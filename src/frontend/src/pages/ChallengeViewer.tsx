@@ -61,9 +61,8 @@ export const ChallengeViewer: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           child_id: selectedChild.id,
-          entry_text: reflection,
-          mood_rating: moodRating,
-          tags: ['challenge-reflection']
+          challenge_id: challenge.id,
+          text: reflection
         })
       });
 

@@ -40,4 +40,13 @@ export interface ProgressSummary {
     [key: string]: number;
   };
   badges?: Badge[];
+}
+
+export interface JournalEntry {
+  id: string;
+  child_id: string;
+  challenge_id?: string;
+  text: string;
+  created_at: string;
+  updated_at: string;
 } 
