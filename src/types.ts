@@ -36,4 +36,14 @@ export interface FeatureFlags {
   'premium.practice_modules': boolean;
   'premium.badge_details': boolean;
   [key: string]: boolean;
-} 
+}
+
+export type PillarId = 1 | 2 | 3 | 4 | 5;
+
+export const PILLAR_NAMES: Record<PillarId, string> = {
+  1: 'Independence',
+  2: 'Growth',
+  3: 'Social',
+  4: 'Strength',
+  5: 'Emotion'
+}; 
