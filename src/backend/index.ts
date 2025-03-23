@@ -9,7 +9,6 @@ router.get('/api/hello', async () => {
   })
 })
 
-// 🔧 Add this fallback route to prevent 1101 crash
 router.all('*', () =>
   new Response(JSON.stringify({ error: 'Not Found' }), {
     status: 404,
