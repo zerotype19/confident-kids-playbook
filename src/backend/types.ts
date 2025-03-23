@@ -4,6 +4,13 @@ export interface Env {
   STRIPE_PRICE_ID: string;
   STRIPE_WEBHOOK_SECRET: string;
   FRONTEND_URL: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  APPLE_CLIENT_ID: string;
+  APPLE_TEAM_ID: string;
+  APPLE_KEY_ID: string;
+  APPLE_PRIVATE_KEY: string;
+  JWT_SECRET: string;
 }
 
 export interface Subscription {
@@ -25,4 +32,45 @@ export interface CheckoutRequest {
 
 export interface PortalRequest {
   child_id: string;
+}
+
+export interface Child {
+  id: string;
+  name: string;
+  age: number;
+  family_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FamilyMember {
+  id: string;
+  user_id: string;
+  family_id: string;
+  role: 'owner' | 'member';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Family {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  members: FamilyMember[];
+  children: Child[];
+}
+
+export interface AuthRequest {
+  provider: 'google' | 'apple';
+  token: string;
+}
+
+export interface FamilyInviteRequest {
+  email: string;
+  role: 'owner' | 'member';
+}
+
+export interface FamilyJoinRequest {
+  invite_code: string;
 } 

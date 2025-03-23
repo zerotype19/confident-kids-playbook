@@ -6,8 +6,11 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/stripe": "^8.0.416",
+    "google-auth-library": "^9.15.1",
     "itty-router": "^4.0.0",
+    "jsonwebtoken": "^9.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "stripe": "^17.7.0"
