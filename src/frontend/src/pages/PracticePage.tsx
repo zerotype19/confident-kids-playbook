@@ -68,7 +68,7 @@ export const PracticePage: React.FC = () => {
         }
       }, 1500);
     } catch (err) {
-      console.error('Failed to update progress:', err);
+      setError('Failed to update progress. Please try again.');
     }
   };
 
@@ -96,7 +96,7 @@ export const PracticePage: React.FC = () => {
         setReflectionText('');
       }
     } catch (err) {
-      console.error('Failed to update progress:', err);
+      setError('Failed to update progress. Please try again.');
     }
   };
 
