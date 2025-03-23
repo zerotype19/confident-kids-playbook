@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
-import { PILLAR_NAMES, PillarId } from '../../types';
+import { PILLAR_NAMES, PillarId } from '../types';
 
 interface CalendarDay {
   completed_challenge_id?: string;
@@ -222,7 +222,7 @@ export const CalendarPage: React.FC = () => {
                 <option value="">Select a pillar...</option>
                 {Object.entries(PILLAR_NAMES).map(([id, name]) => (
                   <option key={id} value={id}>
-                    {name}
+                    {name as string}
                   </option>
                 ))}
               </select>

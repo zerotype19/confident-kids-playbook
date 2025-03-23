@@ -49,4 +49,14 @@ export interface JournalEntry {
   text: string;
   created_at: string;
   updated_at: string;
-} 
+}
+
+export type PillarId = 1 | 2 | 3 | 4 | 5;
+
+export const PILLAR_NAMES: Record<PillarId, string> = {
+  1: 'Self-Awareness',
+  2: 'Self-Management',
+  3: 'Social Awareness',
+  4: 'Relationship Skills',
+  5: 'Responsible Decision-Making'
+}; 
