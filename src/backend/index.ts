@@ -4,7 +4,7 @@ import { getUserFromToken } from './auth'
 const router = Router()
 
 router.get('/api/hello', async () => {
-  return new Response(JSON.stringify({ message: 'hello world' }), {
+  return new Response(JSON.stringify({ message: 'hello world!!!' }), {
     headers: { 'Content-Type': 'application/json' }
   })
 })
