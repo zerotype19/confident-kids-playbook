@@ -1,6 +1,7 @@
 export interface Child {
   id: string;
   first_name: string;
+  name: string;
   avatar_url?: string;
 }
 
@@ -30,4 +31,9 @@ export interface ProgressSummary {
 
 export interface FeatureFlags {
   'premium.dashboard_insights': boolean;
+  'premium.journal_export': boolean;
+  'premium.calendar_schedule': boolean;
+  'premium.practice_modules': boolean;
+  'premium.badge_details': boolean;
+  [key: string]: boolean;
 } 
