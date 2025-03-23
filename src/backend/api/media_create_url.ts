@@ -1,7 +1,8 @@
-import { Env } from '../types';
+import { Env, CreateUploadUrlRequest } from '../types';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomBytes } from 'crypto';
+import jwt from 'jsonwebtoken';
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
@@ -17,7 +18,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, env.JWT_SECRET) as { user_id: string };
-    const { fileType } = await request.json();
+    const { fileType, purpose } = await request.json() as CreateUploadUrlRequest;
 
     // Validate file type
     if (!['image/jpeg', 'image/png', 'image/gif'].includes(fileType)) {
@@ -27,10 +28,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
+    // Validate purpose
+    if (!['avatar', 'journal'].includes(purpose)) {
+      return new Response(JSON.stringify({ error: 'Invalid purpose' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Generate unique filename
     const extension = fileType.split('/')[1];
     const filename = `${randomBytes(16).toString('hex')}.${extension}`;
-    const key = `uploads/${decoded.user_id}/${filename}`;
+    const key = `uploads/${decoded.user_id}/${purpose}/${filename}`;
 
     // Create S3 client
     const s3Client = new S3Client({
@@ -55,7 +64,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return new Response(JSON.stringify({ 
       uploadUrl: signedUrl,
       key: key,
-      filename: filename
+      filename: filename,
+      purpose: purpose
     }), {
       headers: { 'Content-Type': 'application/json' },
     });
