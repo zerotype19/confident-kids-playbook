@@ -158,28 +158,28 @@ export const PracticePage: React.FC = () => {
 
   return (
     <FeatureGate feature="practice_enabled">
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+        <div className="max-w-4xl mx-auto px-2 sm:px-4">
+          <div className="mb-4 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {selectedChild?.name}'s Practice Modules
             </h1>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
               Interactive learning modules for {PILLAR_NAMES[currentModule.pillar_id as PillarId]}
             </p>
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm text-gray-600">
+          <div className="mb-4 sm:mb-8">
+            <div className="flex justify-between mb-1 sm:mb-2">
+              <span className="text-xs sm:text-sm text-gray-600">
                 Module {currentModuleIndex + 1} of {modules.length}
               </span>
-              <span className="text-sm text-gray-600">
+              <span className="text-xs sm:text-sm text-gray-600">
                 Step {currentStepIndex + 1} of {currentModule.steps.length}
               </span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full">
+            <div className="h-1.5 sm:h-2 bg-gray-200 rounded-full">
               <div
                 className="h-full bg-indigo-600 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -188,21 +188,21 @@ export const PracticePage: React.FC = () => {
           </div>
 
           {/* Module Content */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">{currentStep.title}</h2>
-            <div className="prose max-w-none mb-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">{currentStep.title}</h2>
+            <div className="prose prose-sm sm:prose max-w-none mb-4 sm:mb-6">
               {currentStep.content}
             </div>
 
             {currentStep.type === 'interactive' && currentStep.options && (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {currentStep.options.map((option, index) => (
                   <button
                     key={index}
                     onClick={() => handleOptionSelect(index)}
                     disabled={selectedOption !== null}
                     className={`
-                      w-full p-4 text-left rounded-lg border
+                      w-full p-3 sm:p-4 text-left rounded-lg border text-sm sm:text-base
                       ${selectedOption === null
                         ? 'hover:bg-gray-50'
                         : selectedOption === index
@@ -220,19 +220,19 @@ export const PracticePage: React.FC = () => {
             )}
 
             {currentStep.type === 'reflection' && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <textarea
                   value={reflectionText}
                   onChange={(e) => setReflectionText(e.target.value)}
                   placeholder="Share your thoughts..."
-                  className="w-full p-3 border rounded-lg"
+                  className="w-full p-2 sm:p-3 text-sm sm:text-base border rounded-lg"
                   rows={4}
                 />
                 <button
                   onClick={handleReflectionSubmit}
                   disabled={!reflectionText.trim()}
                   className={`
-                    px-4 py-2 rounded-md
+                    px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base rounded-md
                     ${reflectionText.trim()
                       ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
