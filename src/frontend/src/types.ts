@@ -24,4 +24,18 @@ export interface FeatureFlags {
   'premium.journal_export': boolean;
   'premium.calendar_schedule': boolean;
   'premium.badge_details': boolean;
+}
+
+export interface ProgressSummary {
+  child_id: string;
+  streak_days: number;
+  total_coins: number;
+  pillar_progress: {
+    1: number; // Independence
+    2: number; // Growth
+    3: number; // Social
+    4: number; // Strength
+    5: number; // Emotion
+  };
+  badges: string[];
 } 
