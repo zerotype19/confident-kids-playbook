@@ -59,4 +59,30 @@ export const PILLAR_NAMES: Record<PillarId, string> = {
   3: 'Social Awareness',
   4: 'Relationship Skills',
   5: 'Responsible Decision-Making'
-}; 
+};
+
+export interface PracticeModule {
+  id: string;
+  title: string;
+  description: string;
+  pillar_id: number;
+  steps: {
+    id: string;
+    title: string;
+    content: string;
+    type: 'text' | 'interactive' | 'reflection';
+    options?: {
+      text: string;
+      isCorrect: boolean;
+    }[];
+  }[];
+  completed_steps: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PracticeProgress {
+  module_id: string;
+  completed_steps: string[];
+  completed_at?: string;
+} 
