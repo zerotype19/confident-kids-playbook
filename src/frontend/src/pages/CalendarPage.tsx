@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
-import { PILLAR_NAMES } from '../types';
+import { PILLAR_NAMES, PillarId } from '../../types';
 
 interface CalendarDay {
   completed_challenge_id?: string;
