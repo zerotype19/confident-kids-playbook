@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
 import { PracticeModule, PILLAR_NAMES, PillarId } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { FeatureGate } from '../components/FeatureGate';
 
 export const PracticePage: React.FC = () => {
   const { child_id } = useParams<{ child_id: string }>();
@@ -155,6 +157,32 @@ export const PracticePage: React.FC = () => {
   const progress = ((currentStepIndex + 1) / currentModule.steps.length) * 100;
 
   return (
+    <FeatureGate feature="practice_enabled">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Practice</h1>
+        <div className="min-h-screen bg-gray-50 py-8">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {selectedChild?.name}'s Practice Modules
+              </h1>
+              <p className="mt-2 text-gray-600">
+                Interactive learning modules for {PILLAR_NAMES[currentModule.pillar_id as PillarId]}
+              </p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-8">
+              <div className="flex justify-between mb-2">
+                <span className="text-sm text-gray-600">
+                  Module {currentModuleIndex + 1} of {modules.length}
+                </span>
+                <span className="text-sm text-gray-600">
+                  Step {currentStepIndex + 1} of {currentModule.steps.length}
+                </span>
+              </div>
+              <div className="h-2 bg-gray-200 rounded-full">
+                <div
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
