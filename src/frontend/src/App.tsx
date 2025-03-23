@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ChildProvider } from './contexts/ChildContext';
-import { LandingPage } from './pages/LandingPage';
+import HomePage from './pages/HomePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PracticePage } from './pages/PracticePage';
 import { CalendarPage } from './pages/CalendarPage';
@@ -20,7 +20,7 @@ const App: React.FC = () => {
       <AuthProvider>
         <ChildProvider>
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route
               path="/dashboard"
