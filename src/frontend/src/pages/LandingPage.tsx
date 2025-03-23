@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -27,7 +27,7 @@ export const LandingPage: React.FC = () => {
 
       if (!response.ok) throw new Error('Login failed');
       const { token: jwt } = await response.json();
-      await window.auth.login(jwt);
+      await login(jwt);
     } catch (error) {
       console.error('Google login error:', error);
     }
@@ -47,7 +47,7 @@ export const LandingPage: React.FC = () => {
 
       if (!response.ok) throw new Error('Login failed');
       const { token: jwt } = await response.json();
-      await window.auth.login(jwt);
+      await login(jwt);
     } catch (error) {
       console.error('Apple login error:', error);
     }
@@ -64,6 +64,7 @@ export const LandingPage: React.FC = () => {
                 <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
                   <span className="block">Build Your Child's</span>
                   <span className="block text-indigo-600">Confidence</span>
+                  <span className="block text-gray-500 text-2xl sm:text-3xl mt-3">One Day at a Time</span>
                 </h1>
                 <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                   Help your child develop confidence through daily challenges, interactive practice, and positive parenting tools.

@@ -11,14 +11,8 @@ import { FamilySettingsPage } from './pages/FamilySettingsPage';
 import { ProgressDashboard } from './pages/ProgressDashboard';
 import { ChallengeViewer } from './pages/ChallengeViewer';
 import { LoginPage } from './pages/LoginPage';
-import { useAuth } from './contexts/AuthContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import { ProfilePage } from './pages/ProfilePage';
-
-const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/" />;
-};
 
 const App: React.FC = () => {
   return (
