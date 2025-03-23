@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProgressSummary } from '../types';
+import { ProgressSummary, Badge } from '../types';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
 
 interface ProgressSummaryCardProps {
@@ -36,38 +36,47 @@ export const ProgressSummaryCard: React.FC<ProgressSummaryCardProps> = ({
         </div>
       </div>
 
-      <div className="space-y-4">
-        {Object.entries(progress.pillar_progress).map(([pillarId, value]) => {
-          const pillarNumber = parseInt(pillarId, 10) as PillarId;
-          return (
-            <div key={pillarId}>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">
-                  {PILLAR_NAMES[pillarNumber]}
-                </span>
-                <span className="text-sm text-gray-500">{value}%</span>
+      {progress.pillar_progress && (
+        <div className="space-y-4">
+          {Object.entries(progress.pillar_progress).map(([pillarId, value]) => {
+            const pillarNumber = parseInt(pillarId, 10) as PillarId;
+            return (
+              <div key={pillarId}>
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700">
+                    {PILLAR_NAMES[pillarNumber]}
+                  </span>
+                  <span className="text-sm text-gray-500">{value}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${value}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${value}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
-      {showBadges && progress.badges.length > 0 && (
+      {showBadges && progress.badges && progress.badges.length > 0 && (
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-3">Earned Badges</h3>
           <div className="flex flex-wrap gap-2">
-            {progress.badges.map((badge) => (
+            {progress.badges.map((badge: Badge) => (
               <div
-                key={badge}
-                className="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium text-gray-700"
+                key={badge.id}
+                className="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium text-gray-700 flex items-center"
               >
-                {badge}
+                {badge.icon_url && (
+                  <img
+                    src={badge.icon_url}
+                    alt={badge.name}
+                    className="w-4 h-4 mr-2"
+                  />
+                )}
+                {badge.name}
               </div>
             ))}
           </div>

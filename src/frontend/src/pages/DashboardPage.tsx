@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Child, Challenge, ProgressSummary, FeatureFlags } from '../../../types';
 import { useChildContext } from '../contexts/ChildContext';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
+import { ProgressSummaryCard } from '../components/ProgressSummaryCard';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -74,11 +75,11 @@ export const DashboardPage: React.FC = () => {
       <div className="flex items-center mb-6">
         <img 
           src={selectedChild.avatar_url || 'https://placeholder.com/150'} 
-          alt={selectedChild.first_name}
+          alt={selectedChild.name}
           className="w-12 h-12 rounded-full mr-3"
         />
         <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {selectedChild.first_name}!
+          Welcome back, {selectedChild.name}!
         </h1>
       </div>
 
@@ -114,41 +115,7 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Progress Summary */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center">
-            <span className="text-2xl mr-2">🔥</span>
-            <span className="text-lg font-semibold">{progress.streak_days} Day Streak</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-2xl mr-2">🪙</span>
-            <span className="text-lg font-semibold">{progress.total_coins} Coins</span>
-          </div>
-        </div>
-
-        {/* Premium Features */}
-        {flags['premium.dashboard_insights'] && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-3">Pillar Progress</h3>
-            <div className="space-y-2">
-              {Object.entries(progress.pillar_progress || {}).map(([pillar, value]) => (
-                <div key={pillar}>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-700">{pillar}</span>
-                    <span className="text-sm text-gray-500">{value}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-indigo-600 h-2 rounded-full"
-                      style={{ width: `${value}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      <ProgressSummaryCard progress={progress} showBadges={false} />
     </div>
   );
 }; 
