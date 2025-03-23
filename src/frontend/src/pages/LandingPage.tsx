@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -27,9 +27,10 @@ export const LandingPage: React.FC = () => {
 
       if (!response.ok) throw new Error('Login failed');
       const { token: jwt } = await response.json();
-      await window.auth.login(jwt);
+      await login(jwt);
     } catch (error) {
-      console.error('Google login error:', error);
+      // Handle error appropriately
+      alert('Failed to sign in with Google. Please try again.');
     }
   };
 
@@ -47,9 +48,10 @@ export const LandingPage: React.FC = () => {
 
       if (!response.ok) throw new Error('Login failed');
       const { token: jwt } = await response.json();
-      await window.auth.login(jwt);
+      await login(jwt);
     } catch (error) {
-      console.error('Apple login error:', error);
+      // Handle error appropriately
+      alert('Failed to sign in with Apple. Please try again.');
     }
   };
 
