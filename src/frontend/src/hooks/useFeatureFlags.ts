@@ -1,26 +1,45 @@
 import { useState, useEffect } from 'react';
-import { FeatureFlags } from '../../../types';
+import { useAuth } from '../contexts/AuthContext';
+import { FeatureFlags } from '../../../backend/types';
 
 export const useFeatureFlags = () => {
-  const [flags, setFlags] = useState<FeatureFlags>({
-    'premium.dashboard_insights': false
-  });
+  const [flags, setFlags] = useState<FeatureFlags | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
-    // TODO: Replace with actual API call to fetch feature flags
     const fetchFlags = async () => {
       try {
-        // Mock API call
-        const response = await fetch('/api/feature-flags');
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch('/api/flags', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch feature flags');
+        }
+
         const data = await response.json();
         setFlags(data);
-      } catch (error) {
-        console.error('Error fetching feature flags:', error);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load feature flags');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchFlags();
-  }, []);
+  }, [token]);
 
-  return flags;
+  return {
+    flags,
+    loading,
+    error,
+    isFeatureEnabled: (feature: keyof FeatureFlags) => flags?.[feature] ?? false,
+  };
 }; 

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { FeatureGate } from './FeatureGate';
 
 interface MediaUploadProps {
   onUploadComplete: (url: string) => void;
@@ -114,49 +115,51 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
   };
 
   return (
-    <div className={`relative ${className}`}>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileSelect}
-        accept="image/jpeg,image/png,image/gif"
-        className="hidden"
-        disabled={isUploading}
-      />
-      
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        disabled={isUploading}
-        className={`
-          w-full px-4 py-2 rounded-lg border-2 border-dashed
-          ${isUploading 
-            ? 'border-gray-300 bg-gray-50 cursor-not-allowed' 
-            : 'border-blue-500 hover:border-blue-600 hover:bg-blue-50'
-          }
-          transition-colors duration-200
-        `}
-      >
-        {isUploading ? (
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-gray-600">Uploading... {Math.round(progress)}%</span>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center space-y-1">
-            <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="text-sm text-gray-600">Click to upload image</span>
-            <span className="text-xs text-gray-400">JPEG, PNG, or GIF (max {maxSize / (1024 * 1024)}MB)</span>
+    <FeatureGate feature="media_uploads">
+      <div className={`relative ${className}`}>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          accept="image/jpeg,image/png,image/gif"
+          className="hidden"
+          disabled={isUploading}
+        />
+        
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className={`
+            w-full px-4 py-2 rounded-lg border-2 border-dashed
+            ${isUploading 
+              ? 'border-gray-300 bg-gray-50 cursor-not-allowed' 
+              : 'border-blue-500 hover:border-blue-600 hover:bg-blue-50'
+            }
+            transition-colors duration-200
+          `}
+        >
+          {isUploading ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-gray-600">Uploading... {Math.round(progress)}%</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center space-y-1">
+              <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-sm text-gray-600">Click to upload image</span>
+              <span className="text-xs text-gray-400">JPEG, PNG, or GIF (max {maxSize / (1024 * 1024)}MB)</span>
+            </div>
+          )}
+        </button>
+
+        {error && (
+          <div className="mt-2 text-sm text-red-600">
+            {error}
           </div>
         )}
-      </button>
-
-      {error && (
-        <div className="mt-2 text-sm text-red-600">
-          {error}
-        </div>
-      )}
-    </div>
+      </div>
+    </FeatureGate>
   );
 }; 

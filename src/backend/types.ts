@@ -112,4 +112,13 @@ export interface RecordMediaRequest {
   filename: string;
   file_type: string;
   size: number;
+}
+
+export interface FeatureFlags {
+  is_premium: boolean;
+  practice_enabled: boolean;
+  media_uploads: boolean;
+  calendar_enabled: boolean;
+  journal_enabled: boolean;
+  family_sharing: boolean;
 } 
