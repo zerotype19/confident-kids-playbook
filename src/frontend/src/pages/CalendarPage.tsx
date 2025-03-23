@@ -21,7 +21,7 @@ interface CalendarData {
 export const CalendarPage: React.FC = () => {
   const { child_id } = useParams<{ child_id: string }>();
   const { selectedChild } = useChildContext();
-  const flags = useFeatureFlags();
+  const { isFeatureEnabled } = useFeatureFlags();
   const [calendarData, setCalendarData] = useState<CalendarData | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
@@ -192,7 +192,7 @@ export const CalendarPage: React.FC = () => {
                         ${schedulingDate === dateStr ? 'ring-2 ring-indigo-500' : ''}
                       `}
                       onClick={() => {
-                        if (!isPast && flags['premium.calendar_scheduling']) {
+                        if (!isPast && isFeatureEnabled('calendar_enabled')) {
                           setSchedulingDate(dateStr);
                         }
                       }}
@@ -213,7 +213,7 @@ export const CalendarPage: React.FC = () => {
             </div>
 
             {/* Scheduling Modal */}
-            {schedulingDate && flags['premium.calendar_scheduling'] && (
+            {schedulingDate && isFeatureEnabled('calendar_enabled') && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                 <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
                   <h3 className="text-lg font-semibold mb-4">

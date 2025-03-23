@@ -9,7 +9,7 @@ import { FeatureGate } from '../components/FeatureGate';
 export const PracticePage: React.FC = () => {
   const { child_id } = useParams<{ child_id: string }>();
   const { selectedChild } = useChildContext();
-  const flags = useFeatureFlags();
+  const { isFeatureEnabled } = useFeatureFlags();
   const [modules, setModules] = useState<PracticeModule[]>([]);
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -116,7 +116,7 @@ export const PracticePage: React.FC = () => {
     );
   }
 
-  if (!flags['premium.practice_modules']) {
+  if (!isFeatureEnabled('practice_enabled')) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -158,118 +158,94 @@ export const PracticePage: React.FC = () => {
 
   return (
     <FeatureGate feature="practice_enabled">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Practice</h1>
-        <div className="min-h-screen bg-gray-50 py-8">
-          <div className="max-w-4xl mx-auto px-4">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {selectedChild?.name}'s Practice Modules
-              </h1>
-              <p className="mt-2 text-gray-600">
-                Interactive learning modules for {PILLAR_NAMES[currentModule.pillar_id as PillarId]}
-              </p>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              {selectedChild?.name}'s Practice Modules
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Interactive learning modules for {PILLAR_NAMES[currentModule.pillar_id as PillarId]}
+            </p>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex justify-between mb-2">
+              <span className="text-sm text-gray-600">
+                Module {currentModuleIndex + 1} of {modules.length}
+              </span>
+              <span className="text-sm text-gray-600">
+                Step {currentStepIndex + 1} of {currentModule.steps.length}
+              </span>
+            </div>
+            <div className="h-2 bg-gray-200 rounded-full">
+              <div
+                className="h-full bg-indigo-600 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Module Content */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-semibold mb-4">{currentStep.title}</h2>
+            <div className="prose max-w-none mb-6">
+              {currentStep.content}
             </div>
 
-            {/* Progress Bar */}
-            <div className="mb-8">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-gray-600">
-                  Module {currentModuleIndex + 1} of {modules.length}
-                </span>
-                <span className="text-sm text-gray-600">
-                  Step {currentStepIndex + 1} of {currentModule.steps.length}
-                </span>
+            {currentStep.type === 'interactive' && currentStep.options && (
+              <div className="space-y-3">
+                {currentStep.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleOptionSelect(index)}
+                    disabled={selectedOption !== null}
+                    className={`
+                      w-full p-4 text-left rounded-lg border
+                      ${selectedOption === null
+                        ? 'hover:bg-gray-50'
+                        : selectedOption === index
+                          ? option.isCorrect
+                            ? 'bg-green-50 border-green-500'
+                            : 'bg-red-50 border-red-500'
+                          : 'bg-gray-50'
+                      }
+                    `}
+                  >
+                    {option.text}
+                  </button>
+                ))}
               </div>
-              <div className="h-2 bg-gray-200 rounded-full">
-                <div
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {selectedChild?.name}'s Practice Modules
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Interactive learning modules for {PILLAR_NAMES[currentModule.pillar_id as PillarId]}
-          </p>
-        </div>
+            )}
 
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm text-gray-600">
-              Module {currentModuleIndex + 1} of {modules.length}
-            </span>
-            <span className="text-sm text-gray-600">
-              Step {currentStepIndex + 1} of {currentModule.steps.length}
-            </span>
-          </div>
-          <div className="h-2 bg-gray-200 rounded-full">
-            <div
-              className="h-full bg-indigo-600 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Module Content */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">{currentStep.title}</h2>
-          <div className="prose max-w-none mb-6">
-            {currentStep.content}
-          </div>
-
-          {currentStep.type === 'interactive' && currentStep.options && (
-            <div className="space-y-3">
-              {currentStep.options.map((option, index) => (
+            {currentStep.type === 'reflection' && (
+              <div className="space-y-4">
+                <textarea
+                  value={reflectionText}
+                  onChange={(e) => setReflectionText(e.target.value)}
+                  placeholder="Share your thoughts..."
+                  className="w-full p-3 border rounded-lg"
+                  rows={4}
+                />
                 <button
-                  key={index}
-                  onClick={() => handleOptionSelect(index)}
-                  disabled={selectedOption !== null}
+                  onClick={handleReflectionSubmit}
+                  disabled={!reflectionText.trim()}
                   className={`
-                    w-full p-4 text-left rounded-lg border
-                    ${selectedOption === null
-                      ? 'hover:bg-gray-50'
-                      : selectedOption === index
-                        ? option.isCorrect
-                          ? 'bg-green-50 border-green-500'
-                          : 'bg-red-50 border-red-500'
-                        : 'bg-gray-50'
+                    px-4 py-2 rounded-md
+                    ${reflectionText.trim()
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }
                   `}
                 >
-                  {option.text}
+                  Submit Reflection
                 </button>
-              ))}
-            </div>
-          )}
-
-          {currentStep.type === 'reflection' && (
-            <div className="space-y-4">
-              <textarea
-                value={reflectionText}
-                onChange={(e) => setReflectionText(e.target.value)}
-                placeholder="Share your thoughts..."
-                className="w-full p-3 border rounded-lg"
-                rows={4}
-              />
-              <button
-                onClick={handleReflectionSubmit}
-                disabled={!reflectionText.trim()}
-                className={`
-                  px-4 py-2 rounded-md
-                  ${reflectionText.trim()
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }
-                `}
-              >
-                Submit Reflection
-              </button>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </FeatureGate>
   );
 }; 
