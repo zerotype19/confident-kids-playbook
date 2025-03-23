@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login } = useAuth();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -14,6 +17,8 @@ export const LandingPage: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     try {
+      setIsGoogleLoading(true);
+      setError(null);
       const googleAuth = await window.gapi.auth2.getAuthInstance();
       const googleUser = await googleAuth.signIn();
       const token = googleUser.getAuthResponse().id_token;
@@ -29,13 +34,16 @@ export const LandingPage: React.FC = () => {
       const { token: jwt } = await response.json();
       await login(jwt);
     } catch (error) {
-      // Handle error appropriately
-      alert('Failed to sign in with Google. Please try again.');
+      setError('Failed to sign in with Google. Please try again.');
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
   const handleAppleLogin = async () => {
     try {
+      setIsAppleLoading(true);
+      setError(null);
       const appleAuth = await window.AppleID.auth.signIn();
       const { identityToken } = appleAuth;
 
@@ -50,8 +58,9 @@ export const LandingPage: React.FC = () => {
       const { token: jwt } = await response.json();
       await login(jwt);
     } catch (error) {
-      // Handle error appropriately
-      alert('Failed to sign in with Apple. Please try again.');
+      setError('Failed to sign in with Apple. Please try again.');
+    } finally {
+      setIsAppleLoading(false);
     }
   };
 
@@ -159,18 +168,37 @@ export const LandingPage: React.FC = () => {
             <span className="block">Ready to get started?</span>
             <span className="block text-indigo-600">Join confident kids today.</span>
           </h2>
-          <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
-            <div className="inline-flex rounded-md shadow">
+          <div className="mt-8 flex flex-col lg:mt-0 lg:flex-shrink-0">
+            {error && (
+              <div className="mb-4 text-sm text-red-600 bg-red-50 rounded-md p-3">
+                {error}
+              </div>
+            )}
+            <div className="inline-flex rounded-md shadow space-x-4">
               <button
                 onClick={handleGoogleLogin}
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 mr-4"
+                disabled={isGoogleLoading || isAppleLoading}
+                className={`inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed`}
               >
+                {isGoogleLoading ? (
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : null}
                 Sign in with Google
               </button>
               <button
                 onClick={handleAppleLogin}
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-black hover:bg-gray-800"
+                disabled={isAppleLoading || isGoogleLoading}
+                className={`inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-black hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed`}
               >
+                {isAppleLoading ? (
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : null}
                 Sign in with Apple
               </button>
             </div>
