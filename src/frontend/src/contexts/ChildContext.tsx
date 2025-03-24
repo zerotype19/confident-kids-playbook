@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Child } from '../../../types';
+import { Child } from '../types';
 
 interface ChildContextType {
   selectedChild: Child | null;
