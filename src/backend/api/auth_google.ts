@@ -57,10 +57,12 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
       })
     }
 
-    // Log incoming token length for debugging
-    console.log('📥 Received Google token:', {
-      length: body.credential.length,
-      preview: `${body.credential.slice(0, 10)}...${body.credential.slice(-10)}`
+    // Log environment variables (redacted for security)
+    console.log('🔑 Environment variables:', {
+      hasJwtSecret: !!env.JWT_SECRET,
+      hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
+      googleClientIdLength: env.GOOGLE_CLIENT_ID?.length,
+      googleClientIdPreview: env.GOOGLE_CLIENT_ID ? `${env.GOOGLE_CLIENT_ID.slice(0, 10)}...${env.GOOGLE_CLIENT_ID.slice(-10)}` : undefined
     })
 
     // Validate environment variables
@@ -119,7 +121,9 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     console.error('❌ Authentication failed:', {
       error: err.message,
       type: err.constructor.name,
-      stack: err.stack
+      stack: err.stack,
+      hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
+      googleClientIdLength: env.GOOGLE_CLIENT_ID?.length
     })
 
     // Return standardized error response

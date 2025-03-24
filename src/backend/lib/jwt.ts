@@ -87,17 +87,31 @@ async function fetchGoogleCerts(): Promise<jose.JWKS> {
 
 export async function verifyGoogleToken(token: string, clientId: string): Promise<GoogleTokenPayload> {
   try {
-    // Log incoming token for debugging
+    // Log incoming token and client ID for debugging
     console.log('📥 Received Google token:', {
       length: token.length,
-      preview: `${token.slice(0, 10)}...${token.slice(-10)}`
+      preview: `${token.slice(0, 10)}...${token.slice(-10)}`,
+      clientId: clientId
     })
 
     // Create JWKS client for Google's public keys
     const jwks = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
 
+    // First decode the token without verification to check the audience
+    const [headerB64, payloadB64] = token.split('.')
+    const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')))
+    
+    // Log the audience claims for debugging
+    console.log('🔍 Token audience claims:', {
+      aud: payload.aud,
+      azp: payload.azp,
+      expectedClientId: clientId,
+      matchesAud: payload.aud === clientId,
+      matchesAzp: payload.azp === clientId
+    })
+
     // Verify the token
-    const { payload } = await jwtVerify(token, jwks, {
+    const { payload: verifiedPayload } = await jwtVerify(token, jwks, {
       issuer: 'https://accounts.google.com',
       audience: clientId,
       algorithms: ['RS256']
@@ -105,13 +119,13 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
 
     // Log decoded payload (with sensitive data redacted)
     console.log('🔍 Decoded token payload:', {
-      ...payload,
-      email: payload.email ? '***' : undefined,
-      sub: payload.sub ? '***' : undefined
+      ...verifiedPayload,
+      email: verifiedPayload.email ? '***' : undefined,
+      sub: verifiedPayload.sub ? '***' : undefined
     })
 
     // Type check the payload
-    const googlePayload = payload as GoogleTokenPayload
+    const googlePayload = verifiedPayload as GoogleTokenPayload
 
     // Verify audience (check both aud and azp)
     const validAudience = googlePayload.aud === clientId || googlePayload.azp === clientId
@@ -119,9 +133,10 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
       console.error('❌ Invalid audience:', {
         expectedClientId: clientId,
         receivedAud: googlePayload.aud,
-        receivedAzp: googlePayload.azp
+        receivedAzp: googlePayload.azp,
+        fullToken: token // Log full token for debugging
       })
-      throw new Error('Invalid audience')
+      throw new Error(`Invalid audience. Expected: ${clientId}, Received: ${googlePayload.aud}`)
     }
 
     // Verify email is verified (Google specific)
@@ -135,7 +150,8 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
     console.error('❌ Failed to verify token:', {
       error: err.message,
       type: err.constructor.name,
-      stack: err.stack
+      stack: err.stack,
+      clientId: clientId // Log the client ID that was used
     })
     throw new Error(`Token verification failed: ${err.message}`)
   }
