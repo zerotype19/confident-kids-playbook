@@ -10,6 +10,7 @@ interface User {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
+  token: string | null;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -27,30 +28,34 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     // Check for existing session
-    const token = localStorage.getItem('token');
-    if (token) {
-      // TODO: Validate token and fetch user data
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
       setIsAuthenticated(true);
+      // TODO: Fetch user data
     }
   }, []);
 
-  const login = async (token: string) => {
-    localStorage.setItem('token', token);
+  const login = async (newToken: string) => {
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
     setIsAuthenticated(true);
     // TODO: Fetch user data
   };
 
   const logout = async () => {
     localStorage.removeItem('token');
+    setToken(null);
     setIsAuthenticated(false);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

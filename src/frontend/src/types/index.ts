@@ -2,45 +2,63 @@ import { FeatureFlags } from '../../backend/types';
 
 export interface MediaItem {
   id: string;
-  child_id: string;
-  type: string;
   url: string;
-  key: string;
-  filename: string;
-  size: number;
-  created_at: string;
+  type: 'image' | 'video';
+  createdAt: string;
+  childId: string;
 }
 
 export interface PracticeModule {
   id: string;
-  pillar_id: string;
   title: string;
   description: string;
-  steps: Array<{
-    id: string;
-    title: string;
-    content: string;
-    type: 'interactive' | 'reflection';
-    options?: Array<{
-      text: string;
-      isCorrect: boolean;
-    }>;
-  }>;
+  steps: PracticeStep[];
+  completed: boolean;
+  progress: number;
 }
 
-export type PillarId = keyof typeof PILLAR_NAMES;
-
-export const PILLAR_NAMES = {
-  '1': 'Self-Awareness',
-  '2': 'Self-Management',
-  '3': 'Social Awareness',
-  '4': 'Relationship Skills',
-  '5': 'Responsible Decision-Making',
-} as const;
+export interface PracticeStep {
+  id: string;
+  type: 'text' | 'question' | 'reflection';
+  content: string;
+  options?: {
+    text: string;
+    isCorrect: boolean;
+  }[];
+}
 
 export interface FeatureFlagsResponse {
   flags: FeatureFlags;
   loading: boolean;
   error: string | null;
   isFeatureEnabled: (feature: keyof FeatureFlags) => boolean;
+}
+
+export const PILLAR_NAMES = {
+  social: 'Social Skills',
+  emotional: 'Emotional Intelligence',
+  academic: 'Academic Confidence',
+  physical: 'Physical Confidence',
+} as const;
+
+export type PillarId = keyof typeof PILLAR_NAMES;
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  pillar: PillarId;
+  difficulty: 'easy' | 'medium' | 'hard';
+  duration: number;
+  tip?: string;
+  completed: boolean;
+  completedAt?: string;
+}
+
+export interface ProgressSummary {
+  totalChallenges: number;
+  completedChallenges: number;
+  currentStreak: number;
+  longestStreak: number;
+  pillarProgress: Record<PillarId, number>;
 } 

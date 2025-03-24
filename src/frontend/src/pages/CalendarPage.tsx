@@ -1,263 +1,70 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useChildContext } from '../contexts/ChildContext';
+import React, { useState } from 'react';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
-import { PILLAR_NAMES, PillarId } from '../types';
-import { useAuth } from '../contexts/AuthContext';
-import { FeatureGate } from '../components/FeatureGate';
-
-interface CalendarDay {
-  completed_challenge_id?: string;
-  scheduled_pillar_id?: number;
-}
-
-interface CalendarData {
-  child_id: string;
-  days: {
-    [key: string]: CalendarDay;
-  };
-}
+import { PILLAR_NAMES } from '../types';
 
 export const CalendarPage: React.FC = () => {
-  const { child_id } = useParams<{ child_id: string }>();
-  const { selectedChild } = useChildContext();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { isFeatureEnabled } = useFeatureFlags();
-  const [calendarData, setCalendarData] = useState<CalendarData | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [schedulingDate, setSchedulingDate] = useState<string | null>(null);
-  const [selectedPillar, setSelectedPillar] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchCalendarData = async () => {
-      try {
-        const monthStr = currentMonth.toISOString().slice(0, 7); // YYYY-MM
-        const response = await fetch(`/api/calendar/view?child_id=${child_id}&month=${monthStr}`);
-        if (!response.ok) throw new Error('Failed to fetch calendar data');
-        const data = await response.json();
-        setCalendarData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (child_id) {
-      fetchCalendarData();
-    }
-  }, [child_id, currentMonth]);
-
-  const handleSchedulePillar = async () => {
-    if (!schedulingDate || !selectedPillar) return;
-
-    try {
-      const response = await fetch('/api/calendar/schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          child_id,
-          date: schedulingDate,
-          pillar_id: selectedPillar
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to schedule pillar');
-
-      // Refresh calendar data
-      const monthStr = currentMonth.toISOString().slice(0, 7);
-      const calendarResponse = await fetch(`/api/calendar/view?child_id=${child_id}&month=${monthStr}`);
-      if (!calendarResponse.ok) throw new Error('Failed to refresh calendar data');
-      const data = await calendarResponse.json();
-      setCalendarData(data);
-
-      // Reset scheduling state
-      setSchedulingDate(null);
-      setSelectedPillar(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to schedule pillar');
-    }
-  };
-
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const days = [];
-
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDay.getDay(); i++) {
-      days.push(null);
-    }
-
-    // Add days of the month
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-      days.push(new Date(year, month, i));
-    }
-
-    return days;
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const isDateInPast = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
-  };
-
-  if (loading) {
+  if (!isFeatureEnabled('premium.calendar_scheduling')) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading calendar...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-red-600">{error}</div>
-      </div>
-    );
-  }
-
-  const days = getDaysInMonth(currentMonth);
-  const monthName = currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-  return (
-    <FeatureGate feature="calendar_enabled">
-      <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-        <div className="max-w-4xl mx-auto px-2 sm:px-4">
-          <div className="mb-4 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {selectedChild?.name}'s Calendar
-            </h1>
-            <p className="mt-2 text-sm sm:text-base text-gray-600">
-              Track completed challenges and plan future activities
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Calendar Scheduling
+            </h2>
+            <p className="mt-4 text-lg text-gray-500">
+              This feature is available for premium members only.
             </p>
           </div>
-
-          {/* Month Navigation */}
-          <div className="flex justify-between items-center mb-4 sm:mb-6">
-            <button
-              onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}
-              className="text-sm sm:text-base text-indigo-600 hover:text-indigo-700 px-2 py-1"
-            >
-              ← Previous
-            </button>
-            <h2 className="text-lg sm:text-xl font-semibold">{monthName}</h2>
-            <button
-              onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}
-              className="text-sm sm:text-base text-indigo-600 hover:text-indigo-700 px-2 py-1"
-            >
-              Next →
-            </button>
-          </div>
-
-          {/* Calendar Grid */}
-          <div className="bg-white rounded-xl shadow-sm p-2 sm:p-6">
-            {/* Weekday Headers */}
-            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1 sm:mb-2">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="text-center text-xs sm:text-sm font-medium text-gray-500">
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar Days */}
-            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
-              {days.map((date, index) => {
-                if (!date) {
-                  return <div key={`empty-${index}`} className="aspect-square" />;
-                }
-
-                const dateStr = formatDate(date);
-                const dayData = calendarData?.days[dateStr];
-                const isPast = isDateInPast(date);
-
-                return (
-                  <div
-                    key={dateStr}
-                    className={`
-                      aspect-square border rounded-lg p-1 sm:p-2
-                      ${isPast ? 'bg-gray-50' : 'hover:bg-gray-50 cursor-pointer'}
-                      ${schedulingDate === dateStr ? 'ring-2 ring-indigo-500' : ''}
-                    `}
-                    onClick={() => {
-                      if (!isPast && isFeatureEnabled('calendar_enabled')) {
-                        setSchedulingDate(dateStr);
-                      }
-                    }}
-                  >
-                    <div className="text-xs sm:text-sm font-medium mb-0.5 sm:mb-1">{date.getDate()}</div>
-                    <div className="text-[10px] sm:text-xs space-y-0.5 sm:space-y-1">
-                      {dayData?.completed_challenge_id && (
-                        <div className="text-green-600">✅</div>
-                      )}
-                      {dayData?.scheduled_pillar_id && (
-                        <div className="text-indigo-600">🔮</div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Scheduling Modal */}
-          {schedulingDate && isFeatureEnabled('calendar_enabled') && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4">
-              <div className="bg-white rounded-xl p-4 sm:p-6 max-w-md w-full">
-                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-                  Schedule Pillar for {new Date(schedulingDate).toLocaleDateString()}
-                </h3>
-                <select
-                  value={selectedPillar || ''}
-                  onChange={(e) => setSelectedPillar(Number(e.target.value))}
-                  className="w-full p-2 text-sm sm:text-base border rounded-md mb-3 sm:mb-4"
-                >
-                  <option value="">Select a pillar...</option>
-                  {Object.entries(PILLAR_NAMES).map(([id, name]) => (
-                    <option key={id} value={id}>
-                      {name as string}
-                    </option>
-                  ))}
-                </select>
-                <div className="flex justify-end space-x-2 sm:space-x-3">
-                  <button
-                    onClick={() => {
-                      setSchedulingDate(null);
-                      setSelectedPillar(null);
-                    }}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base text-gray-600 hover:text-gray-800"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSchedulePillar}
-                    disabled={!selectedPillar}
-                    className={`
-                      px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base rounded-md
-                      ${selectedPillar
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      }
-                    `}
-                  >
-                    Schedule
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
-    </FeatureGate>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Calendar</h2>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setSelectedDate(new Date(selectedDate.setMonth(selectedDate.getMonth() - 1)))}
+                className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setSelectedDate(new Date(selectedDate.setMonth(selectedDate.getMonth() + 1)))}
+                className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 mt-1">
+            {Array.from({ length: 31 }, (_, i) => (
+              <div
+                key={i}
+                className="aspect-square border border-gray-200 rounded-md p-2 hover:bg-gray-50 cursor-pointer"
+              >
+                <span className="text-sm text-gray-900">{i + 1}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }; 

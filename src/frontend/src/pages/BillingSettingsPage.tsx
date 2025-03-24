@@ -36,20 +36,23 @@ export const BillingSettingsPage: React.FC = () => {
     fetchSubscriptionStatus();
   }, [child_id]);
 
-  const handleSubscribe = async () => {
+  const handleUpgrade = async () => {
     try {
-      const response = await fetch('/api/billing/create-checkout', {
+      const response = await fetch('/api/billing/create-checkout-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ child_id }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-      
-      if (!response.ok) throw new Error('Failed to create checkout session');
-      
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
       const { url } = await response.json();
       window.location.href = url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start subscription process');
+    } catch (error) {
+      console.error('Upgrade error:', error);
     }
   };
 
@@ -90,58 +93,26 @@ export const BillingSettingsPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white shadow rounded-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Subscription Settings</h1>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Billing Settings</h2>
           
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-600">{error}</p>
-            </div>
-          )}
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Subscription Status</h3>
+            <p className="text-gray-600">
+              {isPremium ? 'Premium Member' : 'Free Account'}
+            </p>
+          </div>
 
-          {subscription?.isActive ? (
-            <div className="space-y-6">
-              <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                <h2 className="text-lg font-semibold text-green-800">Active Subscription</h2>
-                <p className="text-green-700 mt-1">
-                  Current Plan: {subscription.plan}
-                </p>
-                <p className="text-green-700">
-                  Renews: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-                </p>
-                {subscription.cancelAtPeriodEnd && (
-                  <p className="text-yellow-700 mt-2">
-                    Subscription will cancel at the end of the billing period
-                  </p>
-                )}
-              </div>
-
+          {!isPremium && (
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Upgrade to Premium</h3>
+              <p className="text-gray-600 mb-4">
+                Get access to all premium features including advanced insights, practice modules, and more.
+              </p>
               <button
-                onClick={handleManageSubscription}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                onClick={handleUpgrade}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors"
               >
-                Manage Subscription
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                <h2 className="text-lg font-semibold text-gray-800">Free Plan</h2>
-                <p className="text-gray-600 mt-1">
-                  Upgrade to access premium features including:
-                </p>
-                <ul className="mt-2 space-y-1 text-gray-600">
-                  <li>• Advanced practice modules</li>
-                  <li>• Personalized learning paths</li>
-                  <li>• Progress analytics</li>
-                  <li>• Priority support</li>
-                </ul>
-              </div>
-
-              <button
-                onClick={handleSubscribe}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Upgrade to Premium
+                Upgrade Now
               </button>
             </div>
           )}
