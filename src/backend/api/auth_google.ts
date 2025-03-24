@@ -9,14 +9,6 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     return handleOptions(request)
   }
 
-  // Log incoming request details
-  const url = new URL(request.url)
-  console.log('🔍 Incoming request:', {
-    method: request.method,
-    pathname: url.pathname,
-    headers: Object.fromEntries(request.headers.entries())
-  })
-
   // Get base CORS headers
   const headers = corsHeaders({
     allowedMethods: ['POST', 'OPTIONS'],
@@ -26,20 +18,14 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
   try {
     // Ensure this is a POST request
     if (request.method !== 'POST') {
-      console.warn('❌ Method not allowed:', {
-        received: request.method,
-        expected: 'POST',
-        path: url.pathname
-      })
-      return new Response(JSON.stringify({ 
+      return Response.json({ 
         status: 'error',
         message: 'Method not allowed',
         details: {
           method: request.method,
-          allowed: ['POST'],
-          path: url.pathname
+          allowed: ['POST']
         }
-      }), {
+      }, {
         status: 405,
         headers: {
           ...Object.fromEntries(headers.entries()),
@@ -52,18 +38,12 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     let body: GoogleAuthRequest
     try {
       body = await request.json()
-      console.log('📦 Received body:', {
-        hasCredential: !!body.credential,
-        credentialLength: body.credential?.length,
-        keys: Object.keys(body)
-      })
     } catch (err) {
-      console.error('❌ Failed to parse request body:', err)
-      return new Response(JSON.stringify({
+      return Response.json({
         status: 'error',
         message: 'Invalid request body',
         details: err instanceof Error ? err.message : 'Could not parse JSON'
-      }), {
+      }, {
         status: 400,
         headers
       })
@@ -71,17 +51,14 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
 
     // Validate credential presence
     if (!body.credential) {
-      console.warn('❌ Missing credential in request:', {
-        receivedKeys: Object.keys(body)
-      })
-      return new Response(JSON.stringify({
+      return Response.json({
         status: 'error',
         message: 'Missing credential',
         details: {
           required: ['credential'],
           received: Object.keys(body)
         }
-      }), {
+      }, {
         status: 400,
         headers
       })
@@ -89,21 +66,20 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
 
     // Validate environment variables
     if (!env.JWT_SECRET || !env.GOOGLE_CLIENT_ID) {
-      console.error('❌ Missing required environment variables:', {
+      console.error('Missing required environment variables:', {
         hasJwtSecret: !!env.JWT_SECRET,
         hasGoogleClientId: !!env.GOOGLE_CLIENT_ID
       })
-      return new Response(JSON.stringify({
+      return Response.json({
         status: 'error',
         message: 'Server configuration error'
-      }), {
+      }, {
         status: 500,
         headers
       })
     }
 
     // Verify the Google token
-    console.log('🔐 Verifying Google token...')
     const googleUser = await verifyGoogleToken(body.credential, env.GOOGLE_CLIENT_ID)
     
     // Create our app's JWT
@@ -118,13 +94,8 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
 
     const jwt = await sign(jwtPayload, env.JWT_SECRET)
 
-    console.log('✅ Successfully authenticated:', {
-      sub: googleUser.sub,
-      email: googleUser.email,
-      name: googleUser.name
-    })
-
-    return new Response(JSON.stringify({
+    // Return success response
+    return Response.json({
       status: 'success',
       jwt,
       user: {
@@ -133,37 +104,39 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
         name: googleUser.name,
         picture: googleUser.picture
       }
-    }), {
+    }, {
       headers
     })
 
   } catch (err: any) {
     // Handle token verification errors
-    if (err.message === 'Invalid token') {
-      return new Response(JSON.stringify({
+    if (err.message === 'Invalid token' || 
+        err.message === 'Token has expired' ||
+        err.message === 'Invalid audience' ||
+        err.message === 'Invalid issuer' ||
+        err.message === 'Token not yet valid' ||
+        err.message === 'Email not verified') {
+      return Response.json({
         status: 'error',
-        message: 'Invalid token'
-      }), {
+        message: err.message
+      }, {
         status: 401,
         headers
       })
     }
 
-    // Log other errors
-    console.error('❌ Unhandled error:', {
+    // Log unexpected errors
+    console.error('Unexpected error:', {
       message: err.message,
       stack: err.stack,
-      type: err.constructor.name,
-      url: request.url,
-      method: request.method
+      type: err.constructor.name
     })
     
-    // Return a sanitized error response
-    return new Response(JSON.stringify({
+    // Return generic error for unexpected errors
+    return Response.json({
       status: 'error',
-      message: 'Internal server error',
-      details: err.message
-    }), {
+      message: 'Internal server error'
+    }, {
       status: 500,
       headers
     })
