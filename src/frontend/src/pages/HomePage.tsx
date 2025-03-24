@@ -1,23 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React from "react"
 
-const HomePage: React.FC = () => {
-  console.log("✅ HomePage mounted");
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
-
+export default function HomePage() {
+  console.log("✅ HomePage mounted (bare)")
   return (
-    <div style={{ padding: "2rem", fontSize: "24px", color: "blue" }}>
-      ✅ Minimal HomePage Render
+    <div style={{ padding: "2rem", fontSize: "24px", color: "green" }}>
+      ✅ Minimal HomePage render successful
     </div>
-  );
-};
-
-export default HomePage; 
+  )
+} 
