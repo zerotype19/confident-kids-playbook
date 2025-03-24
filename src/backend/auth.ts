@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library"
-import { sign } from '@tsndr/cloudflare-worker-jwt'
+import { sign, verify } from '@tsndr/cloudflare-worker-jwt'
 
 interface Env {
   GOOGLE_CLIENT_ID: string
@@ -23,6 +23,7 @@ interface JwtPayload {
   sub: string
   iat: number
   exp: number
+  [key: string]: unknown
 }
 
 const client = new OAuth2Client("GOOGLE_CLIENT_ID")
@@ -61,8 +62,20 @@ export async function createJWT(userId: string, env: Env): Promise<string> {
   const payload: JwtPayload = {
     sub: userId,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 // 30 days
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
   }
 
   return await sign(payload, env.JWT_SECRET)
+}
+
+export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | null> {
+  try {
+    const decoded = await verify(token, { complete: true })
+    if (!decoded || typeof decoded.payload !== 'object') {
+      return null
+    }
+    return decoded.payload as JwtPayload
+  } catch (err) {
+    return null
+  }
 }

@@ -18,7 +18,7 @@ interface DecodedToken {
   [key: string]: unknown
 }
 
-export async function handleGoogleAuth(request: Request): Promise<Response> {
+export async function handleGoogleAuth(request: Request, env: Env): Promise<Response> {
   try {
     const body = await request.json() as GoogleAuthRequest
     const { credential } = body
@@ -27,12 +27,38 @@ export async function handleGoogleAuth(request: Request): Promise<Response> {
       return new Response('Missing credential', { status: 400 })
     }
 
-    // For now, just echo back the decoded payload
-    const parts = credential.split('.')
-    const payload = JSON.parse(atob(parts[1]))
+    // Verify the Google token
+    const decoded = await verify(credential, { complete: true })
 
-    return Response.json({ payload })
+    if (!decoded || typeof decoded.payload !== 'object') {
+      return new Response('Invalid token', { status: 401 })
+    }
+
+    const payload = decoded.payload as DecodedToken
+    const email = payload.email
+    const name = payload.name || ''
+
+    if (!email) {
+      return new Response('Missing email in credential', { status: 400 })
+    }
+
+    // Get or create user in DB
+    const user = await DB.getOrCreateUserByEmail(email, name, env)
+
+    // Sign our app's JWT
+    const token = await createJWT(user.id, env)
+
+    // Return token in response
+    return Response.json({ 
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      }
+    })
   } catch (err) {
+    console.error('Auth error:', err)
     return new Response('Failed to process auth', { status: 500 })
   }
 } 
