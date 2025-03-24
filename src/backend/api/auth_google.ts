@@ -1,13 +1,10 @@
-import { Router } from 'itty-router'
 import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
 
 interface Env {
   JWT_SECRET: string
 }
 
-const router = Router()
-
-router.post('/api/auth/google', async (request: Request, env: Env) => {
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   try {
     const body = await request.json()
     const { credential } = body
@@ -29,6 +26,4 @@ router.post('/api/auth/google', async (request: Request, env: Env) => {
       headers: { 'Content-Type': 'application/json' }
     })
   }
-})
-
-export default router 
+} 
