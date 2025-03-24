@@ -15,6 +15,9 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     allowedHeaders: ['Content-Type']
   })
 
+  // Declare body variable at the top level
+  let requestBody: GoogleAuthRequest | undefined
+
   try {
     // Ensure this is a POST request
     if (request.method !== 'POST') {
@@ -31,9 +34,8 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     }
 
     // Parse and validate request body
-    let body: GoogleAuthRequest
     try {
-      body = await request.json()
+      requestBody = await request.json()
     } catch (err) {
       console.error('❌ Failed to parse request body:', err)
       return Response.json({
@@ -46,7 +48,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     }
 
     // Validate credential presence
-    if (!body.credential) {
+    if (!requestBody.credential) {
       console.error('❌ Missing credential in request body')
       return Response.json({
         status: 'error',
@@ -94,7 +96,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     }
 
     // Verify the Google token
-    const googleUser = await verifyGoogleToken(body.credential, env.GOOGLE_CLIENT_ID)
+    const googleUser = await verifyGoogleToken(requestBody.credential, env.GOOGLE_CLIENT_ID)
     
     // Create our app's JWT
     const jwtPayload = {
@@ -136,13 +138,23 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
       type: err.constructor.name,
       stack: err.stack,
       hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
-      googleClientIdLength: env.GOOGLE_CLIENT_ID?.length
+      googleClientIdLength: env.GOOGLE_CLIENT_ID?.length,
+      requestBody: {
+        hasCredential: !!requestBody?.credential,
+        credentialLength: requestBody?.credential?.length,
+        credentialPreview: requestBody?.credential ? `${requestBody.credential.slice(0, 10)}...${requestBody.credential.slice(-10)}` : undefined
+      }
     })
 
-    // Return standardized error response
+    // Return more detailed error response
     return Response.json({
       status: 'error',
-      message: err.message || 'Invalid token'
+      message: err.message || 'Authentication failed',
+      details: {
+        type: err.constructor.name,
+        hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
+        hasCredential: !!requestBody?.credential
+      }
     }, {
       status: 401,
       headers
