@@ -1,6 +1,6 @@
 import { Router } from 'itty-router'
 import { getUserFromToken } from './auth'
-import { generateJWT } from './auth'
+import googleAuthRouter from './api/auth_google'
 
 interface Env {
   GOOGLE_CLIENT_ID: string
@@ -8,27 +8,10 @@ interface Env {
   DB: D1Database
 }
 
-interface GoogleAuthRequest {
-  token: string
-}
-
 const router = Router()
 
-// Google Auth Route
-router.post('/api/auth/google', async (request: Request, env: Env) => {
-  const body = await request.json()
-  console.log("✅ Received Google login payload:", body)
-
-  return new Response(
-    JSON.stringify({ 
-      success: true, 
-      message: 'Token received' 
-    }), 
-    { 
-      headers: { 'Content-Type': 'application/json' }
-    }
-  )
-})
+// Mount the Google auth routes
+router.all('/api/auth/google/*', googleAuthRouter.handle.bind(googleAuthRouter))
 
 router.get('/api/hello', async () => {
   return new Response(JSON.stringify({ message: 'hello world!!!' }), {

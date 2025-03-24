@@ -8,7 +8,7 @@ interface Env {
 }
 
 interface GoogleAuthRequest {
-  token: string
+  credential: string
 }
 
 interface GoogleTokenInfo {
@@ -37,18 +37,18 @@ const router = Router()
 
 router.post("/api/auth/google", async (request: Request, env: Env) => {
   try {
-    const { token } = await request.json() as GoogleAuthRequest
+    const { credential } = await request.json() as GoogleAuthRequest
 
-    if (!token) {
+    if (!credential) {
       return new Response(
-        JSON.stringify({ success: false, error: "No token provided" }),
+        JSON.stringify({ success: false, error: "No credential provided" }),
         { status: 400 }
       )
     }
 
     // Verify token with Google
     const tokenResponse = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`
     )
 
     if (!tokenResponse.ok) {
