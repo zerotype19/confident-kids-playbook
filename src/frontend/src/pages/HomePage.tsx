@@ -9,6 +9,12 @@ interface GoogleCredentialResponse {
 interface AuthResponse {
   success: boolean
   jwt?: string
+  error?: string
+}
+
+interface GoogleLoginError extends Error {
+  code?: string
+  message: string
 }
 
 // Declare global callback function with proper types
@@ -35,16 +41,21 @@ export default function HomePage(): JSX.Element {
           body: JSON.stringify({ token })
         })
 
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
+
         const data = await res.json() as AuthResponse
         if (data.success && data.jwt) {
           localStorage.setItem("jwt", data.jwt)
           window.location.href = "/dashboard"
         } else {
-          alert("Login failed")
+          throw new Error(data.error || "Login failed")
         }
       } catch (error) {
-        console.error("Login error:", error)
-        alert("Login failed")
+        const loginError = error as GoogleLoginError
+        console.error("Login error:", loginError.message)
+        alert(loginError.message || "Login failed")
       }
     }
   }, [])
