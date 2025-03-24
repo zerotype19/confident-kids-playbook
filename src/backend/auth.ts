@@ -10,10 +10,13 @@ export async function getUserFromToken(request) {
   return { id: 'user_1', token }
 }
 
-export async function verifyGoogleToken(idToken: string) {
+export async function verifyGoogleToken(idToken: string, env: any) {
+  const client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
+  console.log("✅ Using Google Client ID:", env.GOOGLE_CLIENT_ID)
+
   const ticket = await client.verifyIdToken({
     idToken,
-    audience: "GOOGLE_CLIENT_ID"
+    audience: env.GOOGLE_CLIENT_ID
   })
   const payload = ticket.getPayload()
   if (!payload) throw new Error("Invalid token")

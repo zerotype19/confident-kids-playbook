@@ -4,11 +4,11 @@ import { createOrUpdateUser } from "../db/users"
 
 const router = Router()
 
-router.post("/api/auth/google", async (request: Request) => {
+router.post("/api/auth/google", async (request: Request, env: any) => {
   const { token } = await request.json()
 
   try {
-    const userInfo = await verifyGoogleToken(token)
+    const userInfo = await verifyGoogleToken(token, env)
     const user = await createOrUpdateUser(userInfo)
     const jwt = generateJWT(user.id)
     return new Response(JSON.stringify({ success: true, jwt }), {

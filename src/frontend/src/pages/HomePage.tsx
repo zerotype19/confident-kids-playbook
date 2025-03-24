@@ -21,6 +21,9 @@ declare global {
 }
 
 export default function HomePage(): JSX.Element {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  console.log("✅ Using Google Client ID:", clientId)
+
   useEffect(() => {
     // Define the callback function with proper types
     window.handleGoogleLogin = async (response: GoogleCredentialResponse) => {
@@ -74,7 +77,7 @@ export default function HomePage(): JSX.Element {
 
       <div className="flex flex-col gap-4 mb-12">
         <div id="g_id_onload"
-          data-client_id="GOOGLE_CLIENT_ID"
+          data-client_id={clientId}
           data-callback="handleGoogleLogin"
           data-auto_prompt="false">
         </div>
