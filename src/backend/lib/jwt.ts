@@ -45,11 +45,11 @@ function base64UrlDecode(input: string): string {
   return atob(padded)
 }
 
-// Decodes a JWT without verification
-function decodeJwt(token: string): { header: JWTHeader; payload: any } {
+// Helper to decode JWT without verification
+function decodeJwt(token: string): any {
   const [headerB64, payloadB64] = token.split('.')
-  const header = JSON.parse(base64UrlDecode(headerB64))
-  const payload = JSON.parse(base64UrlDecode(payloadB64))
+  const header = JSON.parse(atob(headerB64.replace(/-/g, '+').replace(/_/g, '/')))
+  const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')))
   return { header, payload }
 }
 
@@ -94,21 +94,34 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
       clientId: clientId
     })
 
-    // Create JWKS client for Google's public keys
-    const jwks = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
+    // Decode token without verification to inspect claims
+    const { header, payload } = decodeJwt(token)
+    console.log('🔍 Raw token data:', {
+      header: {
+        ...header,
+        kid: header.kid ? `${header.kid.slice(0, 4)}...${header.kid.slice(-4)}` : undefined
+      },
+      payload: {
+        ...payload,
+        email: payload.email ? '***' : undefined,
+        sub: payload.sub ? '***' : undefined
+      }
+    })
 
-    // First decode the token without verification to check the audience
-    const [headerB64, payloadB64] = token.split('.')
-    const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')))
-    
-    // Log the audience claims for debugging
-    console.log('🔍 Token audience claims:', {
-      aud: payload.aud,
-      azp: payload.azp,
+    // Log audience claims for debugging
+    console.log('🎯 Audience verification:', {
+      tokenAud: payload.aud,
+      tokenAzp: payload.azp,
       expectedClientId: clientId,
       matchesAud: payload.aud === clientId,
-      matchesAzp: payload.azp === clientId
+      matchesAzp: payload.azp === clientId,
+      audLength: payload.aud?.length,
+      azpLength: payload.azp?.length,
+      clientIdLength: clientId.length
     })
+
+    // Create JWKS client for Google's public keys
+    const jwks = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
 
     // Verify the token
     const { payload: verifiedPayload } = await jwtVerify(token, jwks, {
@@ -134,7 +147,9 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
         expectedClientId: clientId,
         receivedAud: googlePayload.aud,
         receivedAzp: googlePayload.azp,
-        fullToken: token // Log full token for debugging
+        audLength: googlePayload.aud?.length,
+        azpLength: googlePayload.azp?.length,
+        clientIdLength: clientId.length
       })
       throw new Error(`Invalid audience. Expected: ${clientId}, Received: ${googlePayload.aud}`)
     }
@@ -151,7 +166,8 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
       error: err.message,
       type: err.constructor.name,
       stack: err.stack,
-      clientId: clientId // Log the client ID that was used
+      clientId: clientId,
+      clientIdLength: clientId?.length
     })
     throw new Error(`Token verification failed: ${err.message}`)
   }
