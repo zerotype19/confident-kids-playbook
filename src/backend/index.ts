@@ -1,17 +1,15 @@
 import { Router } from 'itty-router'
-import { getUserFromToken } from './auth'
-import googleAuthRouter from './api/auth_google'
+import { handleGoogleAuth } from './api/auth_google'
 
 interface Env {
-  GOOGLE_CLIENT_ID: string
   JWT_SECRET: string
   DB: D1Database
 }
 
 const router = Router()
 
-// Mount the Google auth routes
-router.all('/api/auth/google/*', googleAuthRouter.handle.bind(googleAuthRouter))
+// Register Google auth route
+router.post('/api/auth/google', handleGoogleAuth)
 
 router.get('/api/hello', async () => {
   return new Response(JSON.stringify({ message: 'hello world!!!' }), {

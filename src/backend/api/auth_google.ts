@@ -1,124 +1,42 @@
-import { Router } from "itty-router"
-import { generateJWT } from "../auth"
+import { verify } from '@tsndr/cloudflare-worker-jwt'
+import { env } from 'worker:env'
+import { DB } from '../db'
+import { createJWT } from '../auth'
 
 interface Env {
-  GOOGLE_CLIENT_ID: string
   JWT_SECRET: string
   DB: D1Database
 }
 
-interface GoogleAuthRequest {
-  credential: string
-}
-
-interface GoogleTokenInfo {
-  sub: string
-  email: string
-  name: string
-  picture?: string
-}
-
-interface AuthResponse {
-  success: boolean
-  jwt?: string
-  error?: string
-}
-
-interface User {
-  id: string
-  email: string
-  name: string
-  oauth_provider: string
-  oauth_id: string
-  created_at: string
-}
-
-const router = Router()
-
-router.post("/api/auth/google", async (request: Request, env: Env) => {
+export async function handleGoogleAuth(request: Request, env: Env): Promise<Response> {
   try {
-    const { credential } = await request.json() as GoogleAuthRequest
+    const { credential } = await request.json()
 
     if (!credential) {
-      return new Response(
-        JSON.stringify({ success: false, error: "No credential provided" }),
-        { status: 400 }
-      )
+      return new Response('Missing credential', { status: 400 })
     }
 
-    // Verify token with Google
-    const tokenResponse = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`
-    )
+    const decoded = await verify(credential, { complete: true })
 
-    if (!tokenResponse.ok) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid Google token" }),
-        { status: 401 }
-      )
+    if (!decoded || typeof decoded.payload !== 'object') {
+      return new Response('Invalid token', { status: 401 })
     }
 
-    const tokenInfo = await tokenResponse.json() as GoogleTokenInfo
+    const email = decoded.payload.email
+    const name = decoded.payload.name || ''
 
-    // Check for existing user
-    const existingUser = await env.DB.prepare(
-      "SELECT * FROM users WHERE oauth_provider = ? AND oauth_id = ?"
-    )
-      .bind("google", tokenInfo.sub)
-      .first<User>()
-
-    let userId: string
-
-    if (existingUser) {
-      userId = existingUser.id
-    } else {
-      // Create new user
-      const result = await env.DB.prepare(`
-        INSERT INTO users (email, name, oauth_provider, oauth_id, created_at)
-        VALUES (?, ?, ?, ?, datetime('now'))
-      `)
-        .bind(
-          tokenInfo.email,
-          tokenInfo.name,
-          "google",
-          tokenInfo.sub
-        )
-        .run()
-
-      if (!result.success) {
-        throw new Error("Failed to create user")
-      }
-
-      const newUser = await env.DB.prepare(
-        "SELECT * FROM users WHERE oauth_provider = ? AND oauth_id = ?"
-      )
-        .bind("google", tokenInfo.sub)
-        .first<User>()
-
-      if (!newUser) {
-        throw new Error("Failed to retrieve created user")
-      }
-
-      userId = newUser.id
+    if (!email) {
+      return new Response('Missing email in credential', { status: 400 })
     }
 
-    // Generate JWT
-    const jwt = generateJWT(userId)
+    // Get or create user in DB
+    const user = await DB.getOrCreateUserByEmail(email, name, env)
 
-    return new Response(
-      JSON.stringify({ success: true, jwt }),
-      { headers: { "Content-Type": "application/json" } }
-    )
+    // Sign our app's JWT
+    const token = await createJWT(user.id, env)
+
+    return Response.json({ token })
   } catch (err) {
-    console.error("Google auth error:", err)
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: err instanceof Error ? err.message : "Authentication failed" 
-      }),
-      { status: 500 }
-    )
+    return new Response('Auth failed', { status: 500 })
   }
-})
-
-export default router 
+} 

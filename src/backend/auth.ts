@@ -1,7 +1,9 @@
 import { OAuth2Client } from "google-auth-library"
+import { sign } from '@tsndr/cloudflare-worker-jwt'
 
 interface Env {
   GOOGLE_CLIENT_ID: string
+  JWT_SECRET: string
 }
 
 interface UserInfo {
@@ -47,4 +49,14 @@ export async function verifyGoogleToken(idToken: string, env: Env): Promise<User
 export function generateJWT(userId: string): string {
   // TODO: Implement JWT generation
   return "dummy-jwt"
+}
+
+export async function createJWT(userId: string, env: Env) {
+  const payload = {
+    sub: userId,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 // 30 days
+  }
+
+  return await sign(payload, env.JWT_SECRET)
 }
