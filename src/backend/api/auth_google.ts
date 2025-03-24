@@ -4,9 +4,13 @@ interface Env {
   JWT_SECRET: string
 }
 
+interface GoogleAuthRequest {
+  credential: string
+}
+
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   try {
-    const body = await request.json()
+    const body = await request.json() as GoogleAuthRequest
     const { credential } = body
 
     if (!credential) {
