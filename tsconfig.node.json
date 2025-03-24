@@ -13,6 +13,6 @@
       "@/*": ["src/frontend/src/*"]
     }
   },
-  "include": ["src/main.tsx", "src/types.ts"],
+  "include": ["src/*.{ts,tsx}"],
   "references": [{ "path": "./tsconfig.json" }]
 } 
