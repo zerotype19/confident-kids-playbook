@@ -6,11 +6,9 @@ interface GoogleCredentialResponse {
   g_csrf_token: string
 }
 
-interface GoogleLoginResponse {
-  clientId: string
-  credential: string
-  select_by: string
-  g_csrf_token: string
+interface AuthResponse {
+  success: boolean
+  jwt?: string
 }
 
 // Declare global callback function with proper types
@@ -37,8 +35,8 @@ export default function HomePage(): JSX.Element {
           body: JSON.stringify({ token })
         })
 
-        const data = await res.json()
-        if (data.success) {
+        const data = await res.json() as AuthResponse
+        if (data.success && data.jwt) {
           localStorage.setItem("jwt", data.jwt)
           window.location.href = "/dashboard"
         } else {
