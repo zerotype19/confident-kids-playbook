@@ -1,5 +1,5 @@
 import { Router } from 'itty-router'
-import authGoogle from './api/auth_google'
+import { authGoogle } from './api/auth_google'
 
 interface Env {
   JWT_SECRET: string

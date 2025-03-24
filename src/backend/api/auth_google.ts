@@ -8,7 +8,7 @@ interface GoogleAuthRequest {
   credential: string
 }
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const authGoogle = async (request: Request, env: Env) => {
   try {
     const body = await request.json() as GoogleAuthRequest
     const { credential } = body
