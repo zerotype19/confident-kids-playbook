@@ -1,16 +1,29 @@
 import React, { useEffect } from "react"
 
-// Declare global callback function
+interface GoogleCredentialResponse {
+  credential: string
+  select_by: string
+  g_csrf_token: string
+}
+
+interface GoogleLoginResponse {
+  clientId: string
+  credential: string
+  select_by: string
+  g_csrf_token: string
+}
+
+// Declare global callback function with proper types
 declare global {
   interface Window {
-    handleGoogleLogin: (response: any) => Promise<void>;
+    handleGoogleLogin: (response: GoogleCredentialResponse) => Promise<void>;
   }
 }
 
 export default function HomePage(): JSX.Element {
   useEffect(() => {
-    // Define the callback function
-    window.handleGoogleLogin = async (response: any) => {
+    // Define the callback function with proper types
+    window.handleGoogleLogin = async (response: GoogleCredentialResponse) => {
       console.log("✅ Google login response", response)
       const token = response.credential
 
