@@ -23,82 +23,87 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
 }
 
 const App: React.FC = () => {
+  console.log("✅ App.tsx rendering");
+  
   return (
-    <AuthProvider>
-      <ChildProvider>
-        <ErrorBoundary>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <DashboardPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/practice"
-              element={
-                <PrivateRoute>
-                  <PracticePage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/calendar"
-              element={
-                <PrivateRoute>
-                  <CalendarPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/journal/:child_id"
-              element={
-                <PrivateRoute>
-                  <JournalPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/family-settings"
-              element={
-                <PrivateRoute>
-                  <FamilySettingsPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/progress/:child_id"
-              element={
-                <PrivateRoute>
-                  <ProgressDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/challenge/:child_id/:challenge_id"
-              element={
-                <PrivateRoute>
-                  <ChallengeViewer />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <ProfilePage />
-                </PrivateRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </ErrorBoundary>
-      </ChildProvider>
-    </AuthProvider>
+    <>
+      {console.log("✅ App.tsx returning JSX")}
+      <AuthProvider>
+        <ChildProvider>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <DashboardPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/practice"
+                element={
+                  <PrivateRoute>
+                    <PracticePage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/calendar"
+                element={
+                  <PrivateRoute>
+                    <CalendarPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/journal/:child_id"
+                element={
+                  <PrivateRoute>
+                    <JournalPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/family-settings"
+                element={
+                  <PrivateRoute>
+                    <FamilySettingsPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/progress/:child_id"
+                element={
+                  <PrivateRoute>
+                    <ProgressDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/challenge/:child_id/:challenge_id"
+                element={
+                  <PrivateRoute>
+                    <ChallengeViewer />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <ProfilePage />
+                  </PrivateRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ErrorBoundary>
+        </ChildProvider>
+      </AuthProvider>
+    </>
   );
 };
 

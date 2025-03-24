@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+console.log("✅ AuthContext loaded");
+
 interface User {
   uid: string;
   email: string | null;

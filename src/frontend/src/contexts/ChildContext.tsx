@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Child } from '../types';
 
+console.log("✅ ChildContext loaded");
+
 interface ChildContextType {
   selectedChild: Child | null;
   setSelectedChild: (child: Child) => void;
