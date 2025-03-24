@@ -1,8 +1,12 @@
+import { AuthProvider } from "@/contexts/AuthContext"
+
 export default function App() {
   console.log("✅ App.tsx stripped render")
   return (
-    <div style={{ padding: "2rem", fontSize: "24px", color: "green" }}>
-      ✅ App.tsx static render working
-    </div>
+    <AuthProvider>
+      <div style={{ padding: "2rem", fontSize: "24px", color: "blue" }}>
+        ✅ AuthProvider render test
+      </div>
+    </AuthProvider>
   )
 } 
