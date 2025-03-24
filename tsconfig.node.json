@@ -9,11 +9,12 @@
     "jsx": "react-jsx",
     "types": ["react", "react-dom", "react-router-dom"],
     "baseUrl": ".",
+    "rootDir": ".",
     "paths": {
       "@/*": ["src/frontend/src/*"]
     }
   },
-  "include": ["src/main.tsx", "src/types.ts", "src/frontend/**/*.{ts,tsx}"],
+  "include": ["src"],
   "exclude": ["node_modules", "src/frontend/node_modules"],
   "references": [{ "path": "./tsconfig.json" }]
 } 
