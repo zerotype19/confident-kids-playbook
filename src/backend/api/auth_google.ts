@@ -20,11 +20,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     if (request.method !== 'POST') {
       return Response.json({ 
         status: 'error',
-        message: 'Method not allowed',
-        details: {
-          method: request.method,
-          allowed: ['POST']
-        }
+        message: 'Method not allowed'
       }, {
         status: 405,
         headers: {
@@ -41,8 +37,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     } catch (err) {
       return Response.json({
         status: 'error',
-        message: 'Invalid request body',
-        details: err instanceof Error ? err.message : 'Could not parse JSON'
+        message: 'Invalid request body'
       }, {
         status: 400,
         headers
@@ -53,11 +48,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     if (!body.credential) {
       return Response.json({
         status: 'error',
-        message: 'Missing credential',
-        details: {
-          required: ['credential'],
-          received: Object.keys(body)
-        }
+        message: 'Missing credential'
       }, {
         status: 400,
         headers
@@ -96,7 +87,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
 
     // Return success response
     return Response.json({
-      status: 'success',
+      status: 'ok',
       jwt,
       user: {
         id: googleUser.sub,
@@ -109,35 +100,18 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     })
 
   } catch (err: any) {
-    // Handle token verification errors
-    if (err.message === 'Invalid token' || 
-        err.message === 'Token has expired' ||
-        err.message === 'Invalid audience' ||
-        err.message === 'Invalid issuer' ||
-        err.message === 'Token not yet valid' ||
-        err.message === 'Email not verified') {
-      return Response.json({
-        status: 'error',
-        message: err.message
-      }, {
-        status: 401,
-        headers
-      })
-    }
-
-    // Log unexpected errors
-    console.error('Unexpected error:', {
+    // Log the error for debugging
+    console.error('Token verification failed:', {
       message: err.message,
-      stack: err.stack,
       type: err.constructor.name
     })
-    
-    // Return generic error for unexpected errors
+
+    // Return standardized error response
     return Response.json({
       status: 'error',
-      message: 'Internal server error'
+      message: 'Invalid token'
     }, {
-      status: 500,
+      status: 401,
       headers
     })
   }
