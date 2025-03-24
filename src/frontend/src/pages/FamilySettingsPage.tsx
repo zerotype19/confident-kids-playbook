@@ -72,9 +72,9 @@ export const FamilySettingsPage: React.FC = () => {
 
       if (!response.ok) throw new Error('Failed to remove family member');
       setSuccessMessage('Family member removed successfully');
-      setFamily(prev => prev ? {
+      setFamily((prev: Family | null) => prev ? {
         ...prev,
-        members: prev.members.filter(m => m.id !== memberId)
+        members: prev.members.filter((m: FamilyMember) => m.id !== memberId)
       } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove family member');
@@ -138,7 +138,7 @@ export const FamilySettingsPage: React.FC = () => {
           <div className="mb-6 sm:mb-8">
             <h2 className="text-lg sm:text-xl font-semibold mb-4">Family Members</h2>
             <div className="space-y-3 sm:space-y-4">
-              {family.members.map((member) => (
+              {family.members.map((member: FamilyMember) => (
                 <div
                   key={member.id}
                   className="flex items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg"

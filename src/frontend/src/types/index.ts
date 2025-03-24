@@ -34,6 +34,27 @@ export interface FeatureFlagsResponse {
   isFeatureEnabled: (feature: keyof FeatureFlags) => boolean;
 }
 
+export interface FamilyMember {
+  id: string;
+  user_id: string;
+  role: 'owner' | 'member';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Family {
+  id: string;
+  name: string;
+  members: FamilyMember[];
+  children: Array<{
+    id: string;
+    name: string;
+    age: number;
+  }>;
+  created_at: string;
+  updated_at: string;
+}
+
 export const PILLAR_NAMES = {
   social: 'Social Skills',
   emotional: 'Emotional Intelligence',
