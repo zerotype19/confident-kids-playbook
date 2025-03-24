@@ -96,7 +96,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     }
 
     // Verify the Google token
-    const googleUser = await verifyGoogleToken(requestBody.credential, env.GOOGLE_CLIENT_ID)
+    const googleUser = await verifyGoogleToken(requestBody!.credential, env.GOOGLE_CLIENT_ID)
     
     // Create our app's JWT
     const jwtPayload = {

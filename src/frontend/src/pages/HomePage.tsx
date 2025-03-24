@@ -7,9 +7,20 @@ interface GoogleCredentialResponse {
 }
 
 interface AuthResponse {
-  success: boolean
+  status: 'ok' | 'error'
   jwt?: string
-  error?: string
+  user?: {
+    id: string
+    email: string
+    name: string
+    picture: string
+  }
+  message?: string
+  details?: {
+    type: string
+    hasGoogleClientId: boolean
+    hasCredential: boolean
+  }
 }
 
 interface GoogleLoginError extends Error {
@@ -78,12 +89,12 @@ export default function HomePage(): JSX.Element {
       }
 
       const data = await res.json() as AuthResponse
-      if (data.success && data.jwt) {
+      if (data.status === 'ok' && data.jwt) {
         console.log("✅ Login successful, storing JWT")
         localStorage.setItem("jwt", data.jwt)
         window.location.href = "/onboarding"
       } else {
-        throw new Error(data.error || "Login failed")
+        throw new Error(data.message || "Login failed")
       }
     } catch (error) {
       const loginError = error as GoogleLoginError
