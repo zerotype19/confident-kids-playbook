@@ -1,4 +1,5 @@
 import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
+import { corsHeaders, handleOptions } from '../lib/cors'
 
 interface Env {
   JWT_SECRET: string
@@ -9,12 +10,23 @@ interface GoogleAuthRequest {
 }
 
 export const authGoogle = async (request: Request, env: Env) => {
+  // Handle CORS preflight requests
+  if (request.method === 'OPTIONS') {
+    return handleOptions(request)
+  }
+
   // Log incoming request details
   const url = new URL(request.url)
   console.log('🔍 Incoming request:', {
     method: request.method,
     pathname: url.pathname,
     headers: Object.fromEntries(request.headers.entries())
+  })
+
+  // Get base CORS headers
+  const headers = corsHeaders({
+    allowedMethods: ['POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type']
   })
 
   try {
@@ -35,9 +47,9 @@ export const authGoogle = async (request: Request, env: Env) => {
         }
       }), {
         status: 405,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Allow': 'POST'
+        headers: {
+          ...Object.fromEntries(headers.entries()),
+          'Allow': 'POST, OPTIONS'
         }
       })
     }
@@ -59,7 +71,7 @@ export const authGoogle = async (request: Request, env: Env) => {
         details: err instanceof Error ? err.message : 'Could not parse JSON'
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers
       })
     }
 
@@ -77,7 +89,7 @@ export const authGoogle = async (request: Request, env: Env) => {
         }
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers
       })
     }
 
@@ -92,7 +104,7 @@ export const authGoogle = async (request: Request, env: Env) => {
         message: result.error || 'Failed to verify token'
       }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers
       })
     }
 
@@ -101,7 +113,7 @@ export const authGoogle = async (request: Request, env: Env) => {
       status: 'success',
       jwt: result.jwt
     }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers
     })
 
   } catch (err: any) {
@@ -121,7 +133,7 @@ export const authGoogle = async (request: Request, env: Env) => {
       details: err.message
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers
     })
   }
 } 

@@ -1,5 +1,6 @@
 import { Router } from 'itty-router'
 import { authGoogle } from './api/auth_google'
+import { corsHeaders, handleOptions } from './lib/cors'
 
 interface Env {
   JWT_SECRET: string
@@ -27,13 +28,16 @@ const withLogging = async (request: Request) => {
   return response
 }
 
+// Handle CORS preflight for all routes
+router.options('*', handleOptions)
+
 // Register Google auth route with POST method
 router.post('/api/auth/google', authGoogle)
 
 // Handle other routes
 router.get('/api/hello', async () => {
   return new Response(JSON.stringify({ message: 'hello world!!!' }), {
-    headers: { 'Content-Type': 'application/json' }
+    headers: corsHeaders()
   })
 })
 
@@ -50,7 +54,7 @@ router.all('*', (req) => {
     method: req.method
   }), {
     status: 404,
-    headers: { 'Content-Type': 'application/json' }
+    headers: corsHeaders()
   })
 })
 
