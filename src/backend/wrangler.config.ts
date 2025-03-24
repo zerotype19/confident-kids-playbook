@@ -5,4 +5,10 @@ export default {
       external: [],
     },
   },
+  // Ensure proper module resolution
+  resolve: {
+    alias: {
+      jose: 'jose'
+    }
+  }
 }; 
