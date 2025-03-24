@@ -5,16 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "jsx": "react-jsx",
-    "types": ["react", "react-dom", "react-router-dom"],
-    "baseUrl": ".",
-    "rootDir": ".",
-    "paths": {
-      "@/*": ["src/frontend/src/*"]
-    }
+    "strict": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "src/frontend/node_modules"],
-  "references": [{ "path": "./tsconfig.json" }]
+  "include": ["vite.config.ts"]
 } 
