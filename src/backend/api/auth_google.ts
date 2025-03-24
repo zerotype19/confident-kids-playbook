@@ -1,6 +1,7 @@
-import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
+import { sign } from '@tsndr/cloudflare-worker-jwt'
 import { corsHeaders, handleOptions } from '../lib/cors'
 import { Env, GoogleAuthRequest } from '../types'
+import { verifyGoogleToken } from '../lib/jwt'
 
 export const authGoogle = async (request: Request, env: Env): Promise<Response> => {
   // Handle CORS preflight requests
@@ -86,10 +87,12 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
       })
     }
 
-    // Process the credential
-    console.log('🔐 Processing credential...')
-    if (!env.JWT_SECRET) {
-      console.error('❌ JWT_SECRET is not configured')
+    // Validate environment variables
+    if (!env.JWT_SECRET || !env.GOOGLE_CLIENT_ID) {
+      console.error('❌ Missing required environment variables:', {
+        hasJwtSecret: !!env.JWT_SECRET,
+        hasGoogleClientId: !!env.GOOGLE_CLIENT_ID
+      })
       return new Response(JSON.stringify({
         status: 'error',
         message: 'Server configuration error'
@@ -99,29 +102,54 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
       })
     }
 
-    const result = await verifyGoogleTokenAndCreateJwt(body.credential, env.JWT_SECRET)
+    // Verify the Google token
+    console.log('🔐 Verifying Google token...')
+    const googleUser = await verifyGoogleToken(body.credential, env.GOOGLE_CLIENT_ID)
     
-    if (!result.success) {
-      console.error('❌ Failed to verify token:', result.error)
+    // Create our app's JWT
+    const jwtPayload = {
+      sub: googleUser.sub,
+      email: googleUser.email,
+      name: googleUser.name,
+      picture: googleUser.picture,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
+    }
+
+    const jwt = await sign(jwtPayload, env.JWT_SECRET)
+
+    console.log('✅ Successfully authenticated:', {
+      sub: googleUser.sub,
+      email: googleUser.email,
+      name: googleUser.name
+    })
+
+    return new Response(JSON.stringify({
+      status: 'success',
+      jwt,
+      user: {
+        id: googleUser.sub,
+        email: googleUser.email,
+        name: googleUser.name,
+        picture: googleUser.picture
+      }
+    }), {
+      headers
+    })
+
+  } catch (err: any) {
+    // Handle token verification errors
+    if (err.message === 'Invalid token') {
       return new Response(JSON.stringify({
         status: 'error',
-        message: result.error || 'Failed to verify token'
+        message: 'Invalid token'
       }), {
         status: 401,
         headers
       })
     }
 
-    console.log('✅ Successfully authenticated')
-    return new Response(JSON.stringify({
-      status: 'success',
-      jwt: result.jwt
-    }), {
-      headers
-    })
-
-  } catch (err: any) {
-    // Log the full error details
+    // Log other errors
     console.error('❌ Unhandled error:', {
       message: err.message,
       stack: err.stack,
