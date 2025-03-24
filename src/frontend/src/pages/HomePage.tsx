@@ -75,8 +75,14 @@ export default function HomePage(): JSX.Element {
   }
 
   useEffect(() => {
-    const tryInitialize = () => {
-      if (window.google?.accounts?.id) {
+    const scriptId = "google-oauth-script"
+
+    const initializeGoogle = () => {
+      if (
+        window.google &&
+        window.google.accounts &&
+        window.google.accounts.id
+      ) {
         console.log("✅ Google Identity Services loaded")
         window.google.accounts.id.initialize({
           client_id: clientId,
@@ -84,20 +90,24 @@ export default function HomePage(): JSX.Element {
         })
         window.google.accounts.id.renderButton(
           document.getElementById("google-signin-button"),
-          {
-            theme: "outline",
-            size: "large",
-            shape: "pill"
-          }
+          { theme: "outline", size: "large", shape: "pill" }
         )
         console.log("✅ Google sign-in button rendered")
-      } else {
-        console.log("⏳ Waiting for Google Identity Services...")
-        setTimeout(tryInitialize, 500)
       }
     }
 
-    tryInitialize()
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script")
+      script.src = "https://accounts.google.com/gsi/client"
+      script.async = true
+      script.defer = true
+      script.id = scriptId
+      script.onload = initializeGoogle
+      document.body.appendChild(script)
+      console.log("📦 Injected Google script")
+    } else {
+      initializeGoogle()
+    }
   }, [clientId])
 
   return (
