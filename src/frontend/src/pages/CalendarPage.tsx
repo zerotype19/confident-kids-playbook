@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
-import { PILLAR_NAMES } from '../types';
 
 export const CalendarPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
