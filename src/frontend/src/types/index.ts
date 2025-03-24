@@ -1,4 +1,4 @@
-import { FeatureFlags } from '../../backend/types';
+import { FeatureFlags } from '../../../backend/types';
 
 export interface MediaItem {
   id: string;
@@ -28,7 +28,7 @@ export interface PracticeStep {
 }
 
 export interface FeatureFlagsResponse {
-  flags: FeatureFlags;
+  flags: FeatureFlags | null;
   loading: boolean;
   error: string | null;
   isFeatureEnabled: (feature: keyof FeatureFlags) => boolean;
