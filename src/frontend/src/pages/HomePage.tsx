@@ -17,10 +17,27 @@ interface GoogleLoginError extends Error {
   message: string
 }
 
-// Declare global callback function with proper types
+// Declare Google Identity Services types
 declare global {
   interface Window {
-    handleGoogleLogin: (response: GoogleCredentialResponse) => Promise<void>;
+    google: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string
+            callback: (response: GoogleCredentialResponse) => Promise<void>
+          }) => void
+          renderButton: (
+            element: HTMLElement | null,
+            options: {
+              theme: "outline" | "filled"
+              size: "large" | "medium" | "small"
+              shape: "rectangular" | "pill" | "circle"
+            }
+          ) => void
+        }
+      }
+    }
   }
 }
 
@@ -29,36 +46,50 @@ export default function HomePage(): JSX.Element {
   console.log("✅ Using Google Client ID:", clientId)
 
   useEffect(() => {
-    // Define the callback function with proper types
-    window.handleGoogleLogin = async (response: GoogleCredentialResponse) => {
-      console.log("✅ Google login response", response)
-      const token = response.credential
-
-      try {
-        const res = await fetch("/api/auth/google", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token })
-        })
-
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`)
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleLogin
+      })
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-signin-button"),
+        {
+          theme: "outline",
+          size: "large",
+          shape: "pill"
         }
-
-        const data = await res.json() as AuthResponse
-        if (data.success && data.jwt) {
-          localStorage.setItem("jwt", data.jwt)
-          window.location.href = "/dashboard"
-        } else {
-          throw new Error(data.error || "Login failed")
-        }
-      } catch (error) {
-        const loginError = error as GoogleLoginError
-        console.error("Login error:", loginError.message)
-        alert(loginError.message || "Login failed")
-      }
+      )
     }
-  }, [])
+  }, [clientId])
+
+  const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
+    console.log("✅ Google login response", response)
+    const token = response.credential
+
+    try {
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+      })
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`)
+      }
+
+      const data = await res.json() as AuthResponse
+      if (data.success && data.jwt) {
+        localStorage.setItem("jwt", data.jwt)
+        window.location.href = "/onboarding"
+      } else {
+        throw new Error(data.error || "Login failed")
+      }
+    } catch (error) {
+      const loginError = error as GoogleLoginError
+      console.error("Login error:", loginError.message)
+      alert(loginError.message || "Login failed")
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6">
@@ -85,18 +116,7 @@ export default function HomePage(): JSX.Element {
       </section>
 
       <div className="flex flex-col gap-4 mb-12">
-        <div id="g_id_onload"
-          data-client_id={clientId}
-          data-callback="handleGoogleLogin"
-          data-auto_prompt="false">
-        </div>
-        <div className="g_id_signin"
-          data-type="standard"
-          data-shape="pill"
-          data-theme="outline"
-          data-text="sign_in_with"
-          data-size="large">
-        </div>
+        <div id="google-signin-button"></div>
       </div>
 
       <footer className="text-sm text-gray-400 pb-6">
