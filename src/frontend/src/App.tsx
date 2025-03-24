@@ -1,6 +1,6 @@
-import { AuthProvider } from "../contexts/AuthContext"
+import { AuthProvider } from "./contexts/AuthContext"
 
-export default function App() {
+export default function App(): JSX.Element {
   console.log("✅ App.tsx stripped render")
   return (
     <AuthProvider>
