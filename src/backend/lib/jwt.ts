@@ -1,3 +1,5 @@
+import * as jose from 'jose'
+
 interface JWTHeader {
   kid: string
   alg: string
@@ -21,7 +23,7 @@ interface GoogleTokenPayload {
   nbf?: number
 }
 
-interface GoogleCertificate {
+interface GoogleKey {
   kid: string
   n: string
   e: string
@@ -31,7 +33,7 @@ interface GoogleCertificate {
 }
 
 interface GoogleCertsResponse {
-  keys: GoogleCertificate[]
+  keys: GoogleKey[]
 }
 
 // Base64URL decode (handle URL-safe characters and padding)
@@ -52,9 +54,9 @@ function decodeJwt(token: string): { header: JWTHeader; payload: any } {
 }
 
 // Cache Google certs to avoid fetching them too often
-let certsCache: { certs: Record<string, GoogleCertificate>; expires: number } | null = null
+let certsCache: { certs: jose.JWKS; expires: number } | null = null
 
-async function fetchGoogleCerts(): Promise<Record<string, GoogleCertificate>> {
+async function fetchGoogleCerts(): Promise<jose.JWKS> {
   // Check cache first
   if (certsCache && certsCache.expires > Date.now()) {
     return certsCache.certs
@@ -72,158 +74,74 @@ async function fetchGoogleCerts(): Promise<Record<string, GoogleCertificate>> {
   const expires = Date.now() + (maxAge ? parseInt(maxAge) * 1000 : 3600 * 1000)
 
   const data = await response.json() as GoogleCertsResponse
-  const certs = data.keys.reduce((acc: Record<string, GoogleCertificate>, key: GoogleCertificate) => {
-    acc[key.kid] = key
-    return acc
-  }, {})
-
   console.log('✅ Fetched certificates:', {
-    numKeys: Object.keys(certs).length,
-    kids: Object.keys(certs),
+    numKeys: data.keys.length,
+    kids: data.keys.map(k => k.kid),
     expires: new Date(expires).toISOString()
   })
 
   // Update cache
-  certsCache = { certs, expires }
-  return certs
+  certsCache = { certs: data as unknown as jose.JWKS, expires }
+  return data as unknown as jose.JWKS
 }
 
 export async function verifyGoogleToken(token: string, clientId: string): Promise<GoogleTokenPayload> {
   try {
-    // Decode the token (without verification) to get the key ID and check algorithm
-    const decoded = decodeJwt(token)
-    console.log('🔍 Token header:', decoded.header)
-    console.log('🔍 Token payload:', {
-      ...decoded.payload,
-      // Redact sensitive fields for logging
-      email: decoded.payload.email ? '***' : undefined,
-      sub: decoded.payload.sub ? '***' : undefined
+    // Log incoming token for debugging
+    console.log('📥 Received Google token:', {
+      length: token.length,
+      preview: `${token.slice(0, 10)}...${token.slice(-10)}`
     })
 
-    const { kid, alg } = decoded.header
-
-    if (alg !== 'RS256') {
-      throw new Error('Invalid algorithm. Expected RS256')
-    }
-
     // Fetch Google's public keys
-    const certs = await fetchGoogleCerts()
-    const jwk = certs[kid]
-    
-    if (!jwk) {
-      console.error('❌ No matching key found for kid:', {
-        tokenKid: kid,
-        availableKids: Object.keys(certs)
-      })
-      throw new Error('No matching key found')
-    }
+    const jwks = await fetchGoogleCerts()
 
-    // Import the public key
-    const publicKey = await crypto.subtle.importKey(
-      'jwk',
-      jwk,
-      {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: { name: 'SHA-256' },
-      },
-      false, // not extractable
-      ['verify']
-    )
+    // Create a JWKS client
+    const JWKS = jose.createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
 
-    // Split token and prepare for verification
-    const [headerB64, payloadB64, signatureB64] = token.split('.')
-    const signedData = `${headerB64}.${payloadB64}`
-    
-    // Convert base64url signature to ArrayBuffer
-    const signatureBytes = new Uint8Array(
-      base64UrlDecode(signatureB64)
-        .split('')
-        .map(c => c.charCodeAt(0))
-    )
+    // Verify the token
+    const { payload } = await jose.jwtVerify(token, JWKS, {
+      issuer: ['https://accounts.google.com', 'accounts.google.com'],
+      audience: clientId,
+      algorithms: ['RS256'],
+      clockTolerance: 300, // 5 minutes
+      requiredClaims: ['iss', 'sub', 'aud', 'exp', 'iat']
+    })
 
-    // Verify the signature
-    const verified = await crypto.subtle.verify(
-      'RSASSA-PKCS1-v1_5',
-      publicKey,
-      signatureBytes,
-      new TextEncoder().encode(signedData)
-    )
+    // Log decoded payload (with sensitive data redacted)
+    console.log('🔍 Decoded token payload:', {
+      ...payload,
+      email: payload.email ? '***' : undefined,
+      sub: payload.sub ? '***' : undefined
+    })
 
-    if (!verified) {
-      throw new Error('Invalid signature')
-    }
-
-    // Verify token claims
-    const payload = decoded.payload as GoogleTokenPayload
-    const now = Math.floor(Date.now() / 1000)
-
-    // Check required claims
-    if (!payload.iss || !payload.sub || !payload.aud || !payload.exp || !payload.iat) {
-      console.error('❌ Missing required claims:', {
-        hasIss: !!payload.iss,
-        hasSub: !!payload.sub,
-        hasAud: !!payload.aud,
-        hasExp: !!payload.exp,
-        hasIat: !!payload.iat
-      })
-      throw new Error('Missing required claims')
-    }
-
-    // Verify issuer
-    if (payload.iss !== 'https://accounts.google.com' && 
-        payload.iss !== 'accounts.google.com') {
-      console.error('❌ Invalid issuer:', {
-        expected: ['https://accounts.google.com', 'accounts.google.com'],
-        received: payload.iss
-      })
-      throw new Error('Invalid issuer')
-    }
+    // Type check the payload
+    const googlePayload = payload as GoogleTokenPayload
 
     // Verify audience (check both aud and azp)
-    const validAudience = payload.aud === clientId || payload.azp === clientId
+    const validAudience = googlePayload.aud === clientId || googlePayload.azp === clientId
     if (!validAudience) {
       console.error('❌ Invalid audience:', {
         expectedClientId: clientId,
-        receivedAud: payload.aud,
-        receivedAzp: payload.azp
+        receivedAud: googlePayload.aud,
+        receivedAzp: googlePayload.azp
       })
       throw new Error('Invalid audience')
     }
 
-    // Verify time-based claims
-    if (payload.exp < now) {
-      console.error('❌ Token expired:', {
-        expiration: new Date(payload.exp * 1000).toISOString(),
-        now: new Date(now * 1000).toISOString()
-      })
-      throw new Error('Token has expired')
-    }
-
-    if (payload.nbf && payload.nbf > now) {
-      console.error('❌ Token not yet valid:', {
-        notBefore: new Date(payload.nbf * 1000).toISOString(),
-        now: new Date(now * 1000).toISOString()
-      })
-      throw new Error('Token not yet valid')
-    }
-
-    if (payload.iat > now) {
-      console.error('❌ Token issued in future:', {
-        issuedAt: new Date(payload.iat * 1000).toISOString(),
-        now: new Date(now * 1000).toISOString()
-      })
-      throw new Error('Token issued in the future')
-    }
-
     // Verify email is verified (Google specific)
-    if (payload.email && !payload.email_verified) {
+    if (googlePayload.email && !googlePayload.email_verified) {
       throw new Error('Email not verified')
     }
 
     console.log('✅ Token verified successfully')
-    return payload
-  } catch (err) {
-    console.error('❌ Failed to verify token:', err)
+    return googlePayload
+  } catch (err: any) {
+    console.error('❌ Failed to verify token:', {
+      error: err.message,
+      type: err.constructor.name,
+      stack: err.stack
+    })
     throw new Error('Invalid token')
   }
 } 
