@@ -103,7 +103,7 @@ router.post("/api/auth/google", async (request: Request, env: Env) => {
     }
 
     // Generate JWT
-    const jwt = generateJWT(userId, env.JWT_SECRET)
+    const jwt = generateJWT(userId)
 
     return new Response(
       JSON.stringify({ success: true, jwt }),
