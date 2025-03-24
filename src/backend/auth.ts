@@ -1,5 +1,22 @@
 import { OAuth2Client } from "google-auth-library"
 
+interface Env {
+  GOOGLE_CLIENT_ID: string
+}
+
+interface UserInfo {
+  email: string
+  name: string
+  picture: string
+}
+
+interface User {
+  id: string
+  email: string
+  name: string
+  picture: string
+}
+
 const client = new OAuth2Client("GOOGLE_CLIENT_ID")
 
 export async function getUserFromToken(request) {
@@ -10,7 +27,7 @@ export async function getUserFromToken(request) {
   return { id: 'user_1', token }
 }
 
-export async function verifyGoogleToken(idToken: string, env: any) {
+export async function verifyGoogleToken(idToken: string, env: Env): Promise<UserInfo> {
   const client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
   console.log("✅ Using Google Client ID:", env.GOOGLE_CLIENT_ID)
 
