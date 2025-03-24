@@ -35,6 +35,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
     try {
       body = await request.json()
     } catch (err) {
+      console.error('❌ Failed to parse request body:', err)
       return Response.json({
         status: 'error',
         message: 'Invalid request body'
@@ -46,6 +47,7 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
 
     // Validate credential presence
     if (!body.credential) {
+      console.error('❌ Missing credential in request body')
       return Response.json({
         status: 'error',
         message: 'Missing credential'
@@ -55,9 +57,15 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
       })
     }
 
+    // Log incoming token length for debugging
+    console.log('📥 Received Google token:', {
+      length: body.credential.length,
+      preview: `${body.credential.slice(0, 10)}...${body.credential.slice(-10)}`
+    })
+
     // Validate environment variables
     if (!env.JWT_SECRET || !env.GOOGLE_CLIENT_ID) {
-      console.error('Missing required environment variables:', {
+      console.error('❌ Missing required environment variables:', {
         hasJwtSecret: !!env.JWT_SECRET,
         hasGoogleClientId: !!env.GOOGLE_CLIENT_ID
       })
@@ -85,6 +93,13 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
 
     const jwt = await sign(jwtPayload, env.JWT_SECRET)
 
+    console.log('✅ Successfully authenticated user:', {
+      sub: '***', // Redacted for privacy
+      email: '***', // Redacted for privacy
+      hasName: !!googleUser.name,
+      hasPicture: !!googleUser.picture
+    })
+
     // Return success response
     return Response.json({
       status: 'ok',
@@ -101,15 +116,16 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
 
   } catch (err: any) {
     // Log the error for debugging
-    console.error('Token verification failed:', {
-      message: err.message,
-      type: err.constructor.name
+    console.error('❌ Authentication failed:', {
+      error: err.message,
+      type: err.constructor.name,
+      stack: err.stack
     })
 
     // Return standardized error response
     return Response.json({
       status: 'error',
-      message: 'Invalid token'
+      message: err.message || 'Invalid token'
     }, {
       status: 401,
       headers
