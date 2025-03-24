@@ -1,16 +1,27 @@
 import { verify } from '@tsndr/cloudflare-worker-jwt'
-import { env } from 'worker:env'
 import { DB } from '../db'
 import { createJWT } from '../auth'
 
 interface Env {
+  GOOGLE_CLIENT_ID: string
   JWT_SECRET: string
   DB: D1Database
 }
 
+interface GoogleAuthRequest {
+  credential: string
+}
+
+interface DecodedToken {
+  email: string
+  name?: string
+  [key: string]: unknown
+}
+
 export async function handleGoogleAuth(request: Request, env: Env): Promise<Response> {
   try {
-    const { credential } = await request.json()
+    const body = await request.json() as GoogleAuthRequest
+    const { credential } = body
 
     if (!credential) {
       return new Response('Missing credential', { status: 400 })
@@ -22,8 +33,9 @@ export async function handleGoogleAuth(request: Request, env: Env): Promise<Resp
       return new Response('Invalid token', { status: 401 })
     }
 
-    const email = decoded.payload.email
-    const name = decoded.payload.name || ''
+    const payload = decoded.payload as DecodedToken
+    const email = payload.email
+    const name = payload.name || ''
 
     if (!email) {
       return new Response('Missing email in credential', { status: 400 })
