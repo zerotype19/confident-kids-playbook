@@ -1,11 +1,20 @@
 import { Router } from "itty-router"
-import { verifyGoogleToken } from "../auth"
+import { verifyGoogleToken, generateJWT } from "../auth"
 import { createOrUpdateUser } from "../db/users"
+
+interface GoogleAuthRequest {
+  token: string
+}
+
+interface Env {
+  GOOGLE_CLIENT_ID: string
+}
 
 const router = Router()
 
-router.post("/api/auth/google", async (request: Request, env: any) => {
-  const { token } = await request.json()
+router.post("/api/auth/google", async (request: Request, env: Env) => {
+  const body = await request.json() as GoogleAuthRequest
+  const { token } = body
 
   try {
     const userInfo = await verifyGoogleToken(token, env)
