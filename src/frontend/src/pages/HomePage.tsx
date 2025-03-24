@@ -42,8 +42,19 @@ declare global {
 }
 
 export default function HomePage(): JSX.Element {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-  console.log("✅ Using Google Client ID:", clientId)
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+
+  // Safety check for environment variable
+  if (!googleClientId) {
+    console.error("❌ VITE_GOOGLE_CLIENT_ID is missing in environment variables")
+    return (
+      <div className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6">
+        <div className="text-red-600">Error: Google Sign-In is not configured</div>
+      </div>
+    )
+  }
+
+  console.log("✅ Using Google Client ID:", googleClientId)
 
   const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
     console.log("✅ Google login response", response)
@@ -85,7 +96,7 @@ export default function HomePage(): JSX.Element {
       ) {
         console.log("✅ Google Identity Services loaded")
         window.google.accounts.id.initialize({
-          client_id: clientId,
+          client_id: googleClientId,
           callback: handleGoogleLogin
         })
         window.google.accounts.id.renderButton(
@@ -108,7 +119,7 @@ export default function HomePage(): JSX.Element {
     } else {
       initializeGoogle()
     }
-  }, [clientId])
+  }, [googleClientId])
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6">
