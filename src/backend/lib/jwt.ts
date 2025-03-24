@@ -1,4 +1,4 @@
-import * as jose from 'jose'
+import { jwtVerify, createRemoteJWKSet } from 'jose'
 
 interface JWTHeader {
   kid: string
@@ -93,19 +93,14 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
       preview: `${token.slice(0, 10)}...${token.slice(-10)}`
     })
 
-    // Fetch Google's public keys
-    const jwks = await fetchGoogleCerts()
-
-    // Create a JWKS client
-    const JWKS = jose.createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
+    // Create JWKS client for Google's public keys
+    const jwks = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
 
     // Verify the token
-    const { payload } = await jose.jwtVerify(token, JWKS, {
-      issuer: ['https://accounts.google.com', 'accounts.google.com'],
+    const { payload } = await jwtVerify(token, jwks, {
+      issuer: 'https://accounts.google.com',
       audience: clientId,
-      algorithms: ['RS256'],
-      clockTolerance: 300, // 5 minutes
-      requiredClaims: ['iss', 'sub', 'aud', 'exp', 'iat']
+      algorithms: ['RS256']
     })
 
     // Log decoded payload (with sensitive data redacted)
@@ -142,6 +137,6 @@ export async function verifyGoogleToken(token: string, clientId: string): Promis
       type: err.constructor.name,
       stack: err.stack
     })
-    throw new Error('Invalid token')
+    throw new Error(`Token verification failed: ${err.message}`)
   }
 } 
