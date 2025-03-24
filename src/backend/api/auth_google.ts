@@ -9,79 +9,116 @@ interface GoogleAuthRequest {
 }
 
 export const authGoogle = async (request: Request, env: Env) => {
-  console.log('🚀 authGoogle handler invoked:', {
+  // Log incoming request details
+  const url = new URL(request.url)
+  console.log('🔍 Incoming request:', {
     method: request.method,
-    url: request.url,
-    pathname: new URL(request.url).pathname,
+    pathname: url.pathname,
     headers: Object.fromEntries(request.headers.entries())
   })
 
   try {
     // Ensure this is a POST request
     if (request.method !== 'POST') {
-      console.log('❌ Wrong method:', {
+      console.warn('❌ Method not allowed:', {
         received: request.method,
         expected: 'POST',
-        url: request.url
+        path: url.pathname
       })
       return new Response(JSON.stringify({ 
-        error: 'Method Not Allowed',
-        method: request.method,
-        allowed: 'POST',
-        path: new URL(request.url).pathname
+        status: 'error',
+        message: 'Method not allowed',
+        details: {
+          method: request.method,
+          allowed: ['POST'],
+          path: url.pathname
+        }
       }), {
         status: 405,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Allow': 'POST'
+        }
       })
     }
 
-    const body = await request.json() as GoogleAuthRequest
-    console.log('📥 Received POST body:', { 
-      ...body, 
-      credential: body.credential ? '***' : undefined,
-      bodyKeys: Object.keys(body)
-    })
-
-    const { credential } = body
-    if (!credential) {
-      console.log('❌ No credential found in body:', {
-        receivedKeys: Object.keys(body),
-        bodyType: typeof body
+    // Parse and validate request body
+    let body: GoogleAuthRequest
+    try {
+      body = await request.json()
+      console.log('📦 Received body:', {
+        hasCredential: !!body.credential,
+        credentialLength: body.credential?.length,
+        keys: Object.keys(body)
       })
-      return new Response(JSON.stringify({ 
-        error: 'Missing credential',
-        received: Object.keys(body),
-        bodyType: typeof body
+    } catch (err) {
+      console.error('❌ Failed to parse request body:', err)
+      return new Response(JSON.stringify({
+        status: 'error',
+        message: 'Invalid request body',
+        details: err instanceof Error ? err.message : 'Could not parse JSON'
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       })
     }
 
-    console.log('🔐 Processing credential:', {
-      length: credential.length,
-      preview: credential.slice(0, 30) + '...'
-    })
+    // Validate credential presence
+    if (!body.credential) {
+      console.warn('❌ Missing credential in request:', {
+        receivedKeys: Object.keys(body)
+      })
+      return new Response(JSON.stringify({
+        status: 'error',
+        message: 'Missing credential',
+        details: {
+          required: ['credential'],
+          received: Object.keys(body)
+        }
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Process the credential
+    console.log('🔐 Processing credential...')
+    const result = await verifyGoogleTokenAndCreateJwt(body.credential, env.JWT_SECRET)
     
-    const result = await verifyGoogleTokenAndCreateJwt(credential, env.JWT_SECRET)
-    
-    console.log('✅ Successfully processed Google auth')
-    return new Response(JSON.stringify(result), {
+    if (!result.success) {
+      console.error('❌ Failed to verify token:', result.error)
+      return new Response(JSON.stringify({
+        status: 'error',
+        message: result.error || 'Failed to verify token'
+      }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
+    console.log('✅ Successfully authenticated')
+    return new Response(JSON.stringify({
+      status: 'success',
+      jwt: result.jwt
+    }), {
       headers: { 'Content-Type': 'application/json' }
     })
+
   } catch (err: any) {
-    console.error('❌ Error in authGoogle:', {
-      error: err.message,
+    // Log the full error details
+    console.error('❌ Unhandled error:', {
+      message: err.message,
       stack: err.stack,
       type: err.constructor.name,
       url: request.url,
       method: request.method
     })
     
-    return new Response(JSON.stringify({ 
-      error: 'Internal Server Error',
-      details: err.message,
-      type: err.constructor.name
+    // Return a sanitized error response
+    return new Response(JSON.stringify({
+      status: 'error',
+      message: 'Internal server error',
+      details: err.message
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

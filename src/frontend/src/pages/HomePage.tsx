@@ -57,22 +57,29 @@ export default function HomePage(): JSX.Element {
   console.log("✅ Using Google Client ID:", googleClientId)
 
   const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
-    console.log("✅ Google login response", response)
-    const token = response.credential
+    console.log("✅ Google login response received", { 
+      hasCredential: !!response.credential,
+      credentialLength: response.credential?.length
+    })
 
     try {
-      const res = await fetch("/api/auth/google", {
+      const apiUrl = import.meta.env.VITE_API_URL || ''
+      console.log("🔗 Using API URL:", apiUrl)
+      
+      const res = await fetch(`${apiUrl}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token })
+        body: JSON.stringify({ credential: response.credential })
       })
 
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(`HTTP error! status: ${res.status}, details: ${JSON.stringify(errorData)}`)
       }
 
       const data = await res.json() as AuthResponse
       if (data.success && data.jwt) {
+        console.log("✅ Login successful, storing JWT")
         localStorage.setItem("jwt", data.jwt)
         window.location.href = "/onboarding"
       } else {
@@ -80,7 +87,11 @@ export default function HomePage(): JSX.Element {
       }
     } catch (error) {
       const loginError = error as GoogleLoginError
-      console.error("Login error:", loginError.message)
+      console.error("❌ Login error:", {
+        message: loginError.message,
+        code: loginError.code,
+        error: loginError
+      })
       alert(loginError.message || "Login failed")
     }
   }
