@@ -29,3 +29,18 @@ export default {
     return router.handle(request, env, ctx)
   }
 }
+
+export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
+  // Handle the hello endpoint
+  if (request.method === 'GET' && new URL(request.url).pathname === '/api/hello') {
+    return new Response(JSON.stringify({ message: 'hello world!!!' }), {
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+
+  // Return 404 for all other routes
+  return new Response(JSON.stringify({ error: 'Not Found' }), {
+    status: 404,
+    headers: { 'Content-Type': 'application/json' }
+  })
+}

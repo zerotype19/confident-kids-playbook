@@ -18,7 +18,7 @@ interface DecodedToken {
   [key: string]: unknown
 }
 
-export async function handleGoogleAuth(request: Request, env: Env): Promise<Response> {
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   try {
     const body = await request.json() as GoogleAuthRequest
     const { credential } = body
