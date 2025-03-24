@@ -92,19 +92,16 @@ export interface MediaRecord {
 }
 
 export interface CreateUploadUrlRequest {
-  fileType: string;
-  purpose: 'avatar' | 'journal';
+  fileName: string;
+  contentType: string;
 }
 
 export interface MediaItem {
   id: string;
-  child_id: string;
-  type: string;
   url: string;
-  key: string;
-  filename: string;
-  size: number;
-  created_at: string;
+  type: 'image' | 'video';
+  createdAt: string;
+  childId: string;
 }
 
 export interface RecordMediaRequest {
@@ -116,10 +113,73 @@ export interface RecordMediaRequest {
 }
 
 export interface FeatureFlags {
-  is_premium: boolean;
-  practice_enabled: boolean;
-  media_uploads: boolean;
-  calendar_enabled: boolean;
-  journal_enabled: boolean;
-  family_sharing: boolean;
+  'premium.dashboard_insights': boolean;
+  'premium.practice_modules': boolean;
+  'premium.calendar_scheduling': boolean;
+  'premium.family_sharing': boolean;
+}
+
+// Cloudflare Workers types
+export interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+  exec(query: string): Promise<D1Result>;
+}
+
+export interface D1PreparedStatement {
+  bind(...values: any[]): D1PreparedStatement;
+  first<T = unknown>(colName?: string): Promise<T>;
+  all<T = unknown>(): Promise<D1Result<T>>;
+  run(): Promise<D1Result>;
+}
+
+export interface D1Result<T = unknown> {
+  results?: T[];
+  success: boolean;
+  error?: string;
+}
+
+export interface R2Bucket {
+  put(key: string, value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null | Blob, options?: R2PutOptions): Promise<R2Object>;
+  get(key: string, options?: R2GetOptions): Promise<R2Object | null>;
+  delete(key: string): Promise<void>;
+}
+
+export interface R2Object {
+  key: string;
+  size: number;
+  etag: string;
+  uploaded: Date;
+  httpMetadata?: R2HTTPMetadata;
+}
+
+export interface R2PutOptions {
+  httpMetadata?: R2HTTPMetadata;
+  customMetadata?: Record<string, string>;
+}
+
+export interface R2GetOptions {
+  onlyIf?: R2Conditional;
+  range?: R2Range;
+}
+
+export interface R2HTTPMetadata {
+  contentType?: string;
+  contentLanguage?: string;
+  contentDisposition?: string;
+  contentEncoding?: string;
+  cacheControl?: string;
+  cacheExpiry?: Date;
+}
+
+export interface R2Conditional {
+  etagMatches?: string;
+  etagDoesNotMatch?: string;
+  uploadedBefore?: Date;
+  uploadedAfter?: Date;
+}
+
+export interface R2Range {
+  offset?: number;
+  length?: number;
+  suffix?: number;
 } 

@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { useChildContext } from '../contexts/ChildContext';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
-import { Family, FamilyMember } from '../types';
+import type { Family, FamilyMember } from '../types/index';
+
+interface ApiResponse<T> {
+  data: T;
+  error?: string;
+}
+
+interface InviteResponse {
+  success: boolean;
+}
+
+interface RemoveMemberResponse {
+  success: boolean;
+}
+
+interface InviteRequest {
+  email: string;
+  role: 'owner' | 'member';
+}
+
+interface RemoveMemberRequest {
+  member_id: string;
+}
 
 export const FamilySettingsPage: React.FC = () => {
-  const { selectedChild } = useChildContext();
   const { isFeatureEnabled } = useFeatureFlags();
   const [family, setFamily] = useState<Family | null>(null);
   const [inviteEmail, setInviteEmail] = useState<string>('');
@@ -20,8 +40,9 @@ export const FamilySettingsPage: React.FC = () => {
         setError(null);
         const response = await fetch('/api/family/view');
         if (!response.ok) throw new Error('Failed to fetch family data');
-        const data = await response.json();
-        setFamily(data);
+        const data: ApiResponse<Family> = await response.json();
+        if (data.error) throw new Error(data.error);
+        setFamily(data.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch family data');
       } finally {
@@ -34,23 +55,27 @@ export const FamilySettingsPage: React.FC = () => {
     }
   }, [isFeatureEnabled]);
 
-  const handleInvite = async (e: React.FormEvent) => {
+  const handleInvite = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
 
     try {
       setError(null);
       setSuccessMessage(null);
+      const request: InviteRequest = {
+        email: inviteEmail.trim(),
+        role: inviteRole
+      };
+
       const response = await fetch('/api/family/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: inviteEmail.trim(),
-          role: inviteRole
-        })
+        body: JSON.stringify(request)
       });
 
       if (!response.ok) throw new Error('Failed to send invitation');
+      const data: ApiResponse<InviteResponse> = await response.json();
+      if (data.error) throw new Error(data.error);
       setSuccessMessage('Invitation sent successfully');
       setInviteEmail('');
     } catch (err) {
@@ -64,17 +89,21 @@ export const FamilySettingsPage: React.FC = () => {
     try {
       setError(null);
       setSuccessMessage(null);
+      const request: RemoveMemberRequest = { member_id: memberId };
+
       const response = await fetch('/api/family/remove-member', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ member_id: memberId })
+        body: JSON.stringify(request)
       });
 
       if (!response.ok) throw new Error('Failed to remove family member');
+      const data: ApiResponse<RemoveMemberResponse> = await response.json();
+      if (data.error) throw new Error(data.error);
       setSuccessMessage('Family member removed successfully');
-      setFamily((prev: Family | null) => prev ? {
+      setFamily((prev) => prev ? {
         ...prev,
-        members: prev.members.filter((m: FamilyMember) => m.id !== memberId)
+        members: prev.members.filter((m) => m.id !== memberId)
       } : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove family member');
@@ -138,7 +167,7 @@ export const FamilySettingsPage: React.FC = () => {
           <div className="mb-6 sm:mb-8">
             <h2 className="text-lg sm:text-xl font-semibold mb-4">Family Members</h2>
             <div className="space-y-3 sm:space-y-4">
-              {family.members.map((member: FamilyMember) => (
+              {family.members.map((member) => (
                 <div
                   key={member.id}
                   className="flex items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg"
