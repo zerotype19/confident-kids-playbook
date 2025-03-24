@@ -45,23 +45,6 @@ export default function HomePage(): JSX.Element {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   console.log("✅ Using Google Client ID:", clientId)
 
-  useEffect(() => {
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleLogin
-      })
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-signin-button"),
-        {
-          theme: "outline",
-          size: "large",
-          shape: "pill"
-        }
-      )
-    }
-  }, [clientId])
-
   const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
     console.log("✅ Google login response", response)
     const token = response.credential
@@ -90,6 +73,32 @@ export default function HomePage(): JSX.Element {
       alert(loginError.message || "Login failed")
     }
   }
+
+  useEffect(() => {
+    const tryInitialize = () => {
+      if (window.google?.accounts?.id) {
+        console.log("✅ Google Identity Services loaded")
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleLogin
+        })
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-signin-button"),
+          {
+            theme: "outline",
+            size: "large",
+            shape: "pill"
+          }
+        )
+        console.log("✅ Google sign-in button rendered")
+      } else {
+        console.log("⏳ Waiting for Google Identity Services...")
+        setTimeout(tryInitialize, 500)
+      }
+    }
+
+    tryInitialize()
+  }, [clientId])
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6">
