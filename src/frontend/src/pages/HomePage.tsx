@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -13,63 +12,17 @@ const HomePage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleGoogleLogin = async () => {
-    try {
-      if (!window.gapi) {
-        throw new Error('Google API not loaded');
-      }
-      const googleAuth = await window.gapi.auth2.getAuthInstance();
-      const googleUser = await googleAuth.signIn();
-      const token = googleUser.getAuthResponse().id_token;
-
-      // Exchange token for JWT
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'google', token }),
-      });
-
-      if (!response.ok) throw new Error('Login failed');
-      const { token: jwt } = await response.json();
-      await login(jwt);
-    } catch (error) {
-      console.error('Google login error:', error);
-      setError(error instanceof Error ? error.message : 'Google login failed');
-    }
+  const handleGoogleLogin = () => {
+    console.log('Google login clicked');
   };
 
-  const handleAppleLogin = async () => {
-    try {
-      if (!window.AppleID) {
-        throw new Error('Apple Sign In not loaded');
-      }
-      const appleAuth = await window.AppleID.auth.signIn();
-      const { identityToken } = appleAuth;
-
-      // Exchange token for JWT
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'apple', token: identityToken }),
-      });
-
-      if (!response.ok) throw new Error('Login failed');
-      const { token: jwt } = await response.json();
-      await login(jwt);
-    } catch (error) {
-      console.error('Apple login error:', error);
-      setError(error instanceof Error ? error.message : 'Apple login failed');
-    }
+  const handleAppleLogin = () => {
+    console.log('Apple login clicked');
   };
 
   return (
     <div style={{ padding: '2rem', color: 'red' }}>
       <h1>Landing Page Test Render</h1>
-      {error && (
-        <div style={{ color: 'red', marginBottom: '1rem' }}>
-          Error: {error}
-        </div>
-      )}
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white p-6">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-3xl font-bold mb-4">Build Your Child's Confidence — One Day at a Time</h1>
