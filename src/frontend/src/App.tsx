@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ChildProvider } from './contexts/ChildContext';
-import HomePage from './pages/HomePage';
+// import HomePage from './pages/HomePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PracticePage } from './pages/PracticePage';
 import { CalendarPage } from './pages/CalendarPage';
@@ -34,7 +34,11 @@ const App: React.FC = () => {
       <ChildProvider>
         <ErrorBoundary>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={
+              <div style={{ padding: "2rem", fontSize: "24px", color: "green" }}>
+                ✅ Routing works (no HomePage)
+              </div>
+            } />
             <Route path="/login" element={<LoginPage />} />
             <Route
               path="/dashboard"
