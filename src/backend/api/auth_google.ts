@@ -1,15 +1,8 @@
 import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
 import { corsHeaders, handleOptions } from '../lib/cors'
+import { Env, GoogleAuthRequest } from '../types'
 
-interface Env {
-  JWT_SECRET: string
-}
-
-interface GoogleAuthRequest {
-  credential: string
-}
-
-export const authGoogle = async (request: Request, env: Env) => {
+export const authGoogle = async (request: Request, env: Env): Promise<Response> => {
   // Handle CORS preflight requests
   if (request.method === 'OPTIONS') {
     return handleOptions(request)
@@ -95,6 +88,17 @@ export const authGoogle = async (request: Request, env: Env) => {
 
     // Process the credential
     console.log('🔐 Processing credential...')
+    if (!env.JWT_SECRET) {
+      console.error('❌ JWT_SECRET is not configured')
+      return new Response(JSON.stringify({
+        status: 'error',
+        message: 'Server configuration error'
+      }), {
+        status: 500,
+        headers
+      })
+    }
+
     const result = await verifyGoogleTokenAndCreateJwt(body.credential, env.JWT_SECRET)
     
     if (!result.success) {

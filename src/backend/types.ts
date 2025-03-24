@@ -182,4 +182,14 @@ export interface R2Range {
   offset?: number;
   length?: number;
   suffix?: number;
+}
+
+export interface GoogleAuthRequest {
+  credential: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  jwt?: string;
+  error?: string;
 } 

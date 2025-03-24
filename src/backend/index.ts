@@ -1,16 +1,12 @@
 import { Router } from 'itty-router'
 import { authGoogle } from './api/auth_google'
 import { corsHeaders, handleOptions } from './lib/cors'
-
-interface Env {
-  JWT_SECRET: string
-  DB: D1Database
-}
+import { Env } from './types'
 
 const router = Router()
 
 // Debug logging wrapper
-const withLogging = async (request: Request) => {
+const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) => {
   const url = new URL(request.url)
   console.log('🧭 Request received:', {
     method: request.method,
@@ -18,7 +14,8 @@ const withLogging = async (request: Request) => {
     headers: Object.fromEntries(request.headers.entries())
   })
   
-  const response = await router.handle(request)
+  // Pass env to router.handle
+  const response = await router.handle(request, env, ctx)
   
   console.log('📤 Response:', {
     status: response.status,
@@ -32,7 +29,7 @@ const withLogging = async (request: Request) => {
 router.options('*', handleOptions)
 
 // Register Google auth route with POST method
-router.post('/api/auth/google', authGoogle)
+router.post('/api/auth/google', (request: Request, env: Env) => authGoogle(request, env))
 
 // Handle other routes
 router.get('/api/hello', async () => {
@@ -59,5 +56,7 @@ router.all('*', (req) => {
 })
 
 export default {
-  fetch: withLogging
+  fetch: async (request: Request, env: Env, ctx: ExecutionContext) => {
+    return withLogging(request, env, ctx)
+  }
 }
