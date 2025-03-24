@@ -65,11 +65,24 @@ export const authGoogle = async (request: Request, env: Env): Promise<Response> 
       googleClientIdPreview: env.GOOGLE_CLIENT_ID ? `${env.GOOGLE_CLIENT_ID.slice(0, 10)}...${env.GOOGLE_CLIENT_ID.slice(-10)}` : undefined
     })
 
-    // Validate environment variables
-    if (!env.JWT_SECRET || !env.GOOGLE_CLIENT_ID) {
+    // Check for required environment variables
+    const jwtSecret = env.JWT_SECRET
+    const googleClientId = env.GOOGLE_CLIENT_ID
+
+    // Add diagnostic logging for environment variables
+    console.log('🔍 Environment Variables:', {
+      hasJwtSecret: !!jwtSecret,
+      jwtSecretLength: jwtSecret?.length,
+      hasGoogleClientId: !!googleClientId,
+      googleClientIdLength: googleClientId?.length,
+      googleClientIdPreview: googleClientId ? `${googleClientId.slice(0, 4)}...${googleClientId.slice(-4)}` : undefined,
+      isEnvPlaceholder: googleClientId === 'ENV_GOOGLE_CLIENT_ID'
+    })
+
+    if (!jwtSecret || !googleClientId) {
       console.error('❌ Missing required environment variables:', {
-        hasJwtSecret: !!env.JWT_SECRET,
-        hasGoogleClientId: !!env.GOOGLE_CLIENT_ID
+        hasJwtSecret: !!jwtSecret,
+        hasGoogleClientId: !!googleClientId
       })
       return Response.json({
         status: 'error',
