@@ -1,6 +1,7 @@
 import { AuthProvider } from "./contexts/AuthContext"
 import { ChildProvider } from "./contexts/ChildContext"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+import HomePage from "./pages/HomePage"
 
 export default function App(): JSX.Element {
   console.log("✅ App.tsx stripped render")
@@ -9,14 +10,7 @@ export default function App(): JSX.Element {
       <ChildProvider>
         <BrowserRouter>
           <Routes>
-            <Route
-              path="/"
-              element={
-                <div style={{ padding: "2rem", fontSize: "24px", color: "teal" }}>
-                  ✅ Routing test render
-                </div>
-              }
-            />
+            <Route path="/" element={<HomePage />} />
           </Routes>
         </BrowserRouter>
       </ChildProvider>

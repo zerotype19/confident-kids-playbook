@@ -1,12 +1,10 @@
 import React from "react"
 
-const HomePage: React.FC = () => {
-  console.log("✅ HomePage mounted (bare)")
+export default function HomePage(): JSX.Element {
+  console.log("✅ HomePage mounted (basic)")
   return (
     <div style={{ padding: "2rem", fontSize: "24px", color: "green" }}>
-      ✅ Minimal HomePage render successful
+      ✅ HomePage render working
     </div>
   )
-}
-
-export default HomePage 
+} 
