@@ -1,64 +1,34 @@
-import { verify } from '@tsndr/cloudflare-worker-jwt'
-import { DB } from '../db'
-import { createJWT } from '../auth'
+import { Router } from 'itty-router'
+import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
 
 interface Env {
-  GOOGLE_CLIENT_ID: string
   JWT_SECRET: string
-  DB: D1Database
 }
 
-interface GoogleAuthRequest {
-  credential: string
-}
+const router = Router()
 
-interface DecodedToken {
-  email: string
-  name?: string
-  [key: string]: unknown
-}
-
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+router.post('/api/auth/google', async (request: Request, env: Env) => {
   try {
-    const body = await request.json() as GoogleAuthRequest
+    const body = await request.json()
     const { credential } = body
 
     if (!credential) {
-      return new Response('Missing credential', { status: 400 })
+      return new Response(JSON.stringify({ error: 'Missing credential' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
     }
 
-    // Verify the Google token
-    const decoded = await verify(credential, { complete: true })
-
-    if (!decoded || typeof decoded.payload !== 'object') {
-      return new Response('Invalid token', { status: 401 })
-    }
-
-    const payload = decoded.payload as DecodedToken
-    const email = payload.email
-    const name = payload.name || ''
-
-    if (!email) {
-      return new Response('Missing email in credential', { status: 400 })
-    }
-
-    // Get or create user in DB
-    const user = await DB.getOrCreateUserByEmail(email, name, env)
-
-    // Sign our app's JWT
-    const token = await createJWT(user.id, env)
-
-    // Return token in response
-    return Response.json({ 
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
+    const result = await verifyGoogleTokenAndCreateJwt(credential, env.JWT_SECRET)
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' }
     })
   } catch (err) {
-    console.error('Auth error:', err)
-    return new Response('Failed to process auth', { status: 500 })
+    return new Response(JSON.stringify({ error: 'Server error', details: `${err}` }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
   }
-} 
+})
+
+export default router 

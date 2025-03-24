@@ -1,5 +1,5 @@
 import { Router } from 'itty-router'
-import { handleGoogleAuth } from './api/auth_google'
+import authGoogle from './api/auth_google'
 
 interface Env {
   JWT_SECRET: string
@@ -9,8 +9,9 @@ interface Env {
 const router = Router()
 
 // Register Google auth route
-router.post('/api/auth/google', handleGoogleAuth)
+router.all('/api/auth/google', authGoogle.handle)
 
+// Handle other routes
 router.get('/api/hello', async () => {
   return new Response(JSON.stringify({ message: 'hello world!!!' }), {
     headers: { 'Content-Type': 'application/json' }
