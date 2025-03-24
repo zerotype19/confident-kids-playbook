@@ -9,6 +9,14 @@ interface GoogleAuthRequest {
 }
 
 export const authGoogle = async (request: Request, env: Env) => {
+  // Ensure this is a POST request
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+
   try {
     const body = await request.json() as GoogleAuthRequest
     const { credential } = body

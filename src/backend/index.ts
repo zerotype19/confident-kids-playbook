@@ -8,8 +8,8 @@ interface Env {
 
 const router = Router()
 
-// Register Google auth route
-router.all('/api/auth/google', authGoogle.handle)
+// Register Google auth route with POST method
+router.post('/api/auth/google', authGoogle)
 
 // Handle other routes
 router.get('/api/hello', async () => {
@@ -27,7 +27,7 @@ router.all('*', () =>
 
 export default {
   fetch: async (request: Request, env: Env, ctx: ExecutionContext) => {
-    return router.handle(request, env, ctx)
+    return router.handle(request)
   }
 }
 
