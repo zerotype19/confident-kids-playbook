@@ -16,34 +16,18 @@ const router = Router()
 
 // Google Auth Route
 router.post('/api/auth/google', async (request: Request, env: Env) => {
-  try {
-    const { token } = await request.json() as GoogleAuthRequest
-    console.log('✅ Received Google token:', token)
+  const body = await request.json()
+  console.log("✅ Received Google login payload:", body)
 
-    // For testing, return a dummy success response
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        jwt: 'dummy-jwt-for-testing',
-        message: 'Google auth endpoint working' 
-      }),
-      { 
-        headers: { 'Content-Type': 'application/json' }
-      }
-    )
-  } catch (err) {
-    console.error('❌ Google auth error:', err)
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Authentication failed' 
-      }),
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    )
-  }
+  return new Response(
+    JSON.stringify({ 
+      success: true, 
+      message: 'Token received' 
+    }), 
+    { 
+      headers: { 'Content-Type': 'application/json' }
+    }
+  )
 })
 
 router.get('/api/hello', async () => {
