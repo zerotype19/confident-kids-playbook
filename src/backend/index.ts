@@ -16,8 +16,11 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
   })
   
   try {
-    // Pass env to router.handle
-    const response = await router.handle(request, env, ctx)
+    // Create a context object with the environment
+    const context = { request, env }
+    
+    // Pass context to router.handle
+    const response = await router.handle(request, context)
     
     // Ensure CORS headers are present
     const corsResponse = new Response(response.body, {
@@ -37,7 +40,17 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
     return corsResponse
   } catch (error) {
     console.error('❌ Router error:', error)
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      })
+    }
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
       status: 500,
       headers: corsHeaders()
     })
