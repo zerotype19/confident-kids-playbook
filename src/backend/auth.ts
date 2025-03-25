@@ -21,9 +21,11 @@ interface User {
 
 interface JwtPayload {
   sub: string
+  email: string
+  name: string
+  picture: string
   iat: number
   exp: number
-  name?: string
   [key: string]: unknown
 }
 
@@ -71,8 +73,15 @@ export async function createJWT(userId: string, env: Env): Promise<string> {
 export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | null> {
   console.log('🔑 Verifying JWT token:', {
     tokenLength: token.length,
-    tokenPrefix: token.substring(0, 20) + '...'
+    tokenPrefix: token.substring(0, 20) + '...',
+    hasJwtSecret: !!env.JWT_SECRET,
+    jwtSecretLength: env.JWT_SECRET?.length
   })
+
+  if (!env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET is not set in environment')
+    return null
+  }
 
   try {
     // Try verifying with the JWT secret
@@ -80,7 +89,8 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | n
     console.log('✅ JWT verification successful:', {
       hasPayload: !!decoded,
       payloadType: typeof decoded,
-      hasSub: decoded.payload && typeof decoded.payload === 'object' && 'sub' in decoded.payload
+      hasSub: decoded.payload && typeof decoded.payload === 'object' && 'sub' in decoded.payload,
+      header: decoded.header
     })
 
     if (!decoded || !decoded.payload || typeof decoded.payload !== 'object') {
@@ -91,9 +101,10 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | n
     const payload = decoded.payload as JwtPayload
     console.log('✅ JWT payload:', {
       sub: payload.sub,
+      email: payload.email,
+      name: payload.name,
       iat: payload.iat,
-      exp: payload.exp,
-      name: payload.name
+      exp: payload.exp
     })
 
     // Check if the token is expired
