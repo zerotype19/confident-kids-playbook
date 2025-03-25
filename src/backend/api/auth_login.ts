@@ -4,6 +4,12 @@ import jwt from 'jsonwebtoken';
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
+  console.log('🔍 Auth login request:', {
+    hasEnv: !!env,
+    hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
+    hasJwtSecret: !!env.JWT_SECRET
+  });
+
   const { provider, token } = await request.json() as AuthRequest;
 
   try {
@@ -11,6 +17,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     let email: string;
 
     if (provider === 'google') {
+      console.log('🔍 Verifying Google token...');
       const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
       const ticket = await client.verifyIdToken({
         idToken: token,
@@ -20,6 +27,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       if (!payload) throw new Error('Invalid token');
       user_id = payload.sub;
       email = payload.email!;
+      console.log('✅ Google token verified:', { user_id, email });
     } else if (provider === 'apple') {
       // Apple Sign In verification
       const appleClient = new OAuth2Client(env.APPLE_CLIENT_ID);
@@ -48,21 +56,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `).bind(user_id, email).run();
     }
 
-    // Generate JWT
-    const jwt_token = jwt.sign(
-      { user_id, email },
-      env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Create JWT
+    const jwtToken = jwt.sign({ user_id }, env.JWT_SECRET, { expiresIn: '7d' });
 
-    return new Response(JSON.stringify({ token: jwt_token }), {
-      headers: { 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ token: jwtToken }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Auth login error:', error);
     return new Response(JSON.stringify({ error: 'Authentication failed' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   }
 }; 

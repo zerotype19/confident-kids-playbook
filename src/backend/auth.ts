@@ -29,8 +29,6 @@ interface JwtPayload {
   [key: string]: unknown
 }
 
-const client = new OAuth2Client("GOOGLE_CLIENT_ID")
-
 export async function getUserFromToken(request: Request) {
   // Placeholder: implement real token logic later
   const authHeader = request.headers.get('Authorization')
