@@ -76,19 +76,19 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | n
 
   try {
     // Try verifying with the JWT secret
-    const decoded = await verify(token, { secret: env.JWT_SECRET })
+    const decoded = await verify(token, { complete: true })
     console.log('✅ JWT verification successful:', {
       hasPayload: !!decoded,
       payloadType: typeof decoded,
       hasSub: 'sub' in decoded
     })
 
-    if (!decoded || typeof decoded !== 'object') {
+    if (!decoded || typeof decoded.payload !== 'object') {
       console.error('❌ Invalid JWT payload:', decoded)
       return null
     }
 
-    const payload = decoded as JwtPayload
+    const payload = decoded.payload as JwtPayload
     console.log('✅ JWT payload:', {
       sub: payload.sub,
       iat: payload.iat,
