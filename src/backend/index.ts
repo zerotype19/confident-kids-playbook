@@ -15,15 +15,33 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
     headers: Object.fromEntries(request.headers.entries())
   })
   
-  // Pass env to router.handle
-  const response = await router.handle(request, env, ctx)
-  
-  console.log('📤 Response:', {
-    status: response.status,
-    headers: Object.fromEntries(response.headers.entries())
-  })
-  
-  return response
+  try {
+    // Pass env to router.handle
+    const response = await router.handle(request, env, ctx)
+    
+    // Ensure CORS headers are present
+    const corsResponse = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: {
+        ...Object.fromEntries(response.headers.entries()),
+        ...Object.fromEntries(corsHeaders().entries())
+      }
+    })
+    
+    console.log('📤 Response:', {
+      status: corsResponse.status,
+      headers: Object.fromEntries(corsResponse.headers.entries())
+    })
+    
+    return corsResponse
+  } catch (error) {
+    console.error('❌ Router error:', error)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: corsHeaders()
+    })
+  }
 }
 
 // Handle CORS preflight for all routes
@@ -49,16 +67,14 @@ router.all('*', (req) => {
     url: req.url,
     pathname: new URL(req.url).pathname
   })
-  return new Response(JSON.stringify({ 
-    error: 'Not Found',
-    path: new URL(req.url).pathname,
-    method: req.method
-  }), {
+  return new Response(JSON.stringify({ error: 'Not found' }), {
     status: 404,
     headers: corsHeaders()
   })
 })
 
 export default {
-  fetch: withLogging
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    return withLogging(request, env, ctx)
+  }
 }

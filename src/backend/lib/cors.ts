@@ -11,11 +11,19 @@ export function corsHeaders(options: CorsOptions = {}) {
     'Access-Control-Allow-Methods': options.allowedMethods?.join(', ') || 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': options.allowedHeaders?.join(', ') || 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400', // 24 hours
+    'Access-Control-Allow-Credentials': 'false',
+    'Vary': 'Origin'
   })
   return headers
 }
 
 export function handleOptions(request: Request) {
+  console.log('🔄 Handling CORS preflight request:', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  })
+
   // Make sure the necessary headers are present
   // for this to be a valid pre-flight request
   const corsHeaders = new Headers({
@@ -23,6 +31,8 @@ export function handleOptions(request: Request) {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Credentials': 'false',
+    'Vary': 'Origin'
   })
 
   return new Response(null, {
