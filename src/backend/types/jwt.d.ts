@@ -3,10 +3,6 @@ declare module '@tsndr/cloudflare-worker-jwt' {
     [key: string]: unknown
   }
 
-  interface VerifyOptions {
-    complete?: boolean
-  }
-
   interface DecodedToken {
     header: {
       alg: string
@@ -18,7 +14,8 @@ declare module '@tsndr/cloudflare-worker-jwt' {
 
   export function verify(
     token: string,
-    options?: VerifyOptions
+    secret: string,
+    options?: { complete?: boolean }
   ): Promise<DecodedToken | JwtPayload>
 
   export function sign(

@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library"
-import { sign, verify, DecodedToken } from '@tsndr/cloudflare-worker-jwt'
+import { sign, verify } from '@tsndr/cloudflare-worker-jwt'
 
 interface Env {
   GOOGLE_CLIENT_ID: string
@@ -76,14 +76,14 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | n
 
   try {
     // Try verifying with the JWT secret
-    const decoded = await verify(token, { complete: true })
+    const decoded = await verify(token, env.JWT_SECRET, { complete: true })
     console.log('✅ JWT verification successful:', {
       hasPayload: !!decoded,
       payloadType: typeof decoded,
-      hasSub: 'sub' in decoded
+      hasSub: decoded.payload && typeof decoded.payload === 'object' && 'sub' in decoded.payload
     })
 
-    if (!decoded || typeof decoded.payload !== 'object') {
+    if (!decoded || !decoded.payload || typeof decoded.payload !== 'object') {
       console.error('❌ Invalid JWT payload:', decoded)
       return null
     }
