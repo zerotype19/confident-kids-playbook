@@ -76,7 +76,7 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | n
 
   try {
     // Try verifying with the JWT secret
-    const decoded = await verify(token, env.JWT_SECRET)
+    const decoded = await verify(token, { secret: env.JWT_SECRET })
     console.log('✅ JWT verification successful:', {
       hasPayload: !!decoded,
       payloadType: typeof decoded,
