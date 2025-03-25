@@ -64,7 +64,7 @@ router.options('*', handleOptions)
 router.post('/api/auth/google', (request, context) => authGoogle(request, context.env))
 
 // Onboarding routes
-router.get('/api/onboarding/status', onboardingStatus)
+router.get('/api/onboarding/status', (request, context) => onboardingStatus({ request, env: context.env }))
 
 // Handle other routes
 router.get('/api/hello', async () => {
