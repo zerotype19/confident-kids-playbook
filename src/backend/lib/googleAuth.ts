@@ -30,16 +30,16 @@ export async function verifyGoogleTokenAndCreateJwt(
 ): Promise<AuthResult> {
   try {
     // Verify the Google token
-    const decoded = await verify(credential, jwtSecret);
+    const decoded = await verify(credential, jwtSecret, { complete: true });
 
-    if (!decoded || typeof decoded !== 'object') {
+    if (!decoded || !decoded.payload || typeof decoded.payload !== 'object') {
       return {
         success: false,
         error: 'Invalid token'
       }
     }
 
-    const payload = decoded as GoogleTokenPayload;
+    const payload = decoded.payload as GoogleTokenPayload;
     const email = payload.email;
     const name = payload.name || '';
     const picture = payload.picture || '';

@@ -91,7 +91,7 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
 
   try {
     console.log('🔍 Attempting to verify JWT...');
-    const decoded = await verify(token, env.JWT_SECRET);
+    const decoded = await verify(token, env.JWT_SECRET, { complete: true });
     console.log('✅ JWT verification successful, decoded token:', {
       hasDecoded: !!decoded,
       decodedType: typeof decoded,
@@ -99,7 +99,12 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
       decodedPreview: decoded ? JSON.stringify(decoded).substring(0, 100) + '...' : undefined
     });
 
-    const payload = decoded as JwtPayload;
+    if (!decoded || !decoded.payload) {
+      console.error('❌ Invalid decoded token:', decoded);
+      throw new Error('Invalid token structure');
+    }
+
+    const payload = decoded.payload as JwtPayload;
     
     console.log('✅ JWT verification successful:', {
       hasPayload: !!payload,
