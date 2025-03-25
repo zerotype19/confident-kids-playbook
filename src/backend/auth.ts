@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library"
-import { sign, verify } from '@tsndr/cloudflare-worker-jwt'
+import { sign, verify, DecodedToken } from '@tsndr/cloudflare-worker-jwt'
 
 interface Env {
   GOOGLE_CLIENT_ID: string
@@ -28,7 +28,7 @@ interface JwtPayload {
 
 const client = new OAuth2Client("GOOGLE_CLIENT_ID")
 
-export async function getUserFromToken(request) {
+export async function getUserFromToken(request: Request) {
   // Placeholder: implement real token logic later
   const authHeader = request.headers.get('Authorization')
   if (!authHeader) return null
@@ -53,29 +53,56 @@ export async function verifyGoogleToken(idToken: string, env: Env): Promise<User
   }
 }
 
-export function generateJWT(userId: string): string {
-  // TODO: Implement JWT generation
-  return "dummy-jwt"
+export async function generateJWT(userId: string): Promise<string> {
+  return sign({ sub: userId }, 'your-secret-key')
 }
 
 export async function createJWT(userId: string, env: Env): Promise<string> {
-  const payload: JwtPayload = {
-    sub: userId,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
-  }
-
-  return await sign(payload, env.JWT_SECRET)
+  console.log('🔑 Creating JWT for user:', userId)
+  const token = await sign(
+    { sub: userId },
+    env.JWT_SECRET
+  )
+  console.log('✅ JWT created successfully')
+  return token
 }
 
 export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | null> {
+  console.log('🔑 Verifying JWT token:', {
+    tokenLength: token.length,
+    tokenPrefix: token.substring(0, 20) + '...'
+  })
+
   try {
-    const decoded = await verify(token, { complete: true })
-    if (!decoded || typeof decoded.payload !== 'object') {
+    const decoded = await verify(token, env.JWT_SECRET)
+    console.log('✅ JWT verification successful:', {
+      hasPayload: !!decoded,
+      payloadType: typeof decoded,
+      hasSub: 'sub' in decoded
+    })
+
+    if (!decoded || typeof decoded !== 'object') {
+      console.error('❌ Invalid JWT payload:', decoded)
       return null
     }
-    return decoded.payload as JwtPayload
+
+    const payload = decoded as JwtPayload
+    console.log('✅ JWT payload:', {
+      sub: payload.sub,
+      iat: payload.iat,
+      exp: payload.exp
+    })
+
+    return payload
   } catch (err) {
+    console.error('❌ JWT verification failed:', err)
+    if (err instanceof Error) {
+      console.error('Error details:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack
+      })
+    }
     return null
   }
 }
