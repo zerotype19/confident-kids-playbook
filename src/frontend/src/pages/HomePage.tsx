@@ -1,5 +1,6 @@
 import React, { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -56,6 +57,7 @@ declare global {
 export default function HomePage(): JSX.Element {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   // Safety check for environment variable
   if (!googleClientId) {
@@ -104,7 +106,7 @@ export default function HomePage(): JSX.Element {
 
       if (data.status === 'ok' && data.jwt) {
         console.log("✅ Login successful, storing JWT")
-        localStorage.setItem("jwt", data.jwt)
+        await login(data.jwt)
         console.log("✅ JWT stored, navigating to onboarding")
         navigate("/onboarding")
       } else {
