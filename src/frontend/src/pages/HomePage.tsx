@@ -1,4 +1,5 @@
 import React, { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -54,6 +55,7 @@ declare global {
 
 export default function HomePage(): JSX.Element {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  const navigate = useNavigate()
 
   // Safety check for environment variable
   if (!googleClientId) {
@@ -92,7 +94,7 @@ export default function HomePage(): JSX.Element {
       if (data.status === 'ok' && data.jwt) {
         console.log("✅ Login successful, storing JWT")
         localStorage.setItem("jwt", data.jwt)
-        window.location.href = "/onboarding"
+        navigate("/onboarding")
       } else {
         throw new Error(data.message || "Login failed")
       }
@@ -141,7 +143,7 @@ export default function HomePage(): JSX.Element {
     } else {
       initializeGoogle()
     }
-  }, [googleClientId])
+  }, [googleClientId, navigate])
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6">
