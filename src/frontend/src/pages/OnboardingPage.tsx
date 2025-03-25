@@ -12,60 +12,55 @@ export default function OnboardingPage(): JSX.Element {
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       try {
-        console.log("🚀 Starting onboarding status check");
-        const jwt = localStorage.getItem("jwt");
-        console.log("🔍 Checking onboarding status:", { 
+        console.log('🚀 Starting onboarding status check');
+        const jwt = localStorage.getItem('jwt');
+        console.log('🔍 Checking onboarding status:', {
           hasJWT: !!jwt,
           jwtLength: jwt?.length,
-          jwtPrefix: jwt?.substring(0, 10) + '...'
+          jwtPrefix: jwt?.substring(0, 20) + '...',
+          jwtHeader: jwt ? JSON.parse(atob(jwt.split('.')[0])) : null,
+          jwtPayload: jwt ? JSON.parse(atob(jwt.split('.')[1])) : null
         });
-        
+
         if (!jwt) {
-          console.error("❌ No JWT found in localStorage");
-          setError("Please log in to continue");
-          navigate("/");
+          console.error('❌ No JWT found in localStorage');
+          navigate('/login');
           return;
         }
 
-        const apiUrl = import.meta.env.VITE_API_URL || '';
-        console.log("🔗 Using API URL:", apiUrl);
-        
-        console.log("📤 Preparing fetch request with headers:", {
-          'Authorization': `Bearer ${jwt.substring(0, 10)}...`,
+        const apiUrl = import.meta.env.VITE_API_URL;
+        console.log('🔗 Using API URL:', apiUrl);
+
+        const headers = {
+          'Authorization': `Bearer ${jwt}`,
           'Content-Type': 'application/json'
+        };
+        console.log('📤 Preparing fetch request with headers:', {
+          Authorization: headers.Authorization.substring(0, 20) + '...',
+          ContentType: headers['Content-Type']
         });
 
         const response = await fetch(`${apiUrl}/api/onboarding/status`, {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${jwt}`,
-            'Content-Type': 'application/json'
-          },
-          mode: 'cors',
-          credentials: 'omit'
+          headers
         });
-        
-        console.log("📡 Onboarding status response received:", {
+
+        console.log('📡 Onboarding status response received:', {
           status: response.status,
           ok: response.ok,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries())
         });
-        
+
         if (!response.ok) {
-          console.error("❌ Response not OK, attempting to read error data");
-          const errorData = await response.json().catch((e) => {
-            console.error("❌ Failed to parse error response:", e);
-            return {};
-          });
-          console.error("❌ Onboarding status check failed:", errorData);
+          console.error('❌ Response not OK, attempting to read error data');
+          const errorData = await response.json();
+          console.error('❌ Onboarding status check failed:', errorData);
           throw new Error(errorData.error || 'Failed to check onboarding status');
         }
-        
-        console.log("📥 Parsing response JSON");
+
         const data = await response.json();
-        console.log("✅ Onboarding status data:", data);
-        
+        console.log('✅ Onboarding status check successful:', data);
         setHasCompletedOnboarding(data.hasCompletedOnboarding);
         
         if (data.hasCompletedOnboarding) {
@@ -84,7 +79,7 @@ export default function OnboardingPage(): JSX.Element {
           });
         }
         setError(error instanceof Error ? error.message : "Failed to load onboarding status");
-        navigate("/");
+        navigate('/login');
       }
     };
 
