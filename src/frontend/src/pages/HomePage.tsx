@@ -87,15 +87,28 @@ export default function HomePage(): JSX.Element {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
+        console.error("❌ API Error Response:", {
+          status: res.status,
+          statusText: res.statusText,
+          errorData
+        })
         throw new Error(`HTTP error! status: ${res.status}, details: ${JSON.stringify(errorData)}`)
       }
 
       const data = await res.json() as AuthResponse
+      console.log("✅ API Response:", {
+        status: data.status,
+        hasJWT: !!data.jwt,
+        user: data.user
+      })
+
       if (data.status === 'ok' && data.jwt) {
         console.log("✅ Login successful, storing JWT")
         localStorage.setItem("jwt", data.jwt)
+        console.log("✅ JWT stored, navigating to onboarding")
         navigate("/onboarding")
       } else {
+        console.error("❌ Login failed:", data.message)
         throw new Error(data.message || "Login failed")
       }
     } catch (error) {
