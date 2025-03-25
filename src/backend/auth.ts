@@ -62,8 +62,11 @@ export async function generateJWT(userId: string): Promise<string> {
 
 export async function createJWT(userId: string, env: Env): Promise<string> {
   console.log('🔑 Creating JWT for user:', userId)
-  const jwtPayload = {
+  const jwtPayload: JwtPayload = {
     sub: userId,
+    email: '', // These will be filled in by the caller
+    name: '',
+    picture: '',
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
   }
