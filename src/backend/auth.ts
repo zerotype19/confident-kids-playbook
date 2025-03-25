@@ -79,7 +79,8 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
     tokenPrefix: token.substring(0, 20) + '...',
     hasJwtSecret: !!env.JWT_SECRET,
     jwtSecretLength: env.JWT_SECRET?.length,
-    jwtSecretPreview: env.JWT_SECRET ? `${env.JWT_SECRET.substring(0, 4)}...${env.JWT_SECRET.substring(env.JWT_SECRET.length - 4)}` : undefined
+    jwtSecretPreview: env.JWT_SECRET ? `${env.JWT_SECRET.substring(0, 4)}...${env.JWT_SECRET.substring(env.JWT_SECRET.length - 4)}` : undefined,
+    currentTime: Math.floor(Date.now() / 1000)
   });
 
   if (!env.JWT_SECRET) {
@@ -115,7 +116,8 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
       iat: payload.iat,
       exp: payload.exp,
       currentTime: Math.floor(Date.now() / 1000),
-      isExpired: payload.exp ? payload.exp < Math.floor(Date.now() / 1000) : true
+      isExpired: payload.exp ? payload.exp < Math.floor(Date.now() / 1000) : true,
+      timeUntilExpiry: payload.exp ? payload.exp - Math.floor(Date.now() / 1000) : undefined
     });
 
     // Validate required fields
