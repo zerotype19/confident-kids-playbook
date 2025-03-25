@@ -1,163 +1,92 @@
-import { sign } from '@tsndr/cloudflare-worker-jwt'
 import { corsHeaders, handleOptions } from '../lib/cors'
-import { Env, GoogleAuthRequest } from '../types'
-import { verifyGoogleToken } from '../lib/jwt'
+import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
 
-export const authGoogle = async (request: Request, env: Env): Promise<Response> => {
-  // Handle CORS preflight requests
+interface Env {
+  JWT_SECRET: string
+  GOOGLE_CLIENT_ID: string
+}
+
+interface GoogleAuthRequest {
+  credential: string
+}
+
+export async function onRequest(context: { request: Request; env: Env }) {
+  const { request, env } = context;
+  console.log('🚀 Google auth endpoint called:', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries()),
+    hasEnv: !!env,
+    hasJwtSecret: !!env.JWT_SECRET,
+    hasGoogleClientId: !!env.GOOGLE_CLIENT_ID
+  });
+
+  // Handle CORS preflight
   if (request.method === 'OPTIONS') {
-    return handleOptions(request)
+    console.log('🔄 Handling CORS preflight request');
+    return handleOptions(request);
   }
 
-  // Get base CORS headers
-  const headers = corsHeaders({
-    allowedMethods: ['POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type']
-  })
-
-  // Declare body variable at the top level
-  let requestBody: GoogleAuthRequest | undefined
-
   try {
-    // Ensure this is a POST request
-    if (request.method !== 'POST') {
-      return Response.json({ 
-        status: 'error',
-        message: 'Method not allowed'
-      }, {
-        status: 405,
-        headers: {
-          ...Object.fromEntries(headers.entries()),
-          'Allow': 'POST, OPTIONS'
-        }
-      })
-    }
+    const body = await request.json() as GoogleAuthRequest;
+    console.log('✅ Received Google credential:', {
+      hasCredential: !!body.credential,
+      credentialLength: body.credential?.length
+    });
 
-    // Parse and validate request body
-    try {
-      requestBody = await request.json()
-    } catch (err) {
-      console.error('❌ Failed to parse request body:', err)
-      return Response.json({
-        status: 'error',
-        message: 'Invalid request body'
-      }, {
+    if (!body.credential) {
+      console.error('❌ No credential provided');
+      return new Response(JSON.stringify({ error: 'No credential provided' }), {
         status: 400,
-        headers
-      })
+        headers: corsHeaders()
+      });
     }
 
-    // Validate credential presence
-    if (!requestBody.credential) {
-      console.error('❌ Missing credential in request body')
-      return Response.json({
-        status: 'error',
-        message: 'Missing credential'
-      }, {
-        status: 400,
-        headers
-      })
+    console.log('🔗 Using API URL:', request.url);
+    const result = await verifyGoogleTokenAndCreateJwt(body.credential, env.JWT_SECRET, env.GOOGLE_CLIENT_ID);
+
+    if (!result.success) {
+      console.error('❌ Token verification failed:', result.error);
+      return new Response(JSON.stringify({ error: result.error }), {
+        status: 401,
+        headers: corsHeaders()
+      });
     }
 
-    // Log environment variables (redacted for security)
-    console.log('🔑 Environment variables:', {
-      hasJwtSecret: !!env.JWT_SECRET,
-      hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
-      googleClientIdLength: env.GOOGLE_CLIENT_ID?.length,
-      googleClientIdPreview: env.GOOGLE_CLIENT_ID ? `${env.GOOGLE_CLIENT_ID.slice(0, 10)}...${env.GOOGLE_CLIENT_ID.slice(-10)}` : undefined
-    })
-
-    // Check for required environment variables
-    const jwtSecret = env.JWT_SECRET
-    const googleClientId = env.GOOGLE_CLIENT_ID
-
-    // Add diagnostic logging for environment variables
-    console.log('🔍 Environment Variables:', {
-      hasJwtSecret: !!jwtSecret,
-      jwtSecretLength: jwtSecret?.length,
-      hasGoogleClientId: !!googleClientId,
-      googleClientIdLength: googleClientId?.length,
-      googleClientIdPreview: googleClientId ? `${googleClientId.slice(0, 4)}...${googleClientId.slice(-4)}` : undefined,
-      isEnvPlaceholder: googleClientId === 'ENV_GOOGLE_CLIENT_ID'
-    })
-
-    if (!jwtSecret || !googleClientId) {
-      console.error('❌ Missing required environment variables:', {
-        hasJwtSecret: !!jwtSecret,
-        hasGoogleClientId: !!googleClientId
-      })
-      return Response.json({
-        status: 'error',
-        message: 'Server configuration error'
-      }, {
-        status: 500,
-        headers
-      })
-    }
-
-    // Verify the Google token
-    const googleUser = await verifyGoogleToken(requestBody!.credential, env.GOOGLE_CLIENT_ID)
-    
-    // Create our app's JWT
-    const jwtPayload = {
-      sub: googleUser.sub,
-      email: googleUser.email,
-      name: googleUser.name,
-      picture: googleUser.picture,
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
-    }
-
-    const jwt = await sign(jwtPayload, env.JWT_SECRET)
-
-    console.log('✅ Successfully authenticated user:', {
-      sub: '***', // Redacted for privacy
-      email: '***', // Redacted for privacy
-      hasName: !!googleUser.name,
-      hasPicture: !!googleUser.picture
-    })
-
-    // Return success response
-    return Response.json({
+    console.log('✅ API Response:', {
       status: 'ok',
-      jwt,
+      hasJWT: !!result.jwt,
       user: {
-        id: googleUser.sub,
-        email: googleUser.email,
-        name: googleUser.name,
-        picture: googleUser.picture
+        id: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).sub : undefined,
+        email: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).email : undefined,
+        name: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).name : undefined,
+        picture: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).picture : undefined
       }
-    }, {
-      headers
-    })
+    });
 
-  } catch (err: any) {
-    // Log the error for debugging
-    console.error('❌ Authentication failed:', {
-      error: err.message,
-      type: err.constructor.name,
-      stack: err.stack,
-      hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
-      googleClientIdLength: env.GOOGLE_CLIENT_ID?.length,
-      requestBody: {
-        hasCredential: !!requestBody?.credential,
-        credentialLength: requestBody?.credential?.length,
-        credentialPreview: requestBody?.credential ? `${requestBody.credential.slice(0, 10)}...${requestBody.credential.slice(-10)}` : undefined
+    return new Response(
+      JSON.stringify({
+        status: 'ok',
+        jwt: result.jwt,
+        user: {
+          id: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).sub : undefined,
+          email: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).email : undefined,
+          name: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).name : undefined,
+          picture: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).picture : undefined
+        }
+      }),
+      {
+        headers: corsHeaders()
       }
-    })
-
-    // Return more detailed error response
-    return Response.json({
-      status: 'error',
-      message: err.message || 'Authentication failed',
-      details: {
-        type: err.constructor.name,
-        hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
-        hasCredential: !!requestBody?.credential
+    );
+  } catch (error) {
+    console.error('❌ Error processing request:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to process request' }),
+      {
+        status: 500,
+        headers: corsHeaders()
       }
-    }, {
-      status: 401,
-      headers
-    })
+    );
   }
 } 
