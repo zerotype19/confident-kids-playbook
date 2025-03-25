@@ -4,6 +4,17 @@ import { sign } from '@tsndr/cloudflare-worker-jwt'
 interface GoogleTokenPayload {
   email: string
   name?: string
+  picture?: string
+  [key: string]: unknown
+}
+
+interface JwtPayload {
+  sub: string
+  email: string
+  name: string
+  picture: string
+  iat: number
+  exp: number
   [key: string]: unknown
 }
 
@@ -19,7 +30,7 @@ export async function verifyGoogleTokenAndCreateJwt(
 ): Promise<AuthResult> {
   try {
     // Verify the Google token
-    const decoded = await verify(credential, { complete: true })
+    const decoded = await verify(credential, jwtSecret, { complete: true })
 
     if (!decoded || typeof decoded.payload !== 'object') {
       return {
@@ -31,6 +42,7 @@ export async function verifyGoogleTokenAndCreateJwt(
     const payload = decoded.payload as GoogleTokenPayload
     const email = payload.email
     const name = payload.name || ''
+    const picture = payload.picture || ''
 
     if (!email) {
       return {
@@ -40,9 +52,11 @@ export async function verifyGoogleTokenAndCreateJwt(
     }
 
     // Create our app's JWT
-    const jwtPayload = {
+    const jwtPayload: JwtPayload = {
       sub: email,
+      email,
       name,
+      picture,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
     }
