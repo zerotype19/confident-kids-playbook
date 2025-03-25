@@ -1,13 +1,19 @@
 import { Env } from '../types';
 import { verifyJWT } from '../auth';
-import { corsHeaders } from '../lib/cors';
+import { corsHeaders, handleOptions } from '../lib/cors';
 
 interface User {
   has_completed_onboarding: boolean;
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
-  const { request, env } = context;
+  const { request } = context;
+
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return handleOptions(request);
+  }
+
   const authorization = request.headers.get('Authorization');
 
   if (!authorization) {
@@ -19,7 +25,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
   try {
     const token = authorization.split(' ')[1];
-    const payload = await verifyJWT(token, env);
+    const payload = await verifyJWT(token, context.env);
     
     if (!payload?.sub) {
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
@@ -29,7 +35,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
 
     // Query the database directly
-    const result = await env.DB.prepare(
+    const result = await context.env.DB.prepare(
       'SELECT has_completed_onboarding FROM users WHERE id = ?'
     ).bind(payload.sub).all<User>();
 
