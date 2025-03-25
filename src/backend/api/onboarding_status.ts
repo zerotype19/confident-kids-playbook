@@ -7,7 +7,7 @@ interface User {
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
-  const { request } = context;
+  const { request, env } = context;
   console.log('🚀 Onboarding status endpoint called:', {
     method: request.method,
     url: request.url,
@@ -46,7 +46,17 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
 
     console.log('🔑 Verifying JWT token');
-    const payload = await verifyJWT(token, context.env);
+    let payload;
+    try {
+      payload = await verifyJWT(token, env);
+    } catch (jwtError) {
+      console.error('❌ JWT verification failed:', jwtError);
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: corsHeaders()
+      });
+    }
+
     console.log('✅ JWT verification result:', {
       hasPayload: !!payload,
       hasSub: !!payload?.sub,
@@ -62,10 +72,18 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
 
     console.log('📊 Querying database for user:', payload.sub);
-    // Query the database directly
-    const result = await context.env.DB.prepare(
-      'SELECT has_completed_onboarding FROM users WHERE id = ?'
-    ).bind(payload.sub).all<User>();
+    let result;
+    try {
+      result = await env.DB.prepare(
+        'SELECT has_completed_onboarding FROM users WHERE id = ?'
+      ).bind(payload.sub).all<User>();
+    } catch (dbError) {
+      console.error('❌ Database query failed:', dbError);
+      return new Response(JSON.stringify({ error: 'Database error' }), {
+        status: 500,
+        headers: corsHeaders()
+      });
+    }
 
     console.log('📥 Database query result:', {
       hasResults: !!result.results,
@@ -105,7 +123,10 @@ export async function onRequest(context: { request: Request; env: Env }) {
         stack: error.stack
       });
     }
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
       status: 500,
       headers: corsHeaders()
     });
