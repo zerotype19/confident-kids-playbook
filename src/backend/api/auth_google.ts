@@ -10,7 +10,7 @@ interface GoogleAuthRequest {
   credential: string
 }
 
-export async function onRequest(context: { request: Request; env: Env }) {
+export async function authGoogle(context: { request: Request; env: Env }) {
   const { request, env } = context;
   console.log('🚀 Google auth endpoint called:', {
     method: request.method,
