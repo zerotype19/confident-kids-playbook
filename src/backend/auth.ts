@@ -62,10 +62,12 @@ export async function generateJWT(userId: string): Promise<string> {
 
 export async function createJWT(userId: string, env: Env): Promise<string> {
   console.log('🔑 Creating JWT for user:', userId)
-  const token = await sign(
-    { sub: userId },
-    env.JWT_SECRET
-  )
+  const jwtPayload = {
+    sub: userId,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
+  }
+  const token = await sign(jwtPayload, env.JWT_SECRET)
   console.log('✅ JWT created successfully')
   return token
 }
