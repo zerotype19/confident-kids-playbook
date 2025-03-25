@@ -9,11 +9,6 @@ command = "npm install"
 [site]
 bucket = "./"
 
-[env.production]
-vars = { }
-
-[vars]
-
 [build.upload]
 format = "modules"
 dir = "."
