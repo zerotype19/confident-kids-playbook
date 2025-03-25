@@ -7,9 +7,18 @@ interface User {
   email: string
   name: string
   created_at: string
+  has_completed_onboarding: boolean
 }
 
 export const DB = {
+  async getUserById(db: D1Database, id: string): Promise<User | null> {
+    return await db.prepare(
+      "SELECT * FROM users WHERE id = ?"
+    )
+      .bind(id)
+      .first<User>();
+  },
+
   async getOrCreateUserByEmail(email: string, name: string, env: Env): Promise<User> {
     // Check for existing user
     const existingUser = await env.DB.prepare(
