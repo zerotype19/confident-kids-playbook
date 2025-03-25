@@ -30,19 +30,19 @@ export async function verifyGoogleTokenAndCreateJwt(
 ): Promise<AuthResult> {
   try {
     // Verify the Google token
-    const decoded = await verify(credential, jwtSecret, { complete: true })
+    const decoded = await verify(credential, jwtSecret);
 
-    if (!decoded || typeof decoded.payload !== 'object') {
+    if (!decoded || typeof decoded !== 'object') {
       return {
         success: false,
         error: 'Invalid token'
       }
     }
 
-    const payload = decoded.payload as GoogleTokenPayload
-    const email = payload.email
-    const name = payload.name || ''
-    const picture = payload.picture || ''
+    const payload = decoded as GoogleTokenPayload;
+    const email = payload.email;
+    const name = payload.name || '';
+    const picture = payload.picture || '';
 
     if (!email) {
       return {
@@ -61,7 +61,7 @@ export async function verifyGoogleTokenAndCreateJwt(
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
     }
 
-    const jwt = await sign(jwtPayload, jwtSecret)
+    const jwt = await sign(jwtPayload, jwtSecret);
 
     return {
       success: true,
