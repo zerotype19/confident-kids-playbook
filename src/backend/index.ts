@@ -2,6 +2,7 @@ import { Router } from 'itty-router'
 import { authGoogle } from './api/auth_google'
 import { corsHeaders, handleOptions } from './lib/cors'
 import { Env } from './types'
+import { onRequest as onboardingStatus } from './api/onboarding_status'
 
 const router = Router()
 
@@ -28,8 +29,11 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
 // Handle CORS preflight for all routes
 router.options('*', handleOptions)
 
-// Register Google auth route with POST method
-router.post('/api/auth/google', (request: Request, env: Env) => authGoogle(request, env))
+// Auth routes
+router.post('/api/auth/google', authGoogle)
+
+// Onboarding routes
+router.get('/api/onboarding/status', onboardingStatus)
 
 // Handle other routes
 router.get('/api/hello', async () => {
@@ -56,7 +60,5 @@ router.all('*', (req) => {
 })
 
 export default {
-  fetch: async (request: Request, env: Env, ctx: ExecutionContext) => {
-    return withLogging(request, env, ctx)
-  }
+  fetch: withLogging
 }
