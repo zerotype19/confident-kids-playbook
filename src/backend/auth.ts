@@ -100,49 +100,27 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
     });
 
     if (!decoded || typeof decoded !== 'object') {
-      console.error('❌ Invalid decoded token:', decoded);
+      console.error('❌ Invalid decoded token structure');
       throw new Error('Invalid token structure');
     }
 
+    // The decoded token should be the payload directly
     const payload = decoded as JwtPayload;
-    
-    console.log('✅ JWT verification successful:', {
-      hasPayload: !!payload,
-      hasSub: !!payload?.sub,
-      hasEmail: !!payload?.email,
-      hasName: !!payload?.name,
-      hasPicture: !!payload?.picture,
-      hasExp: !!payload?.exp,
-      exp: payload?.exp,
-      isExpired: payload?.exp ? payload.exp < Math.floor(Date.now() / 1000) : true,
-      currentTime: Math.floor(Date.now() / 1000),
-      timeUntilExpiry: payload?.exp ? payload.exp - Math.floor(Date.now() / 1000) : undefined
-    });
 
-    if (!payload?.sub) {
-      console.error('❌ Invalid token payload:', payload);
-      throw new Error('Invalid token payload');
-    }
-
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
-      console.error('❌ Token expired:', {
-        exp: payload.exp,
-        now: Math.floor(Date.now() / 1000),
-        timeExpired: Math.floor(Date.now() / 1000) - payload.exp
+    // Validate required fields
+    if (!payload.sub || !payload.email || !payload.name || !payload.picture) {
+      console.error('❌ Missing required fields in JWT payload:', {
+        hasSub: !!payload.sub,
+        hasEmail: !!payload.email,
+        hasName: !!payload.name,
+        hasPicture: !!payload.picture
       });
-      throw new Error('Token expired');
+      throw new Error('Invalid token payload');
     }
 
     return payload;
   } catch (error) {
     console.error('❌ JWT verification failed:', error);
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-    }
-    throw error;
+    throw new Error('Invalid token');
   }
 }
