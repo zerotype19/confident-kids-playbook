@@ -12,8 +12,13 @@ export default function OnboardingPage(): JSX.Element {
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       try {
+        console.log("🚀 Starting onboarding status check");
         const jwt = localStorage.getItem("jwt");
-        console.log("🔍 Checking onboarding status:", { hasJWT: !!jwt });
+        console.log("🔍 Checking onboarding status:", { 
+          hasJWT: !!jwt,
+          jwtLength: jwt?.length,
+          jwtPrefix: jwt?.substring(0, 10) + '...'
+        });
         
         if (!jwt) {
           console.error("❌ No JWT found in localStorage");
@@ -25,6 +30,11 @@ export default function OnboardingPage(): JSX.Element {
         const apiUrl = import.meta.env.VITE_API_URL || '';
         console.log("🔗 Using API URL:", apiUrl);
         
+        console.log("📤 Preparing fetch request with headers:", {
+          'Authorization': `Bearer ${jwt.substring(0, 10)}...`,
+          'Content-Type': 'application/json'
+        });
+
         const response = await fetch(`${apiUrl}/api/onboarding/status`, {
           method: 'GET',
           headers: {
@@ -35,18 +45,24 @@ export default function OnboardingPage(): JSX.Element {
           credentials: 'omit'
         });
         
-        console.log("📡 Onboarding status response:", {
+        console.log("📡 Onboarding status response received:", {
           status: response.status,
           ok: response.ok,
+          statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries())
         });
         
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
+          console.error("❌ Response not OK, attempting to read error data");
+          const errorData = await response.json().catch((e) => {
+            console.error("❌ Failed to parse error response:", e);
+            return {};
+          });
           console.error("❌ Onboarding status check failed:", errorData);
           throw new Error(errorData.error || 'Failed to check onboarding status');
         }
         
+        console.log("📥 Parsing response JSON");
         const data = await response.json();
         console.log("✅ Onboarding status data:", data);
         
@@ -60,6 +76,13 @@ export default function OnboardingPage(): JSX.Element {
         }
       } catch (error) {
         console.error('❌ Failed to check onboarding status:', error);
+        if (error instanceof Error) {
+          console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+          });
+        }
         setError(error instanceof Error ? error.message : "Failed to load onboarding status");
         navigate("/");
       }

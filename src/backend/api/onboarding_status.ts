@@ -8,13 +8,24 @@ interface User {
 
 export async function onRequest(context: { request: Request; env: Env }) {
   const { request } = context;
+  console.log('🚀 Onboarding status endpoint called:', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  });
 
   // Handle CORS preflight
   if (request.method === 'OPTIONS') {
+    console.log('🔄 Handling CORS preflight request');
     return handleOptions(request);
   }
 
   const authorization = request.headers.get('Authorization');
+  console.log('🔑 Authorization header:', {
+    present: !!authorization,
+    length: authorization?.length,
+    prefix: authorization?.substring(0, 20) + '...'
+  });
 
   if (!authorization) {
     console.error('❌ No Authorization header found');
@@ -36,6 +47,11 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
     console.log('🔑 Verifying JWT token');
     const payload = await verifyJWT(token, context.env);
+    console.log('✅ JWT verification result:', {
+      hasPayload: !!payload,
+      hasSub: !!payload?.sub,
+      sub: payload?.sub
+    });
     
     if (!payload?.sub) {
       console.error('❌ Invalid token payload:', payload);
@@ -51,6 +67,12 @@ export async function onRequest(context: { request: Request; env: Env }) {
       'SELECT has_completed_onboarding FROM users WHERE id = ?'
     ).bind(payload.sub).all<User>();
 
+    console.log('📥 Database query result:', {
+      hasResults: !!result.results,
+      resultCount: result.results?.length,
+      firstResult: result.results?.[0]
+    });
+
     const user = result.results?.[0];
 
     if (!user) {
@@ -62,13 +84,27 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
 
     console.log('✅ Onboarding status retrieved:', user.has_completed_onboarding);
-    return new Response(JSON.stringify({
+    const response = new Response(JSON.stringify({
       hasCompletedOnboarding: user.has_completed_onboarding || false
     }), {
       headers: corsHeaders()
     });
+
+    console.log('📤 Sending response:', {
+      status: response.status,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
+    return response;
   } catch (error) {
     console.error('❌ Onboarding status check failed:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: corsHeaders()
