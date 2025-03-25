@@ -1,4 +1,4 @@
-import { jwtVerify, createRemoteJWKSet } from 'jose'
+import * as jose from 'jose'
 
 interface JWTHeader {
   kid: string
@@ -85,89 +85,46 @@ async function fetchGoogleCerts(): Promise<jose.JWKS> {
   return data as unknown as jose.JWKS
 }
 
-export async function verifyGoogleToken(token: string, clientId: string): Promise<GoogleTokenPayload> {
+const GOOGLE_CERTS_URL = 'https://www.googleapis.com/oauth2/v3/certs'
+const JWKS = jose.createRemoteJWKSet(new URL(GOOGLE_CERTS_URL))
+
+export async function verifyGoogleToken(token: string, clientId: string) {
   try {
-    // Log incoming token and client ID for debugging
-    console.log('📥 Received Google token:', {
-      length: token.length,
-      preview: `${token.slice(0, 10)}...${token.slice(-10)}`,
-      clientId: clientId
+    // Log the token and client ID for debugging
+    console.log('🔍 Verifying token with:', {
+      clientIdLength: clientId.length,
+      clientIdPreview: `${clientId.slice(0, 10)}...${clientId.slice(-10)}`,
+      tokenLength: token.length,
+      tokenPreview: `${token.slice(0, 10)}...${token.slice(-10)}`
     })
 
-    // Decode token without verification to inspect claims
-    const { header, payload } = decodeJwt(token)
-    console.log('🔍 Raw token data:', {
-      header: {
-        ...header,
-        kid: header.kid ? `${header.kid.slice(0, 4)}...${header.kid.slice(-4)}` : undefined
-      },
-      payload: {
-        ...payload,
-        email: payload.email ? '***' : undefined,
-        sub: payload.sub ? '***' : undefined
-      }
-    })
-
-    // Log audience claims for debugging
-    console.log('🎯 Audience verification:', {
-      tokenAud: payload.aud,
-      tokenAzp: payload.azp,
-      expectedClientId: clientId,
-      matchesAud: payload.aud === clientId,
-      matchesAzp: payload.azp === clientId,
-      audLength: payload.aud?.length,
-      azpLength: payload.azp?.length,
-      clientIdLength: clientId.length
-    })
-
-    // Create JWKS client for Google's public keys
-    const jwks = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
-
-    // Verify the token
-    const { payload: verifiedPayload } = await jwtVerify(token, jwks, {
-      issuer: 'https://accounts.google.com',
+    const { payload } = await jose.jwtVerify(token, JWKS, {
+      issuer: ['https://accounts.google.com', 'accounts.google.com'],
       audience: clientId,
       algorithms: ['RS256']
     })
 
-    // Log decoded payload (with sensitive data redacted)
-    console.log('🔍 Decoded token payload:', {
-      ...verifiedPayload,
-      email: verifiedPayload.email ? '***' : undefined,
-      sub: verifiedPayload.sub ? '***' : undefined
-    })
-
-    // Type check the payload
-    const googlePayload = verifiedPayload as GoogleTokenPayload
-
-    // Verify audience (check both aud and azp)
-    const validAudience = googlePayload.aud === clientId || googlePayload.azp === clientId
-    if (!validAudience) {
-      console.error('❌ Invalid audience:', {
-        expectedClientId: clientId,
-        receivedAud: googlePayload.aud,
-        receivedAzp: googlePayload.azp,
-        audLength: googlePayload.aud?.length,
-        azpLength: googlePayload.azp?.length,
-        clientIdLength: clientId.length
-      })
-      throw new Error(`Invalid audience. Expected: ${clientId}, Received: ${googlePayload.aud}`)
+    // Verify required claims
+    if (!payload.sub || !payload.email || !payload.email_verified) {
+      throw new Error('Missing required claims in token')
     }
 
-    // Verify email is verified (Google specific)
-    if (googlePayload.email && !googlePayload.email_verified) {
-      throw new Error('Email not verified')
+    // Return user info
+    return {
+      sub: payload.sub as string,
+      email: payload.email as string,
+      name: payload.name as string,
+      picture: payload.picture as string
     }
-
-    console.log('✅ Token verified successfully')
-    return googlePayload
   } catch (err: any) {
-    console.error('❌ Failed to verify token:', {
+    console.error('❌ Token verification failed:', {
       error: err.message,
       type: err.constructor.name,
       stack: err.stack,
-      clientId: clientId,
-      clientIdLength: clientId?.length
+      clientId: {
+        length: clientId.length,
+        preview: `${clientId.slice(0, 10)}...${clientId.slice(-10)}`
+      }
     })
     throw new Error(`Token verification failed: ${err.message}`)
   }
