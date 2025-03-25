@@ -70,59 +70,49 @@ export async function createJWT(userId: string, env: Env): Promise<string> {
   return token
 }
 
-export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | null> {
-  console.log('🔑 Verifying JWT token:', {
+export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
+  console.log('🔑 Verifying JWT:', {
     tokenLength: token.length,
     tokenPrefix: token.substring(0, 20) + '...',
     hasJwtSecret: !!env.JWT_SECRET,
     jwtSecretLength: env.JWT_SECRET?.length
-  })
+  });
 
   if (!env.JWT_SECRET) {
-    console.error('❌ JWT_SECRET is not set in environment')
-    return null
+    console.error('❌ JWT_SECRET not set in environment');
+    throw new Error('JWT_SECRET not configured');
   }
 
   try {
-    // Try verifying with the JWT secret
-    const decoded = await verify(token, env.JWT_SECRET, { complete: true })
+    const { payload } = await verify(token, env.JWT_SECRET);
+    const typedPayload = payload as JwtPayload;
+    
     console.log('✅ JWT verification successful:', {
-      hasPayload: !!decoded,
-      payloadType: typeof decoded,
-      hasSub: decoded.payload && typeof decoded.payload === 'object' && 'sub' in decoded.payload,
-      header: decoded.header
-    })
+      hasPayload: !!typedPayload,
+      hasSub: !!typedPayload?.sub,
+      hasEmail: !!typedPayload?.email,
+      hasName: !!typedPayload?.name,
+      hasExp: !!typedPayload?.exp,
+      exp: typedPayload?.exp,
+      isExpired: typedPayload?.exp ? typedPayload.exp < Math.floor(Date.now() / 1000) : true
+    });
 
-    if (!decoded || !decoded.payload || typeof decoded.payload !== 'object') {
-      console.error('❌ Invalid JWT payload:', decoded)
-      return null
+    if (!typedPayload?.sub) {
+      console.error('❌ Invalid token payload:', typedPayload);
+      throw new Error('Invalid token payload');
     }
 
-    const payload = decoded.payload as JwtPayload
-    console.log('✅ JWT payload:', {
-      sub: payload.sub,
-      email: payload.email,
-      name: payload.name,
-      iat: payload.iat,
-      exp: payload.exp
-    })
-
-    // Check if the token is expired
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
-      console.error('❌ JWT token has expired')
-      return null
+    if (typedPayload.exp && typedPayload.exp < Math.floor(Date.now() / 1000)) {
+      console.error('❌ Token expired:', {
+        exp: typedPayload.exp,
+        now: Math.floor(Date.now() / 1000)
+      });
+      throw new Error('Token expired');
     }
 
-    return payload
-  } catch (err) {
-    console.error('❌ JWT verification failed:', err)
-    if (err instanceof Error) {
-      console.error('Error details:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack
-      })
-    }
-    return null
+    return typedPayload;
+  } catch (error) {
+    console.error('❌ JWT verification failed:', error);
+    throw error;
   }
 }
