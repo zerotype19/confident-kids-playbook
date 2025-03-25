@@ -61,7 +61,7 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
 router.options('*', handleOptions)
 
 // Auth routes
-router.post('/api/auth/google', authGoogle)
+router.post('/api/auth/google', (request, context) => authGoogle(request, context.env))
 
 // Onboarding routes
 router.get('/api/onboarding/status', onboardingStatus)
