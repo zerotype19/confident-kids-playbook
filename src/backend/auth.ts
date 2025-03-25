@@ -84,8 +84,8 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
   }
 
   try {
-    const decoded = await verify(token, env.JWT_SECRET, { complete: true });
-    const payload = decoded.payload as JwtPayload;
+    const decoded = await verify(token, env.JWT_SECRET);
+    const payload = decoded as JwtPayload;
     
     console.log('✅ JWT verification successful:', {
       hasPayload: !!payload,
