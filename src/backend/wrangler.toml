@@ -13,8 +13,6 @@ bucket = "./"
 vars = { }
 
 [vars]
-JWT_SECRET = "ENV_JWT_SECRET"
-GOOGLE_CLIENT_ID = "ENV_GOOGLE_CLIENT_ID"
 
 [build.upload]
 format = "modules"
