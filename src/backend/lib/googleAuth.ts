@@ -48,48 +48,43 @@ export async function verifyGoogleTokenAndCreateJwt(
       };
     }
 
-    console.log('✅ Google token verified successfully:', {
-      hasPayload: !!payload,
-      hasEmail: !!payload.email,
-      hasName: !!payload.name,
-      hasPicture: !!payload.picture
+    console.log('✅ Google token verified, payload:', {
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
+      sub: payload.sub
     });
 
-    const email = payload.email;
-    const name = payload.name || '';
-    const picture = payload.picture || '';
-
-    if (!email) {
-      console.error('❌ Missing email in Google token');
-      return {
-        success: false,
-        error: 'Missing email in token'
-      };
-    }
-
-    // Create our app's JWT
+    // Create JWT with the same sub as the Google token
     const jwtPayload: JwtPayload = {
-      sub: email,
-      email,
-      name,
-      picture,
+      sub: payload.sub || payload.email || '', // Use sub from Google or fallback to email
+      email: payload.email || '',
+      name: payload.name || '',
+      picture: payload.picture || '',
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
     };
 
     console.log('🔑 Creating JWT with payload:', jwtPayload);
-    const jwt = await sign(jwtPayload, jwtSecret);
+    const token = await sign(jwtPayload, jwtSecret);
+    
     console.log('✅ JWT created successfully');
-
     return {
       success: true,
-      jwt
+      jwt: token
     };
-  } catch (err) {
-    console.error('❌ Token verification failed:', err);
+  } catch (error) {
+    console.error('❌ Error in verifyGoogleTokenAndCreateJwt:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     return {
       success: false,
-      error: err instanceof Error ? err.message : 'Failed to process token'
+      error: 'Failed to verify token'
     };
   }
 } 

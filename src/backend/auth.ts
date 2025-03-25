@@ -96,7 +96,8 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
       hasDecoded: !!decoded,
       decodedType: typeof decoded,
       decodedKeys: Object.keys(decoded),
-      decodedPreview: decoded ? JSON.stringify(decoded).substring(0, 100) + '...' : undefined
+      decodedPreview: decoded ? JSON.stringify(decoded).substring(0, 100) + '...' : undefined,
+      decodedFull: decoded // Log the full decoded token for debugging
     });
 
     if (!decoded || typeof decoded !== 'object') {
@@ -107,20 +108,50 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
     // The decoded token should be the payload directly
     const payload = decoded as JwtPayload;
 
+    // Log all fields for debugging
+    console.log('📋 JWT Payload fields:', {
+      sub: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
+      iat: payload.iat,
+      exp: payload.exp,
+      currentTime: Math.floor(Date.now() / 1000),
+      isExpired: payload.exp ? payload.exp < Math.floor(Date.now() / 1000) : true
+    });
+
     // Validate required fields
     if (!payload.sub || !payload.email || !payload.name || !payload.picture) {
       console.error('❌ Missing required fields in JWT payload:', {
         hasSub: !!payload.sub,
         hasEmail: !!payload.email,
         hasName: !!payload.name,
-        hasPicture: !!payload.picture
+        hasPicture: !!payload.picture,
+        payload: payload // Log the full payload for debugging
       });
       throw new Error('Invalid token payload');
+    }
+
+    // Check token expiration
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      console.error('❌ Token expired:', {
+        exp: payload.exp,
+        now: Math.floor(Date.now() / 1000),
+        timeExpired: Math.floor(Date.now() / 1000) - payload.exp
+      });
+      throw new Error('Token expired');
     }
 
     return payload;
   } catch (error) {
     console.error('❌ JWT verification failed:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     throw new Error('Invalid token');
   }
 }
