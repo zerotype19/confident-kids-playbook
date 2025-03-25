@@ -1,6 +1,6 @@
 import { Env, AuthRequest } from '../types';
 import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken';
+import { sign } from '@tsndr/cloudflare-worker-jwt';
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
@@ -15,6 +15,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     let user_id: string;
     let email: string;
+    let name: string;
+    let picture: string;
 
     if (provider === 'google') {
       console.log('🔍 Verifying Google token...');
@@ -27,7 +29,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       if (!payload) throw new Error('Invalid token');
       user_id = payload.sub;
       email = payload.email!;
-      console.log('✅ Google token verified:', { user_id, email });
+      name = payload.name || '';
+      picture = payload.picture || '';
+      console.log('✅ Google token verified:', { user_id, email, name, picture });
     } else if (provider === 'apple') {
       // Apple Sign In verification
       const appleClient = new OAuth2Client(env.APPLE_CLIENT_ID);
@@ -39,6 +43,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       if (!payload) throw new Error('Invalid token');
       user_id = payload.sub;
       email = payload.email!;
+      name = payload.name || '';
+      picture = payload.picture || '';
     } else {
       throw new Error('Invalid provider');
     }
@@ -51,13 +57,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!user) {
       // Create new user
       await env.DB.prepare(`
-        INSERT INTO users (id, email, created_at, updated_at)
-        VALUES (?, ?, datetime('now'), datetime('now'))
-      `).bind(user_id, email).run();
+        INSERT INTO users (id, email, name, picture, created_at, updated_at)
+        VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+      `).bind(user_id, email, name, picture).run();
     }
 
-    // Create JWT
-    const jwtToken = jwt.sign({ user_id }, env.JWT_SECRET, { expiresIn: '7d' });
+    // Create JWT with all required fields
+    const jwtPayload = {
+      sub: user_id,
+      email,
+      name,
+      picture,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
+    };
+
+    console.log('🔑 Creating JWT with payload:', jwtPayload);
+    const jwtToken = await sign(jwtPayload, env.JWT_SECRET);
+    console.log('✅ JWT created successfully');
 
     return new Response(JSON.stringify({ token: jwtToken }), {
       headers: {
@@ -67,6 +84,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     });
   } catch (error) {
     console.error('❌ Auth login error:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     return new Response(JSON.stringify({ error: 'Authentication failed' }), {
       status: 401,
       headers: {
