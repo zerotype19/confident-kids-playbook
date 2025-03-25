@@ -26,20 +26,25 @@ export default function OnboardingPage(): JSX.Element {
         console.log("🔗 Using API URL:", apiUrl);
         
         const response = await fetch(`${apiUrl}/api/onboarding/status`, {
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${jwt}`
-          }
+            'Authorization': `Bearer ${jwt}`,
+            'Content-Type': 'application/json'
+          },
+          mode: 'cors',
+          credentials: 'omit'
         });
         
         console.log("📡 Onboarding status response:", {
           status: response.status,
-          ok: response.ok
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
         });
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           console.error("❌ Onboarding status check failed:", errorData);
-          throw new Error('Failed to check onboarding status');
+          throw new Error(errorData.error || 'Failed to check onboarding status');
         }
         
         const data = await response.json();
@@ -55,7 +60,7 @@ export default function OnboardingPage(): JSX.Element {
         }
       } catch (error) {
         console.error('❌ Failed to check onboarding status:', error);
-        setError("Failed to load onboarding status");
+        setError(error instanceof Error ? error.message : "Failed to load onboarding status");
         navigate("/");
       }
     };
