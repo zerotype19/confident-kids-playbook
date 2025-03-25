@@ -106,6 +106,7 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
       hasSub: !!payload?.sub,
       hasEmail: !!payload?.email,
       hasName: !!payload?.name,
+      hasPicture: !!payload?.picture,
       hasExp: !!payload?.exp,
       exp: payload?.exp,
       isExpired: payload?.exp ? payload.exp < Math.floor(Date.now() / 1000) : true,

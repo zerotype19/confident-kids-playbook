@@ -11,7 +11,11 @@ export async function onRequest(context: { request: Request; env: Env }) {
   console.log('🚀 Onboarding status endpoint called:', {
     method: request.method,
     url: request.url,
-    headers: Object.fromEntries(request.headers.entries())
+    headers: Object.fromEntries(request.headers.entries()),
+    hasEnv: !!env,
+    hasDB: !!env.DB,
+    hasJwtSecret: !!env.JWT_SECRET,
+    jwtSecretLength: env.JWT_SECRET?.length
   });
 
   // Handle CORS preflight
@@ -24,7 +28,9 @@ export async function onRequest(context: { request: Request; env: Env }) {
   console.log('🔑 Authorization header:', {
     present: !!authorization,
     length: authorization?.length,
-    prefix: authorization?.substring(0, 20) + '...'
+    prefix: authorization?.substring(0, 20) + '...',
+    type: authorization?.split(' ')[0],
+    tokenLength: authorization?.split(' ')[1]?.length
   });
 
   if (!authorization) {
@@ -45,12 +51,38 @@ export async function onRequest(context: { request: Request; env: Env }) {
       });
     }
 
-    console.log('🔑 Verifying JWT token');
+    console.log('🔑 Verifying JWT token:', {
+      tokenLength: token.length,
+      tokenPrefix: token.substring(0, 20) + '...',
+      hasJwtSecret: !!env.JWT_SECRET,
+      jwtSecretLength: env.JWT_SECRET?.length
+    });
+
     let payload;
     try {
       payload = await verifyJWT(token, env);
+      console.log('✅ JWT verification successful:', {
+        hasPayload: !!payload,
+        hasSub: !!payload?.sub,
+        hasEmail: !!payload?.email,
+        hasName: !!payload?.name,
+        hasPicture: !!payload?.picture,
+        hasExp: !!payload?.exp,
+        exp: payload?.exp,
+        isExpired: payload?.exp ? payload.exp < Math.floor(Date.now() / 1000) : true
+      });
     } catch (jwtError) {
-      console.error('❌ JWT verification failed:', jwtError);
+      console.error('❌ JWT verification failed:', {
+        error: jwtError instanceof Error ? {
+          name: jwtError.name,
+          message: jwtError.message,
+          stack: jwtError.stack
+        } : jwtError,
+        tokenLength: token.length,
+        tokenPrefix: token.substring(0, 20) + '...',
+        hasJwtSecret: !!env.JWT_SECRET,
+        jwtSecretLength: env.JWT_SECRET?.length
+      });
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
         headers: corsHeaders()
