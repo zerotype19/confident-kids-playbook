@@ -23,6 +23,7 @@ interface JwtPayload {
   sub: string
   iat: number
   exp: number
+  name?: string
   [key: string]: unknown
 }
 
@@ -74,6 +75,7 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | n
   })
 
   try {
+    // Try verifying with the JWT secret
     const decoded = await verify(token, env.JWT_SECRET)
     console.log('✅ JWT verification successful:', {
       hasPayload: !!decoded,
@@ -90,8 +92,15 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload | n
     console.log('✅ JWT payload:', {
       sub: payload.sub,
       iat: payload.iat,
-      exp: payload.exp
+      exp: payload.exp,
+      name: payload.name
     })
+
+    // Check if the token is expired
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      console.error('❌ JWT token has expired')
+      return null
+    }
 
     return payload
   } catch (err) {
