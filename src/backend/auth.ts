@@ -90,22 +90,29 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
 
   try {
     console.log('🔍 Attempting to verify JWT...');
-    const decoded = await verify(token, env.JWT_SECRET, { complete: true });
-    console.log('✅ JWT verification successful, decoded token:', {
-      hasDecoded: !!decoded,
-      decodedType: typeof decoded,
-      decodedKeys: Object.keys(decoded),
-      decodedPreview: decoded ? JSON.stringify(decoded).substring(0, 100) + '...' : undefined,
-      decodedFull: decoded
-    });
-
-    if (!decoded || typeof decoded !== 'object' || !('payload' in decoded)) {
-      console.error('❌ Invalid decoded token structure:', decoded);
-      throw new Error('Invalid token structure');
+    
+    // First verify the signature
+    const isValid = await verify(token, env.JWT_SECRET);
+    if (!isValid) {
+      console.error('❌ JWT signature verification failed');
+      throw new Error('Invalid token signature');
     }
 
-    // The decoded token should have a payload property
-    const payload = decoded.payload as JwtPayload;
+    // Then decode the token to get the payload
+    const [headerB64, payloadB64] = token.split('.');
+    if (!headerB64 || !payloadB64) {
+      console.error('❌ Invalid token format');
+      throw new Error('Invalid token format');
+    }
+
+    const payload = JSON.parse(atob(payloadB64)) as JwtPayload;
+    console.log('✅ JWT decoded successfully:', {
+      hasPayload: !!payload,
+      payloadType: typeof payload,
+      payloadKeys: Object.keys(payload),
+      payloadPreview: payload ? JSON.stringify(payload).substring(0, 100) + '...' : undefined,
+      payloadFull: payload
+    });
 
     // Log all fields for debugging
     console.log('📋 JWT Payload fields:', {
