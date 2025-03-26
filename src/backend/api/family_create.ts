@@ -1,47 +1,71 @@
 import { Env } from '../types';
 import { verifyJWT } from '../auth';
 import { nanoid } from 'nanoid';
+import { corsHeaders, handleOptions } from '../lib/cors';
 
 interface CreateFamilyRequest {
   name: string;
 }
 
-export async function onRequest(context: any) {
+export async function onRequest(context: { request: Request; env: Env }) {
   const { request, env } = context;
+  
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return handleOptions(request);
+  }
+
   const authorization = request.headers.get('Authorization');
 
   if (!authorization) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   }
 
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   }
 
   try {
     const token = authorization.split(' ')[1];
-    const payload = await verifyJWT(token, env as Env);
+    const payload = await verifyJWT(token, env);
     
     if (!payload?.sub) {
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: corsHeaders()
       });
     }
 
     const body = await request.json() as CreateFamilyRequest;
     const familyId = nanoid();
 
+    // First ensure user exists
+    const userResult = await env.DB.prepare(`
+      SELECT id FROM users WHERE id = ?
+    `).bind(payload.sub).first();
+
+    if (!userResult) {
+      // Create user if they don't exist
+      const createUserResult = await env.DB.prepare(`
+        INSERT INTO users (id, email, name, auth_provider)
+        VALUES (?, ?, ?, ?)
+      `).bind(payload.sub, payload.email, payload.name, 'google').run();
+
+      if (!createUserResult.success) {
+        throw new Error('Failed to create user');
+      }
+    }
+
     // Create family
     const createFamilyResult = await env.DB.prepare(`
-      INSERT INTO families (id, name, created_at)
-      VALUES (?, ?, datetime('now'))
+      INSERT INTO families (id, name)
+      VALUES (?, ?)
     `).bind(familyId, body.name).run();
 
     if (!createFamilyResult.success) {
@@ -62,13 +86,13 @@ export async function onRequest(context: any) {
       success: true,
       familyId
     }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   } catch (error) {
     console.error('Failed to create family:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   }
 } 

@@ -2,8 +2,8 @@ import { Env } from '../types';
 import { verifyJWT } from '../auth';
 import { corsHeaders, handleOptions } from '../lib/cors';
 
-interface User {
-  has_completed_onboarding: boolean;
+interface FamilyMember {
+  family_id: string;
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
@@ -103,7 +103,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
       });
     }
 
-    console.log('📊 Querying database for user:', payload.sub);
+    console.log('📊 Querying database for user family:', payload.sub);
     let result;
     try {
       if (!env.DB) {
@@ -117,9 +117,11 @@ export async function onRequest(context: { request: Request; env: Env }) {
         });
       }
 
-      result = await env.DB.prepare(
-        'SELECT has_completed_onboarding FROM users WHERE id = ?'
-      ).bind(payload.sub).all<User>();
+      result = await env.DB.prepare(`
+        SELECT family_id 
+        FROM family_members 
+        WHERE user_id = ?
+      `).bind(payload.sub).all<FamilyMember>();
     } catch (dbError) {
       console.error('❌ Database query failed:', dbError);
       return new Response(JSON.stringify({ 
@@ -137,19 +139,11 @@ export async function onRequest(context: { request: Request; env: Env }) {
       firstResult: result.results?.[0]
     });
 
-    const user = result.results?.[0];
+    const hasCompletedOnboarding = result.results && result.results.length > 0;
 
-    if (!user) {
-      console.error('❌ User not found:', payload.sub);
-      return new Response(JSON.stringify({ error: 'User not found' }), {
-        status: 404,
-        headers: corsHeaders()
-      });
-    }
-
-    console.log('✅ Onboarding status retrieved:', user.has_completed_onboarding);
+    console.log('✅ Onboarding status retrieved:', hasCompletedOnboarding);
     const response = new Response(JSON.stringify({
-      hasCompletedOnboarding: user.has_completed_onboarding || false
+      hasCompletedOnboarding
     }), {
       headers: corsHeaders()
     });
