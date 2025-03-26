@@ -3,6 +3,9 @@ import { authGoogle } from './api/auth_google'
 import { corsHeaders, handleOptions } from './lib/cors'
 import { Env } from './types'
 import { onRequest as onboardingStatus } from './api/onboarding_status'
+import { onRequest as familyCreate } from './api/family_create'
+import { onRequest as childrenCreate } from './api/children_create'
+import { onRequest as onboardingComplete } from './api/onboarding_complete'
 
 const router = Router()
 
@@ -65,6 +68,9 @@ router.post('/api/auth/google', (request, context) => authGoogle({ request, env:
 
 // Onboarding routes
 router.get('/api/onboarding/status', (request, context) => onboardingStatus({ request, env: context.env }))
+router.post('/api/family/create', (request, context) => familyCreate({ request, env: context.env }))
+router.post('/api/children/create', (request, context) => childrenCreate({ request, env: context.env }))
+router.post('/api/onboarding/complete', (request, context) => onboardingComplete({ request, env: context.env }))
 
 // Handle other routes
 router.get('/api/hello', async () => {

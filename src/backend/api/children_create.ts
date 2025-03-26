@@ -1,6 +1,7 @@
 import { Env } from '../types';
 import { verifyJWT } from '../auth';
 import { nanoid } from 'nanoid';
+import { corsHeaders, handleOptions } from '../lib/cors';
 
 interface CreateChildRequest {
   name: string;
@@ -12,32 +13,38 @@ interface FamilyMemberResult {
   family_id: string;
 }
 
-export async function onRequest(context: any) {
+export async function onRequest(context: { request: Request; env: Env }) {
   const { request, env } = context;
+  
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return handleOptions(request);
+  }
+
   const authorization = request.headers.get('Authorization');
 
   if (!authorization) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   }
 
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   }
 
   try {
     const token = authorization.split(' ')[1];
-    const payload = await verifyJWT(token, env as Env);
+    const payload = await verifyJWT(token, env);
     
     if (!payload?.sub) {
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: corsHeaders()
       });
     }
 
@@ -51,7 +58,7 @@ export async function onRequest(context: any) {
     if (!familyMember) {
       return new Response(JSON.stringify({ error: 'No family found' }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' }
+        headers: corsHeaders()
       });
     }
 
@@ -60,8 +67,8 @@ export async function onRequest(context: any) {
 
     // Create child profile
     const createChildResult = await env.DB.prepare(`
-      INSERT INTO children (id, family_id, name, age_range, avatar_url, created_at)
-      VALUES (?, ?, ?, ?, ?, datetime('now'))
+      INSERT INTO children (id, family_id, name, age_range, avatar_url)
+      VALUES (?, ?, ?, ?, ?)
     `).bind(
       childId,
       familyMember.family_id,
@@ -78,13 +85,13 @@ export async function onRequest(context: any) {
       success: true,
       childId
     }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   } catch (error) {
     console.error('Failed to create child profile:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: corsHeaders()
     });
   }
 } 
