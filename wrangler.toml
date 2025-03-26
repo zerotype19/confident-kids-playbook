@@ -21,5 +21,5 @@ name = "@tsndr/cloudflare-worker-jwt"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "confident-kids-playbook-db"
-database_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"   # replace with actual ID from CLI or dashboard
+database_name = "confident-kids-db"
+database_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
