@@ -1,0 +1,68 @@
+
+name: Validate PR Structure and Docs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-doc-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v3
+
+      - name: Ensure Required Docs Exist
+        run: |
+          REQUIRED_FILES=(
+            "build-docs/Confident-Kids-PRD.md"
+            "build-docs/Confident-Kids-App-Flow.md"
+            "build-docs/Confident-Kids-Tech-Stack.md"
+            "build-docs/Confident-Kids-Frontend-Guidelines.md"
+            "build-docs/Confident-Kids-Backend-Structure.md"
+            "build-docs/Confident-Kids-Implementation-Plan.md"
+            "build-docs/cursor-instructions.md"
+            "DEV_NOTE_README.md"
+          )
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "ERROR: Missing required doc: $file"
+              exit 1
+            fi
+          done
+
+      - name: Check for Schema Edits
+        run: |
+          git fetch origin main
+          CHANGED=$(git diff --name-only origin/main)
+          if echo "$CHANGED" | grep -q "schema.sql"; then
+            echo "ERROR: schema.sql was modified in this PR. This is not allowed."
+            exit 1
+          fi
+
+      - name: Check for File Structure Changes
+        run: |
+          git diff --name-status origin/main | grep -v '^M' | grep -v 'build-docs/' | grep -v 'src/' || true
+          if [ $? -eq 0 ]; then
+            echo "WARNING: File structure was changed. Please confirm this is intentional."
+          fi
+
+      - name: Ensure Cursor Instructions Compliance in Commits
+        run: |
+          git log origin/main..HEAD --pretty=format:"%s" > commit_messages.txt
+          if grep -i -v "Implementation Plan Step" commit_messages.txt | grep -v "DOCS:" | grep -q "."; then
+            echo "WARNING: All commits should reference a specific Implementation Plan Step or be labeled 'DOCS:'."
+            cat commit_messages.txt
+            exit 1
+          fi
+
+      - name: Check Only One Implementation Step is Touched
+        run: |
+          FILES=$(git diff --name-only origin/main)
+          IMPLEMENTATION_CHANGES=$(echo "$FILES" | grep -E 'src/|api/|components/' | wc -l)
+          if [ $IMPLEMENTATION_CHANGES -gt 10 ]; then
+            echo "WARNING: This PR modifies many files. Cursor should only handle one Implementation Plan step at a time."
+            echo "$FILES"
+            exit 1
+          fi
