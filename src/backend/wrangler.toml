@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "confident-kids-playbook-db"
-database_id = "confident-kids-playbook-db"
+database_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
 
 [build]
 command = "npm install"
