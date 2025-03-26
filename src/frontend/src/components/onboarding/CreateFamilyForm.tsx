@@ -13,10 +13,12 @@ export default function CreateFamilyForm(): JSX.Element {
     setError('');
 
     try {
-      const response = await fetch('/api/family/create', {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/family/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
         },
         body: JSON.stringify({
           name: familyName,
