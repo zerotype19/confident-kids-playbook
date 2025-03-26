@@ -74,7 +74,7 @@ export async function createJWT(userId: string, env: Env): Promise<string> {
 }
 
 export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
-  console.log('🔑 Verifying JWT:', {
+  console.log('🔑 Starting JWT verification:', {
     tokenLength: token.length,
     tokenPrefix: token.substring(0, 20) + '...',
     hasJwtSecret: !!env.JWT_SECRET,
