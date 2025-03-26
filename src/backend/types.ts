@@ -92,8 +92,8 @@ export interface MediaRecord {
 }
 
 export interface CreateUploadUrlRequest {
-  fileName: string;
-  contentType: string;
+  fileType: string;
+  purpose: 'avatar' | 'journal';
 }
 
 export interface MediaItem {

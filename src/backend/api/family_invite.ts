@@ -1,6 +1,13 @@
 import { Env, FamilyInviteRequest } from '../types';
 import jwt from 'jsonwebtoken';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
+
+interface Family {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
@@ -24,7 +31,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       FROM families f
       JOIN family_members fm ON f.id = fm.family_id
       WHERE fm.user_id = ? AND fm.role = 'owner'
-    `).bind(decoded.user_id).first();
+    `).bind(decoded.user_id).first<Family>();
 
     if (!family) {
       return new Response(JSON.stringify({ error: 'No family found or not owner' }), {

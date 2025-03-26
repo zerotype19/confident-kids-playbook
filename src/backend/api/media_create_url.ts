@@ -1,7 +1,7 @@
 import { Env, CreateUploadUrlRequest } from '../types';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
