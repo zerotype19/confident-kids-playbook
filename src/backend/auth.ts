@@ -90,22 +90,22 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
 
   try {
     console.log('🔍 Attempting to verify JWT...');
-    const decoded = await verify(token, env.JWT_SECRET);
+    const decoded = await verify(token, env.JWT_SECRET, { complete: true });
     console.log('✅ JWT verification successful, decoded token:', {
       hasDecoded: !!decoded,
       decodedType: typeof decoded,
       decodedKeys: Object.keys(decoded),
       decodedPreview: decoded ? JSON.stringify(decoded).substring(0, 100) + '...' : undefined,
-      decodedFull: decoded // Log the full decoded token for debugging
+      decodedFull: decoded
     });
 
-    if (!decoded || typeof decoded !== 'object') {
-      console.error('❌ Invalid decoded token structure');
+    if (!decoded || typeof decoded !== 'object' || !('payload' in decoded)) {
+      console.error('❌ Invalid decoded token structure:', decoded);
       throw new Error('Invalid token structure');
     }
 
-    // The decoded token should be the payload directly
-    const payload = decoded as JwtPayload;
+    // The decoded token should have a payload property
+    const payload = decoded.payload as JwtPayload;
 
     // Log all fields for debugging
     console.log('📋 JWT Payload fields:', {
@@ -127,7 +127,7 @@ export async function verifyJWT(token: string, env: Env): Promise<JwtPayload> {
         hasEmail: !!payload.email,
         hasName: !!payload.name,
         hasPicture: !!payload.picture,
-        payload: payload // Log the full payload for debugging
+        payload: payload
       });
       throw new Error('Invalid token payload');
     }
