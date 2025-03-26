@@ -13,6 +13,8 @@ This file is for developers (or AI tools like Cursor) working on this project. I
 - ❌ DO NOT modify file structure
 - ❌ DO NOT touch `schema.sql` or any migration files
 - ✅ ONLY work on the *next* open task from the Implementation Plan
+- ✅ Follow commit conventions in `commit-style-guide.md`
+- ✅ Load and follow `cursor-instructions.md` in every new Cursor AI session
 
 ---
 
@@ -43,11 +45,12 @@ This file is for developers (or AI tools like Cursor) working on this project. I
 If you are starting fresh or reloading after a context loss:
 
 1. Read all `/build-docs/` files:
-   - `PRD.md`
+   - `Confident-Kids-PRD.md`
    - `App Flow.md`
    - `Tech Stack.md`
    - `Backend Structure.md`
    - `Implementation Plan.md`
+   - `cursor-instructions.md`
 2. Confirm last completed step with a human
 3. Resume with the next Implementation Plan item ONLY
 
@@ -56,7 +59,7 @@ If you are starting fresh or reloading after a context loss:
 ### SAFE FILE ZONES
 
 You MAY edit:
-- Files related to current feature task
+- Files related to the **current feature task**
 - Any utility/helper file **created in this session**
 
 You MAY NOT:
@@ -64,4 +67,12 @@ You MAY NOT:
 
 ---
 
-For questions or unclear steps, pause and ask the developer. This avoids logic conflicts and regression bugs.
+### REFERENCES
+
+- `/build-docs/cursor-instructions.md`: strict Cursor rules
+- `/build-docs/Confident-Kids-Implementation-Plan.md`: what to build next
+- `/commit-style-guide.md`: how to write commits
+
+---
+
+Always confirm current task status before you start. Cursor AI should only act on explicit instructions tied to a known step.
