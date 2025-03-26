@@ -4,6 +4,11 @@ main = "index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
+[[d1_databases]]
+binding = "DB"
+database_name = "confident-kids-playbook-db"
+database_id = "confident-kids-playbook-db"
+
 [build]
 command = "npm install"
 
