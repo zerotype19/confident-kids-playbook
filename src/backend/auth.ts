@@ -1,10 +1,6 @@
 import { OAuth2Client } from "google-auth-library"
 import { sign, verify } from '@tsndr/cloudflare-worker-jwt'
-
-interface Env {
-  GOOGLE_CLIENT_ID: string
-  JWT_SECRET: string
-}
+import { Env } from './types'
 
 interface UserInfo {
   email: string

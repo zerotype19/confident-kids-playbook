@@ -106,13 +106,27 @@ export async function onRequest(context: { request: Request; env: Env }) {
     console.log('📊 Querying database for user:', payload.sub);
     let result;
     try {
+      if (!env.DB) {
+        console.error('❌ Database not configured');
+        return new Response(JSON.stringify({ 
+          error: 'Database not configured',
+          hasCompletedOnboarding: false // Default to false if DB is not available
+        }), {
+          status: 200,
+          headers: corsHeaders()
+        });
+      }
+
       result = await env.DB.prepare(
         'SELECT has_completed_onboarding FROM users WHERE id = ?'
       ).bind(payload.sub).all<User>();
     } catch (dbError) {
       console.error('❌ Database query failed:', dbError);
-      return new Response(JSON.stringify({ error: 'Database error' }), {
-        status: 500,
+      return new Response(JSON.stringify({ 
+        error: 'Database error',
+        hasCompletedOnboarding: false // Default to false on DB error
+      }), {
+        status: 200,
         headers: corsHeaders()
       });
     }
