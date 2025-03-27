@@ -16,6 +16,13 @@ Brief description of what’s being implemented, including which Implementation 
 
 ---
 
+### ☑️ AI Assistant Usage
+- [ ] AI tool was used in part of this PR (e.g. Cursor AI, Copilot)
+- [ ] AI code was reviewed and verified manually
+- [ ] AI did NOT alter auth, routing, or index.html unless explicitly approved
+
+
+
 ### 📝 Related Documentation
 
 (Optional) List any new or updated docs related to this PR:
