@@ -27,29 +27,29 @@ export default function OnboardingPage(): JSX.Element {
   const { token } = useAuth();
 
   useEffect(() => {
-    const checkOnboarding = async () => {
+    const checkProfile = async () => {
       if (!token) return;
 
       try {
-        const res = await fetch("/api/onboarding/status", {
+        const res = await fetch("/api/user/profile", {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         if (!res.ok) {
-          console.error('Failed to check onboarding status');
+          console.error('Failed to check user profile');
           return;
         }
 
         const data = await res.json();
-        if (data.hasCompletedOnboarding) {
+        if (data.hasFamily && data.hasChild) {
           navigate("/dashboard");
         }
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
+        console.error('Error checking user profile:', error);
       }
     };
 
-    checkOnboarding();
+    checkProfile();
   }, [token, navigate]);
 
   return (

@@ -15,6 +15,11 @@ interface FamilyMemberResult {
 
 export async function onRequest(context: { request: Request; env: Env }) {
   const { request, env } = context;
+  console.log('🚀 Children create endpoint called:', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  });
   
   // Handle CORS preflight
   if (request.method === 'OPTIONS') {
@@ -48,12 +53,22 @@ export async function onRequest(context: { request: Request; env: Env }) {
       });
     }
 
+    console.log('🔑 JWT verification successful:', {
+      userId: payload.sub,
+      email: payload.email
+    });
+
     // Get user's family
     const familyMember = await env.DB.prepare(`
       SELECT family_id FROM family_members 
       WHERE user_id = ? 
       LIMIT 1
     `).bind(payload.sub).first() as FamilyMemberResult | null;
+
+    console.log('👨‍👩‍👧‍👦 Family lookup result:', {
+      hasFamily: !!familyMember,
+      familyId: familyMember?.family_id
+    });
 
     if (!familyMember) {
       return new Response(JSON.stringify({ error: 'No family found' }), {
@@ -63,7 +78,31 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
 
     const body = await request.json() as CreateChildRequest;
+    
+    // Validate required fields
+    if (!body.name) {
+      return new Response(JSON.stringify({ error: 'Name is required' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    if (!body.age_range) {
+      return new Response(JSON.stringify({ error: 'Age range is required' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
     const childId = nanoid();
+
+    console.log('👶 Creating child with:', {
+      childId,
+      name: body.name,
+      ageRange: body.age_range,
+      familyId: familyMember.family_id,
+      hasAvatar: !!body.avatar_url
+    });
 
     // Create child profile
     const createChildResult = await env.DB.prepare(`
@@ -81,6 +120,11 @@ export async function onRequest(context: { request: Request; env: Env }) {
       throw new Error('Failed to create child profile');
     }
 
+    console.log('✅ Child created successfully:', {
+      childId,
+      familyId: familyMember.family_id
+    });
+
     return new Response(JSON.stringify({
       success: true,
       childId
@@ -88,8 +132,11 @@ export async function onRequest(context: { request: Request; env: Env }) {
       headers: corsHeaders()
     });
   } catch (error) {
-    console.error('Failed to create child profile:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error('❌ Failed to create child profile:', error);
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
       status: 500,
       headers: corsHeaders()
     });
