@@ -22,7 +22,8 @@ export default function NotesSection({ childId }: NotesSectionProps): JSX.Elemen
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await fetch(`/api/notes?child_id=${childId}`, {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/api/notes?child_id=${childId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -52,7 +53,8 @@ export default function NotesSection({ childId }: NotesSectionProps): JSX.Elemen
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('/api/notes/create', {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/notes/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

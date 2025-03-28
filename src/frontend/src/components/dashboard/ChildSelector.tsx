@@ -27,7 +27,8 @@ export default function ChildSelector({ selectedChildId, onSelectChild }: ChildS
           return;
         }
 
-        const response = await fetch('/api/children', {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/api/children`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

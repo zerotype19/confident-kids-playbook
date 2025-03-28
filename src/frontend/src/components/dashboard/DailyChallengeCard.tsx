@@ -27,7 +27,8 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await fetch(`/api/challenges/today?child_id=${childId}`, {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/api/challenges/today?child_id=${childId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -56,7 +57,8 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('/api/challenges/complete', {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/challenges/complete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

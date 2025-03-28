@@ -12,7 +12,8 @@ export const useFeatureFlags = (): FeatureFlagsResponse & { isPremium: boolean; 
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/feature-flags', {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/feature-flags`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

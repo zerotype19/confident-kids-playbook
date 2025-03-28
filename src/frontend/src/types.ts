@@ -19,11 +19,20 @@ export interface Challenge {
 }
 
 export interface FeatureFlags {
+  is_premium: boolean;
+  practice_enabled: boolean;
+  media_uploads: boolean;
+  calendar_enabled: boolean;
+  journal_enabled: boolean;
+  family_sharing: boolean;
   'premium.dashboard_insights': boolean;
-  'premium.practice_modules': boolean;
-  'premium.journal_export': boolean;
-  'premium.calendar_schedule': boolean;
-  'premium.badge_details': boolean;
+}
+
+export interface FeatureFlagsResponse {
+  flags: FeatureFlags | null;
+  loading: boolean;
+  error: string | null;
+  isFeatureEnabled: (feature: keyof FeatureFlags) => boolean;
 }
 
 export interface Badge {

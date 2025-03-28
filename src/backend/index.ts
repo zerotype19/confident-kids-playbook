@@ -7,6 +7,7 @@ import { onRequest as familyCreate } from './api/family_create'
 import { onRequest as childrenCreate } from './api/children_create'
 import { onRequest as onboardingComplete } from './api/onboarding_complete'
 import { onRequest as userProfile } from './api/user_profile'
+import { onRequest as children } from './api/children'
 
 const router = Router()
 
@@ -75,6 +76,9 @@ router.get('/api/onboarding/status', (request, context) => onboardingStatus({ re
 router.post('/api/family/create', (request, context) => familyCreate({ request, env: context.env }))
 router.post('/api/children/create', (request, context) => childrenCreate({ request, env: context.env }))
 router.post('/api/onboarding/complete', (request, context) => onboardingComplete({ request, env: context.env }))
+
+// Children routes
+router.get('/api/children', (request, context) => children({ request, env: context.env }))
 
 // Handle other routes
 router.get('/api/hello', async () => {
