@@ -8,11 +8,6 @@ import { onRequest as childrenCreate } from './api/children_create'
 import { onRequest as onboardingComplete } from './api/onboarding_complete'
 import { onRequest as userProfile } from './api/user_profile'
 import { onRequest as children } from './api/children'
-import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-import { logger } from 'hono/logger'
-import { prettyJSON } from 'hono/pretty-json'
-import { onRequest as auth } from './api/auth'
 import { onRequest as dashboardChallenge } from './api/dashboard/challenge'
 
 const router = Router()
@@ -73,7 +68,6 @@ router.options('*', handleOptions)
 
 // Auth routes
 router.post('/api/auth/google', (request, context) => authGoogle({ request, env: context.env }))
-router.get('/api/auth/verify', (request, context) => auth({ request, env: context.env }))
 
 // User profile routes
 router.get('/api/user/profile', (request, context) => userProfile({ request, env: context.env }))
@@ -86,6 +80,8 @@ router.post('/api/onboarding/complete', (request, context) => onboardingComplete
 
 // Children routes
 router.get('/api/children', (request, context) => children({ request, env: context.env }))
+
+// Dashboard routes
 router.get('/api/dashboard/challenge', (request, context) => dashboardChallenge({ request, env: context.env }))
 
 // Handle other routes
