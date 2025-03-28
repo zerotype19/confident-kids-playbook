@@ -36,7 +36,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchUserData = async (authToken: string) => {
     try {
       const response = await fetch("/api/user/profile", {
-        headers: { Authorization: `Bearer ${authToken}` }
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
       
       if (!response.ok) {
