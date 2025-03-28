@@ -10,6 +10,17 @@ interface Child {
   id: string;
 }
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  has_completed_onboarding: boolean;
+}
+
+interface DBResult<T> {
+  results: T[];
+}
+
 export async function onRequest(context: { request: Request; env: Env }) {
   const { request, env } = context;
   console.log('🚀 User profile endpoint called:', {
@@ -56,14 +67,28 @@ export async function onRequest(context: { request: Request; env: Env }) {
       email: payload?.email
     });
 
+    // Get user data including onboarding status
+    const userResult = await env.DB.prepare(`
+      SELECT id, email, name, has_completed_onboarding
+      FROM users
+      WHERE id = ?
+    `).bind(payload.sub).first<User>();
+
+    if (!userResult) {
+      return new Response(JSON.stringify({ error: 'User not found' }), {
+        status: 404,
+        headers: corsHeaders()
+      });
+    }
+
     // Check if user has a family
     const familyResult = await env.DB.prepare(`
       SELECT family_id 
       FROM family_members 
       WHERE user_id = ?
-    `).bind(payload.sub).all<FamilyMember>();
+    `).bind(payload.sub).all<FamilyMember>() as DBResult<FamilyMember>;
 
-    const hasFamily = familyResult.results !== undefined && Array.isArray(familyResult.results) && familyResult.results.length > 0;
+    const hasFamily = familyResult.results.length > 0;
     const familyId = hasFamily ? familyResult.results[0].family_id : null;
 
     // If user has a family, check for children
@@ -74,17 +99,18 @@ export async function onRequest(context: { request: Request; env: Env }) {
         FROM children 
         WHERE family_id = ?
         LIMIT 1
-      `).bind(familyId).all<Child>();
+      `).bind(familyId).all<Child>() as DBResult<Child>;
 
-      hasChild = childrenResult.results !== undefined && Array.isArray(childrenResult.results) && childrenResult.results.length > 0;
+      hasChild = childrenResult.results.length > 0;
     }
 
     return new Response(JSON.stringify({
       userId: payload.sub,
-      email: payload.email,
-      name: payload.name,
+      email: userResult.email,
+      name: userResult.name,
       hasFamily,
-      hasChild
+      hasChild,
+      hasCompletedOnboarding: Boolean(userResult.has_completed_onboarding)
     }), {
       headers: corsHeaders()
     });

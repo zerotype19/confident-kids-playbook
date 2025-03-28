@@ -1,20 +1,20 @@
 import React, { useEffect } from 'react';
 import { useOnboarding } from './OnboardingState';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ParentDetailsScreen(): JSX.Element {
   const { setCurrentStep, userData, setUserData } = useOnboarding();
+  const { token } = useAuth();
 
   useEffect(() => {
     // Fetch user data from the backend
     const fetchUserData = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const jwt = localStorage.getItem('jwt');
-        if (!jwt) return;
+        if (!token) return;
 
-        const response = await fetch(`${apiUrl}/api/user/profile`, {
+        const response = await fetch("/api/user/profile", {
           headers: {
-            'Authorization': `Bearer ${jwt}`
+            'Authorization': `Bearer ${token}`
           }
         });
 
@@ -31,7 +31,7 @@ export default function ParentDetailsScreen(): JSX.Element {
     };
 
     fetchUserData();
-  }, [setUserData]);
+  }, [setUserData, token]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
