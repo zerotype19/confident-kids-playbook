@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 console.log("✅ AuthContext loaded");
 
@@ -33,7 +32,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const fetchUserData = async (authToken: string) => {
     try {
@@ -54,11 +52,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         hasCompletedOnboarding: data.hasCompletedOnboarding
       };
       setUser(userData);
-
-      // Redirect to dashboard if onboarding is completed
-      if (userData.hasCompletedOnboarding) {
-        navigate('/dashboard');
-      }
     } catch (error) {
       console.error('Error fetching user data:', error);
       // If we can't fetch user data, clear the token and user state
@@ -91,7 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     setIsAuthenticated(false);
     setUser(null);
-    navigate('/');
   };
 
   return (

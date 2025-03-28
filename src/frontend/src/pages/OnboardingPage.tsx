@@ -24,33 +24,21 @@ function OnboardingContent(): JSX.Element {
 
 export default function OnboardingPage(): JSX.Element {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   useEffect(() => {
-    const checkProfile = async () => {
-      if (!token) return;
+    // If user has completed onboarding, redirect to dashboard
+    if (user?.hasCompletedOnboarding) {
+      navigate('/dashboard');
+      return;
+    }
 
-      try {
-        const res = await fetch("/api/user/profile", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (!res.ok) {
-          console.error('Failed to check user profile');
-          return;
-        }
-
-        const data = await res.json();
-        if (data.hasFamily && data.hasChild) {
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        console.error('Error checking user profile:', error);
-      }
-    };
-
-    checkProfile();
-  }, [token, navigate]);
+    // If no token, redirect to login
+    if (!token) {
+      navigate('/');
+      return;
+    }
+  }, [token, user, navigate]);
 
   return (
     <OnboardingProvider>
