@@ -6,6 +6,7 @@ import { onRequest as onboardingStatus } from './api/onboarding_status'
 import { onRequest as familyCreate } from './api/family_create'
 import { onRequest as childrenCreate } from './api/children_create'
 import { onRequest as onboardingComplete } from './api/onboarding_complete'
+import { onRequest as userProfile } from './api/user_profile'
 
 const router = Router()
 
@@ -65,6 +66,9 @@ router.options('*', handleOptions)
 
 // Auth routes
 router.post('/api/auth/google', (request, context) => authGoogle({ request, env: context.env }))
+
+// User profile routes
+router.get('/api/user/profile', (request, context) => userProfile({ request, env: context.env }))
 
 // Onboarding routes
 router.get('/api/onboarding/status', (request, context) => onboardingStatus({ request, env: context.env }))
