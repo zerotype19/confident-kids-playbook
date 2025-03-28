@@ -5,12 +5,31 @@ import { corsHeaders, handleOptions } from '../lib/cors';
 
 interface CreateChildRequest {
   name: string;
-  age_range: string;
+  birthdate: string;
+  gender: string;
   avatar_url?: string;
 }
 
 interface FamilyMemberResult {
   family_id: string;
+}
+
+function calculateAgeRange(birthdate: string): string | null {
+  const birth = new Date(birthdate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  const dayDiff = today.getDate() - birth.getDate();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    // hasn't had birthday yet this year
+    age -= 1;
+  }
+
+  if (age >= 3 && age <= 5) return "3–5";
+  if (age >= 6 && age <= 9) return "6–9";
+  if (age >= 10 && age <= 13) return "10–13";
+  return null;
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
@@ -80,15 +99,27 @@ export async function onRequest(context: { request: Request; env: Env }) {
     const body = await request.json() as CreateChildRequest;
     
     // Validate required fields
-    if (!body.name) {
-      return new Response(JSON.stringify({ error: 'Name is required' }), {
+    if (!body.name || !body.birthdate || !body.gender) {
+      return new Response(JSON.stringify({ 
+        error: 'Missing required fields',
+        details: {
+          name: !body.name ? 'Name is required' : null,
+          birthdate: !body.birthdate ? 'Birthdate is required' : null,
+          gender: !body.gender ? 'Gender is required' : null
+        }
+      }), {
         status: 400,
         headers: corsHeaders()
       });
     }
 
-    if (!body.age_range) {
-      return new Response(JSON.stringify({ error: 'Age range is required' }), {
+    // Calculate age range from birthdate
+    const ageRange = calculateAgeRange(body.birthdate);
+    if (!ageRange) {
+      return new Response(JSON.stringify({ 
+        error: 'Child must be between ages 3 and 13',
+        details: 'Please provide a valid birthdate for a child aged 3-13'
+      }), {
         status: 400,
         headers: corsHeaders()
       });
@@ -99,20 +130,24 @@ export async function onRequest(context: { request: Request; env: Env }) {
     console.log('👶 Creating child with:', {
       childId,
       name: body.name,
-      ageRange: body.age_range,
+      birthdate: body.birthdate,
+      ageRange,
+      gender: body.gender,
       familyId: familyMember.family_id,
       hasAvatar: !!body.avatar_url
     });
 
     // Create child profile
     const createChildResult = await env.DB.prepare(`
-      INSERT INTO children (id, family_id, name, age_range, avatar_url)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO children (id, family_id, name, birthdate, age_range, gender, avatar_url)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `).bind(
       childId,
       familyMember.family_id,
       body.name,
-      body.age_range,
+      body.birthdate,
+      ageRange,
+      body.gender,
       body.avatar_url || null
     ).run();
 
