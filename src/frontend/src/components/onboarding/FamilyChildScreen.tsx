@@ -134,64 +134,66 @@ export default function FamilyChildScreen(): JSX.Element {
             ))}
           </div>
 
-          {/* Add Child Form */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Add Child</h3>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="childName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="childName"
-                  value={newChild.name}
-                  onChange={(e) => setNewChild({ ...newChild, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Enter child's name"
-                  required
-                />
-              </div>
+          {/* Add Child Form - Only show if no children exist */}
+          {children.length === 0 && (
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Add Child</h3>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="childName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="childName"
+                    value={newChild.name}
+                    onChange={(e) => setNewChild({ ...newChild, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Enter child's name"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-1">
-                  Birthdate (Optional)
-                </label>
-                <input
-                  type="date"
-                  id="birthdate"
-                  value={newChild.birthdate}
-                  onChange={(e) => setNewChild({ ...newChild, birthdate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
+                <div>
+                  <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-1">
+                    Birthdate (Optional)
+                  </label>
+                  <input
+                    type="date"
+                    id="birthdate"
+                    value={newChild.birthdate}
+                    onChange={(e) => setNewChild({ ...newChild, birthdate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
 
-              <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-                  Gender (Optional)
-                </label>
-                <select
-                  id="gender"
-                  value={newChild.gender}
-                  onChange={(e) => setNewChild({ ...newChild, gender: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                <div>
+                  <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                    Gender (Optional)
+                  </label>
+                  <select
+                    id="gender"
+                    value={newChild.gender}
+                    onChange={(e) => setNewChild({ ...newChild, gender: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddChild}
+                  className="w-full py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+                  Add Child
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={handleAddChild}
-                className="w-full py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              >
-                Add Child
-              </button>
             </div>
-          </div>
+          )}
 
           {/* Navigation */}
           <div className="flex justify-between pt-4">

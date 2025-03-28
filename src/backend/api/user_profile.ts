@@ -48,6 +48,14 @@ export async function onRequest(context: { request: Request; env: Env }) {
       });
     }
 
+    console.log('✅ JWT verification result:', {
+      hasPayload: !!payload,
+      hasSub: !!payload?.sub,
+      sub: payload?.sub,
+      name: payload?.name,
+      email: payload?.email
+    });
+
     // Check if user has a family
     const familyResult = await env.DB.prepare(`
       SELECT family_id 
@@ -55,7 +63,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
       WHERE user_id = ?
     `).bind(payload.sub).all<FamilyMember>();
 
-    const hasFamily = familyResult.results && familyResult.results.length > 0;
+    const hasFamily = familyResult.results !== undefined && Array.isArray(familyResult.results) && familyResult.results.length > 0;
     const familyId = hasFamily ? familyResult.results[0].family_id : null;
 
     // If user has a family, check for children
@@ -68,12 +76,13 @@ export async function onRequest(context: { request: Request; env: Env }) {
         LIMIT 1
       `).bind(familyId).all<Child>();
 
-      hasChild = childrenResult.results && childrenResult.results.length > 0;
+      hasChild = childrenResult.results !== undefined && Array.isArray(childrenResult.results) && childrenResult.results.length > 0;
     }
 
     return new Response(JSON.stringify({
       userId: payload.sub,
       email: payload.email,
+      name: payload.name,
       hasFamily,
       hasChild
     }), {
@@ -82,6 +91,13 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
   } catch (error) {
     console.error('❌ User profile check failed:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
