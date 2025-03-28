@@ -9,10 +9,14 @@ export interface Child {
 export interface Challenge {
   id: string;
   title: string;
+  description: string;
   goal: string;
-  steps: string[];
+  steps: string | string[];
   example_dialogue?: string;
   tip?: string;
+  pillar_id: number;
+  age_range: string;
+  difficulty_level: string;
   created_at: string;
   updated_at: string;
 }

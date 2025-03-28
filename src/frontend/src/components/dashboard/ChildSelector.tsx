@@ -1,37 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-interface Child {
-  id: string;
-  name: string;
-  age_range: string;
-}
+import { Child } from '../../types';
 
 interface ChildSelectorProps {
-  selectedChildId: string | null;
-  onSelectChild: (childId: string) => void;
+  selectedChild: Child | null;
+  onChildSelect: (child: Child | null) => void;
 }
 
-export default function ChildSelector({ selectedChildId, onSelectChild }: ChildSelectorProps): JSX.Element {
+export default function ChildSelector({ selectedChild, onChildSelect }: ChildSelectorProps) {
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchChildren = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          navigate('/');
-          return;
+          throw new Error('No authentication token found');
         }
 
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await fetch(`${apiUrl}/api/children`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
 
         if (!response.ok) {
@@ -48,41 +39,60 @@ export default function ChildSelector({ selectedChildId, onSelectChild }: ChildS
     };
 
     fetchChildren();
-  }, [navigate]);
+  }, []);
 
   if (loading) {
-    return <div className="text-sm text-gray-600">Loading children...</div>;
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-4">
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-sm text-red-600">{error}</div>;
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-4">
+        <div className="text-red-600 text-sm">{error}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Select Child</h2>
-        <button
-          onClick={() => navigate('/onboarding/child')}
-          className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm"
-        >
-          Add Child
-        </button>
-      </div>
-
+    <div className="bg-white rounded-2xl shadow-sm p-4">
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">Select Child</h2>
       <div className="space-y-2">
         {children.map((child) => (
           <button
             key={child.id}
-            onClick={() => onSelectChild(child.id)}
-            className={`w-full text-left p-3 rounded-lg border ${
-              selectedChildId === child.id
-                ? 'border-blue-600 bg-blue-50'
-                : 'border-gray-200 hover:border-blue-200'
+            onClick={() => onChildSelect(child)}
+            className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
+              selectedChild?.id === child.id
+                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                : 'hover:bg-gray-50 border border-gray-200'
             }`}
           >
-            <div className="font-medium">{child.name}</div>
-            <div className="text-sm text-gray-600">{child.age_range}</div>
+            <div className="flex items-center space-x-3">
+              {child.avatar_url ? (
+                <img
+                  src={child.avatar_url}
+                  alt={child.name}
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 text-sm">
+                    {child.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <div>
+                <div className="font-medium">{child.name}</div>
+                <div className="text-sm text-gray-500">{child.age_range}</div>
+              </div>
+            </div>
           </button>
         ))}
       </div>
