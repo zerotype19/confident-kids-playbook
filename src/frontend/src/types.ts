@@ -4,7 +4,6 @@ export interface Child {
   age_range: string;
   avatar_url?: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Challenge {
