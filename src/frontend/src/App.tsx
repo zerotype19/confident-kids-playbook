@@ -3,6 +3,7 @@ import { ChildProvider } from "./contexts/ChildContext"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import OnboardingPage from "./pages/OnboardingPage"
+import DashboardPage from "./pages/DashboardPage"
 import { PrivateRoute } from "./components/PrivateRoute"
 
 export default function App(): JSX.Element {
@@ -26,6 +27,14 @@ export default function App(): JSX.Element {
               element={
                 <PrivateRoute>
                   <OnboardingPage />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard" 
+              element={
+                <PrivateRoute>
+                  <DashboardPage />
                 </PrivateRoute>
               } 
             />

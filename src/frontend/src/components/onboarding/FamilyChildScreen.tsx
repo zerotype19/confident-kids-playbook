@@ -60,8 +60,8 @@ export default function FamilyChildScreen(): JSX.Element {
 
       if (!completeResponse.ok) throw new Error('Failed to complete onboarding');
 
-      // Navigate to home
-      navigate('/home');
+      // Navigate to dashboard
+      navigate('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
