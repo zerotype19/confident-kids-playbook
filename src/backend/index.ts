@@ -8,7 +8,7 @@ import { onRequest as childrenCreate } from './api/children_create'
 import { onRequest as onboardingComplete } from './api/onboarding_complete'
 import { onRequest as userProfile } from './api/user_profile'
 import { onRequest as children } from './api/children'
-import { onRequest as dashboardChallenge } from './api/dashboard/challenge'
+import { challenge } from './api/dashboard/challenge'
 import { notes, createNote } from './api/notes'
 
 const router = Router()
@@ -83,7 +83,7 @@ router.post('/api/onboarding/complete', (request, context) => onboardingComplete
 router.get('/api/children', (request, context) => children({ request, env: context.env }))
 
 // Dashboard routes
-router.get('/api/dashboard/challenge', (request, context) => dashboardChallenge({ request, env: context.env }))
+router.get('/api/dashboard/challenge', (request, context) => challenge({ request, env: context.env }))
 
 // Notes routes
 router.get('/api/notes', (request, context) => notes({ request, env: context.env }))
