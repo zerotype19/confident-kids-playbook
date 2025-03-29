@@ -7,7 +7,7 @@ interface Note {
 }
 
 interface NotesSectionProps {
-  childId: string;
+  childId?: string;
 }
 
 export default function NotesSection({ childId }: NotesSectionProps): JSX.Element {

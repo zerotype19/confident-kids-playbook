@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ProgressSummaryProps {
-  childId: string;
+  childId?: string;
 }
 
 export default function ProgressSummary({ childId }: ProgressSummaryProps) {
