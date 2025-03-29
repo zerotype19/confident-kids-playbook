@@ -51,10 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       const userData = {
-        uid: data.userId,
+        uid: data.sub,
         email: data.email,
         displayName: data.name,
-        photoURL: null,
+        photoURL: data.picture,
         hasCompletedOnboarding: data.hasCompletedOnboarding
       };
       setUser(userData);
