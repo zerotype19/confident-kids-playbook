@@ -9,8 +9,9 @@ interface Challenge {
   steps: string[];
   example_dialogue: string;
   tip: string;
-  pillar: string;
+  pillar_id: string;
   age_range: string;
+  difficulty_level: number;
 }
 
 interface Child {
@@ -25,8 +26,9 @@ interface ChallengeResult {
   steps: string;
   example_dialogue: string;
   tip: string;
-  pillar: string;
+  pillar_id: string;
   age_range: string;
+  difficulty_level: number;
 }
 
 export async function challenge({ request, env }: { request: Request; env: Env }) {
@@ -65,8 +67,9 @@ export async function challenge({ request, env }: { request: Request; env: Env }
         steps,
         example_dialogue,
         tip,
-        pillar,
-        age_range
+        pillar_id,
+        age_range,
+        difficulty_level
       FROM challenges
       WHERE age_range = ?
       AND NOT EXISTS (
@@ -96,8 +99,9 @@ export async function challenge({ request, env }: { request: Request; env: Env }
       steps: JSON.parse(result.steps),
       example_dialogue: result.example_dialogue,
       tip: result.tip,
-      pillar: result.pillar,
-      age_range: result.age_range
+      pillar_id: result.pillar_id,
+      age_range: result.age_range,
+      difficulty_level: result.difficulty_level
     };
 
     return new Response(JSON.stringify({ challenge }), {
