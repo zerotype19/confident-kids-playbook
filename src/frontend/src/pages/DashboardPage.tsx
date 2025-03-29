@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import ChildSelector from '../components/dashboard/ChildSelector';
-import DailyChallengeCard from '../components/dashboard/DailyChallengeCard';
 import NavigationPanel from '../components/dashboard/NavigationPanel';
 import NotesSection from '../components/dashboard/NotesSection';
 import ProgressSummary from '../components/dashboard/ProgressSummary';
@@ -40,7 +39,7 @@ export default function DashboardPage() {
           throw new Error('Failed to fetch challenge');
         }
         const data = await response.json();
-        setChallenge(data);
+        setChallenge(data.challenge);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch challenge');
       } finally {
