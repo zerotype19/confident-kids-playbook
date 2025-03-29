@@ -75,7 +75,7 @@ export async function challenge({ request, env }: { request: Request; env: Env }
         age_range,
         difficulty_level
       FROM challenges
-      WHERE age_range = ?
+      WHERE REPLACE(age_range, '–', '-') = REPLACE(?, '–', '-')
       AND NOT EXISTS (
         SELECT 1 
         FROM challenge_logs cl 
