@@ -20,13 +20,14 @@ export default function NotesSection({ childId }: NotesSectionProps): JSX.Elemen
     const fetchNotes = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
 
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await fetch(`${apiUrl}/api/notes?child_id=${childId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/notes?child_id=${childId}`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
 
         if (!response.ok) {
@@ -35,8 +36,9 @@ export default function NotesSection({ childId }: NotesSectionProps): JSX.Elemen
 
         const data = await response.json();
         setNotes(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch notes');
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+        setError('Failed to load notes');
       } finally {
         setLoading(false);
       }
@@ -45,36 +47,35 @@ export default function NotesSection({ childId }: NotesSectionProps): JSX.Elemen
     fetchNotes();
   }, [childId]);
 
-  const handleAddNote = async (e: React.FormEvent) => {
+  const handleAddNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newNote.trim()) return;
 
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${apiUrl}/api/notes/create`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/notes`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          child_id: childId,
-          content: newNote
-        })
+        body: JSON.stringify({ child_id: childId, content: newNote }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to create note');
       }
 
-      const data = await response.json();
-      setNotes(prev => [data, ...prev]);
+      const newNoteData = await response.json();
+      setNotes(prevNotes => [newNoteData, ...prevNotes]);
       setNewNote('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create note');
+    } catch (error) {
+      console.error('Error creating note:', error);
+      setError('Failed to create note');
     }
   };
 
