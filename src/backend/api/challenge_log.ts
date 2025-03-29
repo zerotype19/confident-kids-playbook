@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 interface ChallengeLogRequest {
   child_id: string;
   challenge_id: string;
-  notes?: string;
+  reflection?: string;
+  mood_rating?: number;
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
@@ -59,11 +60,10 @@ export async function onRequest(context: { request: Request; env: Env }) {
     // Check for duplicate log
     const existingLog = await env.DB.prepare(`
       SELECT id FROM challenge_logs 
-      WHERE user_id = ? 
-      AND child_id = ? 
+      WHERE child_id = ? 
       AND challenge_id = ? 
       AND date(completed_at) = date('now')
-    `).bind(payload.sub, body.child_id, body.challenge_id).first();
+    `).bind(body.child_id, body.challenge_id).first();
 
     if (existingLog) {
       return new Response(JSON.stringify({ error: 'Challenge already completed today' }), {
@@ -75,14 +75,14 @@ export async function onRequest(context: { request: Request; env: Env }) {
     // Insert new log
     const logId = uuidv4();
     await env.DB.prepare(`
-      INSERT INTO challenge_logs (id, user_id, child_id, challenge_id, completed_at, notes)
-      VALUES (?, ?, ?, ?, datetime('now'), ?)
+      INSERT INTO challenge_logs (id, child_id, challenge_id, completed_at, reflection, mood_rating)
+      VALUES (?, ?, ?, datetime('now'), ?, ?)
     `).bind(
       logId,
-      payload.sub,
       body.child_id,
       body.challenge_id,
-      body.notes || null
+      body.reflection || null,
+      body.mood_rating || null
     ).run();
 
     return new Response(JSON.stringify({ success: true }), {
