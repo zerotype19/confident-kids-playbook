@@ -86,6 +86,11 @@ export default function DashboardPage() {
     fetchChallenge();
   }, [selectedChild]);
 
+  const handleChallengeComplete = () => {
+    // Optionally refresh the challenge or update UI
+    console.log('Challenge completed!');
+  };
+
   return (
     <Layout>
       <PageWrapper>
@@ -115,8 +120,12 @@ export default function DashboardPage() {
                 <div className="bg-white rounded-2xl shadow-kidoova p-4 md:p-6 text-center">
                   <p className="text-red-600">{error}</p>
                 </div>
-              ) : challenge ? (
-                <TodayChallengeCard challenge={challenge} />
+              ) : challenge && selectedChild ? (
+                <TodayChallengeCard 
+                  challenge={challenge}
+                  childId={selectedChild.id}
+                  onComplete={handleChallengeComplete}
+                />
               ) : null}
 
               {selectedChild?.id && (

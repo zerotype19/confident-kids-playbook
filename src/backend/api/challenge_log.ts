@@ -1,0 +1,105 @@
+import { Env } from '../types';
+import { verifyJWT } from '../auth';
+import { corsHeaders } from '../lib/cors';
+import { v4 as uuidv4 } from 'uuid';
+
+interface ChallengeLogRequest {
+  child_id: string;
+  challenge_id: string;
+  notes?: string;
+}
+
+export async function onRequest(context: { request: Request; env: Env }) {
+  const { request, env } = context;
+
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: corsHeaders()
+    });
+  }
+
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    // Verify authentication
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: corsHeaders()
+      });
+    }
+
+    const token = authorization.split(' ')[1];
+    const payload = await verifyJWT(token, env);
+    
+    if (!payload?.sub) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: corsHeaders()
+      });
+    }
+
+    // Parse request body
+    const body: ChallengeLogRequest = await request.json();
+    
+    if (!body.child_id || !body.challenge_id) {
+      return new Response(JSON.stringify({ error: 'Child ID and Challenge ID are required' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    // Check for duplicate log
+    const existingLog = await env.DB.prepare(`
+      SELECT id FROM challenge_logs 
+      WHERE user_id = ? 
+      AND child_id = ? 
+      AND challenge_id = ? 
+      AND date(completed_at) = date('now')
+    `).bind(payload.sub, body.child_id, body.challenge_id).first();
+
+    if (existingLog) {
+      return new Response(JSON.stringify({ error: 'Challenge already completed today' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    // Insert new log
+    const logId = uuidv4();
+    await env.DB.prepare(`
+      INSERT INTO challenge_logs (id, user_id, child_id, challenge_id, completed_at, notes)
+      VALUES (?, ?, ?, ?, datetime('now'), ?)
+    `).bind(
+      logId,
+      payload.sub,
+      body.child_id,
+      body.challenge_id,
+      body.notes || null
+    ).run();
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: corsHeaders()
+    });
+
+  } catch (error) {
+    console.error('Error logging challenge completion:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to log challenge completion',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
+      {
+        status: 500,
+        headers: corsHeaders()
+      }
+    );
+  }
+} 

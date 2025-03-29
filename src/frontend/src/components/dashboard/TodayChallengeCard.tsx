@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Challenge {
+  id: string;
   title: string;
   description: string;
   goal: string;
@@ -11,11 +12,54 @@ interface Challenge {
 
 interface TodayChallengeCardProps {
   challenge: Challenge;
+  childId: string;
+  onComplete?: () => void;
 }
 
-export default function TodayChallengeCard({ challenge }: TodayChallengeCardProps) {
+export default function TodayChallengeCard({ challenge, childId, onComplete }: TodayChallengeCardProps) {
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  const handleMarkComplete = async () => {
+    setIsCompleting(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          child_id: childId,
+          challenge_id: challenge.id
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to mark challenge as complete');
+      }
+
+      setIsCompleted(true);
+      onComplete?.();
+    } catch (err) {
+      console.error('Error marking challenge complete:', err);
+      setError(err instanceof Error ? err.message : 'Failed to mark challenge as complete');
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow-kidoova p-6 space-y-6 border border-kidoova-yellow/20">
+    <div className={`bg-white rounded-2xl shadow-kidoova p-6 space-y-6 border ${isCompleted ? 'border-kidoova-accent' : 'border-kidoova-yellow/20'}`}>
       {/* Title Section */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-kidoova-green mb-2">
@@ -72,6 +116,42 @@ export default function TodayChallengeCard({ challenge }: TodayChallengeCardProp
           "{challenge.example_dialogue}"
         </p>
       </div>
+
+      {/* Mark Complete Button */}
+      {!isCompleted && (
+        <div className="flex justify-center">
+          <button
+            onClick={handleMarkComplete}
+            disabled={isCompleting}
+            className={`
+              px-6 py-3 rounded-lg font-semibold text-white
+              ${isCompleting 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
+              }
+            `}
+          >
+            {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
+          </button>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {isCompleted && (
+        <div className="flex justify-center items-center space-x-2 text-kidoova-accent">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="font-semibold">Challenge Completed!</span>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="text-red-600 text-center">
+          {error}
+        </div>
+      )}
     </div>
   );
 } 

@@ -10,6 +10,7 @@ import { onRequest as userProfile } from './api/user_profile'
 import { onRequest as children } from './api/children'
 import { challenge } from './api/dashboard/challenge'
 import { notes, createNote } from './api/notes'
+import { onRequest as challengeLog } from './api/challenge_log'
 
 const router = Router()
 
@@ -35,7 +36,7 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
       statusText: response.statusText,
       headers: {
         ...Object.fromEntries(response.headers.entries()),
-        ...Object.fromEntries(corsHeaders().entries())
+        ...Object.fromEntries(corsHeaders(request).entries())
       }
     })
     
@@ -59,7 +60,7 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
       details: error instanceof Error ? error.message : 'Unknown error'
     }), {
       status: 500,
-      headers: corsHeaders()
+      headers: corsHeaders(request)
     })
   }
 }
@@ -84,6 +85,7 @@ router.get('/api/children', (request, context) => children({ request, env: conte
 
 // Dashboard routes
 router.get('/api/dashboard/challenge', (request, context) => challenge({ request, env: context.env }))
+router.post('/api/challenge-log', (request, context) => challengeLog({ request, env: context.env }))
 
 // Notes routes
 router.get('/api/notes', (request, context) => notes({ request, env: context.env }))
