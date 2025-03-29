@@ -8,11 +8,13 @@ export function Header() {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <img 
-                src="https://raw.githubusercontent.com/zerotype19/confident-kids-playbook/main/src/frontend/public/logo.png"
+                src="/static/logo.png"
                 alt="Kidoova" 
                 className="h-8 sm:h-10 w-auto"
                 onError={(e) => {
                   console.error('Logo failed to load:', e);
+                  // Try the GitHub URL as fallback
+                  e.currentTarget.src = 'https://raw.githubusercontent.com/zerotype19/confident-kids-playbook/main/src/frontend/public/logo.png';
                 }}
               />
             </Link>
