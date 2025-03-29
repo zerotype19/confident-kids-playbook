@@ -8,7 +8,20 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    copyPublicDir: true
+    copyPublicDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+      output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === 'logo.png') {
+            return 'logo.png';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
+      },
+    },
   },
   resolve: {
     alias: {
