@@ -24,7 +24,7 @@ export default function DashboardPage() {
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch('/api/children', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -63,7 +63,7 @@ export default function DashboardPage() {
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`/api/dashboard/challenge?childId=${selectedChild.id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/challenge?childId=${selectedChild.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
