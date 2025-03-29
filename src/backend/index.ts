@@ -86,8 +86,8 @@ router.get('/api/children', (request, context) => children({ request, env: conte
 router.get('/api/dashboard/challenge', (request, context) => dashboardChallenge({ request, env: context.env }))
 
 // Notes routes
-router.get('/api/notes', notes)
-router.post('/api/notes', createNote)
+router.get('/api/notes', (request, context) => notes({ request, env: context.env }))
+router.post('/api/notes', (request, context) => createNote({ request, env: context.env }))
 
 // Handle other routes
 router.get('/api/hello', async () => {

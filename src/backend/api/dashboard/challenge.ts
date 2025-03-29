@@ -147,17 +147,35 @@ export async function onRequest(context: { request: Request; env: Env }) {
 }
 
 export async function challenge({ request, env }: { request: Request; env: Env }) {
-  const url = new URL(request.url);
-  const childId = url.searchParams.get('child_id');
-
-  if (!childId) {
-    return new Response(JSON.stringify({ error: 'Child ID is required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
+  const authorization = request.headers.get('Authorization');
+  if (!authorization) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: corsHeaders()
     });
   }
 
   try {
+    const token = authorization.split(' ')[1];
+    const payload = await verifyJWT(token, env);
+    
+    if (!payload?.sub) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: corsHeaders()
+      });
+    }
+
+    const url = new URL(request.url);
+    const childId = url.searchParams.get('child_id');
+
+    if (!childId) {
+      return new Response(JSON.stringify({ error: 'Child ID is required' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
     // TODO: Replace with actual database query
     // For now, return a mock challenge
     const challenge: Challenge = {
@@ -176,8 +194,8 @@ export async function challenge({ request, env }: { request: Request; env: Env }
       pillar: 'Problem Solving'
     };
 
-    return new Response(JSON.stringify(challenge), {
-      headers: { 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ challenge }), {
+      headers: corsHeaders()
     });
   } catch (error) {
     console.error('Error fetching challenge:', error);
@@ -185,7 +203,7 @@ export async function challenge({ request, env }: { request: Request; env: Env }
       JSON.stringify({ error: 'Failed to fetch challenge' }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders()
       }
     );
   }
