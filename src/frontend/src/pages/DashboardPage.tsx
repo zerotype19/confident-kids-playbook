@@ -22,10 +22,46 @@ interface Challenge {
 
 export default function DashboardPage() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+  const [children, setChildren] = useState<Child[]>([]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch children list
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch children');
+        }
+
+        const data = await response.json();
+        setChildren(data);
+        
+        // Auto-select first child if there's only one
+        if (data.length === 1 && !selectedChild) {
+          setSelectedChild(data[0]);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch children');
+      }
+    };
+
+    fetchChildren();
+  }, [selectedChild]);
+
+  // Fetch challenge when child is selected
   useEffect(() => {
     async function fetchChallenge() {
       if (!selectedChild) return;
@@ -80,6 +116,9 @@ export default function DashboardPage() {
             <ChildSelector
               selectedChild={selectedChild}
               onChildSelect={setSelectedChild}
+              children={children}
+              loading={isLoading}
+              error={error}
             />
             <NavigationPanel />
           </div>

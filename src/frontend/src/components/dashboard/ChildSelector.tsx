@@ -1,46 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Child } from '../../types';
 
 interface ChildSelectorProps {
   selectedChild: Child | null;
   onChildSelect: (child: Child | null) => void;
+  children: Child[];
+  loading?: boolean;
+  error?: string | null;
 }
 
-export default function ChildSelector({ selectedChild, onChildSelect }: ChildSelectorProps) {
-  const [children, setChildren] = useState<Child[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchChildren = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch children');
-        }
-
-        const data = await response.json();
-        setChildren(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch children');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChildren();
-  }, []);
-
+export default function ChildSelector({ 
+  selectedChild, 
+  onChildSelect, 
+  children,
+  loading = false,
+  error = null
+}: ChildSelectorProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-4">
