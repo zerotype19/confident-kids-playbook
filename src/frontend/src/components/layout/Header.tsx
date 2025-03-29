@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import logoUrl from '@/assets/logo.png';
 
 export function Header() {
   return (
@@ -8,12 +9,11 @@ export function Header() {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <img 
-                src="/logo.png" 
+                src={logoUrl} 
                 alt="Kidoova" 
                 className="h-8 sm:h-10 w-auto"
                 onError={(e) => {
                   console.error('Logo failed to load:', e);
-                  e.currentTarget.src = 'https://confident-kids-playbook.pages.dev/logo.png';
                 }}
               />
             </Link>

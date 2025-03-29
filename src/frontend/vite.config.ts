@@ -15,9 +15,6 @@ export default defineConfig({
       },
       output: {
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'logo.png') {
-            return 'logo.png';
-          }
           return 'assets/[name]-[hash][extname]';
         },
       },
