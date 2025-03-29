@@ -1,6 +1,7 @@
 import React, { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import { PageWrapper } from "../components/PageWrapper"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -139,7 +140,7 @@ export default function HomePage(): JSX.Element {
           callback: handleGoogleLogin
         })
         window.google.accounts.id.renderButton(
-          document.getElementById("google-signin-button"),
+          document.getElementById("google-login-button"),
           { theme: "outline", size: "large", shape: "pill" }
         )
         console.log("✅ Google sign-in button rendered")
@@ -161,37 +162,30 @@ export default function HomePage(): JSX.Element {
   }, [googleClientId, navigate])
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 flex flex-col items-center justify-center px-6">
-      <header className="text-center py-12">
-        <h1 className="text-4xl font-bold mb-4">Confident Kids Playbook</h1>
-        <p className="text-lg text-gray-600">
-          Build stronger, braver, more confident kids – one small daily step at a time.
+    <PageWrapper>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading mb-6">
+          Welcome to Confident Kids Playbook
+        </h1>
+        <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl">
+          Empowering children to build confidence through play and practice
         </p>
-      </header>
-
-      <section className="grid gap-6 max-w-xl text-center mb-12">
-        <div className="bg-gray-50 p-4 rounded-xl shadow">
-          🎯 Daily psychology-backed challenges
+        <div id="google-login-button" className="mb-8"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <h2 className="text-xl font-heading mb-4">Daily Challenges</h2>
+            <p className="text-gray-600">Fun, engaging activities that build self-esteem</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <h2 className="text-xl font-heading mb-4">Progress Tracking</h2>
+            <p className="text-gray-600">Monitor your child's growth and achievements</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <h2 className="text-xl font-heading mb-4">Parent Resources</h2>
+            <p className="text-gray-600">Tools and tips to support your child's journey</p>
+          </div>
         </div>
-        <div className="bg-gray-50 p-4 rounded-xl shadow">
-          🧠 Practice modules for growth & resilience
-        </div>
-        <div className="bg-gray-50 p-4 rounded-xl shadow">
-          📊 Progress tracking, rewards, and streaks
-        </div>
-        <div className="bg-gray-50 p-4 rounded-xl shadow">
-          👪 Designed for real parent-child connection
-        </div>
-      </section>
-
-      <div className="flex flex-col gap-4 mb-12">
-        <div id="google-signin-button"></div>
       </div>
-
-      <footer className="text-sm text-gray-400 pb-6">
-        <p>© 2025 Confident Kids Playbook</p>
-        <p>About | Contact | Terms</p>
-      </footer>
-    </div>
+    </PageWrapper>
   )
 } 

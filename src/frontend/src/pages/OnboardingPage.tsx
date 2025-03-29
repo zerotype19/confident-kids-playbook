@@ -6,6 +6,7 @@ import ParentDetailsScreen from '../components/onboarding/ParentDetailsScreen';
 import FamilyChildScreen from '../components/onboarding/FamilyChildScreen';
 import { useOnboarding } from '../components/onboarding/OnboardingState';
 import { useAuth } from '../contexts/AuthContext';
+import { PageWrapper } from '../components/PageWrapper';
 
 function OnboardingContent(): JSX.Element {
   const { currentStep } = useOnboarding();
@@ -42,7 +43,9 @@ export default function OnboardingPage(): JSX.Element {
 
   return (
     <OnboardingProvider>
-      <OnboardingContent />
+      <PageWrapper>
+        <OnboardingContent />
+      </PageWrapper>
     </OnboardingProvider>
   );
 } 

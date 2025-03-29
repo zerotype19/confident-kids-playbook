@@ -7,13 +7,15 @@ import NotesSection from '../components/dashboard/NotesSection';
 import ProgressSummary from '../components/dashboard/ProgressSummary';
 import TodaysChallenge from '../components/dashboard/TodaysChallenge';
 import { Child } from '../types';
+import { PageWrapper } from '../components/PageWrapper';
 
 export default function DashboardPage() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <PageWrapper>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-heading mb-6">Dashboard</h1>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Child Selection and Navigation */}
           <div className="lg:col-span-3 space-y-6">
@@ -44,7 +46,7 @@ export default function DashboardPage() {
             {selectedChild && <ProgressSummary childId={selectedChild.id} />}
           </div>
         </div>
-      </div>
+      </PageWrapper>
     </Layout>
   );
 } 
