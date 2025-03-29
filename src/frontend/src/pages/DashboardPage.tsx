@@ -34,7 +34,20 @@ export default function DashboardPage() {
       setError(null);
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/challenge?child_id=${selectedChild.id}`);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/dashboard/challenge?child_id=${selectedChild.id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
         if (!response.ok) {
           throw new Error('Failed to fetch challenge');
         }
@@ -57,11 +70,13 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <PageWrapper>
-        <h1 className="text-3xl font-bold text-kidoova-green mb-6">Welcome back!</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="w-full">
+        <h1 className="text-2xl md:text-3xl font-bold text-kidoova-green mb-6 text-center md:text-left">
+          Welcome back!
+        </h1>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
           {/* Left Column - Child Selection and Navigation */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-4 md:space-y-6">
             <ChildSelector
               selectedChild={selectedChild}
               onChildSelect={setSelectedChild}
@@ -70,15 +85,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Main Content Area */}
-          <div className="lg:col-span-6 space-y-6">
+          <div className="lg:col-span-6 space-y-4 md:space-y-6">
             {selectedChild ? (
               <>
                 {isLoading ? (
-                  <div className="bg-white rounded-2xl shadow-kidoova p-6 text-center">
+                  <div className="bg-white rounded-2xl shadow-kidoova p-4 md:p-6 text-center">
                     <p className="text-gray-600">Loading today's challenge...</p>
                   </div>
                 ) : error ? (
-                  <div className="bg-white rounded-2xl shadow-kidoova p-6 text-center">
+                  <div className="bg-white rounded-2xl shadow-kidoova p-4 md:p-6 text-center">
                     <p className="text-red-600">{error}</p>
                   </div>
                 ) : challenge ? (
@@ -96,7 +111,7 @@ export default function DashboardPage() {
                 <NotesSection childId={selectedChild.id} />
               </>
             ) : (
-              <div className="bg-white rounded-2xl shadow-kidoova p-6 text-center">
+              <div className="bg-white rounded-2xl shadow-kidoova p-4 md:p-6 text-center">
                 <p className="text-gray-600">Please select a child to view their dashboard.</p>
                 <CustomButton 
                   variant="secondary" 
@@ -114,7 +129,7 @@ export default function DashboardPage() {
             {selectedChild && <ProgressSummary childId={selectedChild.id} />}
           </div>
         </div>
-      </PageWrapper>
+      </div>
     </Layout>
   );
 } 
