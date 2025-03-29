@@ -5,25 +5,25 @@
 /* === GLOBAL STYLES === */
 html,
 body {
-  @apply bg-brand-light text-text-base font-sans;
+  @apply bg-kidoova-background text-kidoova-green font-sans;
 }
 
 h1, h2, h3, h4 {
-  @apply font-heading text-text-base;
+  @apply font-sans font-bold text-kidoova-green;
 }
 
 a {
-  @apply text-accent-blue hover:underline;
+  @apply text-kidoova-accent hover:text-kidoova-green transition-colors;
 }
 
 button {
-  @apply px-4 py-2 rounded-2xl font-medium text-white bg-accent-blue hover:bg-blue-600 transition-all;
+  @apply px-4 py-2 rounded-xl font-medium text-white bg-kidoova-accent hover:bg-kidoova-green transition-all shadow-kidoova;
 }
 
 input, select, textarea {
-  @apply rounded-xl border border-brand-dark px-4 py-2 text-sm w-full bg-white focus:outline-none focus:ring-2 focus:ring-accent-blue;
+  @apply rounded-xl border border-kidoova-accent/20 px-4 py-2 text-sm w-full bg-white focus:outline-none focus:ring-2 focus:ring-kidoova-accent/50;
 }
 
 .card {
-  @apply bg-white rounded-2xl shadow-card p-4 space-y-2;
+  @apply bg-white rounded-xl shadow-kidoova p-4 space-y-2;
 }
