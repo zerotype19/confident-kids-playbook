@@ -43,6 +43,7 @@ export async function challenge({ request, env }: { request: Request; env: Env }
   }
 
   try {
+    console.log('Fetching child with ID:', childId);
     // First, get the child's age range
     const child = await env.DB.prepare(`
       SELECT age_range 
@@ -51,11 +52,14 @@ export async function challenge({ request, env }: { request: Request; env: Env }
     `).bind(childId).first<Child>();
 
     if (!child) {
+      console.log('Child not found:', childId);
       return new Response(JSON.stringify({ error: 'Child not found' }), {
         status: 404,
         headers: corsHeaders()
       });
     }
+
+    console.log('Found child with age range:', child.age_range);
 
     // Get a random age-appropriate challenge that hasn't been completed today
     const result = await env.DB.prepare(`
@@ -84,11 +88,14 @@ export async function challenge({ request, env }: { request: Request; env: Env }
     `).bind(child.age_range, childId).first<ChallengeResult>();
 
     if (!result) {
+      console.log('No challenges found for age range:', child.age_range);
       return new Response(JSON.stringify({ error: 'No age-appropriate challenges available for today' }), {
         status: 404,
         headers: corsHeaders()
       });
     }
+
+    console.log('Found challenge:', result.id);
 
     // Parse the steps JSON array
     const challenge: Challenge = {
