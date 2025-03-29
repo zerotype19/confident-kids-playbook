@@ -8,6 +8,7 @@ import ProgressSummary from '../components/dashboard/ProgressSummary';
 import TodaysChallenge from '../components/dashboard/TodaysChallenge';
 import { Child } from '../types';
 import { PageWrapper } from '../components/PageWrapper';
+import CustomButton from '../components/CustomButton';
 
 export default function DashboardPage() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
@@ -15,7 +16,7 @@ export default function DashboardPage() {
   return (
     <Layout>
       <PageWrapper>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-heading mb-6">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-kidoova-green mb-6">Welcome back!</h1>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Child Selection and Navigation */}
           <div className="lg:col-span-3 space-y-6">
@@ -35,8 +36,15 @@ export default function DashboardPage() {
                 <NotesSection childId={selectedChild.id} />
               </>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
+              <div className="bg-white rounded-2xl shadow-kidoova p-6 text-center">
                 <p className="text-gray-600">Please select a child to view their dashboard.</p>
+                <CustomButton 
+                  variant="secondary" 
+                  onClick={() => console.log('Add child clicked')}
+                  className="mt-4"
+                >
+                  Add Child
+                </CustomButton>
               </div>
             )}
           </div>
