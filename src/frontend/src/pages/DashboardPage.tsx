@@ -4,7 +4,7 @@ import ChildSelector from '../components/dashboard/ChildSelector';
 import NavigationPanel from '../components/dashboard/NavigationPanel';
 import NotesSection from '../components/dashboard/NotesSection';
 import ProgressSummary from '../components/dashboard/ProgressSummary';
-import TodaysChallengeCard from '../components/dashboard/TodaysChallengeCard';
+import TodayChallengeCard from '../components/dashboard/TodayChallengeCard';
 import { Child } from '../types';
 import { PageWrapper } from '../components/PageWrapper';
 import CustomButton from '../components/CustomButton';
@@ -136,16 +136,7 @@ export default function DashboardPage() {
                     <p className="text-red-600">{error}</p>
                   </div>
                 ) : challenge ? (
-                  <TodaysChallengeCard
-                    title={challenge.title}
-                    description={challenge.description}
-                    goal={challenge.goal}
-                    steps={challenge.steps}
-                    exampleDialogue={challenge.example_dialogue}
-                    tip={challenge.tip}
-                    pillar={challenge.pillar}
-                    onMarkComplete={handleMarkComplete}
-                  />
+                  <TodayChallengeCard challenge={challenge} />
                 ) : null}
                 <NotesSection childId={selectedChild.id} />
               </>
