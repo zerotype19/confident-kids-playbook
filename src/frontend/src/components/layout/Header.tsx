@@ -13,8 +13,6 @@ export function Header() {
                 className="h-8 sm:h-10 w-auto"
                 onError={(e) => {
                   console.error('Logo failed to load:', e);
-                  // Try the GitHub URL as fallback
-                  e.currentTarget.src = 'https://raw.githubusercontent.com/zerotype19/confident-kids-playbook/main/src/frontend/public/logo.png';
                 }}
               />
             </Link>
