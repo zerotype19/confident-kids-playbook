@@ -12,6 +12,21 @@ interface Challenge {
   pillar: string;
 }
 
+interface Child {
+  age_range: string;
+}
+
+interface ChallengeResult {
+  id: string;
+  title: string;
+  description: string;
+  goal: string;
+  steps: string;
+  example_dialogue: string;
+  tip: string;
+  pillar: string;
+}
+
 export async function challenge({ request, env }: { request: Request; env: Env }) {
   const url = new URL(request.url);
   const childId = url.searchParams.get('childId');
@@ -24,24 +39,46 @@ export async function challenge({ request, env }: { request: Request; env: Env }
   }
 
   try {
-    // Get a random challenge for the day
+    // First, get the child's age range
+    const child = await env.DB.prepare(`
+      SELECT age_range 
+      FROM children 
+      WHERE id = ?
+    `).bind(childId).first<Child>();
+
+    if (!child) {
+      return new Response(JSON.stringify({ error: 'Child not found' }), {
+        status: 404,
+        headers: corsHeaders()
+      });
+    }
+
+    // Get a random age-appropriate challenge that hasn't been completed today
     const result = await env.DB.prepare(`
       SELECT 
-        id,
-        title,
-        description,
-        goal,
-        steps,
-        example_dialogue,
-        tip,
-        pillar
-      FROM challenges
+        c.id,
+        c.title,
+        c.description,
+        c.goal,
+        c.steps,
+        c.example_dialogue,
+        c.tip,
+        c.pillar
+      FROM challenges c
+      WHERE c.age_range = ?
+      AND NOT EXISTS (
+        SELECT 1 
+        FROM challenge_logs cl 
+        WHERE cl.child_id = ? 
+        AND cl.challenge_id = c.id 
+        AND date(cl.completed_at) = date('now')
+      )
       ORDER BY RANDOM()
       LIMIT 1
-    `).first();
+    `).bind(child.age_range, childId).first<ChallengeResult>();
 
     if (!result) {
-      return new Response(JSON.stringify({ error: 'No challenges available' }), {
+      return new Response(JSON.stringify({ error: 'No age-appropriate challenges available for today' }), {
         status: 404,
         headers: corsHeaders()
       });
@@ -49,8 +86,14 @@ export async function challenge({ request, env }: { request: Request; env: Env }
 
     // Parse the steps JSON array
     const challenge: Challenge = {
-      ...result,
-      steps: JSON.parse(result.steps)
+      id: result.id,
+      title: result.title,
+      description: result.description,
+      goal: result.goal,
+      steps: JSON.parse(result.steps),
+      example_dialogue: result.example_dialogue,
+      tip: result.tip,
+      pillar: result.pillar
     };
 
     return new Response(JSON.stringify({ challenge }), {

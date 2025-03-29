@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS challenges (
   example_dialogue TEXT NOT NULL,
   tip TEXT NOT NULL,
   pillar TEXT NOT NULL,
+  age_range TEXT NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -20,7 +21,8 @@ INSERT INTO challenges (
   steps,
   example_dialogue,
   tip,
-  pillar
+  pillar,
+  age_range
 ) VALUES (
   'challenge_001',
   'Ask, Don''t Tell',
@@ -34,5 +36,6 @@ INSERT INTO challenges (
   ),
   'Instead of saying "Put your toys away", try "What do you think would be a good way to organize your toys?"',
   'Remember to give your child time to think and respond. Silence is okay!',
-  'Problem Solving'
+  'Problem Solving',
+  '3-5'
 ); 
