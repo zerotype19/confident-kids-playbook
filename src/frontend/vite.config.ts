@@ -6,12 +6,15 @@ export default defineConfig({
   plugins: [react()],
   root: './',
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    assetsDir: 'assets',
+    copyPublicDir: true
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@types': path.resolve(__dirname, '../types')
     }
-  }
+  },
+  publicDir: 'public'
 })
