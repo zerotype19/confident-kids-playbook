@@ -24,8 +24,6 @@ export function handleOptions(request: Request) {
     headers: Object.fromEntries(request.headers.entries())
   })
 
-  // Make sure the necessary headers are present
-  // for this to be a valid pre-flight request
   const corsHeaders = new Headers({
     'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
