@@ -14,7 +14,7 @@ interface Challenge {
 
 export async function challenge({ request, env }: { request: Request; env: Env }) {
   const url = new URL(request.url);
-  const childId = url.searchParams.get('child_id');
+  const childId = url.searchParams.get('childId');
 
   if (!childId) {
     return new Response(JSON.stringify({ error: 'Child ID is required' }), {
