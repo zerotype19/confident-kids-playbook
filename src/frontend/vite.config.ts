@@ -7,7 +7,7 @@ export default defineConfig({
   root: './',
   build: {
     outDir: 'dist',
-    assetsDir: 'static',
+    assetsDir: 'assets',
     copyPublicDir: true,
     rollupOptions: {
       input: {
@@ -16,9 +16,9 @@ export default defineConfig({
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'logo.png') {
-            return 'static/logo.png';
+            return 'assets/logo.png';
           }
-          return 'static/[name]-[hash][extname]';
+          return 'assets/[name]-[hash][extname]';
         },
       },
     },
