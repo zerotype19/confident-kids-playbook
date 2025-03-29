@@ -10,6 +10,7 @@ interface Challenge {
   example_dialogue: string;
   tip: string;
   pillar: string;
+  age_range: string;
 }
 
 interface Child {
@@ -25,6 +26,7 @@ interface ChallengeResult {
   example_dialogue: string;
   tip: string;
   pillar: string;
+  age_range: string;
 }
 
 export async function challenge({ request, env }: { request: Request; env: Env }) {
@@ -56,21 +58,22 @@ export async function challenge({ request, env }: { request: Request; env: Env }
     // Get a random age-appropriate challenge that hasn't been completed today
     const result = await env.DB.prepare(`
       SELECT 
-        c.id,
-        c.title,
-        c.description,
-        c.goal,
-        c.steps,
-        c.example_dialogue,
-        c.tip,
-        c.pillar
-      FROM challenges c
-      WHERE c.age_range = ?
+        id,
+        title,
+        description,
+        goal,
+        steps,
+        example_dialogue,
+        tip,
+        pillar,
+        age_range
+      FROM challenges
+      WHERE age_range = ?
       AND NOT EXISTS (
         SELECT 1 
         FROM challenge_logs cl 
         WHERE cl.child_id = ? 
-        AND cl.challenge_id = c.id 
+        AND cl.challenge_id = challenges.id 
         AND date(cl.completed_at) = date('now')
       )
       ORDER BY RANDOM()
@@ -93,7 +96,8 @@ export async function challenge({ request, env }: { request: Request; env: Env }
       steps: JSON.parse(result.steps),
       example_dialogue: result.example_dialogue,
       tip: result.tip,
-      pillar: result.pillar
+      pillar: result.pillar,
+      age_range: result.age_range
     };
 
     return new Response(JSON.stringify({ challenge }), {
