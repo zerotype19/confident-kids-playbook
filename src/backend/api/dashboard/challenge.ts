@@ -24,22 +24,33 @@ export async function challenge({ request, env }: { request: Request; env: Env }
   }
 
   try {
-    // TODO: Replace with actual database query
-    // For now, return a mock challenge
+    // Get a random challenge for the day
+    const result = await env.DB.prepare(`
+      SELECT 
+        id,
+        title,
+        description,
+        goal,
+        steps,
+        example_dialogue,
+        tip,
+        pillar
+      FROM challenges
+      ORDER BY RANDOM()
+      LIMIT 1
+    `).first();
+
+    if (!result) {
+      return new Response(JSON.stringify({ error: 'No challenges available' }), {
+        status: 404,
+        headers: corsHeaders()
+      });
+    }
+
+    // Parse the steps JSON array
     const challenge: Challenge = {
-      id: '1',
-      title: 'Ask, Don\'t Tell',
-      description: 'Help your child develop problem-solving skills by asking questions instead of giving direct instructions.',
-      goal: 'Encourage independent thinking and decision-making in your child',
-      steps: [
-        'Start with open-ended questions',
-        'Listen without interrupting',
-        'Guide them to find their own solutions',
-        'Celebrate their problem-solving attempts'
-      ],
-      example_dialogue: 'Instead of saying "Put your toys away", try "What do you think would be a good way to organize your toys?"',
-      tip: 'Remember to give your child time to think and respond. Silence is okay!',
-      pillar: 'Problem Solving'
+      ...result,
+      steps: JSON.parse(result.steps)
     };
 
     return new Response(JSON.stringify({ challenge }), {
