@@ -2,9 +2,9 @@ import React from 'react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen w-full flex flex-col bg-neutral-100 text-gray-900">
+    <div className="min-h-screen w-full flex flex-col bg-kidoova-background text-text-base">
       {/* Header with Logo */}
-      <header className="w-full bg-white shadow-sm">
+      <header className="w-full bg-white shadow-kidoova">
         <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <img 
             src="/logo.png" 
