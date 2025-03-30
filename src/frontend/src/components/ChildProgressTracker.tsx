@@ -82,19 +82,28 @@ export default function ChildProgressTracker({ childId }: ChildProgressTrackerPr
   return (
     <div>
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Progress Summary</h2>
-      <div className="space-y-3">
-        <p className="flex items-center">
-          <span className="text-green-500 mr-2">✅</span>
-          <strong>Challenges Completed:</strong> {data.totalCompleted}
-        </p>
-        <p className="flex items-center">
-          <span className="text-orange-500 mr-2">🔥</span>
-          <strong>Current Streak:</strong> {data.currentStreak} day{data.currentStreak !== 1 ? 's' : ''}
-        </p>
-        <p className="flex items-center">
-          <span className="text-blue-500 mr-2">🌟</span>
-          <strong>Current Focus:</strong> {data.currentFocusPillar}
-        </p>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-green-500 mr-2">✅</span>
+            <strong>Challenges Completed:</strong>
+          </div>
+          <span className="text-lg font-semibold">{data.totalCompleted}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-orange-500 mr-2">🔥</span>
+            <strong>Current Streak:</strong>
+          </div>
+          <span className="text-lg font-semibold">{data.currentStreak} day{data.currentStreak !== 1 ? 's' : ''}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-blue-500 mr-2">🌟</span>
+            <strong>Current Focus:</strong>
+          </div>
+          <span className="text-lg font-semibold">{data.currentFocusPillar}</span>
+        </div>
       </div>
     </div>
   );
