@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 
 interface ProgressData {
   totalCompleted: number;
@@ -31,12 +30,18 @@ export default function ChildProgressTracker({ childId }: ChildProgressTrackerPr
           throw new Error('No authentication token found');
         }
 
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/progress/${childId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/progress/${childId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        setData(response.data);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch progress');
+        }
+
+        const data = await response.json();
+        setData(data);
       } catch (err) {
         setError("Failed to load progress data");
         console.error("Error fetching progress:", err);
