@@ -67,7 +67,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
       email: payload?.email
     });
 
-    // Get user data including onboarding status
+    // Get user data from database
     const userResult = await env.DB.prepare(`
       SELECT id, email, name, has_completed_onboarding
       FROM users
@@ -75,67 +75,50 @@ export async function onRequest(context: { request: Request; env: Env }) {
     `).bind(payload.sub).first<User>();
 
     if (!userResult) {
-      // Create new user if they don't exist
-      await env.DB.prepare(`
-        INSERT INTO users (id, email, name, has_completed_onboarding, created_at, updated_at)
-        VALUES (?, ?, ?, false, datetime('now'), datetime('now'))
-      `).bind(payload.sub, payload.email, payload.name).run();
-
-      // Fetch the newly created user
-      const newUserResult = await env.DB.prepare(`
-        SELECT id, email, name, has_completed_onboarding
-        FROM users
-        WHERE id = ?
-      `).bind(payload.sub).first<User>();
-
-      if (!newUserResult) {
-        throw new Error('Failed to create user');
-      }
-
-      return new Response(JSON.stringify({
-        userId: newUserResult.id,
-        email: newUserResult.email,
-        name: newUserResult.name,
-        hasFamily: false,
-        hasChild: false,
-        hasCompletedOnboarding: false
-      }), {
-        headers: corsHeaders()
+      return new Response(JSON.stringify({ error: 'User not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Check if user has a family
+    // Get family data if exists
     const familyResult = await env.DB.prepare(`
-      SELECT family_id 
-      FROM family_members 
+      SELECT id, name
+      FROM families
       WHERE user_id = ?
-    `).bind(payload.sub).all<FamilyMember>() as DBResult<FamilyMember>;
+    `).bind(payload.sub).first();
 
-    const hasFamily = familyResult.results.length > 0;
-    const familyId = hasFamily ? familyResult.results[0].family_id : null;
-
-    // If user has a family, check for children
-    let hasChild = false;
-    if (familyId) {
+    // Get children if family exists
+    let children = [];
+    if (familyResult) {
       const childrenResult = await env.DB.prepare(`
-        SELECT id 
-        FROM children 
+        SELECT id, name, birthdate, gender
+        FROM children
         WHERE family_id = ?
-        LIMIT 1
-      `).bind(familyId).all<Child>() as DBResult<Child>;
-
-      hasChild = childrenResult.results.length > 0;
+      `).bind(familyResult.id).all<Child>() as DBResult<Child>;
+      children = childrenResult.results || [];
     }
 
+    // Return user data with family and children
     return new Response(JSON.stringify({
-      userId: payload.sub,
+      userId: userResult.id,
       email: userResult.email,
       name: userResult.name,
-      hasFamily,
-      hasChild,
-      hasCompletedOnboarding: Boolean(userResult.has_completed_onboarding)
+      hasCompletedOnboarding: userResult.has_completed_onboarding,
+      hasFamily: !!familyResult,
+      hasChild: children.length > 0,
+      family: familyResult ? {
+        id: familyResult.id,
+        name: familyResult.name
+      } : null,
+      children: children.map(child => ({
+        id: child.id,
+        name: child.name,
+        birthdate: child.birthdate,
+        gender: child.gender
+      }))
     }), {
-      headers: corsHeaders()
+      headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
