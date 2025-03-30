@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -9,8 +9,31 @@ interface PrivateRouteProps {
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated, user, token } = useAuth();
   const location = useLocation();
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  console.log('🔒 PrivateRoute render:', { isAuthenticated, user, token, location: location.pathname });
+  console.log('🔒 PrivateRoute render:', { isAuthenticated, user, token, location: location.pathname, isInitialized });
+
+  useEffect(() => {
+    // Wait a short moment to allow token to be loaded from localStorage
+    const timer = setTimeout(() => {
+      setIsInitialized(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show loading state while initializing
+  if (!isInitialized) {
+    console.log('⏳ Waiting for initialization');
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900">Loading...</h2>
+          <p className="mt-2 text-gray-600">Please wait while we set up your account.</p>
+        </div>
+      </div>
+    );
+  }
 
   // If we have a token but user data isn't loaded yet, show loading state
   if (token && !user) {
