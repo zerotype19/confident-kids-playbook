@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 interface ProgressData {
   totalCompleted: number;
-  streak: number;
-  focusPillarId: number | null;
+  currentStreak: number;
+  currentFocusPillar: string;
 }
 
 interface ChildProgressTrackerProps {
@@ -30,25 +30,34 @@ export default function ChildProgressTracker({ childId }: ChildProgressTrackerPr
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/progress/${childId}`, {
+        const url = `${import.meta.env.VITE_API_URL}/api/progress?child_id=${childId}`;
+        console.log('Fetching progress from:', url);
+
+        const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
+        console.log('Progress API response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch progress');
+          const errorText = await response.text();
+          console.error('Progress API error response:', errorText);
+          throw new Error(`Failed to fetch progress: ${response.status} ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('Progress API response data:', data);
         setData(data);
       } catch (err) {
-        setError("Failed to load progress data");
         console.error("Error fetching progress:", err);
+        setError(err instanceof Error ? err.message : "Failed to load progress data");
       }
     };
 
     if (childId) {
+      console.log('ChildProgressTracker: childId changed, fetching progress for:', childId);
       fetchProgress();
     }
   }, [childId]);
@@ -80,11 +89,11 @@ export default function ChildProgressTracker({ childId }: ChildProgressTrackerPr
         </p>
         <p className="flex items-center">
           <span className="text-orange-500 mr-2">🔥</span>
-          <strong>Current Streak:</strong> {data.streak} day{data.streak !== 1 ? 's' : ''}
+          <strong>Current Streak:</strong> {data.currentStreak} day{data.currentStreak !== 1 ? 's' : ''}
         </p>
         <p className="flex items-center">
           <span className="text-blue-500 mr-2">🌟</span>
-          <strong>Current Focus:</strong> {data.focusPillarId ? pillarNames[data.focusPillarId] : "No data yet"}
+          <strong>Current Focus:</strong> {data.currentFocusPillar}
         </p>
       </div>
     </div>

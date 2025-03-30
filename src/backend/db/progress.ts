@@ -20,16 +20,20 @@ interface PillarResult {
 }
 
 export async function getProgressSummary(childId: string): Promise<ProgressSummary> {
+  console.log('Progress DB: Starting to fetch summary for child:', childId);
   const { DB } = process.env as unknown as Env;
   
   // Get total completed challenges
+  console.log('Progress DB: Fetching total completed challenges');
   const completedResult = await DB.prepare(`
     SELECT COUNT(*) as count 
     FROM challenge_completions 
     WHERE child_id = ? AND completed = 1
   `).bind(childId).first<CompletedResult>();
+  console.log('Progress DB: Completed challenges result:', completedResult);
   
   // Get current streak
+  console.log('Progress DB: Fetching current streak');
   const streakResult = await DB.prepare(`
     WITH RECURSIVE dates AS (
       SELECT date(completed_at) as date
@@ -50,8 +54,10 @@ export async function getProgressSummary(childId: string): Promise<ProgressSumma
     SELECT MAX(streak) as current_streak
     FROM consecutive_days
   `).bind(childId, childId).first<StreakResult>();
+  console.log('Progress DB: Streak result:', streakResult);
   
   // Get current focus pillar
+  console.log('Progress DB: Fetching current focus pillar');
   const pillarResult = await DB.prepare(`
     SELECT c.pillar, COUNT(*) as count
     FROM challenge_completions cc
@@ -61,10 +67,14 @@ export async function getProgressSummary(childId: string): Promise<ProgressSumma
     ORDER BY count DESC
     LIMIT 1
   `).bind(childId).first<PillarResult>();
+  console.log('Progress DB: Pillar result:', pillarResult);
   
-  return {
+  const summary = {
     totalCompleted: completedResult?.count || 0,
     currentStreak: streakResult?.current_streak || 0,
     currentFocusPillar: pillarResult?.pillar || 'None'
   };
+  
+  console.log('Progress DB: Final summary:', summary);
+  return summary;
 } 
