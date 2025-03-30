@@ -75,8 +75,31 @@ export async function onRequest(context: { request: Request; env: Env }) {
     `).bind(payload.sub).first<User>();
 
     if (!userResult) {
-      return new Response(JSON.stringify({ error: 'User not found' }), {
-        status: 404,
+      // Create new user if they don't exist
+      await env.DB.prepare(`
+        INSERT INTO users (id, email, name, has_completed_onboarding, created_at, updated_at)
+        VALUES (?, ?, ?, false, datetime('now'), datetime('now'))
+      `).bind(payload.sub, payload.email, payload.name).run();
+
+      // Fetch the newly created user
+      const newUserResult = await env.DB.prepare(`
+        SELECT id, email, name, has_completed_onboarding
+        FROM users
+        WHERE id = ?
+      `).bind(payload.sub).first<User>();
+
+      if (!newUserResult) {
+        throw new Error('Failed to create user');
+      }
+
+      return new Response(JSON.stringify({
+        userId: newUserResult.id,
+        email: newUserResult.email,
+        name: newUserResult.name,
+        hasFamily: false,
+        hasChild: false,
+        hasCompletedOnboarding: false
+      }), {
         headers: corsHeaders()
       });
     }

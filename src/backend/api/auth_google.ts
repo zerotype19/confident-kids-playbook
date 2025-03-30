@@ -1,9 +1,12 @@
 import { corsHeaders, handleOptions } from '../lib/cors'
 import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
+import { OAuth2Client } from 'google-auth-library'
 
 interface Env {
   JWT_SECRET: string
   GOOGLE_CLIENT_ID: string
+  DB: D1Database
+  APPLE_CLIENT_ID: string
 }
 
 interface GoogleAuthRequest {
@@ -18,7 +21,9 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     headers: Object.fromEntries(request.headers.entries()),
     hasEnv: !!env,
     hasJwtSecret: !!env.JWT_SECRET,
-    hasGoogleClientId: !!env.GOOGLE_CLIENT_ID
+    hasGoogleClientId: !!env.GOOGLE_CLIENT_ID,
+    hasDB: !!env.DB,
+    hasAppleClientId: !!env.APPLE_CLIENT_ID
   });
 
   // Handle CORS preflight
@@ -63,6 +68,24 @@ export async function authGoogle(context: { request: Request; env: Env }) {
         picture: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).picture : undefined
       }
     });
+
+    const user_id = result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).sub : undefined;
+    const email = result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).email : undefined;
+    const name = result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).name : undefined;
+    const picture = result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).picture : undefined;
+
+    // Check if user exists
+    const user = await env.DB.prepare(
+      'SELECT id FROM users WHERE id = ?'
+    ).bind(user_id).first();
+
+    if (!user) {
+      // Create new user
+      await env.DB.prepare(`
+        INSERT INTO users (id, email, name, picture, has_completed_onboarding, created_at, updated_at)
+        VALUES (?, ?, ?, ?, false, datetime('now'), datetime('now'))
+      `).bind(user_id, email, name, picture).run();
+    }
 
     return new Response(
       JSON.stringify({
