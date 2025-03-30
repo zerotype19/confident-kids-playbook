@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (authToken: string) => {
     try {
+      console.log("🔍 Fetching user data with token:", authToken.substring(0, 10) + "...");
       const apiUrl = import.meta.env.VITE_API_URL;
       const response = await fetch(`${apiUrl}/api/user/profile`, {
         method: 'GET',
@@ -60,6 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       console.log("👤 Mapped user data:", userData);
       setUser(userData);
+      console.log("✅ User state updated with:", userData);
     } catch (error) {
       console.error('Error fetching user data:', error);
       // If we can't fetch user data, clear the token and user state
@@ -74,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check for existing session
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
+      console.log("🔑 Found stored token, initializing auth state");
       setToken(storedToken);
       setIsAuthenticated(true);
       fetchUserData(storedToken);
@@ -81,9 +84,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (newToken: string) => {
+    console.log("🔑 Starting login process");
     localStorage.setItem('token', newToken);
     setToken(newToken);
     setIsAuthenticated(true);
+    console.log("✅ Auth state updated, fetching user data");
     await fetchUserData(newToken);
   };
 
