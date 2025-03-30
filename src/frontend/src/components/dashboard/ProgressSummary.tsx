@@ -1,8 +1,9 @@
 import React from 'react';
-import ChildProgressTracker from '../../components/ChildProgressTracker';
+import ChildProgressTracker from '../ChildProgressTracker';
+import ChildRewards from '../ChildRewards';
 
 interface ProgressSummaryProps {
-  childId?: string;
+  childId: string;
 }
 
 export default function ProgressSummary({ childId }: ProgressSummaryProps) {
@@ -11,8 +12,11 @@ export default function ProgressSummary({ childId }: ProgressSummaryProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-4">
-      <ChildProgressTracker childId={childId} />
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl shadow-sm p-4">
+        <ChildProgressTracker childId={childId} />
+      </div>
+      <ChildRewards childId={childId} />
     </div>
   );
 } 
