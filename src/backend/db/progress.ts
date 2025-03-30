@@ -26,8 +26,8 @@ export async function getProgressSummary(childId: string, env: Env): Promise<Pro
   console.log('Progress DB: Fetching total completed challenges');
   const completedResult = await env.DB.prepare(`
     SELECT COUNT(*) as count 
-    FROM challenge_completions 
-    WHERE child_id = ? AND completed = 1
+    FROM challenge_logs 
+    WHERE child_id = ?
   `).bind(childId).first<CompletedResult>();
   console.log('Progress DB: Completed challenges result:', completedResult);
   
@@ -36,8 +36,8 @@ export async function getProgressSummary(childId: string, env: Env): Promise<Pro
   const streakResult = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
       SELECT date(completed_at) as date
-      FROM challenge_completions
-      WHERE child_id = ? AND completed = 1
+      FROM challenge_logs
+      WHERE child_id = ?
       ORDER BY completed_at DESC
       LIMIT 1
     ),
@@ -45,10 +45,10 @@ export async function getProgressSummary(childId: string, env: Env): Promise<Pro
       SELECT date, 1 as streak
       FROM dates
       UNION ALL
-      SELECT date(cc.completed_at), cd.streak + 1
-      FROM challenge_completions cc
-      JOIN consecutive_days cd ON date(cc.completed_at) = date(cd.date, '-1 day')
-      WHERE cc.child_id = ? AND cc.completed = 1
+      SELECT date(cl.completed_at), cd.streak + 1
+      FROM challenge_logs cl
+      JOIN consecutive_days cd ON date(cl.completed_at) = date(cd.date, '-1 day')
+      WHERE cl.child_id = ?
     )
     SELECT MAX(streak) as current_streak
     FROM consecutive_days
@@ -59,9 +59,9 @@ export async function getProgressSummary(childId: string, env: Env): Promise<Pro
   console.log('Progress DB: Fetching current focus pillar');
   const pillarResult = await env.DB.prepare(`
     SELECT c.pillar, COUNT(*) as count
-    FROM challenge_completions cc
-    JOIN challenges c ON cc.challenge_id = c.id
-    WHERE cc.child_id = ? AND cc.completed = 1
+    FROM challenge_logs cl
+    JOIN challenges c ON cl.challenge_id = c.id
+    WHERE cl.child_id = ?
     GROUP BY c.pillar
     ORDER BY count DESC
     LIMIT 1
