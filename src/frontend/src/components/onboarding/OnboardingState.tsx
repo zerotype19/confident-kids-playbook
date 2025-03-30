@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -35,6 +35,15 @@ export function OnboardingProvider({ children: providerChildren }: { children: R
   const { user } = useAuth();
 
   const totalSteps = 4; // Welcome, Parent Details, Family/Child, Completion
+
+  useEffect(() => {
+    if (user) {
+      setUserData({
+        name: user.displayName || '',
+        email: user.email || ''
+      });
+    }
+  }, [user]);
 
   const addChild = (child: { name: string; birthdate?: string; gender?: string }) => {
     setChildren(prev => [...prev, child]);
