@@ -1,11 +1,11 @@
 import { Env } from "../../types";
 import { getChildRewards } from "../../lib/rewardEngine";
 
-export async function onRequestGet(context: EventContext<Env, string, unknown>) {
-  const { childId } = context.params;
-  const { env } = context;
+export async function onRequestGet({ request, env }: { request: Request; env: Env }) {
+  const url = new URL(request.url);
+  const childId = url.pathname.split('/').pop();
 
-  if (!childId || Array.isArray(childId)) {
+  if (!childId) {
     return new Response(JSON.stringify({ error: 'Child ID is required' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
