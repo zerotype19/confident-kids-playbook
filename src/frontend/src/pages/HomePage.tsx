@@ -114,7 +114,7 @@ export default function HomePage(): JSX.Element {
         console.log("✅ User data fetched, checking onboarding status")
         // Navigate directly to onboarding since this is a new user
         console.log("🔄 Navigating to onboarding page")
-        navigate("/onboarding", { replace: true })
+        window.location.href = "/onboarding"
         console.log("✅ Navigation completed")
       } else {
         console.error("❌ Login failed:", data.message)
