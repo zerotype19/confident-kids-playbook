@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface OnboardingState {
   currentStep: number;
@@ -31,40 +32,9 @@ export function OnboardingProvider({ children: providerChildren }: { children: R
   const [familyData, setFamilyData] = useState({ name: '' });
   const [children, setChildren] = useState<Array<{ name: string; birthdate?: string; gender?: string }>>([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const totalSteps = 4; // Welcome, Parent Details, Family/Child, Completion
-
-  useEffect(() => {
-    // Check onboarding status on mount
-    const checkOnboardingStatus = async () => {
-      try {
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const jwt = localStorage.getItem('jwt');
-        if (!jwt) {
-          navigate('/login');
-          return;
-        }
-
-        const response = await fetch(`${apiUrl}/api/onboarding/status`, {
-          headers: {
-            'Authorization': `Bearer ${jwt}`
-          }
-        });
-
-        if (!response.ok) throw new Error('Failed to check onboarding status');
-        
-        const data = await response.json();
-        if (data.hasCompletedOnboarding) {
-          navigate('/home');
-        }
-      } catch (error) {
-        console.error('Error checking onboarding status:', error);
-        navigate('/login');
-      }
-    };
-
-    checkOnboardingStatus();
-  }, [navigate]);
 
   const addChild = (child: { name: string; birthdate?: string; gender?: string }) => {
     setChildren(prev => [...prev, child]);
