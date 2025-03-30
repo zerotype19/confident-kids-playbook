@@ -15,9 +15,17 @@ interface StreakResult {
 }
 
 interface PillarResult {
-  pillar: string;
+  pillar_id: number;
   count: number;
 }
+
+const pillarNames: Record<number, string> = {
+  1: "Independence & Problem-Solving",
+  2: "Growth Mindset & Resilience",
+  3: "Social Confidence & Communication",
+  4: "Purpose & Strength Discovery",
+  5: "Managing Fear & Anxiety"
+};
 
 export async function getProgressSummary(childId: string, env: Env): Promise<ProgressSummary> {
   console.log('Progress DB: Starting to fetch summary for child:', childId);
@@ -58,11 +66,11 @@ export async function getProgressSummary(childId: string, env: Env): Promise<Pro
   // Get current focus pillar
   console.log('Progress DB: Fetching current focus pillar');
   const pillarResult = await env.DB.prepare(`
-    SELECT c.pillar, COUNT(*) as count
+    SELECT c.pillar_id, COUNT(*) as count
     FROM challenge_logs cl
     JOIN challenges c ON cl.challenge_id = c.id
     WHERE cl.child_id = ?
-    GROUP BY c.pillar
+    GROUP BY c.pillar_id
     ORDER BY count DESC
     LIMIT 1
   `).bind(childId).first<PillarResult>();
@@ -71,7 +79,7 @@ export async function getProgressSummary(childId: string, env: Env): Promise<Pro
   const summary = {
     totalCompleted: completedResult?.count || 0,
     currentStreak: streakResult?.current_streak || 0,
-    currentFocusPillar: pillarResult?.pillar || 'None'
+    currentFocusPillar: pillarResult ? pillarNames[pillarResult.pillar_id] || 'None' : 'None'
   };
   
   console.log('Progress DB: Final summary:', summary);
