@@ -8,7 +8,7 @@ interface CompletionStepProps {
 
 export default function CompletionStep({ onComplete }: CompletionStepProps) {
   const { userData, familyData, children } = useOnboarding();
-  const { token } = useAuth();
+  const { token, fetchUserData } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -64,6 +64,9 @@ export default function CompletionStep({ onComplete }: CompletionStepProps) {
         const errorData = await completeResponse.json();
         throw new Error(errorData.message || 'Failed to complete onboarding');
       }
+
+      // Refresh user data to get updated onboarding status
+      await fetchUserData(token);
 
       // Navigate to dashboard
       onComplete();
