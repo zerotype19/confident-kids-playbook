@@ -83,9 +83,10 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
     // Get family data if exists
     const familyResult = await env.DB.prepare(`
-      SELECT id, name
-      FROM families
-      WHERE user_id = ?
+      SELECT f.id, f.name
+      FROM families f
+      JOIN family_members fm ON f.id = fm.family_id
+      WHERE fm.user_id = ?
     `).bind(payload.sub).first();
 
     // Get children if family exists
