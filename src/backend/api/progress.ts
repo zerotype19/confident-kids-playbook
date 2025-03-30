@@ -27,7 +27,7 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
 
   try {
     console.log('Progress API: Fetching progress summary for child:', childId);
-    const summary = await getProgressSummary(childId);
+    const summary = await getProgressSummary(childId, env);
     console.log('Progress API: Successfully fetched summary:', summary);
     
     return new Response(JSON.stringify(summary), { 
