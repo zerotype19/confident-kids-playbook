@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       const userData = {
-        uid: data.sub,
+        uid: data.userId,
         email: data.email,
         displayName: data.name,
         photoURL: data.picture,

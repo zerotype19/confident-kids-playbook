@@ -108,7 +108,10 @@ export default function HomePage(): JSX.Element {
       if (data.status === 'ok' && data.jwt) {
         console.log("✅ Login successful, storing JWT")
         await login(data.jwt)
-        console.log("✅ JWT stored, navigating to onboarding")
+        console.log("✅ JWT stored, waiting for user data")
+        // Wait a moment for user data to be fetched
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        console.log("✅ User data fetched, navigating to onboarding")
         navigate("/onboarding")
       } else {
         console.error("❌ Login failed:", data.message)
