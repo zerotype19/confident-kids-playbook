@@ -5,6 +5,15 @@ export default defineConfig({
   plugins: [react()],
   root: './',
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    rollupOptions: {
+      external: [],
+    },
+    commonjsOptions: {
+      include: [/node_modules/],
+    }
+  },
+  optimizeDeps: {
+    include: ['axios']
   }
 })
