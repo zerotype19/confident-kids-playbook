@@ -1,60 +1,70 @@
-import { getDB } from './db';
+import { Env } from "../types";
 
-interface ProgressSummary {
+export interface ProgressSummary {
   totalCompleted: number;
-  streak: number;
-  focusPillarId: number | null;
+  currentStreak: number;
+  currentFocusPillar: string;
 }
 
-interface StreakRow {
-  day: string;
+interface CompletedResult {
+  count: number;
 }
 
-function calculateStreak(dates: string[]): number {
-  let streak = 0;
-  let yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  
-  for (let day of dates) {
-    const date = new Date(day);
-    if (
-      date.toDateString() === new Date().toDateString() ||
-      date.toDateString() === yesterday.toDateString()
-    ) {
-      streak++;
-      yesterday.setDate(yesterday.getDate() - 1);
-    } else {
-      break;
-    }
-  }
-  return streak;
+interface StreakResult {
+  current_streak: number;
+}
+
+interface PillarResult {
+  pillar: string;
+  count: number;
 }
 
 export async function getProgressSummary(childId: string): Promise<ProgressSummary> {
-  const db = getDB();
-
-  const totalCompleted = await db.get(`
-    SELECT COUNT(*) as total FROM challenge_logs WHERE child_id = ?;
-  `, [childId]);
-
-  const streakData = await db.all<StreakRow>(`
-    SELECT DATE(completed_at) as day FROM challenge_logs 
-    WHERE child_id = ? ORDER BY completed_at DESC LIMIT 10;
-  `, [childId]);
-
-  const days = streakData.map(row => row.day);
-  const streak = calculateStreak(days);
-
-  const focusPillar = await db.get(`
-    SELECT c.pillar_id, COUNT(*) as count FROM challenge_logs cl
-    JOIN challenges c ON cl.challenge_id = c.id
-    WHERE cl.child_id = ?
-    GROUP BY c.pillar_id ORDER BY count DESC LIMIT 1;
-  `, [childId]);
-
+  const { DB } = process.env as unknown as Env;
+  
+  // Get total completed challenges
+  const completedResult = await DB.prepare(`
+    SELECT COUNT(*) as count 
+    FROM challenge_completions 
+    WHERE child_id = ? AND completed = 1
+  `).bind(childId).first<CompletedResult>();
+  
+  // Get current streak
+  const streakResult = await DB.prepare(`
+    WITH RECURSIVE dates AS (
+      SELECT date(completed_at) as date
+      FROM challenge_completions
+      WHERE child_id = ? AND completed = 1
+      ORDER BY completed_at DESC
+      LIMIT 1
+    ),
+    consecutive_days AS (
+      SELECT date, 1 as streak
+      FROM dates
+      UNION ALL
+      SELECT date(cc.completed_at), cd.streak + 1
+      FROM challenge_completions cc
+      JOIN consecutive_days cd ON date(cc.completed_at) = date(cd.date, '-1 day')
+      WHERE cc.child_id = ? AND cc.completed = 1
+    )
+    SELECT MAX(streak) as current_streak
+    FROM consecutive_days
+  `).bind(childId, childId).first<StreakResult>();
+  
+  // Get current focus pillar
+  const pillarResult = await DB.prepare(`
+    SELECT c.pillar, COUNT(*) as count
+    FROM challenge_completions cc
+    JOIN challenges c ON cc.challenge_id = c.id
+    WHERE cc.child_id = ? AND cc.completed = 1
+    GROUP BY c.pillar
+    ORDER BY count DESC
+    LIMIT 1
+  `).bind(childId).first<PillarResult>();
+  
   return {
-    totalCompleted: totalCompleted.total,
-    streak,
-    focusPillarId: focusPillar?.pillar_id ?? null
+    totalCompleted: completedResult?.count || 0,
+    currentStreak: streakResult?.current_streak || 0,
+    currentFocusPillar: pillarResult?.pillar || 'None'
   };
 } 
