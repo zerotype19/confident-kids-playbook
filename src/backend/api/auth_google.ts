@@ -82,8 +82,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     if (!user) {
       // Create new user
       await env.DB.prepare(`
-        INSERT INTO users (id, email, name, has_completed_onboarding, created_at, updated_at)
-        VALUES (?, ?, ?, false, datetime('now'), datetime('now'))
+        INSERT INTO users (id, email, name, has_completed_onboarding, created_at)
+        VALUES (?, ?, ?, false, datetime('now'))
       `).bind(user_id, email, name).run();
     }
 
