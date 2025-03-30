@@ -12,22 +12,30 @@ function OnboardingContent() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  console.log('🎯 OnboardingContent render:', { user, currentStep });
+
   useEffect(() => {
+    console.log('🔄 OnboardingContent useEffect:', { user });
+    
     if (!user) {
+      console.log('❌ No user, redirecting to login');
       navigate('/login');
       return;
     }
 
     if (user.hasCompletedOnboarding) {
+      console.log('✅ User completed onboarding, redirecting to dashboard');
       navigate('/dashboard');
     }
   }, [user, navigate]);
 
   if (!user) {
+    console.log('❌ OnboardingContent: No user, returning null');
     return null;
   }
 
   const renderStep = () => {
+    console.log('🎨 Rendering step:', currentStep);
     switch (currentStep) {
       case 1:
         return <WelcomeStep onNext={() => setCurrentStep(2)} />;
@@ -42,6 +50,7 @@ function OnboardingContent() {
     }
   };
 
+  console.log('🎨 OnboardingContent: Rendering content');
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -63,6 +72,7 @@ function OnboardingContent() {
 }
 
 export default function OnboardingPage() {
+  console.log('🚀 OnboardingPage render');
   return (
     <OnboardingProvider>
       <OnboardingContent />
