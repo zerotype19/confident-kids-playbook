@@ -113,7 +113,7 @@ export default function HomePage(): JSX.Element {
         await new Promise(resolve => setTimeout(resolve, 1000))
         console.log("✅ User data fetched, navigating to onboarding")
         // Navigate directly to onboarding since this is a new user
-        navigate("/onboarding")
+        navigate("/onboarding", { replace: true })
       } else {
         console.error("❌ Login failed:", data.message)
         throw new Error(data.message || "Login failed")

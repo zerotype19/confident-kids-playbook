@@ -50,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const data = await response.json();
+      console.log("📥 User data received:", data);
       const userData = {
         uid: data.userId,
         email: data.email,
@@ -57,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         photoURL: data.picture,
         hasCompletedOnboarding: data.hasCompletedOnboarding
       };
+      console.log("👤 Mapped user data:", userData);
       setUser(userData);
     } catch (error) {
       console.error('Error fetching user data:', error);
