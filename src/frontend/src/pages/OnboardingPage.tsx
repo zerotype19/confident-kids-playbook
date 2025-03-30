@@ -9,33 +9,50 @@ import CompletionStep from '../components/onboarding/CompletionStep';
 
 function OnboardingContent() {
   const { currentStep, setCurrentStep } = useOnboarding();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
 
-  console.log('🎯 OnboardingContent render:', { user, currentStep, isAuthenticated });
+  console.log('🎯 OnboardingContent render:', { user, currentStep, isAuthenticated, token });
 
   useEffect(() => {
-    console.log('🔄 OnboardingContent useEffect:', { user, isAuthenticated });
+    console.log('🔄 OnboardingContent useEffect:', { user, isAuthenticated, token });
     
-    if (!isAuthenticated) {
-      console.log('❌ Not authenticated, redirecting to login');
+    // If we have a token but user data isn't loaded yet, wait
+    if (token && !user) {
+      console.log('⏳ Token exists but user data not loaded yet');
+      return;
+    }
+
+    // If not authenticated and no token, redirect to home
+    if (!isAuthenticated && !token) {
+      console.log('❌ Not authenticated and no token, redirecting to home');
       navigate('/');
       return;
     }
 
-    if (!user) {
-      console.log('⏳ User data not loaded yet');
-      return;
-    }
-
-    if (user.hasCompletedOnboarding) {
+    // If user has completed onboarding, redirect to dashboard
+    if (user?.hasCompletedOnboarding) {
       console.log('✅ User completed onboarding, redirecting to dashboard');
       navigate('/dashboard');
     }
-  }, [user, isAuthenticated, navigate]);
+  }, [user, isAuthenticated, token, navigate]);
 
-  if (!isAuthenticated || !user) {
-    console.log('⏳ Waiting for authentication or user data');
+  // Show loading state while initializing
+  if (token && !user) {
+    console.log('⏳ Waiting for user data to load');
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900">Loading...</h2>
+          <p className="mt-2 text-gray-600">Please wait while we set up your account.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while not authenticated
+  if (!isAuthenticated && !token) {
+    console.log('⏳ Waiting for authentication');
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
         <div className="text-center">
