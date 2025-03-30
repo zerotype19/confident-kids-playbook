@@ -9,17 +9,22 @@ import CompletionStep from '../components/onboarding/CompletionStep';
 
 function OnboardingContent() {
   const { currentStep, setCurrentStep } = useOnboarding();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  console.log('🎯 OnboardingContent render:', { user, currentStep });
+  console.log('🎯 OnboardingContent render:', { user, currentStep, isAuthenticated });
 
   useEffect(() => {
-    console.log('🔄 OnboardingContent useEffect:', { user });
+    console.log('🔄 OnboardingContent useEffect:', { user, isAuthenticated });
     
+    if (!isAuthenticated) {
+      console.log('❌ Not authenticated, redirecting to login');
+      navigate('/');
+      return;
+    }
+
     if (!user) {
-      console.log('❌ No user, redirecting to login');
-      navigate('/login');
+      console.log('⏳ User data not loaded yet');
       return;
     }
 
@@ -27,11 +32,18 @@ function OnboardingContent() {
       console.log('✅ User completed onboarding, redirecting to dashboard');
       navigate('/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, isAuthenticated, navigate]);
 
-  if (!user) {
-    console.log('❌ OnboardingContent: No user, returning null');
-    return null;
+  if (!isAuthenticated || !user) {
+    console.log('⏳ Waiting for authentication or user data');
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900">Loading...</h2>
+          <p className="mt-2 text-gray-600">Please wait while we set up your account.</p>
+        </div>
+      </div>
+    );
   }
 
   const renderStep = () => {
