@@ -24,7 +24,7 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenges/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,8 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
         },
         body: JSON.stringify({
           child_id: childId,
-          challenge_id: challenge.id
+          challenge_id: challenge.id,
+          reflection: '' // Optional reflection
         })
       });
 
@@ -82,7 +83,7 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-center gap-2 text-kidoova-accent hover:text-kidoova-green font-medium"
       >
-        {isExpanded ? 'Show Less' : 'View Full Challenge'}
+        {isExpanded ? 'Show Less' : 'View Challenge Details'}
         <svg
           className={`w-5 h-5 transform transition-transform ${
             isExpanded ? 'rotate-180' : ''
@@ -114,14 +115,23 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
               Steps to Try
             </h3>
             <ul className="space-y-2">
-              {(Array.isArray(challenge.steps) ? challenge.steps : [challenge.steps]).map((step, index) => (
-                <li key={index} className="flex items-start">
+              {Array.isArray(challenge.steps) ? (
+                challenge.steps.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
+                      {index + 1}
+                    </span>
+                    <span className="text-text-base">{step}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="flex items-start">
                   <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
-                    {index + 1}
+                    1
                   </span>
-                  <span className="text-text-base">{step}</span>
+                  <span className="text-text-base">{challenge.steps}</span>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 

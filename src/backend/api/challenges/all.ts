@@ -103,7 +103,9 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 
     console.log('Found challenges:', {
       count: challenges.results?.length || 0,
-      firstChallenge: challenges.results?.[0]
+      firstChallenge: challenges.results?.[0],
+      childAgeRange: child.age_range,
+      childId: childId
     });
 
     return new Response(JSON.stringify(challenges.results), {
