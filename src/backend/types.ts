@@ -43,6 +43,7 @@ export interface Child {
   id: string;
   name: string;
   age: number;
+  age_range: string;
   family_id: string;
   created_at: string;
   updated_at: string;

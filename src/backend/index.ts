@@ -39,7 +39,7 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
       statusText: response.statusText,
       headers: {
         ...Object.fromEntries(response.headers.entries()),
-        ...Object.fromEntries(corsHeaders(request).entries())
+        ...Object.fromEntries(corsHeaders({}).entries())
       }
     })
     
@@ -63,7 +63,7 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
       details: error instanceof Error ? error.message : 'Unknown error'
     }), {
       status: 500,
-      headers: corsHeaders(request)
+      headers: corsHeaders({})
     })
   }
 }
