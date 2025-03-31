@@ -11,7 +11,7 @@ interface Challenge {
 }
 
 interface TodayChallengeCardProps {
-  challenge: Challenge;
+  challenge: Challenge | null;
   childId: string;
   onComplete?: () => void;
 }
@@ -20,6 +20,17 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
   const [isCompleting, setIsCompleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+
+  if (!challenge) {
+    return (
+      <div className="bg-white rounded-2xl shadow-kidoova p-6">
+        <div className="text-center py-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Challenge Available</h3>
+          <p className="text-gray-600">Check back later for today's challenge.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleMarkComplete = async () => {
     setIsCompleting(true);
@@ -31,7 +42,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenges/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,7 +50,8 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         },
         body: JSON.stringify({
           child_id: childId,
-          challenge_id: challenge.id
+          challenge_id: challenge.id,
+          reflection: "Completed the challenge"
         })
       });
 
@@ -49,7 +61,9 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
       }
 
       setIsCompleted(true);
-      onComplete?.();
+      if (onComplete) {
+        onComplete();
+      }
     } catch (err) {
       console.error('Error marking challenge complete:', err);
       setError(err instanceof Error ? err.message : 'Failed to mark challenge as complete');
@@ -59,99 +73,60 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
   };
 
   return (
-    <div className={`bg-white rounded-2xl shadow-kidoova p-6 space-y-6 border ${isCompleted ? 'border-kidoova-accent' : 'border-kidoova-yellow/20'}`}>
-      {/* Title Section */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-kidoova-green mb-2">
-          {challenge.title}
-        </h2>
-        <p className="text-lg text-text-base">
-          {challenge.description}
-        </p>
-      </div>
-
-      {/* Goal Section */}
-      <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-        <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-          Your Goal
-        </h3>
-        <p className="text-text-base">
-          {challenge.goal}
-        </p>
-      </div>
-
-      {/* Steps Section */}
-      <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-        <h3 className="text-lg font-semibold text-kidoova-green mb-3">
-          Steps to Try
-        </h3>
-        <ul className="space-y-2">
-          {challenge.steps.map((step, index) => (
-            <li key={index} className="flex items-start">
-              <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
-                {index + 1}
-              </span>
-              <span className="text-text-base">{step}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Tip Section */}
-      <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-        <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-          Helpful Tip
-        </h3>
-        <p className="text-text-base">
-          {challenge.tip}
-        </p>
-      </div>
-
-      {/* Example Dialogue */}
-      <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-        <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-          Try Saying This
-        </h3>
-        <p className="text-text-base italic">
-          "{challenge.example_dialogue}"
-        </p>
-      </div>
-
-      {/* Mark Complete Button */}
-      {!isCompleted && (
-        <div className="flex justify-center">
+    <div className="bg-white rounded-2xl shadow-kidoova p-6">
+      <div className="flex justify-between items-start mb-4">
+        <h2 className="text-xl font-semibold text-gray-900">Today's Challenge</h2>
+        {!isCompleted && (
           <button
             onClick={handleMarkComplete}
             disabled={isCompleting}
-            className={`
-              px-6 py-3 rounded-lg font-semibold text-white
-              ${isCompleting 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
-              }
-            `}
+            className={`px-4 py-2 rounded-lg text-white font-medium ${
+              isCompleting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-kidoova-green hover:bg-kidoova-green-dark'
+            }`}
           >
-            {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
+            {isCompleting ? 'Marking Complete...' : 'Mark Complete'}
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Success Message */}
-      {isCompleted && (
-        <div className="flex justify-center items-center space-x-2 text-kidoova-accent">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          <span className="font-semibold">Challenge Completed!</span>
-        </div>
-      )}
-
-      {/* Error Message */}
       {error && (
-        <div className="text-red-600 text-center">
+        <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">
           {error}
         </div>
       )}
+
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Description</h3>
+          <p className="text-gray-600">{challenge.description}</p>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Goal</h3>
+          <p className="text-gray-600">{challenge.goal}</p>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
+          <ol className="list-decimal list-inside space-y-2 text-gray-600">
+            {challenge.steps.map((step, index) => (
+              <li key={index}>{step}</li>
+            ))}
+          </ol>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Tip</h3>
+          <p className="text-gray-600">{challenge.tip}</p>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Example Dialogue</h3>
+          <p className="text-gray-600">{challenge.example_dialogue}</p>
+        </div>
+      </div>
     </div>
   );
 } 
