@@ -16,7 +16,8 @@ export interface Challenge {
   tip?: string;
   pillar_id: number;
   age_range: string;
-  difficulty_level: string;
+  difficulty_level: number;
+  is_completed: number;
   created_at: string;
   updated_at: string;
 }
