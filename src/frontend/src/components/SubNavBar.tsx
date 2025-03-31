@@ -47,7 +47,7 @@ export default function SubNavBar() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 md:relative md:border-b">
+    <nav className="bg-white border-b border-gray-200 z-50">
       <div className="flex justify-around items-center py-2 px-4 md:justify-center md:py-4 md:space-x-8">
         {navItems.map((item) => (
           <Link
