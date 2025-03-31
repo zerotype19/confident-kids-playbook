@@ -97,7 +97,7 @@ router.get('/api/notes', (request, context) => notes({ request, env: context.env
 router.post('/api/notes', (request, context) => createNote({ request, env: context.env }))
 
 // All challenges route
-router.get('/api/challenges/all', allChallenges)
+router.get('/api/challenges/all', (request, context) => allChallenges({ request, env: context.env }))
 
 // Handle other routes
 router.get('/api/hello', async () => {
