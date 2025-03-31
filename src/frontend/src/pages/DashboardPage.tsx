@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import ChildSelector from '../components/dashboard/ChildSelector';
-import NavigationPanel from '../components/dashboard/NavigationPanel';
 import NotesSection from '../components/dashboard/NotesSection';
 import ProgressSummary from '../components/dashboard/ProgressSummary';
 import TodayChallengeCard from '../components/dashboard/TodayChallengeCard';
 import { Child } from '../types';
 import PageWrapper from '../components/PageWrapper';
 import CustomButton from '../components/CustomButton';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [challenge, setChallenge] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchChildren = async () => {
@@ -93,35 +94,29 @@ export default function DashboardPage() {
   return (
     <PageWrapper>
       <div className="space-y-6">
-        <div className="bg-white rounded-2xl shadow-kidoova p-6">
-          <h1 className="text-2xl font-bold text-kidoova-green mb-6">Dashboard</h1>
-          
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-heading">Dashboard</h1>
           <ChildSelector
             children={children}
             selectedChild={selectedChild}
             onSelectChild={setSelectedChild}
           />
-
-          {selectedChild && (
-            <div className="mt-6">
-              {isLoading ? (
-                <div className="text-center py-8">Loading today's challenge...</div>
-              ) : error ? (
-                <div className="text-red-500 text-center py-8">{error}</div>
-              ) : challenge && (
-                <TodayChallengeCard
-                  challenge={challenge}
-                  childId={selectedChild.id}
-                />
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <ProgressSummary childId={selectedChild.id} />
-                <NotesSection childId={selectedChild.id} />
-              </div>
-            </div>
-          )}
         </div>
+
+        {selectedChild ? (
+          <>
+            <ProgressSummary childId={selectedChild.id} />
+            <TodayChallengeCard childId={selectedChild.id} challenge={challenge} />
+            <NotesSection childId={selectedChild.id} />
+          </>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
+            <CustomButton onClick={() => navigate('/manage-children')}>
+              Manage Children
+            </CustomButton>
+          </div>
+        )}
       </div>
     </PageWrapper>
   );
