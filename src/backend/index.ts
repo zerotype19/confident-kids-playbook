@@ -13,6 +13,7 @@ import { notes, createNote } from './api/notes'
 import { onRequest as challengeLog } from './api/challenge_log'
 import { onRequestGet as progress } from './api/progress'
 import { onRequestGet as rewards } from './api/rewards/[childId]'
+import { onRequest as allChallenges } from './api/challenges/all'
 
 const router = Router()
 
@@ -94,6 +95,9 @@ router.get('/api/rewards/:childId', (request, context) => rewards({ request, env
 // Notes routes
 router.get('/api/notes', (request, context) => notes({ request, env: context.env }))
 router.post('/api/notes', (request, context) => createNote({ request, env: context.env }))
+
+// All challenges route
+router.get('/api/challenges/all', allChallenges)
 
 // Handle other routes
 router.get('/api/hello', async () => {

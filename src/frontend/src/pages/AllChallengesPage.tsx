@@ -1,34 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { useChildContext } from '../contexts/ChildContext';
 import Layout from '../components/Layout';
 import { PageWrapper } from '../components/PageWrapper';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeFilters from '../components/challenges/ChallengeFilters';
-import { Challenge } from '../types';
+import ChildSelector from '../components/dashboard/ChildSelector';
+import { Child } from '../types';
 
 export default function AllChallengesPage() {
-  const { selectedChild } = useChildContext();
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [children, setChildren] = useState<Child[]>([]);
+  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+  const [challenges, setChallenges] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPillar, setSelectedPillar] = useState<number | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
 
+  // Fetch children on component mount
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch children');
+        }
+
+        const data = await response.json();
+        setChildren(data);
+        
+        // Auto-select first child if only one exists
+        if (data.length === 1) {
+          setSelectedChild(data[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching children:', err);
+        setError('Failed to load children');
+      }
+    };
+
+    fetchChildren();
+  }, []);
+
+  // Fetch challenges when selected child changes
   useEffect(() => {
     const fetchChallenges = async () => {
       if (!selectedChild) return;
 
-      try {
-        setLoading(true);
-        setError(null);
+      setIsLoading(true);
+      setError(null);
 
+      try {
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('No authentication token found');
         }
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/challenges/all?childId=${selectedChild.id}`,
+          `${import.meta.env.VITE_API_URL}/api/challenges/all?child_id=${selectedChild.id}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -41,11 +78,12 @@ export default function AllChallengesPage() {
         }
 
         const data = await response.json();
-        setChallenges(data.challenges);
+        setChallenges(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load challenges');
+        console.error('Error fetching challenges:', err);
+        setError('Failed to load challenges');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -58,67 +96,48 @@ export default function AllChallengesPage() {
     return true;
   });
 
-  if (!selectedChild) {
-    return (
-      <Layout>
-        <PageWrapper>
-          <div className="text-center text-gray-600">
-            Please select a child to view their challenges
-          </div>
-        </PageWrapper>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <PageWrapper>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-kidoova-green">
-              All Challenges for {selectedChild.name}
-            </h1>
-            <p className="mt-2 text-gray-600">
-              Explore and complete challenges to help your child grow
-            </p>
-          </div>
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-kidoova p-6">
+            <h1 className="text-2xl font-bold text-kidoova-green mb-6">All Challenges</h1>
+            
+            <ChildSelector
+              children={children}
+              selectedChild={selectedChild}
+              onSelectChild={setSelectedChild}
+            />
 
-          <ChallengeFilters
-            selectedPillar={selectedPillar}
-            onPillarChange={setSelectedPillar}
-            selectedDifficulty={selectedDifficulty}
-            onDifficultyChange={setSelectedDifficulty}
-          />
-
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                </div>
-              ))}
-            </div>
-          ) : error ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-600">{error}</p>
-            </div>
-          ) : filteredChallenges.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">No challenges found matching your filters</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {filteredChallenges.map((challenge) => (
-                <ChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  childId={selectedChild.id}
+            {selectedChild && (
+              <div className="mt-6">
+                <ChallengeFilters
+                  selectedPillar={selectedPillar}
+                  onPillarChange={setSelectedPillar}
+                  selectedDifficulty={selectedDifficulty}
+                  onDifficultyChange={setSelectedDifficulty}
                 />
-              ))}
-            </div>
-          )}
+
+                {isLoading ? (
+                  <div className="text-center py-8">Loading challenges...</div>
+                ) : error ? (
+                  <div className="text-red-500 text-center py-8">{error}</div>
+                ) : filteredChallenges.length === 0 ? (
+                  <div className="text-center py-8">No challenges found matching your filters.</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    {filteredChallenges.map((challenge) => (
+                      <ChallengeCard
+                        key={challenge.id}
+                        challenge={challenge}
+                        childId={selectedChild.id}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </PageWrapper>
     </Layout>
