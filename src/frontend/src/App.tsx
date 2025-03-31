@@ -6,6 +6,7 @@ import OnboardingPage from "./pages/OnboardingPage"
 import DashboardPage from "./pages/DashboardPage"
 import AllChallengesPage from "./pages/AllChallengesPage"
 import { PrivateRoute } from "./components/PrivateRoute"
+import PageWrapper from "./components/PageWrapper"
 
 export default function App(): JSX.Element {
   console.log("✅ App.tsx render")
@@ -35,7 +36,9 @@ export default function App(): JSX.Element {
               path="/dashboard" 
               element={
                 <PrivateRoute>
-                  <DashboardPage />
+                  <PageWrapper>
+                    <DashboardPage />
+                  </PageWrapper>
                 </PrivateRoute>
               } 
             />
@@ -43,7 +46,9 @@ export default function App(): JSX.Element {
               path="/all-challenges" 
               element={
                 <PrivateRoute>
-                  <AllChallengesPage />
+                  <PageWrapper>
+                    <AllChallengesPage />
+                  </PageWrapper>
                 </PrivateRoute>
               } 
             />
