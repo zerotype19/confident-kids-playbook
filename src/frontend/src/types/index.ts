@@ -68,12 +68,14 @@ export interface Challenge {
   id: string;
   title: string;
   description: string;
-  pillar: PillarId;
-  difficulty: 'easy' | 'medium' | 'hard';
-  duration: number;
-  tip?: string;
-  completed: boolean;
-  completedAt?: string;
+  goal: string;
+  steps: string | string[];
+  example_dialogue: string;
+  tip: string;
+  pillar_id: number;
+  age_range: string;
+  difficulty_level: number;
+  is_completed: boolean;
 }
 
 export interface ProgressSummary {

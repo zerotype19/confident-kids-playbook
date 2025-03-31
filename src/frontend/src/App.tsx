@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import OnboardingPage from "./pages/OnboardingPage"
 import DashboardPage from "./pages/DashboardPage"
+import AllChallengesPage from "./pages/AllChallengesPage"
 import { PrivateRoute } from "./components/PrivateRoute"
 
 export default function App(): JSX.Element {
@@ -35,6 +36,14 @@ export default function App(): JSX.Element {
               element={
                 <PrivateRoute>
                   <DashboardPage />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/all-challenges" 
+              element={
+                <PrivateRoute>
+                  <AllChallengesPage />
                 </PrivateRoute>
               } 
             />
