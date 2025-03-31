@@ -13,7 +13,7 @@ import { notes, createNote } from './api/notes'
 import { onRequest as challengeLog } from './api/challenge_log'
 import { onRequestGet as progress } from './api/progress'
 import { onRequestGet as rewards } from './api/rewards/[childId]'
-import { onRequest as allChallenges } from './api/challenges/all'
+import { onRequestGet as allChallenges } from './api/challenges/all'
 
 const router = Router()
 

@@ -2,7 +2,7 @@ import { Env } from '../../types';
 import { verifyJWT } from '../../auth';
 import { corsHeaders } from '../../lib/cors';
 
-export async function onRequest(context: { request: Request; env: Env }) {
+export async function onRequestGet(context: { request: Request; env: Env }) {
   const { request, env } = context;
 
   // Handle CORS preflight
