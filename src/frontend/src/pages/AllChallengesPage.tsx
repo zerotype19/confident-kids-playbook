@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { PageWrapper } from '../components/PageWrapper';
+import PageWrapper from '../components/PageWrapper';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeFilters from '../components/challenges/ChallengeFilters';
 import ChildSelector from '../components/dashboard/ChildSelector';
