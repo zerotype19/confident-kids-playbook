@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
 import ChildSelector from '../components/dashboard/ChildSelector';
 import NavigationPanel from '../components/dashboard/NavigationPanel';
 import NotesSection from '../components/dashboard/NotesSection';
@@ -92,52 +91,38 @@ export default function DashboardPage() {
   };
 
   return (
-    <Layout>
-      <PageWrapper>
-        <div className="max-w-5xl mx-auto p-4 md:p-6 flex flex-col gap-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-kidoova-green mb-6 text-center md:text-left">
-            Welcome back{selectedChild ? `, ${selectedChild.name}` : ''}!
-          </h1>
+    <PageWrapper>
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-kidoova p-6">
+          <h1 className="text-2xl font-bold text-kidoova-green mb-6">Dashboard</h1>
+          
+          <ChildSelector
+            children={children}
+            selectedChild={selectedChild}
+            onSelectChild={setSelectedChild}
+          />
 
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Sidebar */}
-            <div className="w-full md:w-64 flex-shrink-0">
-              <ChildSelector
-                children={children}
-                selectedChild={selectedChild}
-                onSelectChild={setSelectedChild}
-              />
-              <NavigationPanel />
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1 space-y-6">
+          {selectedChild && (
+            <div className="mt-6">
               {isLoading ? (
-                <div className="bg-white rounded-2xl shadow-kidoova p-4 md:p-6 text-center">
-                  <p className="text-gray-600">Loading today's challenge...</p>
-                </div>
+                <div className="text-center py-8">Loading today's challenge...</div>
               ) : error ? (
-                <div className="bg-white rounded-2xl shadow-kidoova p-4 md:p-6 text-center">
-                  <p className="text-red-600">{error}</p>
-                </div>
-              ) : challenge && selectedChild ? (
-                <TodayChallengeCard 
+                <div className="text-red-500 text-center py-8">{error}</div>
+              ) : challenge && (
+                <TodayChallengeCard
                   challenge={challenge}
                   childId={selectedChild.id}
-                  onComplete={handleChallengeComplete}
                 />
-              ) : null}
-
-              {selectedChild?.id && (
-                <>
-                  <NotesSection childId={selectedChild.id} />
-                  <ProgressSummary childId={selectedChild.id} />
-                </>
               )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <ProgressSummary childId={selectedChild.id} />
+                <NotesSection childId={selectedChild.id} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      </PageWrapper>
-    </Layout>
+      </div>
+    </PageWrapper>
   );
 } 
