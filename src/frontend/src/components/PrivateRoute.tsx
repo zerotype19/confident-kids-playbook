@@ -35,6 +35,12 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     );
   }
 
+  // If not authenticated, redirect to home page
+  if (!isAuthenticated || !token) {
+    console.log('❌ Not authenticated, redirecting to home');
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
   // If we have a token but user data isn't loaded yet, show loading state
   if (token && !user) {
     console.log('⏳ Token exists but user data not loaded yet');
@@ -46,12 +52,6 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
         </div>
       </div>
     );
-  }
-
-  // If not authenticated and no token, redirect to home
-  if (!isAuthenticated && !token) {
-    console.log('❌ Not authenticated and no token, redirecting to home');
-    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   // If user has completed onboarding and tries to access onboarding pages
@@ -66,6 +66,7 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     return <Navigate to="/onboarding" replace />;
   }
 
-  console.log('✅ Access granted to:', location.pathname);
+  // If authenticated and user data is loaded, render children
+  console.log('✅ Authenticated, rendering protected content');
   return <>{children}</>;
 }; 
