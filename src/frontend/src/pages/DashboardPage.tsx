@@ -6,7 +6,7 @@ import NotesSection from '../components/dashboard/NotesSection';
 import ProgressSummary from '../components/dashboard/ProgressSummary';
 import TodayChallengeCard from '../components/dashboard/TodayChallengeCard';
 import { Child } from '../types';
-import { PageWrapper } from '../components/PageWrapper';
+import PageWrapper from '../components/PageWrapper';
 import CustomButton from '../components/CustomButton';
 
 export default function DashboardPage() {
