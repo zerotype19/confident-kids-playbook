@@ -2,6 +2,25 @@ import { Env } from '../../types';
 import { verifyJWT } from '../../auth';
 import { corsHeaders } from '../../lib/cors';
 
+interface Child {
+  id: string;
+  age_range: string;
+}
+
+interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  goal: string;
+  steps: string;
+  example_dialogue: string;
+  tip: string;
+  pillar_id: number;
+  age_range: string;
+  difficulty_level: number;
+  is_completed: number;
+}
+
 export async function onRequestGet(context: { request: Request; env: Env }) {
   const { request, env } = context;
 
@@ -56,7 +75,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       FROM children c
       JOIN family_members fm ON c.family_id = fm.family_id
       WHERE c.id = ? AND fm.user_id = ?
-    `).bind(childId, payload.sub).first();
+    `).bind(childId, payload.sub).first<Child>();
 
     if (!child) {
       return new Response(JSON.stringify({ error: 'Child not found or access denied' }), {
@@ -66,6 +85,11 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     }
 
     // Get all challenges for the child's age range
+    console.log('Fetching challenges for child:', {
+      childId,
+      ageRange: child.age_range
+    });
+
     const challenges = await env.DB.prepare(`
       SELECT c.*, 
              CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
@@ -73,9 +97,14 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
         AND cl.child_id = ? 
         AND date(cl.completed_at) = date('now')
-      WHERE c.age_range = ?
+      WHERE REPLACE(c.age_range, '–', '-') = REPLACE(?, '–', '-')
       ORDER BY c.pillar_id, c.difficulty_level
-    `).bind(childId, child.age_range).all();
+    `).bind(childId, child.age_range).all<Challenge>();
+
+    console.log('Found challenges:', {
+      count: challenges.results?.length || 0,
+      firstChallenge: challenges.results?.[0]
+    });
 
     return new Response(JSON.stringify(challenges.results), {
       headers: corsHeaders()
