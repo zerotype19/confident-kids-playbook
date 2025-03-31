@@ -1,7 +1,6 @@
 import React, { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import PageWrapper from "../components/PageWrapper"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -58,7 +57,13 @@ declare global {
 export default function HomePage(): JSX.Element {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { isAuthenticated, login } = useAuth()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard')
+    }
+  }, [isAuthenticated, navigate])
 
   // Safety check for environment variable
   if (!googleClientId) {
@@ -73,61 +78,11 @@ export default function HomePage(): JSX.Element {
   console.log("✅ Using Google Client ID:", googleClientId)
 
   const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
-    console.log("✅ Google login response received", { 
-      hasCredential: !!response.credential,
-      credentialLength: response.credential?.length
-    })
-
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || ''
-      console.log("🔗 Using API URL:", apiUrl)
-      
-      const res = await fetch(`${apiUrl}/api/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: response.credential })
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        console.error("❌ API Error Response:", {
-          status: res.status,
-          statusText: res.statusText,
-          errorData
-        })
-        throw new Error(`HTTP error! status: ${res.status}, details: ${JSON.stringify(errorData)}`)
-      }
-
-      const data = await res.json() as AuthResponse
-      console.log("✅ API Response:", {
-        status: data.status,
-        hasJWT: !!data.jwt,
-        user: data.user
-      })
-
-      if (data.status === 'ok' && data.jwt) {
-        console.log("✅ Login successful, storing JWT")
-        await login(data.jwt)
-        console.log("✅ JWT stored, waiting for user data")
-        // Wait a moment for user data to be fetched
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        console.log("✅ User data fetched, checking onboarding status")
-        // Navigate directly to onboarding since this is a new user
-        console.log("🔄 Navigating to onboarding page")
-        window.location.href = "/onboarding"
-        console.log("✅ Navigation completed")
-      } else {
-        console.error("❌ Login failed:", data.message)
-        throw new Error(data.message || "Login failed")
-      }
+      await login(response.credential)
+      navigate('/dashboard')
     } catch (error) {
-      const loginError = error as GoogleLoginError
-      console.error("❌ Login error:", {
-        message: loginError.message,
-        code: loginError.code,
-        error: loginError
-      })
-      alert(loginError.message || "Login failed")
+      console.error('Login error:', error)
     }
   }
 
@@ -168,7 +123,7 @@ export default function HomePage(): JSX.Element {
   }, [googleClientId, navigate])
 
   return (
-    <PageWrapper>
+    <div className="min-h-screen bg-kidoova-background">
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading mb-6">
           Welcome to Confident Kids Playbook
@@ -192,6 +147,6 @@ export default function HomePage(): JSX.Element {
           </div>
         </div>
       </div>
-    </PageWrapper>
+    </div>
   )
 } 
