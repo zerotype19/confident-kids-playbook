@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { PageWrapper } from "../components/PageWrapper"
+import PageWrapper from "../components/PageWrapper"
 
 interface GoogleCredentialResponse {
   credential: string
