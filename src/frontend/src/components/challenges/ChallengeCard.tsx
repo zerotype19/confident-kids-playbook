@@ -52,51 +52,39 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-kidoova p-6">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-kidoova-green">
-            {challenge.title}
-          </h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-              {challenge.pillar_id === 1 ? 'Problem Solving' :
-               challenge.pillar_id === 2 ? 'Growth Mindset' :
-               challenge.pillar_id === 3 ? 'Social Skills' :
-               challenge.pillar_id === 4 ? 'Self-Awareness' :
-               'Courage'}
-            </span>
-            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-              {challenge.difficulty_level === 1 ? 'Easy' :
-               challenge.difficulty_level === 2 ? 'Medium' :
-               'Hard'}
-            </span>
-          </div>
+    <div className={`bg-white rounded-2xl shadow-kidoova p-6 space-y-6 border ${isCompleted ? 'border-kidoova-accent' : 'border-kidoova-yellow/20'}`}>
+      {/* Title Section */}
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-kidoova-green mb-2">
+          {challenge.title}
+        </h2>
+        <p className="text-lg text-text-base">
+          {challenge.description}
+        </p>
+        <div className="flex items-center justify-center gap-2 mt-2">
+          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+            {challenge.pillar_id === 1 ? 'Problem Solving' :
+             challenge.pillar_id === 2 ? 'Growth Mindset' :
+             challenge.pillar_id === 3 ? 'Social Skills' :
+             challenge.pillar_id === 4 ? 'Self-Awareness' :
+             'Courage'}
+          </span>
+          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+            {challenge.difficulty_level === 1 ? 'Easy' :
+             challenge.difficulty_level === 2 ? 'Medium' :
+             'Hard'}
+          </span>
         </div>
-        {isCompleted && (
-          <div className="flex items-center space-x-2 text-kidoova-accent">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="font-semibold">Completed</span>
-          </div>
-        )}
       </div>
-
-      {/* Description */}
-      <p className="text-gray-600 text-sm mb-4">
-        {challenge.description}
-      </p>
 
       {/* Expand/Collapse Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="text-sm text-kidoova-accent hover:text-kidoova-green flex items-center gap-1"
+        className="w-full flex items-center justify-center gap-2 text-kidoova-accent hover:text-kidoova-green font-medium"
       >
         {isExpanded ? 'Show Less' : 'View Full Challenge'}
         <svg
-          className={`w-4 h-4 transform transition-transform ${
+          className={`w-5 h-5 transform transition-transform ${
             isExpanded ? 'rotate-180' : ''
           }`}
           fill="none"
@@ -109,42 +97,55 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="mt-6 space-y-6 pt-6 border-t">
-          {/* Goal */}
-          <div>
-            <h4 className="font-medium text-gray-900 mb-2">Goal</h4>
-            <p className="text-sm text-gray-600">{challenge.goal}</p>
+        <>
+          {/* Goal Section */}
+          <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+            <h3 className="text-lg font-semibold text-kidoova-green mb-2">
+              Your Goal
+            </h3>
+            <p className="text-text-base">
+              {challenge.goal}
+            </p>
           </div>
 
-          {/* Steps */}
-          <div>
-            <h4 className="font-medium text-gray-900 mb-2">Steps</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-              {Array.isArray(challenge.steps) ? (
-                challenge.steps.map((step, idx) => (
-                  <li key={idx}>{step}</li>
-                ))
-              ) : (
-                <li>{challenge.steps}</li>
-              )}
+          {/* Steps Section */}
+          <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+            <h3 className="text-lg font-semibold text-kidoova-green mb-3">
+              Steps to Try
+            </h3>
+            <ul className="space-y-2">
+              {(Array.isArray(challenge.steps) ? challenge.steps : [challenge.steps]).map((step, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
+                    {index + 1}
+                  </span>
+                  <span className="text-text-base">{step}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Example Dialogue */}
-          {challenge.example_dialogue && (
+          {/* Tip Section */}
+          {challenge.tip && (
             <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-              <h4 className="font-medium text-kidoova-green mb-2">Try Saying This</h4>
-              <p className="text-sm text-gray-600 italic">
-                "{challenge.example_dialogue}"
+              <h3 className="text-lg font-semibold text-kidoova-green mb-2">
+                Helpful Tip
+              </h3>
+              <p className="text-text-base">
+                {challenge.tip}
               </p>
             </div>
           )}
 
-          {/* Tip */}
-          {challenge.tip && (
-            <div>
-              <h4 className="font-medium text-gray-900 mb-2">Tip</h4>
-              <p className="text-sm text-gray-600">{challenge.tip}</p>
+          {/* Example Dialogue */}
+          {challenge.example_dialogue && (
+            <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+              <h3 className="text-lg font-semibold text-kidoova-green mb-2">
+                Try Saying This
+              </h3>
+              <p className="text-text-base italic">
+                "{challenge.example_dialogue}"
+              </p>
             </div>
           )}
 
@@ -166,12 +167,22 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
               </button>
             </div>
           )}
+        </>
+      )}
+
+      {/* Success Message */}
+      {isCompleted && (
+        <div className="flex justify-center items-center space-x-2 text-kidoova-accent">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="font-semibold">Challenge Completed!</span>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="mt-4 text-sm text-red-600 text-center">
+        <div className="text-red-600 text-center">
           {error}
         </div>
       )}
