@@ -10,6 +10,7 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reflection, setReflection] = useState('');
   const isCompleted = challenge.is_completed === 1;
 
   const handleMarkComplete = async () => {
@@ -31,19 +32,19 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          child_id: childId,
           challenge_id: challenge.id,
-          reflection: '' // Optional reflection
+          child_id: childId,
+          reflection
         })
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to mark challenge as complete');
+        throw new Error('Failed to complete challenge');
       }
 
       // Update the challenge in the parent component
       challenge.is_completed = 1;
+      setReflection('');
     } catch (err) {
       console.error('Error marking challenge complete:', err);
       setError(err instanceof Error ? err.message : 'Failed to mark challenge as complete');
@@ -150,20 +151,28 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
 
           {/* Complete Button */}
           {!isCompleted && (
-            <div className="flex justify-center">
-              <button
-                onClick={handleMarkComplete}
-                disabled={isCompleting}
-                className={`
-                  px-6 py-3 rounded-lg font-semibold text-white
-                  ${isCompleting 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
-                  }
-                `}
-              >
-                {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
-              </button>
+            <div className="space-y-3">
+              <textarea
+                value={reflection}
+                onChange={(e) => setReflection(e.target.value)}
+                placeholder="Add a reflection note..."
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full h-24"
+              />
+              <div className="flex justify-center">
+                <button
+                  onClick={handleMarkComplete}
+                  disabled={isCompleting}
+                  className={`
+                    px-6 py-3 rounded-lg font-semibold text-white
+                    ${isCompleting 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
+                    }
+                  `}
+                >
+                  {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
+                </button>
+              </div>
             </div>
           )}
         </>
