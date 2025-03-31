@@ -4,7 +4,6 @@ import NotesSection from '../components/dashboard/NotesSection';
 import ProgressSummary from '../components/dashboard/ProgressSummary';
 import TodayChallengeCard from '../components/dashboard/TodayChallengeCard';
 import { Child } from '../types';
-import PageWrapper from '../components/PageWrapper';
 import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
 
@@ -92,32 +91,30 @@ export default function DashboardPage() {
   };
 
   return (
-    <PageWrapper>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-heading">Dashboard</h1>
-          <ChildSelector
-            children={children}
-            selectedChild={selectedChild}
-            onSelectChild={setSelectedChild}
-          />
-        </div>
-
-        {selectedChild ? (
-          <>
-            <ProgressSummary childId={selectedChild.id} />
-            <TodayChallengeCard childId={selectedChild.id} challenge={challenge} />
-            <NotesSection childId={selectedChild.id} />
-          </>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
-            <CustomButton onClick={() => navigate('/manage-children')}>
-              Manage Children
-            </CustomButton>
-          </div>
-        )}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-heading">Dashboard</h1>
+        <ChildSelector
+          children={children}
+          selectedChild={selectedChild}
+          onSelectChild={setSelectedChild}
+        />
       </div>
-    </PageWrapper>
+
+      {selectedChild ? (
+        <>
+          <ProgressSummary childId={selectedChild.id} />
+          <TodayChallengeCard childId={selectedChild.id} challenge={challenge} />
+          <NotesSection childId={selectedChild.id} />
+        </>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
+          <CustomButton onClick={() => navigate('/manage-children')}>
+            Manage Children
+          </CustomButton>
+        </div>
+      )}
+    </div>
   );
 } 
