@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AGE_RANGES = [
-  '3-4 years',
-  '5-6 years',
-  '7-8 years',
-  '9-10 years'
+  '3-5',
+  '6-9',
+  '10-13'
 ];
 
 export default function CreateChildForm(): JSX.Element {
@@ -92,7 +91,7 @@ export default function CreateChildForm(): JSX.Element {
             <option value="">Select age range</option>
             {AGE_RANGES.map((range) => (
               <option key={range} value={range}>
-                {range}
+                {range === '3-5' ? '3-5 years' : range === '6-9' ? '6-9 years' : '10-13 years'}
               </option>
             ))}
           </select>
