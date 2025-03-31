@@ -54,47 +54,36 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
 
   return (
     <div className={`bg-white rounded-2xl shadow-kidoova p-6 space-y-6 border ${isCompleted ? 'border-kidoova-accent' : 'border-kidoova-yellow/20'}`}>
-      {/* Title Section */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-kidoova-green mb-2">
+      {/* Title Section - Clickable to expand */}
+      <div 
+        className="text-center cursor-pointer"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <h2 className="text-2xl font-bold text-kidoova-green mb-2 hover:text-kidoova-accent transition-colors">
           {challenge.title}
         </h2>
-        <p className="text-lg text-text-base">
-          {challenge.description}
-        </p>
-        <div className="flex items-center justify-center gap-2 mt-2">
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-            {challenge.pillar_id === 1 ? 'Problem Solving' :
-             challenge.pillar_id === 2 ? 'Growth Mindset' :
-             challenge.pillar_id === 3 ? 'Social Skills' :
-             challenge.pillar_id === 4 ? 'Self-Awareness' :
-             'Courage'}
-          </span>
-          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-            {challenge.difficulty_level === 1 ? 'Easy' :
-             challenge.difficulty_level === 2 ? 'Medium' :
-             'Hard'}
-          </span>
-        </div>
+        {isExpanded && (
+          <>
+            <p className="text-lg text-text-base">
+              {challenge.description}
+            </p>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                {challenge.pillar_id === 1 ? 'Problem Solving' :
+                 challenge.pillar_id === 2 ? 'Growth Mindset' :
+                 challenge.pillar_id === 3 ? 'Social Skills' :
+                 challenge.pillar_id === 4 ? 'Self-Awareness' :
+                 'Courage'}
+              </span>
+              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+                {challenge.difficulty_level === 1 ? 'Easy' :
+                 challenge.difficulty_level === 2 ? 'Medium' :
+                 'Hard'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
-
-      {/* Expand/Collapse Button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-center gap-2 text-kidoova-accent hover:text-kidoova-green font-medium"
-      >
-        {isExpanded ? 'Show Less' : 'View Challenge Details'}
-        <svg
-          className={`w-5 h-5 transform transition-transform ${
-            isExpanded ? 'rotate-180' : ''
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
 
       {/* Expanded Content */}
       {isExpanded && (
