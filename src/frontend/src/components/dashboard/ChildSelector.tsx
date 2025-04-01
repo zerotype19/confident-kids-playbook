@@ -22,11 +22,11 @@ export default function ChildSelector({ children }: ChildSelectorProps) {
   }, []);
 
   return (
-    <div className="relative inline-block w-full sm:w-auto text-left" ref={dropdownRef}>
+    <div className="relative inline-block w-48 sm:w-56 text-left" ref={dropdownRef}>
       <div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full sm:w-auto inline-flex justify-between items-center rounded-xl bg-kidoova-accent text-white font-bold px-4 py-2 shadow-kidoova hover:bg-kidoova-green transition"
+          className="w-full inline-flex justify-between items-center rounded-xl bg-kidoova-accent text-white font-bold px-4 py-2 shadow-kidoova hover:bg-kidoova-green transition"
         >
           <span className="truncate">
             {selectedChild ? selectedChild.name : 'Select Child'}
@@ -47,7 +47,7 @@ export default function ChildSelector({ children }: ChildSelectorProps) {
       </div>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-full sm:w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+        <div className="absolute right-0 mt-2 w-48 sm:w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
           <div className="py-1" role="menu">
             {children.map((child) => (
               <button
