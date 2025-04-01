@@ -14,8 +14,6 @@ interface Challenge {
   age_range: string;
   difficulty_level: number;
   is_completed: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 export async function onRequestGet(context: { request: Request; env: Env }) {
@@ -94,8 +92,6 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         c.pillar_id,
         c.age_range,
         c.difficulty_level,
-        c.created_at,
-        c.updated_at,
         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id AND cl.child_id = ?
