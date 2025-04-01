@@ -101,23 +101,26 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
               Steps to Try
             </h3>
             <ul className="space-y-2">
-              {Array.isArray(challenge.steps) ? (
-                challenge.steps.map((step, index) => (
+              {(() => {
+                let stepsArray: string[];
+                if (typeof challenge.steps === 'string') {
+                  try {
+                    stepsArray = JSON.parse(challenge.steps);
+                  } catch (e) {
+                    stepsArray = [challenge.steps];
+                  }
+                } else {
+                  stepsArray = challenge.steps;
+                }
+                return stepsArray.map((step, index) => (
                   <li key={index} className="flex items-start">
                     <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
                       {index + 1}
                     </span>
                     <span className="text-text-base">{step}</span>
                   </li>
-                ))
-              ) : (
-                <li className="flex items-start">
-                  <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
-                    1
-                  </span>
-                  <span className="text-text-base">{challenge.steps}</span>
-                </li>
-              )}
+                ));
+              })()}
             </ul>
           </div>
 
