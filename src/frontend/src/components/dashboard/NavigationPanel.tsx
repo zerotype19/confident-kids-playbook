@@ -21,10 +21,17 @@ export default function NavigationPanel(): JSX.Element {
       
       <div className="space-y-3">
         <button
-          onClick={() => navigate('/onboarding/child')}
+          onClick={() => navigate('/dashboard')}
           className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
         >
-          Add New Child
+          Dashboard
+        </button>
+
+        <button
+          onClick={() => navigate('/pillars')}
+          className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
+        >
+          Pillars
         </button>
 
         <button
@@ -32,6 +39,13 @@ export default function NavigationPanel(): JSX.Element {
           className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
         >
           All Challenges
+        </button>
+
+        <button
+          onClick={() => navigate('/onboarding/child')}
+          className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
+        >
+          Add New Child
         </button>
 
         <button

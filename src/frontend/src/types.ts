@@ -115,4 +115,12 @@ export interface Family {
   children: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface Pillar {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
 } 
