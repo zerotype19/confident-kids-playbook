@@ -8,6 +8,7 @@ interface User {
   displayName: string | null;
   photoURL: string | null;
   hasCompletedOnboarding: boolean;
+  childId: string;
 }
 
 interface AuthContextType {
@@ -94,7 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: data.email,
         displayName: data.name,
         photoURL: data.picture,
-        hasCompletedOnboarding: data.hasCompletedOnboarding
+        hasCompletedOnboarding: data.hasCompletedOnboarding,
+        childId: data.childId
       };
       console.log("👤 Mapped user data:", userData);
       setUser(userData);

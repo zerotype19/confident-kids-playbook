@@ -46,13 +46,38 @@ export interface Badge {
   icon_url: string;
 }
 
+export interface Reward {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  type: 'milestone' | 'streak' | 'pillar';
+  criteria_value: number;
+  pillar_id?: number;
+  earned_at?: string;
+}
+
 export interface ProgressSummary {
-  streak_days: number;
-  total_coins: number;
-  pillar_progress?: {
-    [key: string]: number;
+  milestones_completed: number;
+  current_streak: number;
+  longest_streak: number;
+  pillar_progress: {
+    [key: string]: {
+      completed: number;
+      total: number;
+      percentage: number;
+    };
   };
-  badges?: Badge[];
+  next_reward?: {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    type: 'milestone' | 'streak' | 'pillar';
+    criteria_value: number;
+    pillar_id?: number;
+    progress: number;
+  };
 }
 
 export interface JournalEntry {
@@ -123,4 +148,19 @@ export interface Pillar {
   description: string;
   icon: string;
   color: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  childId: string;
+  // ... other existing fields ...
+}
+
+export interface RewardsOverviewProps {
+  progress: ProgressSummary | null;
+}
+
+export interface TrophyCaseProps {
+  rewards: Reward[];
 } 
