@@ -125,6 +125,11 @@ export default function HomePage(): JSX.Element {
   return (
     <div className="min-h-screen bg-kidoova-background">
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
+        <img 
+          src="/logo.png" 
+          alt="Kidoova Logo" 
+          className="h-16 md:h-20 mb-8"
+        />
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading mb-6">
           Welcome to Confident Kids Playbook
         </h1>
