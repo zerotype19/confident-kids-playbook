@@ -1,34 +1,21 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function SubNavBar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        localStorage.removeItem('token');
-        navigate('/login');
-      }
+      await logout();
+      navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
       // Still clear token and redirect on error
       localStorage.removeItem('token');
-      navigate('/login');
+      navigate('/');
     }
   };
 
@@ -66,17 +53,13 @@ export default function SubNavBar() {
               </Link>
             ))}
           </div>
-          <Link
-            to="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handleLogout();
-            }}
+          <button
+            onClick={handleLogout}
             className="flex items-center py-3 px-2 md:px-3 text-sm font-medium text-gray-500 hover:text-kidoova-accent transition-colors duration-200"
           >
             <span className="text-xl md:text-lg">🚪</span>
             <span className="hidden md:inline ml-2">Logout</span>
-          </Link>
+          </button>
         </div>
       </div>
     </nav>
