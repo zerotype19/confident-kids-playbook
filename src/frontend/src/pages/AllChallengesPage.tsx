@@ -94,8 +94,25 @@ export default function AllChallengesPage() {
   }, [selectedPillar, selectedDifficulty, challenges]);
 
   const filteredChallenges = challenges.filter(challenge => {
-    if (selectedPillar && challenge.pillar_id !== selectedPillar) return false;
-    if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) return false;
+    console.log('Checking challenge:', {
+      id: challenge.id,
+      title: challenge.title,
+      pillar_id: challenge.pillar_id,
+      selectedPillar,
+      difficulty_level: challenge.difficulty_level,
+      selectedDifficulty,
+      matchesPillar: !selectedPillar || challenge.pillar_id === selectedPillar,
+      matchesDifficulty: !selectedDifficulty || challenge.difficulty_level === selectedDifficulty
+    });
+    
+    if (selectedPillar && challenge.pillar_id !== selectedPillar) {
+      console.log('Filtered out by pillar');
+      return false;
+    }
+    if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) {
+      console.log('Filtered out by difficulty');
+      return false;
+    }
     return true;
   });
 
