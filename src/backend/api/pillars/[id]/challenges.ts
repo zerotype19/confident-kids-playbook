@@ -63,8 +63,9 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 
     // Verify user has access to this child
     const hasAccess = await env.DB.prepare(`
-      SELECT 1 FROM children 
-      WHERE id = ? AND user_id = ?
+      SELECT 1 FROM children c
+      JOIN family_members fm ON c.family_id = fm.family_id
+      WHERE c.id = ? AND fm.user_id = ?
     `).bind(childId, payload.sub).first();
 
     if (!hasAccess) {
