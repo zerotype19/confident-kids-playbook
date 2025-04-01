@@ -1,29 +1,24 @@
 // src/components/PageWrapper.tsx
 
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import SubNavBar from './SubNavBar';
 
-interface PageWrapperProps {
-  children: React.ReactNode;
-}
-
-export default function PageWrapper({ children }: PageWrapperProps) {
+export default function PageWrapper() {
   return (
-    <div className="min-h-screen bg-kidoova-background flex flex-col">
-      {/* Header with Logo */}
-      <header className="w-full bg-white shadow-kidoova">
-        <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-kidoova-background">
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-screen-lg mx-auto px-4 py-4">
           <img 
-            src={import.meta.env.BASE_URL + 'logo.png'} 
-            alt="Kidoova" 
-            className="h-8 sm:h-10 w-auto"
+            src="/logo.png" 
+            alt="Kidoova Logo" 
+            className="h-8 md:h-10"
           />
         </div>
       </header>
-      
       <SubNavBar />
-      <main className="flex-1 container mx-auto px-4 py-6">
-        {children}
+      <main className="max-w-screen-lg mx-auto px-4 py-6">
+        <Outlet />
       </main>
     </div>
   );
