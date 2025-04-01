@@ -84,6 +84,9 @@ export default function HomePage(): JSX.Element {
   const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
     try {
       console.log("🔑 Received Google credential");
+      // Store credential temporarily for cleanup
+      localStorage.setItem('google_credential', response.credential);
+      
       // Exchange Google credential for JWT
       const apiUrl = import.meta.env.VITE_API_URL;
       const authResponse = await fetch(`${apiUrl}/api/auth/google`, {
@@ -106,9 +109,13 @@ export default function HomePage(): JSX.Element {
       const { jwt } = await authResponse.json();
       console.log("✅ Received JWT, logging in");
       await login(jwt);
+      // Clear the temporary credential after successful login
+      localStorage.removeItem('google_credential');
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
+      // Clear the temporary credential on error
+      localStorage.removeItem('google_credential');
     }
   }
 
@@ -155,8 +162,12 @@ export default function HomePage(): JSX.Element {
       }
       // Clear Google auth state
       if (window.google?.accounts?.id) {
-        window.google.accounts.id.disableAutoSelect()
-        window.google.accounts.id.revoke()
+        try {
+          window.google.accounts.id.disableAutoSelect()
+          window.google.accounts.id.revoke()
+        } catch (error) {
+          console.error('Error cleaning up Google auth state:', error)
+        }
       }
     }
   }, [googleClientId])
