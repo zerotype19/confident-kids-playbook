@@ -34,6 +34,7 @@ export default function SubNavBar() {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '🏠' },
+    { path: '/pillars', label: 'Pillars', icon: '🎯' },
     { path: '/all-challenges', label: 'Challenges', icon: '🧠' },
     { path: '/rewards', label: 'Rewards', icon: '🎁' },
     { path: '/manage-children', label: 'Children', icon: '👶' },
