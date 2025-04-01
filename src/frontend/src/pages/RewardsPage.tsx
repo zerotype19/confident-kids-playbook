@@ -1,38 +1,95 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useChildContext } from '../contexts/ChildContext';
 import { Reward, ProgressSummary } from '../types';
 import RewardsOverview from '../components/rewards/RewardsOverview';
 import TrophyCase from '../components/rewards/TrophyCase';
 import ProgressTracker from '../components/rewards/ProgressTracker';
+import ChildSelector from '../components/dashboard/ChildSelector';
 
 export default function RewardsPage() {
-  const { user } = useAuth();
+  const { selectedChild, setSelectedChild } = useChildContext();
+  const [children, setChildren] = useState<any[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch children on component mount
   useEffect(() => {
-    async function fetchRewardsAndProgress() {
+    const fetchChildren = async () => {
       try {
-        const response = await fetch(`/api/rewards?childId=${user?.uid}`);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch children');
+        }
+
+        const data = await response.json();
+        setChildren(data);
+        
+        // Auto-select first child if only one exists
+        if (data.length === 1 && !selectedChild) {
+          setSelectedChild(data[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching children:', err);
+        setError('Failed to load children');
+      }
+    };
+
+    fetchChildren();
+  }, [setSelectedChild, selectedChild]);
+
+  // Fetch rewards and progress when selected child changes
+  useEffect(() => {
+    const fetchRewardsAndProgress = async () => {
+      if (!selectedChild) return;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/rewards/${selectedChild.id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+
         if (!response.ok) {
           throw new Error('Failed to fetch rewards and progress');
         }
+
         const data = await response.json();
         setRewards(data.rewards);
         setProgress(data.progress);
       } catch (err) {
+        console.error('Error fetching rewards:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    if (user?.uid) {
-      fetchRewardsAndProgress();
-    }
-  }, [user?.uid]);
+    fetchRewardsAndProgress();
+  }, [selectedChild]);
 
   if (loading) {
     return (
@@ -55,17 +112,26 @@ export default function RewardsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-3xl font-heading text-gray-900">Your Rewards</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-8">
-          <RewardsOverview progress={progress} />
-          <ProgressTracker progress={progress} childId={user?.uid || ''} />
-        </div>
-        <div>
-          <TrophyCase rewards={rewards} />
-        </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-3xl font-heading text-gray-900">Your Rewards</h1>
+        <ChildSelector children={children} />
       </div>
+
+      {selectedChild ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-8">
+            <RewardsOverview progress={progress} />
+            <ProgressTracker progress={progress} childId={selectedChild.id} />
+          </div>
+          <div>
+            <TrophyCase rewards={rewards} />
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">Please select a child to view their rewards</p>
+        </div>
+      )}
     </div>
   );
 } 
