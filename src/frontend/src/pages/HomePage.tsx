@@ -163,10 +163,12 @@ export default function HomePage(): JSX.Element {
       // Clear Google auth state
       if (window.google?.accounts?.id) {
         try {
-          window.google.accounts.id.disableAutoSelect()
-          window.google.accounts.id.revoke()
+          // First disable auto-select
+          window.google.accounts.id.disableAutoSelect();
+          // Then revoke the current session
+          window.google.accounts.id.revoke();
         } catch (error) {
-          console.error('Error cleaning up Google auth state:', error)
+          console.error('Error cleaning up Google auth state:', error);
         }
       }
     }
