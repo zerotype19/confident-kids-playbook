@@ -29,6 +29,39 @@ export const useAuth = () => {
   return context;
 };
 
+interface GoogleCredentialResponse {
+  credential: string;
+  select_by: string;
+  g_csrf_token: string;
+}
+
+interface GoogleIdentityServices {
+  initialize: (config: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => Promise<void>;
+  }) => void;
+  renderButton: (
+    element: HTMLElement | null,
+    options: {
+      theme: "outline" | "filled";
+      size: "large" | "medium" | "small";
+      shape: "rectangular" | "pill" | "circle";
+    }
+  ) => void;
+  disableAutoSelect: () => Promise<void>;
+  revoke: () => Promise<void>;
+}
+
+declare global {
+  interface Window {
+    google: {
+      accounts: {
+        id: GoogleIdentityServices;
+      };
+    };
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -94,6 +127,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    // Clear Google auth state if it exists
+    if (window.google?.accounts?.id) {
+      try {
+        await window.google.accounts.id.disableAutoSelect();
+        await window.google.accounts.id.revoke();
+      } catch (error) {
+        console.error('Error clearing Google auth state:', error);
+      }
+    }
     localStorage.removeItem('token');
     setToken(null);
     setIsAuthenticated(false);

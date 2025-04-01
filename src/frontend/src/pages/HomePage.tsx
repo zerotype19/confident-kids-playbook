@@ -30,27 +30,31 @@ interface GoogleLoginError extends Error {
   message: string
 }
 
+interface GoogleIdentityServices {
+  initialize: (config: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => Promise<void>;
+  }) => void;
+  renderButton: (
+    element: HTMLElement | null,
+    options: {
+      theme: "outline" | "filled";
+      size: "large" | "medium" | "small";
+      shape: "rectangular" | "pill" | "circle";
+    }
+  ) => void;
+  disableAutoSelect: () => Promise<void>;
+  revoke: () => Promise<void>;
+}
+
 // Declare Google Identity Services types
 declare global {
   interface Window {
     google: {
       accounts: {
-        id: {
-          initialize: (config: {
-            client_id: string
-            callback: (response: GoogleCredentialResponse) => Promise<void>
-          }) => void
-          renderButton: (
-            element: HTMLElement | null,
-            options: {
-              theme: "outline" | "filled"
-              size: "large" | "medium" | "small"
-              shape: "rectangular" | "pill" | "circle"
-            }
-          ) => void
-        }
-      }
-    }
+        id: GoogleIdentityServices;
+      };
+    };
   }
 }
 
@@ -100,14 +104,11 @@ export default function HomePage(): JSX.Element {
           client_id: googleClientId,
           callback: handleGoogleLogin
         })
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-login-button"),
-          { theme: "outline", size: "large", shape: "pill" }
-        )
         console.log("✅ Google sign-in button rendered")
       }
     }
 
+    // Load Google Identity Services script
     if (!document.getElementById(scriptId)) {
       const script = document.createElement("script")
       script.src = "https://accounts.google.com/gsi/client"
@@ -115,12 +116,24 @@ export default function HomePage(): JSX.Element {
       script.defer = true
       script.id = scriptId
       script.onload = initializeGoogle
-      document.body.appendChild(script)
-      console.log("📦 Injected Google script")
+      document.head.appendChild(script)
     } else {
       initializeGoogle()
     }
-  }, [googleClientId, navigate])
+
+    // Cleanup function
+    return () => {
+      const script = document.getElementById(scriptId)
+      if (script) {
+        script.remove()
+      }
+      // Clear Google auth state
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.disableAutoSelect()
+        window.google.accounts.id.revoke()
+      }
+    }
+  }, [googleClientId])
 
   return (
     <div className="min-h-screen bg-kidoova-background">
