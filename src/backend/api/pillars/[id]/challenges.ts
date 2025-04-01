@@ -7,7 +7,7 @@ interface Challenge {
   title: string;
   description: string;
   pillar_id: number;
-  difficulty: string;
+  difficulty_level: string;
   points: number;
   is_completed: boolean;
 }
@@ -82,13 +82,13 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         c.title,
         c.description,
         c.pillar_id,
-        c.difficulty,
+        c.difficulty_level,
         c.points,
         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id AND cl.child_id = ?
       WHERE c.pillar_id = ?
-      ORDER BY c.difficulty, c.title
+      ORDER BY c.difficulty_level, c.title
     `).bind(childId, pillarId).all<Challenge>();
 
     return new Response(JSON.stringify(challenges), {
