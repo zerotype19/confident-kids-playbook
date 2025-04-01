@@ -1,6 +1,6 @@
 import { Env } from '../types';
 import { corsHeaders } from '../lib/cors';
-import { verifyJWT } from '../lib/auth';
+import { verifyJWT } from '../auth';
 import { v4 as uuidv4 } from 'uuid';
 import { evaluateAndGrantRewards } from '../lib/rewardEngine';
 
