@@ -8,6 +8,18 @@ interface TrophyCaseProps {
 export default function TrophyCase({ rewards }: TrophyCaseProps) {
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
 
+  // Handle empty rewards array
+  if (!rewards || !Array.isArray(rewards) || rewards.length === 0) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-heading mb-6">Trophy Case</h2>
+        <div className="text-center py-8 text-gray-600">
+          <p>No rewards earned yet. Keep completing challenges to earn rewards!</p>
+        </div>
+      </div>
+    );
+  }
+
   const groupedRewards = rewards.reduce((acc, reward) => {
     if (!acc[reward.type]) {
       acc[reward.type] = [];

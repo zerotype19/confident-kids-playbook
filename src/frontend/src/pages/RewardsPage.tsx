@@ -78,8 +78,8 @@ export default function RewardsPage() {
         }
 
         const data = await response.json();
-        // The API returns just the rewards array
-        setRewards(data || []);
+        // The API returns an object with a results array
+        setRewards(data.results || []);
         
         // For now, we'll create a simple progress summary
         setProgress({
