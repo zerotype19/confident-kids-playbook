@@ -8,11 +8,11 @@ interface ChallengeFiltersProps {
 }
 
 const PILLARS = [
-  { id: 1, name: 'Self-Awareness' },
-  { id: 2, name: 'Self-Management' },
-  { id: 3, name: 'Social Awareness' },
-  { id: 4, name: 'Relationship Skills' },
-  { id: 5, name: 'Responsible Decision-Making' }
+  { id: 1, name: 'Independence & Problem-Solving' },
+  { id: 2, name: 'Growth Mindset & Resilience' },
+  { id: 3, name: 'Social Confidence & Communication' },
+  { id: 4, name: 'Purpose & Strength Discovery' },
+  { id: 5, name: 'Managing Fear & Anxiety' }
 ];
 
 const DIFFICULTIES = [

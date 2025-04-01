@@ -67,11 +67,11 @@ export interface JournalEntry {
 export type PillarId = 1 | 2 | 3 | 4 | 5;
 
 export const PILLAR_NAMES: Record<PillarId, string> = {
-  1: 'Self-Awareness',
-  2: 'Self-Management',
-  3: 'Social Awareness',
-  4: 'Relationship Skills',
-  5: 'Responsible Decision-Making'
+  1: 'Independence & Problem-Solving',
+  2: 'Growth Mindset & Resilience',
+  3: 'Social Confidence & Communication',
+  4: 'Purpose & Strength Discovery',
+  5: 'Managing Fear & Anxiety'
 };
 
 export interface PracticeModule {
