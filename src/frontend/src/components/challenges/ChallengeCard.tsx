@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Challenge } from '../../types';
+import { Challenge, PILLAR_NAMES } from '../../types';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -70,11 +70,7 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
             </p>
             <div className="flex items-center justify-center gap-2 mt-2">
               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                {challenge.pillar_id === 1 ? 'Problem Solving' :
-                 challenge.pillar_id === 2 ? 'Growth Mindset' :
-                 challenge.pillar_id === 3 ? 'Social Skills' :
-                 challenge.pillar_id === 4 ? 'Self-Awareness' :
-                 'Courage'}
+                {PILLAR_NAMES[challenge.pillar_id as keyof typeof PILLAR_NAMES]}
               </span>
               <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
                 {challenge.difficulty_level === 1 ? 'Easy' :
