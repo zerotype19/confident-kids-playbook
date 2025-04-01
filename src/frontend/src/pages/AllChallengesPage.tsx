@@ -88,11 +88,20 @@ export default function AllChallengesPage() {
     fetchChallenges();
   }, [selectedChild]);
 
+  useEffect(() => {
+    console.log('Selected filters:', { selectedPillar, selectedDifficulty });
+    console.log('All challenges:', challenges);
+  }, [selectedPillar, selectedDifficulty, challenges]);
+
   const filteredChallenges = challenges.filter(challenge => {
     if (selectedPillar && challenge.pillar_id !== selectedPillar) return false;
     if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) return false;
     return true;
   });
+
+  useEffect(() => {
+    console.log('Filtered challenges:', filteredChallenges);
+  }, [filteredChallenges]);
 
   return (
     <div className="space-y-6">
@@ -118,13 +127,13 @@ export default function AllChallengesPage() {
             <div className="text-center py-8">Loading challenges...</div>
           ) : error ? (
             <div className="text-red-500 text-center py-8">{error}</div>
-          ) : challenges.length === 0 ? (
+          ) : filteredChallenges.length === 0 ? (
             <div className="text-center py-8 text-gray-600">
               No challenges found for the selected filters.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {challenges.map((challenge) => (
+              {filteredChallenges.map((challenge) => (
                 <ChallengeCard
                   key={challenge.id}
                   challenge={challenge}
