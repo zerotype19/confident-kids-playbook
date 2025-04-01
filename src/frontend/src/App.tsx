@@ -36,22 +36,22 @@ export default function App(): JSX.Element {
               path="/dashboard" 
               element={
                 <PrivateRoute>
-                  <PageWrapper>
-                    <DashboardPage />
-                  </PageWrapper>
+                  <PageWrapper />
                 </PrivateRoute>
               } 
-            />
+            >
+              <Route index element={<DashboardPage />} />
+            </Route>
             <Route 
               path="/all-challenges" 
               element={
                 <PrivateRoute>
-                  <PageWrapper>
-                    <AllChallengesPage />
-                  </PageWrapper>
+                  <PageWrapper />
                 </PrivateRoute>
               } 
-            />
+            >
+              <Route index element={<AllChallengesPage />} />
+            </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
