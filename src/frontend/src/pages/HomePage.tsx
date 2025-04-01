@@ -104,6 +104,10 @@ export default function HomePage(): JSX.Element {
           client_id: googleClientId,
           callback: handleGoogleLogin
         })
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-login-button"),
+          { theme: "outline", size: "large", shape: "pill" }
+        )
         console.log("✅ Google sign-in button rendered")
       }
     }
