@@ -55,7 +55,7 @@ export default function SubNavBar() {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center py-3 px-2 md:px-3 text-sm font-medium text-gray-500 hover:text-kidoova-accent transition-colors duration-200"
+            className="nav-button flex items-center py-3 px-2 md:px-3 text-sm font-medium text-gray-500 hover:text-kidoova-accent transition-colors duration-200"
           >
             <span className="text-xl md:text-lg">🚪</span>
             <span className="hidden md:inline ml-2">Logout</span>

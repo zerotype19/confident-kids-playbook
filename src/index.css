@@ -16,7 +16,8 @@ a {
   @apply text-kidoova-accent hover:text-kidoova-green transition-colors;
 }
 
-button {
+/* Global button styles - excluding navigation buttons */
+button:not(.nav-button) {
   @apply px-4 py-2 rounded-xl font-medium text-white bg-kidoova-accent hover:bg-kidoova-green transition-all shadow-kidoova;
 }
 
