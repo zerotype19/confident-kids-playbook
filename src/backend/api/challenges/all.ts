@@ -97,7 +97,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
         AND cl.child_id = ? 
         AND date(cl.completed_at) = date('now')
-      WHERE REPLACE(c.age_range, '–', '-') = REPLACE(?, '–', '-')
+      WHERE REPLACE(REPLACE(REPLACE(c.age_range, '–', '-'), '—', '-'), ' ', '') = 
+            REPLACE(REPLACE(REPLACE(?, '–', '-'), '—', '-'), ' ', '')
       ORDER BY c.pillar_id, c.difficulty_level
     `).bind(childId, child.age_range).all<Challenge>();
 
