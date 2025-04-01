@@ -39,7 +39,6 @@ export default function SubNavBar() {
     { path: '/rewards', label: 'Rewards', icon: '🎁' },
     { path: '/manage-children', label: 'Children', icon: '👶' },
     { path: '/profile', label: 'Profile', icon: '👤' },
-    { path: '/subscription', label: 'Subscription', icon: '💳' },
   ];
 
   // Don't show nav on login, onboarding, or root pages
