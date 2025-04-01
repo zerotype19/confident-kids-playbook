@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeFilters from '../components/challenges/ChallengeFilters';
 import ChildSelector from '../components/dashboard/ChildSelector';
-import { Child } from '../types';
+import GroupedChallenges from '../components/challenges/GroupedChallenges';
+import { Child, Challenge } from '../types';
 import { useChildContext } from '../contexts/ChildContext';
 
 export default function AllChallengesPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
-  const [challenges, setChallenges] = useState<any[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPillar, setSelectedPillar] = useState<number | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
+  const [isGroupedView, setIsGroupedView] = useState(true);
 
   // Fetch children on component mount
   useEffect(() => {
@@ -104,7 +106,15 @@ export default function AllChallengesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-heading">All Challenges</h1>
-        <ChildSelector children={children} />
+        <div className="flex items-center gap-4">
+          <ChildSelector children={children} />
+          <button
+            onClick={() => setIsGroupedView(!isGroupedView)}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            {isGroupedView ? 'Ungrouped View' : 'Grouped View'}
+          </button>
+        </div>
       </div>
 
       {selectedChild ? (
@@ -124,6 +134,11 @@ export default function AllChallengesPage() {
             <div className="text-center py-8 text-gray-600">
               No challenges found for the selected filters.
             </div>
+          ) : isGroupedView ? (
+            <GroupedChallenges
+              challenges={filteredChallenges}
+              childId={selectedChild.id}
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredChallenges.map((challenge) => (
