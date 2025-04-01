@@ -81,7 +81,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        console.error("❌ Failed to fetch user data:", response.status, response.statusText);
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error details:", errorData);
+        throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -103,6 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(null);
       setIsAuthenticated(false);
       setUser(null);
+      throw error; // Re-throw to handle in the login function
     }
   };
 
