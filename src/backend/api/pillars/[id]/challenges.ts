@@ -3,12 +3,16 @@ import { verifyJWT } from '../../../auth';
 import { corsHeaders } from '../../../lib/cors';
 
 interface Challenge {
-  id: number;
+  id: string;
   title: string;
   description: string;
+  goal: string;
+  steps: string;
+  example_dialogue: string;
+  tip: string;
   pillar_id: number;
-  difficulty_level: string;
-  points: number;
+  age_range: string;
+  difficulty_level: number;
   is_completed: boolean;
 }
 
@@ -81,9 +85,13 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         c.id,
         c.title,
         c.description,
+        c.goal,
+        c.steps,
+        c.example_dialogue,
+        c.tip,
         c.pillar_id,
+        c.age_range,
         c.difficulty_level,
-        c.points,
         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id AND cl.child_id = ?
