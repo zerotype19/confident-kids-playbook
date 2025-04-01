@@ -62,7 +62,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       });
     }
 
-    // Verify user has access to the child
+    // Get child's age range and verify access
     const child = await env.DB.prepare(`
       SELECT c.* 
       FROM children c
@@ -77,21 +77,37 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       });
     }
 
-    // Get total challenges for this pillar
+    // Get total age-appropriate challenges for this pillar
     const { total } = await env.DB.prepare(`
-      SELECT COUNT(*) as total FROM challenges WHERE pillar_id = ?
-    `).bind(pillarId).first<{ total: number }>();
+      SELECT COUNT(*) as total 
+      FROM challenges 
+      WHERE pillar_id = ?
+        AND REPLACE(REPLACE(REPLACE(age_range, '–', '-'), '—', '-'), ' ', '') = 
+            REPLACE(REPLACE(REPLACE(?, '–', '-'), '—', '-'), ' ', '')
+    `).bind(pillarId, child.age_range).first<{ total: number }>();
 
-    // Get completed challenges for this pillar and child
+    // Get completed age-appropriate challenges for this pillar and child
     const { completed } = await env.DB.prepare(`
-      SELECT COUNT(*) as completed FROM challenges 
-      WHERE pillar_id = ? AND id IN (
-        SELECT challenge_id FROM challenge_logs 
-        WHERE child_id = ? AND completed_at IS NOT NULL
-      )
-    `).bind(pillarId, childId).first<{ completed: number }>();
+      SELECT COUNT(*) as completed 
+      FROM challenges c
+      JOIN challenge_logs cl ON c.id = cl.challenge_id
+      WHERE c.pillar_id = ? 
+        AND cl.child_id = ?
+        AND cl.completed_at IS NOT NULL
+        AND REPLACE(REPLACE(REPLACE(c.age_range, '–', '-'), '—', '-'), ' ', '') = 
+            REPLACE(REPLACE(REPLACE(?, '–', '-'), '—', '-'), ' ', '')
+    `).bind(pillarId, childId, child.age_range).first<{ completed: number }>();
 
     const progress = total ? (completed / total) * 100 : 0;
+
+    console.log('Pillar progress calculation:', {
+      pillarId,
+      childId,
+      childAgeRange: child.age_range,
+      total,
+      completed,
+      progress
+    });
 
     const response: PillarProgress = {
       total,
@@ -100,7 +116,10 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     };
 
     return new Response(JSON.stringify(response), {
-      headers: corsHeaders()
+      headers: {
+        ...corsHeaders(),
+        'Content-Type': 'application/json'
+      }
     });
 
   } catch (error) {
