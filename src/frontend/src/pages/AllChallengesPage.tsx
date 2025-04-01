@@ -3,10 +3,11 @@ import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeFilters from '../components/challenges/ChallengeFilters';
 import ChildSelector from '../components/dashboard/ChildSelector';
 import { Child } from '../types';
+import { useChildContext } from '../contexts/ChildContext';
 
 export default function AllChallengesPage() {
+  const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
-  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [challenges, setChallenges] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export default function AllChallengesPage() {
         setChildren(data);
         
         // Auto-select first child if only one exists
-        if (data.length === 1) {
+        if (data.length === 1 && !selectedChild) {
           setSelectedChild(data[0]);
         }
       } catch (err) {
@@ -46,7 +47,7 @@ export default function AllChallengesPage() {
     };
 
     fetchChildren();
-  }, []);
+  }, [setSelectedChild, selectedChild]);
 
   // Fetch challenges when selected child changes
   useEffect(() => {
@@ -94,41 +95,16 @@ export default function AllChallengesPage() {
   }, [selectedPillar, selectedDifficulty, challenges]);
 
   const filteredChallenges = challenges.filter(challenge => {
-    console.log('Checking challenge:', {
-      id: challenge.id,
-      title: challenge.title,
-      pillar_id: challenge.pillar_id,
-      selectedPillar,
-      difficulty_level: challenge.difficulty_level,
-      selectedDifficulty,
-      matchesPillar: !selectedPillar || challenge.pillar_id === selectedPillar,
-      matchesDifficulty: !selectedDifficulty || challenge.difficulty_level === selectedDifficulty
-    });
-    
-    if (selectedPillar && challenge.pillar_id !== selectedPillar) {
-      console.log('Filtered out by pillar');
-      return false;
-    }
-    if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) {
-      console.log('Filtered out by difficulty');
-      return false;
-    }
+    if (selectedPillar && challenge.pillar_id !== selectedPillar) return false;
+    if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) return false;
     return true;
   });
 
-  useEffect(() => {
-    console.log('Filtered challenges:', filteredChallenges);
-  }, [filteredChallenges]);
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-heading">All Challenges</h1>
-        <ChildSelector
-          children={children}
-          selectedChild={selectedChild}
-          onSelectChild={setSelectedChild}
-        />
+        <ChildSelector children={children} />
       </div>
 
       {selectedChild ? (

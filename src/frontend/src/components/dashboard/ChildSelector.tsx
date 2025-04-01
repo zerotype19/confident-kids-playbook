@@ -1,31 +1,74 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Child } from '../../types';
+import { useChildContext } from '../../contexts/ChildContext';
 
 interface ChildSelectorProps {
   children: Child[];
-  selectedChild: Child | null;
-  onSelectChild: (child: Child) => void;
 }
 
-export default function ChildSelector({ children, selectedChild, onSelectChild }: ChildSelectorProps) {
+export default function ChildSelector({ children }: ChildSelectorProps) {
+  const { selectedChild, setSelectedChild } = useChildContext();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className="bg-white rounded-2xl shadow-kidoova p-4">
-      <h2 className="text-lg font-semibold text-kidoova-green mb-4">Select Child</h2>
-      <div className="space-y-2">
-        {children.map((child) => (
-          <button
-            key={child.id}
-            onClick={() => onSelectChild(child)}
-            className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-              selectedChild?.id === child.id
-                ? 'bg-kidoova-accent text-white'
-                : 'hover:bg-kidoova-background text-text-base'
-            }`}
+    <div className="relative inline-block w-full sm:w-auto text-left" ref={dropdownRef}>
+      <div>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full sm:w-auto inline-flex justify-between items-center rounded-xl bg-kidoova-accent text-white font-bold px-4 py-2 shadow-kidoova hover:bg-kidoova-green transition"
+        >
+          <span className="truncate">
+            {selectedChild ? selectedChild.name : 'Select Child'}
+          </span>
+          <svg
+            className={`ml-2 h-5 w-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
           >
-            {child.name}
-          </button>
-        ))}
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
       </div>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+          <div className="py-1" role="menu">
+            {children.map((child) => (
+              <button
+                key={child.id}
+                onClick={() => {
+                  setSelectedChild(child);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-4 py-2 text-sm ${
+                  selectedChild?.id === child.id
+                    ? 'bg-kidoova-accent text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                role="menuitem"
+              >
+                {child.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

@@ -6,9 +6,10 @@ import TodayChallengeCard from '../components/dashboard/TodayChallengeCard';
 import { Child } from '../types';
 import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
+import { useChildContext } from '../contexts/ChildContext';
 
 export default function DashboardPage() {
-  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+  const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
   const [challenge, setChallenge] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +38,7 @@ export default function DashboardPage() {
         setChildren(data);
         
         // Auto-select first child if only one exists
-        if (data.length === 1) {
+        if (data.length === 1 && !selectedChild) {
           setSelectedChild(data[0]);
         }
       } catch (err) {
@@ -47,7 +48,7 @@ export default function DashboardPage() {
     };
 
     fetchChildren();
-  }, []);
+  }, [setSelectedChild, selectedChild]);
 
   useEffect(() => {
     const fetchChallenge = async () => {
@@ -94,11 +95,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-heading">Dashboard</h1>
-        <ChildSelector
-          children={children}
-          selectedChild={selectedChild}
-          onSelectChild={setSelectedChild}
-        />
+        <ChildSelector children={children} />
       </div>
 
       {selectedChild ? (
