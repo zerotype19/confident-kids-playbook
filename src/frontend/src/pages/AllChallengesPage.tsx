@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PageWrapper from '../components/PageWrapper';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeFilters from '../components/challenges/ChallengeFilters';
 import ChildSelector from '../components/dashboard/ChildSelector';
@@ -96,47 +95,50 @@ export default function AllChallengesPage() {
   });
 
   return (
-    <PageWrapper>
-      <div className="space-y-6">
-        <div className="bg-white rounded-2xl shadow-kidoova p-6">
-          <h1 className="text-2xl font-bold text-kidoova-green mb-6">All Challenges</h1>
-          
-          <ChildSelector
-            children={children}
-            selectedChild={selectedChild}
-            onSelectChild={setSelectedChild}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-heading">All Challenges</h1>
+        <ChildSelector
+          children={children}
+          selectedChild={selectedChild}
+          onSelectChild={setSelectedChild}
+        />
+      </div>
+
+      {selectedChild ? (
+        <>
+          <ChallengeFilters
+            selectedPillar={selectedPillar}
+            onPillarChange={setSelectedPillar}
+            selectedDifficulty={selectedDifficulty}
+            onDifficultyChange={setSelectedDifficulty}
           />
 
-          {selectedChild && (
-            <div className="mt-6">
-              <ChallengeFilters
-                selectedPillar={selectedPillar}
-                onPillarChange={setSelectedPillar}
-                selectedDifficulty={selectedDifficulty}
-                onDifficultyChange={setSelectedDifficulty}
-              />
-
-              {isLoading ? (
-                <div className="text-center py-8">Loading challenges...</div>
-              ) : error ? (
-                <div className="text-red-500 text-center py-8">{error}</div>
-              ) : filteredChallenges.length === 0 ? (
-                <div className="text-center py-8">No challenges found matching your filters.</div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                  {filteredChallenges.map((challenge) => (
-                    <ChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      childId={selectedChild.id}
-                    />
-                  ))}
-                </div>
-              )}
+          {isLoading ? (
+            <div className="text-center py-8">Loading challenges...</div>
+          ) : error ? (
+            <div className="text-red-500 text-center py-8">{error}</div>
+          ) : challenges.length === 0 ? (
+            <div className="text-center py-8 text-gray-600">
+              No challenges found for the selected filters.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {challenges.map((challenge) => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  childId={selectedChild.id}
+                />
+              ))}
             </div>
           )}
+        </>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">Please select a child to view their challenges</p>
         </div>
-      </div>
-    </PageWrapper>
+      )}
+    </div>
   );
 } 
