@@ -134,12 +134,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Clear Google auth state if it exists
     if (window.google?.accounts?.id) {
       try {
-        // First disable auto-select
+        // Disable auto-select to prevent automatic sign-in
         await window.google.accounts.id.disableAutoSelect();
-        // Then revoke the current session
-        await window.google.accounts.id.revoke();
       } catch (error) {
-        console.error('Error clearing Google auth state:', error);
+        console.error('Error disabling Google auto-select:', error);
       }
     }
     // Clear local storage and state
