@@ -1,0 +1,104 @@
+import { Env } from '../../../types';
+import { verifyJWT } from '../../../auth';
+import { corsHeaders } from '../../../lib/cors';
+
+interface Challenge {
+  id: number;
+  title: string;
+  description: string;
+  pillar_id: number;
+  difficulty: string;
+  points: number;
+  is_completed: boolean;
+}
+
+export async function onRequestGet(context: { request: Request; env: Env }) {
+  const { request, env } = context;
+
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: corsHeaders()
+    });
+  }
+
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    // Verify authentication
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: corsHeaders()
+      });
+    }
+
+    const token = authorization.split(' ')[1];
+    const payload = await verifyJWT(token, env);
+    
+    if (!payload?.sub) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: corsHeaders()
+      });
+    }
+
+    // Get pillar ID from URL and child ID from query params
+    const url = new URL(request.url);
+    const pillarId = url.pathname.split('/')[3]; // /api/pillars/:id/challenges
+    const childId = url.searchParams.get('child_id');
+
+    if (!childId) {
+      return new Response(JSON.stringify({ error: 'Child ID is required' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    // Verify user has access to this child
+    const hasAccess = await env.DB.prepare(`
+      SELECT 1 FROM children 
+      WHERE id = ? AND user_id = ?
+    `).bind(childId, payload.sub).first();
+
+    if (!hasAccess) {
+      return new Response(JSON.stringify({ error: 'Access denied' }), {
+        status: 403,
+        headers: corsHeaders()
+      });
+    }
+
+    // Get challenges for this pillar
+    const challenges = await env.DB.prepare(`
+      SELECT 
+        c.id,
+        c.title,
+        c.description,
+        c.pillar_id,
+        c.difficulty,
+        c.points,
+        CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
+      FROM challenges c
+      LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id AND cl.child_id = ?
+      WHERE c.pillar_id = ?
+      ORDER BY c.difficulty, c.title
+    `).bind(childId, pillarId).all<Challenge>();
+
+    return new Response(JSON.stringify(challenges), {
+      headers: corsHeaders()
+    });
+
+  } catch (error) {
+    console.error('Error fetching pillar challenges:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
+} 
