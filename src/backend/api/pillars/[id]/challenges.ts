@@ -2,6 +2,11 @@ import { Env } from '../../../types';
 import { verifyJWT } from '../../../auth';
 import { corsHeaders } from '../../../lib/cors';
 
+interface Child {
+  id: string;
+  age_range: string;
+}
+
 interface Challenge {
   id: string;
   title: string;
@@ -13,7 +18,7 @@ interface Challenge {
   pillar_id: number;
   age_range: string;
   difficulty_level: number;
-  is_completed: boolean;
+  is_completed: number;
 }
 
 export async function onRequestGet(context: { request: Request; env: Env }) {
@@ -65,21 +70,28 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       });
     }
 
-    // Verify user has access to this child
-    const hasAccess = await env.DB.prepare(`
-      SELECT 1 FROM children c
+    // Get child's age range and verify access
+    const child = await env.DB.prepare(`
+      SELECT c.* 
+      FROM children c
       JOIN family_members fm ON c.family_id = fm.family_id
       WHERE c.id = ? AND fm.user_id = ?
-    `).bind(childId, payload.sub).first();
+    `).bind(childId, payload.sub).first<Child>();
 
-    if (!hasAccess) {
-      return new Response(JSON.stringify({ error: 'Access denied' }), {
-        status: 403,
+    if (!child) {
+      return new Response(JSON.stringify({ error: 'Child not found or access denied' }), {
+        status: 404,
         headers: corsHeaders()
       });
     }
 
-    // Get challenges for this pillar
+    // Get challenges for this pillar that match the child's age range
+    console.log('Fetching challenges for child:', {
+      childId,
+      ageRange: child.age_range,
+      pillarId
+    });
+
     const challenges = await env.DB.prepare(`
       SELECT 
         c.id,
@@ -94,19 +106,23 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         c.difficulty_level,
         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
-      LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id AND cl.child_id = ?
+      LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
+        AND cl.child_id = ? 
+        AND date(cl.completed_at) = date('now')
       WHERE c.pillar_id = ?
+        AND REPLACE(REPLACE(REPLACE(c.age_range, '–', '-'), '—', '-'), ' ', '') = 
+            REPLACE(REPLACE(REPLACE(?, '–', '-'), '—', '-'), ' ', '')
       ORDER BY c.difficulty_level, c.title
-    `).bind(childId, pillarId).all<Challenge>();
+    `).bind(childId, pillarId, child.age_range).all<Challenge>();
 
-    console.log('Challenges query result type:', typeof challenges);
-    console.log('Is challenges result an array?', Array.isArray(challenges));
-    console.log('Challenges query result:', challenges);
+    console.log('Found challenges:', {
+      count: challenges.results?.length || 0,
+      firstChallenge: challenges.results?.[0],
+      childAgeRange: child.age_range,
+      childId: childId
+    });
 
-    // Ensure we're returning an array
-    const challengesArray = Array.isArray(challenges) ? challenges : challenges.results || [];
-
-    return new Response(JSON.stringify(challengesArray), {
+    return new Response(JSON.stringify(challenges.results), {
       headers: {
         ...corsHeaders(),
         'Content-Type': 'application/json'
