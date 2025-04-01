@@ -3,16 +3,57 @@ import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { Pillar } from '../types';
 import PillarCard from '../components/pillars/PillarCard';
+import ChildSelector from '../components/dashboard/ChildSelector';
+import { Child } from '../types';
 
 export default function PillarsPage() {
   const navigate = useNavigate();
-  const { selectedChild } = useChildContext();
+  const { selectedChild, setSelectedChild } = useChildContext();
+  const [children, setChildren] = useState<Child[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch children on component mount
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch children');
+        }
+
+        const data = await response.json();
+        setChildren(data);
+        
+        // Auto-select first child if only one exists
+        if (data.length === 1 && !selectedChild) {
+          setSelectedChild(data[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching children:', err);
+        setError('Failed to load children');
+      }
+    };
+
+    fetchChildren();
+  }, [setSelectedChild, selectedChild]);
+
+  // Fetch pillars when selected child changes
   useEffect(() => {
     const fetchPillars = async () => {
+      if (!selectedChild) return;
+
       setIsLoading(true);
       setError(null);
 
@@ -23,7 +64,7 @@ export default function PillarsPage() {
         }
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/pillars`,
+          `${import.meta.env.VITE_API_URL}/api/pillars?child_id=${selectedChild.id}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -46,12 +87,12 @@ export default function PillarsPage() {
     };
 
     fetchPillars();
-  }, []);
+  }, [selectedChild]);
 
   if (!selectedChild) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Please select a child to view pillars</p>
+        <p className="text-gray-600 mb-4">Please select a child to view their pillars</p>
       </div>
     );
   }
@@ -70,9 +111,9 @@ export default function PillarsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-heading text-gray-900">Pillars of Growth</h1>
-        <p className="text-gray-600">Track your child's progress across different areas</p>
+        <ChildSelector children={children} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

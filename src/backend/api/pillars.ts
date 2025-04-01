@@ -5,7 +5,7 @@ import { D1Database } from '@cloudflare/workers-types';
 
 const pillars = new Hono<{ Bindings: { DB: D1Database } }>();
 
-// Get all pillars
+// Get all pillars with progress for a specific child
 pillars.get('/', async (c) => {
   try {
     const token = c.req.header('Authorization')?.split(' ')[1];
@@ -15,12 +15,44 @@ pillars.get('/', async (c) => {
 
     await verifyToken(token);
 
-    const { results } = await c.env.DB.prepare(`
+    const childId = c.req.query('child_id');
+    if (!childId) {
+      throw new HTTPException(400, { message: 'Child ID is required' });
+    }
+
+    // Get all pillars
+    const { results: pillars } = await c.env.DB.prepare(`
       SELECT * FROM pillars
       ORDER BY id ASC
     `).all();
 
-    return c.json(results);
+    // Get progress for each pillar
+    const pillarsWithProgress = await Promise.all(
+      pillars.map(async (pillar) => {
+        // Get total challenges for this pillar
+        const { total } = await c.env.DB.prepare(`
+          SELECT COUNT(*) as total FROM challenges WHERE pillar_id = ?
+        `).bind(pillar.id).first();
+
+        // Get completed challenges for this pillar and child
+        const { completed } = await c.env.DB.prepare(`
+          SELECT COUNT(*) as completed FROM challenges 
+          WHERE pillar_id = ? AND id IN (
+            SELECT challenge_id FROM challenge_completions 
+            WHERE child_id = ? AND completed_at IS NOT NULL
+          )
+        `).bind(pillar.id, childId).first();
+
+        const progress = total ? (completed / total) * 100 : 0;
+
+        return {
+          ...pillar,
+          progress
+        };
+      })
+    );
+
+    return c.json(pillarsWithProgress);
   } catch (error) {
     console.error('Error fetching pillars:', error);
     throw new HTTPException(500, { message: 'Failed to fetch pillars' });
