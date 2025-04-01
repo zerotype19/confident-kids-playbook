@@ -47,7 +47,7 @@ export default function ChildSelector({ children }: ChildSelectorProps) {
       </div>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+        <div className="absolute right-0 mt-2 w-full sm:w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
           <div className="py-1" role="menu">
             {children.map((child) => (
               <button
