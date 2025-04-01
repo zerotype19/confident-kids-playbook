@@ -14,6 +14,8 @@ interface Challenge {
   age_range: string;
   difficulty_level: number;
   is_completed: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export async function onRequestGet(context: { request: Request; env: Env }) {
@@ -92,6 +94,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         c.pillar_id,
         c.age_range,
         c.difficulty_level,
+        c.created_at,
+        c.updated_at,
         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id AND cl.child_id = ?
@@ -99,8 +103,18 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       ORDER BY c.difficulty_level, c.title
     `).bind(childId, pillarId).all<Challenge>();
 
-    return new Response(JSON.stringify(challenges), {
-      headers: corsHeaders()
+    console.log('Challenges query result type:', typeof challenges);
+    console.log('Is challenges result an array?', Array.isArray(challenges));
+    console.log('Challenges query result:', challenges);
+
+    // Ensure we're returning an array
+    const challengesArray = Array.isArray(challenges) ? challenges : challenges.results || [];
+
+    return new Response(JSON.stringify(challengesArray), {
+      headers: {
+        ...corsHeaders(),
+        'Content-Type': 'application/json'
+      }
     });
 
   } catch (error) {

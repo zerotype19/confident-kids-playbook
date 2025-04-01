@@ -41,6 +41,7 @@ export default function PillarDetailPage() {
         }
 
         const pillarData = await pillarResponse.json();
+        console.log('Pillar data:', pillarData);
         setPillar(pillarData);
 
         // Fetch pillar progress
@@ -58,6 +59,7 @@ export default function PillarDetailPage() {
         }
 
         const { progress } = await progressResponse.json();
+        console.log('Progress data:', progress);
         setProgress(progress);
 
         // Fetch pillar challenges
@@ -75,6 +77,16 @@ export default function PillarDetailPage() {
         }
 
         const challengesData = await challengesResponse.json();
+        console.log('Challenges data type:', typeof challengesData);
+        console.log('Is challenges data an array?', Array.isArray(challengesData));
+        console.log('Challenges data:', challengesData);
+        
+        // Ensure challenges is an array before setting state
+        if (!Array.isArray(challengesData)) {
+          console.error('Challenges data is not an array:', challengesData);
+          throw new Error('Invalid challenges data format');
+        }
+        
         setChallenges(challengesData);
       } catch (err) {
         console.error('Error fetching pillar data:', err);
