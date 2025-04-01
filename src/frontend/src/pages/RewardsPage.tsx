@@ -78,8 +78,16 @@ export default function RewardsPage() {
         }
 
         const data = await response.json();
-        setRewards(data.rewards);
-        setProgress(data.progress);
+        // The API returns just the rewards array
+        setRewards(data || []);
+        
+        // For now, we'll create a simple progress summary
+        setProgress({
+          milestones_completed: 0,
+          current_streak: 0,
+          longest_streak: 0,
+          pillar_progress: {}
+        });
       } catch (err) {
         console.error('Error fetching rewards:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
