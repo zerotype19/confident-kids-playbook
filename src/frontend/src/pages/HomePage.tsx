@@ -86,23 +86,24 @@ export default function HomePage(): JSX.Element {
       console.log("🔑 Received Google credential");
       // Exchange Google credential for JWT
       const apiUrl = import.meta.env.VITE_API_URL;
-      const authResponse = await fetch(`${apiUrl}/api/auth/login`, {
+      const authResponse = await fetch(`${apiUrl}/api/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          provider: 'google', 
-          token: response.credential 
+          credential: response.credential 
         })
       });
 
       if (!authResponse.ok) {
+        const errorData = await authResponse.json();
+        console.error("❌ Auth response error:", errorData);
         throw new Error('Failed to exchange Google credential for JWT');
       }
 
-      const { token: jwt } = await authResponse.json();
+      const { jwt } = await authResponse.json();
       console.log("✅ Received JWT, logging in");
       await login(jwt);
       navigate('/dashboard');
