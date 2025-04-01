@@ -42,6 +42,13 @@ export default function NavigationPanel(): JSX.Element {
         </button>
 
         <button
+          onClick={() => navigate('/rewards')}
+          className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
+        >
+          Rewards
+        </button>
+
+        <button
           onClick={() => navigate('/onboarding/child')}
           className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
         >

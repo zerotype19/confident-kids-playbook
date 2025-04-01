@@ -7,6 +7,7 @@ import DashboardPage from "./pages/DashboardPage"
 import AllChallengesPage from "./pages/AllChallengesPage"
 import PillarsPage from "./pages/PillarsPage"
 import PillarDetailPage from "./pages/PillarDetailPage"
+import RewardsPage from "./pages/RewardsPage"
 import { PrivateRoute } from "./components/PrivateRoute"
 import PageWrapper from "./components/PageWrapper"
 
@@ -64,6 +65,16 @@ export default function App(): JSX.Element {
               } 
             >
               <Route index element={<AllChallengesPage />} />
+            </Route>
+            <Route 
+              path="/rewards" 
+              element={
+                <PrivateRoute>
+                  <PageWrapper />
+                </PrivateRoute>
+              } 
+            >
+              <Route index element={<RewardsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
