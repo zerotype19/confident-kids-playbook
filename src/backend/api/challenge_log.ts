@@ -1,7 +1,8 @@
 import { Env } from '../types';
-import { verifyJWT } from '../auth';
 import { corsHeaders } from '../lib/cors';
+import { verifyJWT } from '../lib/auth';
 import { v4 as uuidv4 } from 'uuid';
+import { evaluateAndGrantRewards } from '../lib/rewardEngine';
 
 interface ChallengeLogRequest {
   child_id: string;
@@ -84,6 +85,9 @@ export async function onRequest(context: { request: Request; env: Env }) {
       body.reflection || null,
       body.mood_rating || null
     ).run();
+
+    // Evaluate and grant rewards
+    await evaluateAndGrantRewards(body.child_id, env);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: corsHeaders()
