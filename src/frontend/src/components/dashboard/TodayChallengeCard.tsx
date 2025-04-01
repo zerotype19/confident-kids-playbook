@@ -42,7 +42,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenges/complete`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
