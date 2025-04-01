@@ -15,6 +15,7 @@ import { onRequestGet as progress } from './api/progress'
 import { onRequestGet as rewards } from './api/rewards/[childId]'
 import { onRequestGet as allChallenges } from './api/challenges/all'
 import { onRequestGet as pillars } from './api/pillars/index'
+import { onRequestGet as pillarProgress } from './api/pillars/[id]/progress'
 
 const router = Router()
 
@@ -102,6 +103,7 @@ router.get('/api/challenges/all', (request, context) => allChallenges({ request,
 
 // Pillars route
 router.get('/api/pillars', (request, context) => pillars({ request, env: context.env }))
+router.get('/api/pillars/:id/progress', (request, context) => pillarProgress({ request, env: context.env }))
 
 // Handle other routes
 router.get('/api/hello', async () => {
