@@ -34,6 +34,18 @@ export default function AllChallengesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const challengesPerPage = 12;
 
+  // Get pillar from URL query parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pillarId = urlParams.get('pillar');
+    if (pillarId) {
+      setFilters(prev => ({
+        ...prev,
+        pillarId: Number(pillarId)
+      }));
+    }
+  }, []);
+
   // Fetch children on component mount
   useEffect(() => {
     const fetchChildren = async () => {

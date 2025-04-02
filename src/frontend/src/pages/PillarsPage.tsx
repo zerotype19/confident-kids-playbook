@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { Pillar } from '../types';
-import PillarCard from '../components/pillars/PillarCard';
 import ChildSelector from '../components/dashboard/ChildSelector';
 import { Child } from '../types';
+import ExpandedPillar from '../components/pillars/ExpandedPillar';
 
 export default function PillarsPage() {
-  const navigate = useNavigate();
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
@@ -116,13 +114,12 @@ export default function PillarsPage() {
         <ChildSelector children={children} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-6">
         {pillars.map((pillar) => (
-          <PillarCard
+          <ExpandedPillar
             key={pillar.id}
             pillar={pillar}
             childId={selectedChild.id}
-            onClick={() => navigate(`/pillars/${pillar.id}`)}
           />
         ))}
       </div>
