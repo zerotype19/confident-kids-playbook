@@ -38,6 +38,12 @@ export async function getRewardsAndProgress(c: Context) {
         FROM challenge_logs
         WHERE child_id = ? AND completed = 1
       ),
+      weekly_challenges AS (
+        SELECT COUNT(*) as completed
+        FROM challenge_logs
+        WHERE child_id = ? 
+        AND date(completed_at) >= date('now', 'weekday 0', '-7 days')
+      ),
       next_reward AS (
         SELECT 
           r.*,
@@ -61,6 +67,7 @@ export async function getRewardsAndProgress(c: Context) {
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
           'milestones_completed', (SELECT completed FROM milestone_progress),
+          'weekly_challenges', (SELECT completed FROM weekly_challenges),
           'pillar_progress', json_group_object(
             pillar_id,
             json_object(
@@ -83,7 +90,7 @@ export async function getRewardsAndProgress(c: Context) {
             FROM next_reward
           )
         ) as progress_summary
-    `).bind(childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+    `).bind(childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     return c.json({
       rewards: rewards.results,

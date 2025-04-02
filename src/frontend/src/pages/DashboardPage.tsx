@@ -104,6 +104,7 @@ export default function DashboardPage() {
           milestones_completed: rewardsData.progress.total_challenges,
           current_streak: rewardsData.progress.current_streak,
           longest_streak: rewardsData.progress.longest_streak,
+          weekly_challenges: rewardsData.progress.weekly_challenges,
           pillar_progress: pillarProgress,
           milestone_progress: rewardsData.progress.milestone_progress
         });
@@ -144,6 +145,7 @@ export default function DashboardPage() {
               milestones_completed: rewardsData.progress.total_challenges,
               current_streak: rewardsData.progress.current_streak,
               longest_streak: rewardsData.progress.longest_streak,
+              weekly_challenges: rewardsData.progress.weekly_challenges,
               pillar_progress: pillarProgress,
               milestone_progress: rewardsData.progress.milestone_progress
             });
