@@ -158,6 +158,15 @@ export async function getRewardsAndProgress(c: Context) {
                 ELSE (COALESCE(SUM(CASE WHEN cp.pillar_id = 4 THEN cp.completed ELSE 0 END), 0) * 100.0 / 
                       COALESCE(SUM(CASE WHEN cp.pillar_id = 4 THEN cp.total ELSE 0 END), 0))
               END
+            ),
+            '5', json_object(
+              'completed', COALESCE(SUM(CASE WHEN cp.pillar_id = 5 THEN cp.completed ELSE 0 END), 0),
+              'total', COALESCE(SUM(CASE WHEN cp.pillar_id = 5 THEN cp.total ELSE 0 END), 0),
+              'percentage', CASE 
+                WHEN COALESCE(SUM(CASE WHEN cp.pillar_id = 5 THEN cp.total ELSE 0 END), 0) = 0 THEN 0 
+                ELSE (COALESCE(SUM(CASE WHEN cp.pillar_id = 5 THEN cp.completed ELSE 0 END), 0) * 100.0 / 
+                      COALESCE(SUM(CASE WHEN cp.pillar_id = 5 THEN cp.total ELSE 0 END), 0))
+              END
             )
           ),
           'milestone_progress', json_object(
