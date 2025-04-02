@@ -107,7 +107,8 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-6 flex items-start gap-4 bg-gray-50 hover:bg-gray-100 transition-colors border-0 focus:outline-none focus:ring-0"
+        className="w-full p-6 flex items-start gap-4 bg-gray-50 hover:bg-gray-100 transition-colors border-0 focus:outline-none focus:ring-0 appearance-none cursor-pointer"
+        style={{ backgroundColor: '#F9FAFB' }}
       >
         <span className="text-4xl">{pillar.icon}</span>
         <div className="flex-1 text-left">
