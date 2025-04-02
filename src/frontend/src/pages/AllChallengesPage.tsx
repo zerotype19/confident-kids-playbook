@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeFilters from '../components/challenges/ChallengeFilters';
 import ChildSelector from '../components/dashboard/ChildSelector';
-import { Child, Challenge } from '../types';
+import { Child, Challenge, PillarId } from '../types';
 import { useChildContext } from '../contexts/ChildContext';
 
 export default function AllChallengesPage() {
@@ -11,7 +11,7 @@ export default function AllChallengesPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPillar, setSelectedPillar] = useState<number | null>(null);
+  const [selectedPillar, setSelectedPillar] = useState<PillarId | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'completed'>('newest');
@@ -96,7 +96,7 @@ export default function AllChallengesPage() {
   // Filter and sort challenges
   const filteredChallenges = challenges
     .filter(challenge => {
-      if (selectedPillar && challenge.pillar_id !== selectedPillar) return false;
+      if (selectedPillar && challenge.pillar_id !== Number(selectedPillar)) return false;
       if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) return false;
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
@@ -168,10 +168,10 @@ export default function AllChallengesPage() {
         <>
           {/* Filters */}
           <ChallengeFilters
-            selectedPillar={selectedPillar}
-            onPillarChange={setSelectedPillar}
-            selectedDifficulty={selectedDifficulty}
-            onDifficultyChange={setSelectedDifficulty}
+            selectedPillars={selectedPillar ? [selectedPillar] : []}
+            selectedDifficulties={selectedDifficulty ? [selectedDifficulty.toString()] : []}
+            onPillarChange={(pillarId) => setSelectedPillar(pillarId)}
+            onDifficultyChange={(difficulty) => setSelectedDifficulty(parseInt(difficulty))}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             onClearFilters={handleClearFilters}
@@ -202,7 +202,10 @@ export default function AllChallengesPage() {
                 <ChallengeCard
                   key={challenge.id}
                   challenge={challenge}
-                  childId={selectedChild.id}
+                  onComplete={async (challengeId) => {
+                    // TODO: Implement challenge completion
+                    console.log('Challenge completed:', challengeId);
+                  }}
                 />
               ))}
             </div>
