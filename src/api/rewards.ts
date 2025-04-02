@@ -44,7 +44,8 @@ export async function getRewardsAndProgress(c: Context) {
           GROUP_CONCAT(date(completed_at)) as dates,
           GROUP_CONCAT(completed_at) as raw_dates,
           date('now', 'weekday 0') as week_start,
-          date('now') as current_date
+          date('now') as current_date,
+          GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -62,7 +63,8 @@ export async function getRewardsAndProgress(c: Context) {
           date('now') as current_date,
           date('now', 'weekday 0') as week_start_date,
           date('now', 'weekday 6') as week_end_date,
-          GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results
+          GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results,
+          GROUP_CONCAT(date(completed_at)) as all_dates
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -99,7 +101,8 @@ export async function getRewardsAndProgress(c: Context) {
               'raw_dates', raw_dates,
               'week_start', week_start,
               'current_date', current_date,
-              'date_comparison', date('now', 'weekday 0')
+              'date_comparison', date('now', 'weekday 0'),
+              'date_comparison_results', date_comparison_results
             )
             FROM weekly_challenges
           ),
@@ -116,6 +119,7 @@ export async function getRewardsAndProgress(c: Context) {
               'week_start_date', week_start_date,
               'week_end_date', week_end_date,
               'date_comparison_results', date_comparison_results,
+              'all_dates', all_dates,
               'query_params', json_object(
                 'child_id', ?,
                 'week_start', date('now', 'weekday 0')
