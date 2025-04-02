@@ -73,16 +73,14 @@ export async function onRequest(context: { request: Request; env: Env }) {
       });
     }
 
-    // Check if challenge exists and is not already completed
+    // Check if challenge exists
     const challengeResult = await env.DB.prepare(`
       SELECT * FROM challenges 
-      WHERE id = ? AND id NOT IN (
-        SELECT challenge_id FROM challenge_logs WHERE child_id = ?
-      )
-    `).bind(body.challenge_id, body.child_id).first();
+      WHERE id = ?
+    `).bind(body.challenge_id).first();
 
     if (!challengeResult) {
-      return new Response(JSON.stringify({ error: 'Challenge not found or already completed' }), {
+      return new Response(JSON.stringify({ error: 'Challenge not found' }), {
         status: 404,
         headers: corsHeaders()
       });
