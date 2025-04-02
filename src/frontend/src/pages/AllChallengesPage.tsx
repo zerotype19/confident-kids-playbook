@@ -178,14 +178,17 @@ export default function AllChallengesPage() {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/challenges/${challengeId}/complete`,
+        `${import.meta.env.VITE_API_URL}/api/challenges/complete`,
         {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ child_id: selectedChild.id })
+          body: JSON.stringify({ 
+            child_id: selectedChild.id,
+            challenge_id: challengeId
+          })
         }
       );
 
