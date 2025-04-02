@@ -54,52 +54,68 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
   };
 
   return (
-    <div className={`bg-white rounded-2xl shadow-kidoova p-6 space-y-6 border ${isCompleted ? 'border-kidoova-accent' : 'border-kidoova-yellow/20'}`}>
-      {/* Title Section - Clickable to expand */}
-      <div 
-        className="text-center cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <h2 className="text-2xl font-bold text-kidoova-green mb-2 hover:text-kidoova-accent transition-colors">
-          {challenge.title}
-        </h2>
-        {isExpanded && (
-          <>
-            <p className="text-lg text-text-base">
-              {challenge.description}
-            </p>
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                {PILLAR_NAMES[challenge.pillar_id as keyof typeof PILLAR_NAMES]}
-              </span>
-              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-                {challenge.difficulty_level === 1 ? 'Easy' :
-                 challenge.difficulty_level === 2 ? 'Medium' :
-                 'Hard'}
-              </span>
-            </div>
-          </>
-        )}
+    <div 
+      className={`
+        bg-white shadow-md rounded-lg p-4 flex flex-col space-y-4 
+        hover:shadow-xl transform hover:scale-105 transition duration-200
+        ${isCompleted ? 'border-2 border-kidoova-accent' : 'border border-gray-200'}
+      `}
+    >
+      {/* Header */}
+      <div className="flex justify-between items-start">
+        <h3 className="text-lg font-semibold text-kidoova-green">{challenge.title}</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+            {PILLAR_NAMES[challenge.pillar_id as keyof typeof PILLAR_NAMES]}
+          </span>
+          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+            {challenge.difficulty_level === 1 ? 'Easy' :
+             challenge.difficulty_level === 2 ? 'Medium' :
+             'Hard'}
+          </span>
+        </div>
       </div>
 
+      {/* Description */}
+      <p className="text-sm text-gray-600 line-clamp-2">{challenge.description}</p>
+
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+        <div 
+          className={`h-full rounded-full transition-all duration-500 ${
+            isCompleted ? 'bg-kidoova-accent' : 'bg-kidoova-yellow'
+          }`}
+          style={{ width: isCompleted ? '100%' : '0%' }}
+        />
+      </div>
+
+      {/* Action Button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`
+          w-full px-4 py-2 rounded-lg font-medium text-white
+          ${isCompleted 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors'
+          }
+        `}
+        disabled={isCompleted}
+      >
+        {isCompleted ? 'Completed' : isExpanded ? 'Show Less' : 'Start Challenge'}
+      </button>
+
       {/* Expanded Content */}
-      {isExpanded && (
-        <>
+      {isExpanded && !isCompleted && (
+        <div className="space-y-4 pt-4 border-t border-gray-100">
           {/* Goal Section */}
-          <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-            <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-              Your Goal
-            </h3>
-            <p className="text-text-base">
-              {challenge.goal}
-            </p>
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Your Goal</h4>
+            <p className="text-sm text-gray-600">{challenge.goal}</p>
           </div>
 
           {/* Steps Section */}
-          <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-            <h3 className="text-lg font-semibold text-kidoova-green mb-3">
-              Steps to Try
-            </h3>
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Steps to Try</h4>
             <ul className="space-y-2">
               {(() => {
                 let stepsArray: string[];
@@ -113,11 +129,11 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
                   stepsArray = challenge.steps;
                 }
                 return stepsArray.map((step, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
+                  <li key={index} className="flex items-start text-sm text-gray-600">
+                    <span className="flex-shrink-0 w-5 h-5 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1 text-xs">
                       {index + 1}
                     </span>
-                    <span className="text-text-base">{step}</span>
+                    <span>{step}</span>
                   </li>
                 ));
               })()}
@@ -126,70 +142,50 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
 
           {/* Tip Section */}
           {challenge.tip && (
-            <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-              <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-                Helpful Tip
-              </h3>
-              <p className="text-text-base">
-                {challenge.tip}
-              </p>
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Helpful Tip</h4>
+              <p className="text-sm text-gray-600">{challenge.tip}</p>
             </div>
           )}
 
           {/* Example Dialogue */}
           {challenge.example_dialogue && (
-            <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-              <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-                Try Saying This
-              </h3>
-              <p className="text-text-base italic">
-                "{challenge.example_dialogue}"
-              </p>
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Try Saying This</h4>
+              <p className="text-sm text-gray-600 italic">"{challenge.example_dialogue}"</p>
             </div>
           )}
+
+          {/* Reflection Input */}
+          <div>
+            <textarea
+              value={reflection}
+              onChange={(e) => setReflection(e.target.value)}
+              placeholder="Add a reflection note..."
+              className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
+            />
+          </div>
 
           {/* Complete Button */}
-          {!isCompleted && (
-            <div className="space-y-3">
-              <textarea
-                value={reflection}
-                onChange={(e) => setReflection(e.target.value)}
-                placeholder="Add a reflection note..."
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full h-24"
-              />
-              <div className="flex justify-center">
-                <button
-                  onClick={handleMarkComplete}
-                  disabled={isCompleting}
-                  className={`
-                    px-6 py-3 rounded-lg font-semibold text-white
-                    ${isCompleting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
-                    }
-                  `}
-                >
-                  {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Success Message */}
-      {isCompleted && (
-        <div className="flex justify-center items-center space-x-2 text-kidoova-accent">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          <span className="font-semibold">Challenge Completed!</span>
+          <button
+            onClick={handleMarkComplete}
+            disabled={isCompleting}
+            className={`
+              w-full px-4 py-2 rounded-lg font-medium text-white
+              ${isCompleting 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors'
+              }
+            `}
+          >
+            {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
+          </button>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="text-red-600 text-center">
+        <div className="text-red-600 text-sm text-center">
           {error}
         </div>
       )}

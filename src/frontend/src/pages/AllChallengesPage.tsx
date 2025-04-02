@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeFilters from '../components/challenges/ChallengeFilters';
 import ChildSelector from '../components/dashboard/ChildSelector';
-import GroupedChallenges from '../components/challenges/GroupedChallenges';
 import { Child, Challenge } from '../types';
 import { useChildContext } from '../contexts/ChildContext';
 
@@ -14,7 +13,10 @@ export default function AllChallengesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedPillar, setSelectedPillar] = useState<number | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
-  const [isGroupedView, setIsGroupedView] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'completed'>('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const challengesPerPage = 12;
 
   // Fetch children on component mount
   useEffect(() => {
@@ -91,63 +93,141 @@ export default function AllChallengesPage() {
     fetchChallenges();
   }, [selectedChild]);
 
-  useEffect(() => {
-    console.log('Selected filters:', { selectedPillar, selectedDifficulty });
-    console.log('All challenges:', challenges);
-  }, [selectedPillar, selectedDifficulty, challenges]);
+  // Filter and sort challenges
+  const filteredChallenges = challenges
+    .filter(challenge => {
+      if (selectedPillar && challenge.pillar_id !== selectedPillar) return false;
+      if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) return false;
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          challenge.title.toLowerCase().includes(searchLower) ||
+          challenge.description.toLowerCase().includes(searchLower)
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'popular':
+          return b.is_completed - a.is_completed;
+        case 'completed':
+          return b.is_completed - a.is_completed;
+        default:
+          return 0;
+      }
+    });
 
-  const filteredChallenges = challenges.filter(challenge => {
-    if (selectedPillar && challenge.pillar_id !== selectedPillar) return false;
-    if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) return false;
-    return true;
-  });
+  // Pagination
+  const totalPages = Math.ceil(filteredChallenges.length / challengesPerPage);
+  const paginatedChallenges = filteredChallenges.slice(
+    (currentPage - 1) * challengesPerPage,
+    currentPage * challengesPerPage
+  );
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSelectedPillar(null);
+    setSelectedDifficulty(null);
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kidoova-accent"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500 text-center">
+          <p className="text-lg font-medium">Error loading challenges</p>
+          <p className="text-sm mt-2">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-heading">All Challenges</h1>
+        <h1 className="text-3xl font-heading text-gray-900">All Challenges</h1>
         <div className="flex items-center gap-4">
           <ChildSelector children={children} />
-          <button
-            onClick={() => setIsGroupedView(!isGroupedView)}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            {isGroupedView ? 'Ungrouped View' : 'Grouped View'}
-          </button>
         </div>
       </div>
 
       {selectedChild ? (
         <>
+          {/* Filters */}
           <ChallengeFilters
             selectedPillar={selectedPillar}
             onPillarChange={setSelectedPillar}
             selectedDifficulty={selectedDifficulty}
             onDifficultyChange={setSelectedDifficulty}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onClearFilters={handleClearFilters}
           />
 
-          {isLoading ? (
-            <div className="text-center py-8">Loading challenges...</div>
-          ) : error ? (
-            <div className="text-red-500 text-center py-8">{error}</div>
-          ) : filteredChallenges.length === 0 ? (
+          {/* Sort Options */}
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-gray-700">Sort by:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'newest' | 'popular' | 'completed')}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
+            >
+              <option value="newest">Newest First</option>
+              <option value="popular">Most Popular</option>
+              <option value="completed">Most Completed</option>
+            </select>
+          </div>
+
+          {/* Challenges Grid */}
+          {paginatedChallenges.length === 0 ? (
             <div className="text-center py-8 text-gray-600">
               No challenges found for the selected filters.
             </div>
-          ) : isGroupedView ? (
-            <GroupedChallenges
-              challenges={filteredChallenges}
-              childId={selectedChild.id}
-            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredChallenges.map((challenge) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {paginatedChallenges.map((challenge) => (
                 <ChallengeCard
                   key={challenge.id}
                   challenge={challenge}
                   childId={selectedChild.id}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-700">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
             </div>
           )}
         </>
