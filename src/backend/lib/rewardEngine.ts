@@ -1,4 +1,5 @@
 import { Env } from "../types";
+import { v4 as uuidv4 } from 'uuid';
 
 interface Reward {
   id: string;
@@ -116,7 +117,7 @@ async function grantRewardIfNew(
     await db.prepare(`
       INSERT INTO child_rewards (id, child_id, reward_id)
       VALUES (?, ?, ?)
-    `).bind(crypto.randomUUID(), childId, reward.id).run();
+    `).bind(uuidv4(), childId, reward.id).run();
   } else {
     console.log('Reward Engine: Reward already granted');
   }
