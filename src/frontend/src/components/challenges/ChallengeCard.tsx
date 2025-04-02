@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Challenge } from '../../types';
-import { CheckCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, ChevronDownIcon, ChevronUpIcon, CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react';
 
 interface ChallengeCardProps {
   challenge: Challenge;
