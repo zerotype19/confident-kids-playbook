@@ -204,7 +204,9 @@ export async function getChildProgress(childId: string, env: Env) {
   // Get pillar progress with age range filter
   const pillarProgress = await env.DB.prepare(`
     WITH pillar_totals AS (
-      SELECT pillar_id, COUNT(*) as total
+      SELECT 
+        pillar_id,
+        COUNT(*) as total
       FROM challenges
       WHERE age_range = ?
       GROUP BY pillar_id
@@ -233,13 +235,13 @@ export async function getChildProgress(childId: string, env: Env) {
   console.log('Reward Engine: Debug info:', {
     age_range,
     child_id: childId,
-    pillar_totals: await env.DB.prepare(`
+    raw_challenges: await env.DB.prepare(`
       SELECT pillar_id, COUNT(*) as total
       FROM challenges
       WHERE age_range = ?
       GROUP BY pillar_id
     `).bind(age_range).all(),
-    completed_challenges: await env.DB.prepare(`
+    raw_completed: await env.DB.prepare(`
       SELECT 
         c.pillar_id,
         COUNT(*) as completed
