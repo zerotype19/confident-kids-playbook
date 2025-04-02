@@ -51,7 +51,12 @@ export async function getRewardsAndProgress(c: Context) {
           COUNT(*) as total_completed,
           GROUP_CONCAT(date(completed_at)) as completed_dates,
           GROUP_CONCAT(completed_at) as raw_dates,
-          GROUP_CONCAT(completed) as completion_status
+          GROUP_CONCAT(completed) as completion_status,
+          GROUP_CONCAT(challenge_id) as challenge_ids,
+          GROUP_CONCAT(child_id) as child_ids,
+          date('now') as current_date,
+          date('now', 'weekday 0') as week_start_date,
+          date('now', 'weekday 6') as week_end_date
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -88,7 +93,16 @@ export async function getRewardsAndProgress(c: Context) {
               'total_completed', total_completed,
               'completed_dates', completed_dates,
               'raw_dates', raw_dates,
-              'completion_status', completion_status
+              'completion_status', completion_status,
+              'challenge_ids', challenge_ids,
+              'child_ids', child_ids,
+              'current_date', current_date,
+              'week_start_date', week_start_date,
+              'week_end_date', week_end_date,
+              'query_params', json_object(
+                'child_id', ?,
+                'week_start', date('now', 'weekday 0')
+              )
             )
             FROM debug_weekly
           ),
