@@ -86,16 +86,15 @@ export async function onRequest(context: { request: Request; env: Env }) {
       });
     }
 
-    // Check for duplicate log for today
+    // Check if challenge has ever been completed by this child
     const existingLog = await env.DB.prepare(`
       SELECT id FROM challenge_logs 
       WHERE child_id = ? 
-      AND challenge_id = ? 
-      AND date(completed_at) = date('now')
+      AND challenge_id = ?
     `).bind(body.child_id, body.challenge_id).first();
 
     if (existingLog) {
-      return new Response(JSON.stringify({ error: 'Challenge already completed today' }), {
+      return new Response(JSON.stringify({ error: 'Challenge already completed' }), {
         status: 400,
         headers: corsHeaders()
       });
