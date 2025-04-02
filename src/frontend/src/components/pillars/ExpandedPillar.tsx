@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pillar, Challenge } from '../../types';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 interface ExpandedPillarProps {
   pillar: Pillar;
@@ -114,11 +113,9 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
         <div className="flex-1 text-left">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-heading text-gray-900">{pillar.name}</h2>
-            {isExpanded ? (
-              <ChevronUpIcon className="w-6 h-6 text-gray-500" />
-            ) : (
-              <ChevronDownIcon className="w-6 h-6 text-gray-500" />
-            )}
+            <span className="text-gray-500 text-xl font-medium">
+              {isExpanded ? '−' : '+'}
+            </span>
           </div>
           <p className="text-gray-600 mt-1">{pillar.description}</p>
           
