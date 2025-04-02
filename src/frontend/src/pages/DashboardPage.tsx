@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
         // Fetch today's challenge
         const challengeResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/dashboard/challenge?childId=${selectedChild.id}`,
+          `${import.meta.env.VITE_API_URL}/api/dashboard/challenge?childId=${selectedChild.id}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -83,7 +83,7 @@ export default function DashboardPage() {
 
         // Fetch rewards and progress
         const rewardsResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/rewards?childId=${selectedChild.id}`,
+          `${import.meta.env.VITE_API_URL}/api/rewards?childId=${selectedChild.id}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -129,7 +129,7 @@ export default function DashboardPage() {
 
           // Fetch updated rewards and progress
           const rewardsResponse = await fetch(
-            `${import.meta.env.VITE_API_URL}/rewards?childId=${selectedChild.id}`,
+            `${import.meta.env.VITE_API_URL}/api/rewards?childId=${selectedChild.id}`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`

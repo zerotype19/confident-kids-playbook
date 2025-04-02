@@ -26,7 +26,7 @@ export default function ChildRewards({ childId }: ChildRewardsProps) {
           throw new Error('No authentication token found');
         }
 
-        const url = `${import.meta.env.VITE_API_URL}/rewards?childId=${childId}`;
+        const url = `${import.meta.env.VITE_API_URL}/api/rewards?childId=${childId}`;
         console.log('Fetching rewards from:', url);
 
         const response = await fetch(url, {
