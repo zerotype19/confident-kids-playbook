@@ -42,6 +42,7 @@ export async function getRewardsAndProgress(c: Context) {
         SELECT COUNT(*) as completed
         FROM challenge_logs
         WHERE child_id = ? 
+        AND completed = 1
         AND date(completed_at) >= date('now', 'weekday 0', '-7 days')
       ),
       next_reward AS (
