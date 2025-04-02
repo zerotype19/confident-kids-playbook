@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-
-interface Reward {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  type: 'milestone' | 'streak' | 'pillar';
-  criteria_value: number;
-  pillar_id?: number;
-}
+import { Reward, ProgressSummary } from "../types";
 
 interface ChildRewardsProps {
   childId: string;
@@ -16,6 +7,7 @@ interface ChildRewardsProps {
 
 export default function ChildRewards({ childId }: ChildRewardsProps) {
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const [progress, setProgress] = useState<ProgressSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,7 +32,19 @@ export default function ChildRewards({ childId }: ChildRewardsProps) {
         }
 
         const data = await response.json();
-        setRewards(data);
+        setRewards(data.rewards || []);
+        
+        // Ensure pillar_progress is an object
+        const pillarProgress = data.progress.pillar_progress || {};
+        
+        setProgress({
+          milestones_completed: data.progress.total_challenges,
+          current_streak: data.progress.current_streak,
+          longest_streak: data.progress.longest_streak,
+          weekly_challenges: data.progress.weekly_challenges,
+          pillar_progress: pillarProgress,
+          milestone_progress: data.progress.milestone_progress
+        });
       } catch (err) {
         console.error("Error fetching rewards:", err);
         setError(err instanceof Error ? err.message : "Failed to load rewards");
