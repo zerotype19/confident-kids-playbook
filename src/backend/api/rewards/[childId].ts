@@ -1,5 +1,5 @@
 import { Env } from "../../types";
-import { getChildRewards } from "../../lib/rewardEngine";
+import { getChildRewards, getChildProgress } from "../../lib/rewardEngine";
 
 export async function onRequestGet({ request, env }: { request: Request; env: Env }) {
   const url = new URL(request.url);
@@ -13,8 +13,15 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
   }
 
   try {
-    const rewards = await getChildRewards(childId, env);
-    return new Response(JSON.stringify(rewards), {
+    const [rewards, progress] = await Promise.all([
+      getChildRewards(childId, env),
+      getChildProgress(childId, env)
+    ]);
+
+    return new Response(JSON.stringify({
+      rewards: rewards.results || [],
+      progress
+    }), {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {

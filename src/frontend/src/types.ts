@@ -62,11 +62,16 @@ export interface ProgressSummary {
   current_streak: number;
   longest_streak: number;
   pillar_progress: {
-    [key: string]: {
+    [key: number]: {
       completed: number;
       total: number;
       percentage: number;
     };
+  };
+  milestone_progress: {
+    current: number;
+    next: number;
+    percentage: number;
   };
   next_reward?: {
     id: string;

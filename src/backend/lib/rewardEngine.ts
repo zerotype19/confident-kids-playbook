@@ -135,4 +135,87 @@ export async function getChildRewards(childId: string, env: Env): Promise<Reward
   
   console.log('Reward Engine: Found rewards:', rewards);
   return rewards;
+}
+
+export async function getChildProgress(childId: string, env: Env) {
+  console.log('Reward Engine: Fetching progress for child:', childId);
+
+  // Get total completed challenges
+  const { total } = await env.DB.prepare(`
+    SELECT COUNT(*) as total 
+    FROM challenge_logs 
+    WHERE child_id = ?
+  `).bind(childId).first<{ total: number }>();
+
+  // Get current streak
+  const { current_streak } = await env.DB.prepare(`
+    WITH RECURSIVE dates AS (
+      SELECT date(completed_at) as date
+      FROM challenge_logs
+      WHERE child_id = ?
+      ORDER BY completed_at DESC
+      LIMIT 1
+    ),
+    consecutive_days AS (
+      SELECT date, 1 as streak
+      FROM dates
+      UNION ALL
+      SELECT date(cl.completed_at), cd.streak + 1
+      FROM challenge_logs cl
+      JOIN consecutive_days cd ON date(cl.completed_at) = date(cd.date, '-1 day')
+      WHERE cl.child_id = ?
+    )
+    SELECT MAX(streak) as current_streak
+    FROM consecutive_days
+  `).bind(childId, childId).first<{ current_streak: number }>();
+
+  // Get longest streak
+  const { longest_streak } = await env.DB.prepare(`
+    WITH RECURSIVE dates AS (
+      SELECT date(completed_at) as date
+      FROM challenge_logs
+      WHERE child_id = ?
+      ORDER BY completed_at DESC
+    ),
+    consecutive_days AS (
+      SELECT date, 1 as streak
+      FROM dates
+      UNION ALL
+      SELECT date(cl.completed_at), cd.streak + 1
+      FROM challenge_logs cl
+      JOIN consecutive_days cd ON date(cl.completed_at) = date(cd.date, '-1 day')
+      WHERE cl.child_id = ?
+    )
+    SELECT MAX(streak) as longest_streak
+    FROM consecutive_days
+  `).bind(childId, childId).first<{ longest_streak: number }>();
+
+  // Get pillar progress
+  const pillarProgress = await env.DB.prepare(`
+    SELECT 
+      c.pillar_id,
+      COUNT(*) as completed,
+      (SELECT COUNT(*) FROM challenges WHERE pillar_id = c.pillar_id) as total
+    FROM challenge_logs cl
+    JOIN challenges c ON cl.challenge_id = c.id
+    WHERE cl.child_id = ?
+    GROUP BY c.pillar_id
+  `).bind(childId).all<{ pillar_id: number; completed: number; total: number }>();
+
+  // Calculate milestone progress
+  const milestones = [5, 10, 20];
+  const nextMilestone = milestones.find(m => m > total) || milestones[milestones.length - 1];
+  const milestoneProgress = {
+    current: total,
+    next: nextMilestone,
+    percentage: (total / nextMilestone) * 100
+  };
+
+  return {
+    total_challenges: total,
+    current_streak: current_streak || 0,
+    longest_streak: longest_streak || 0,
+    pillar_progress: pillarProgress.results || [],
+    milestone_progress: milestoneProgress
+  };
 } 

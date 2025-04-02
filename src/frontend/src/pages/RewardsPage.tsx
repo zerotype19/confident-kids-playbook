@@ -78,15 +78,20 @@ export default function RewardsPage() {
         }
 
         const data = await response.json();
-        // The API returns an object with a results array
-        setRewards(data.results || []);
-        
-        // For now, we'll create a simple progress summary
+        setRewards(data.rewards || []);
         setProgress({
-          milestones_completed: 0,
-          current_streak: 0,
-          longest_streak: 0,
-          pillar_progress: {}
+          milestones_completed: data.progress.total_challenges,
+          current_streak: data.progress.current_streak,
+          longest_streak: data.progress.longest_streak,
+          pillar_progress: data.progress.pillar_progress.reduce((acc: any, pillar: any) => {
+            acc[pillar.pillar_id] = {
+              completed: pillar.completed,
+              total: pillar.total,
+              percentage: (pillar.completed / pillar.total) * 100
+            };
+            return acc;
+          }, {}),
+          milestone_progress: data.progress.milestone_progress
         });
       } catch (err) {
         console.error('Error fetching rewards:', err);
