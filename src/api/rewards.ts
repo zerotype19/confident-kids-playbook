@@ -75,6 +75,7 @@ export async function getRewardsAndProgress(c: Context) {
       )
       SELECT 
         json_object(
+          'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
           'milestones_completed', (SELECT completed FROM milestone_progress),
@@ -95,6 +96,11 @@ export async function getRewardsAndProgress(c: Context) {
               'percentage', (completed * 100.0 / total)
             )
           ),
+          'milestone_progress', json_object(
+            'current', (SELECT completed FROM milestone_progress),
+            'next', 20,
+            'percentage', (SELECT completed FROM milestone_progress) * 100.0 / 20
+          ),
           'next_reward', (
             SELECT json_object(
               'id', id,
@@ -109,7 +115,7 @@ export async function getRewardsAndProgress(c: Context) {
             FROM next_reward
           )
         ) as progress_summary
-    `).bind(childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+    `).bind(childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     return c.json({
       rewards: rewards.results,
