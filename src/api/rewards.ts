@@ -161,6 +161,9 @@ export async function getRewardsAndProgress(c: Context) {
         ) as progress_summary
     `).bind(childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
+    // Log the progress summary before returning
+    console.log('Reward Engine: Progress summary:', progress?.progress_summary);
+
     return c.json({
       rewards: rewards.results,
       progress: progress?.progress_summary || null
