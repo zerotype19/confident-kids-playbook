@@ -2,27 +2,6 @@ import { Context } from 'hono';
 import { db } from '@db';
 import { Reward, ProgressSummary } from '../frontend/src/types';
 
-// Add type declarations for missing modules
-declare module 'hono' {
-  export interface Context {
-    req: {
-      query: (key: string) => string | undefined;
-    };
-    json: (data: any, status?: number) => Response;
-  }
-}
-
-declare module '../db' {
-  export const db: {
-    prepare: (sql: string) => {
-      bind: (...params: any[]) => {
-        first: <T>() => Promise<T | null>;
-        all: <T>() => Promise<{ results: T[] }>;
-      };
-    };
-  };
-}
-
 export async function getRewardsAndProgress(c: Context) {
   try {
     const childId = c.req.query('childId');
@@ -216,11 +195,23 @@ export async function getRewardsAndProgress(c: Context) {
 
     // Log the progress summary before returning
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
-
-    return c.json({
-      rewards: rewards.results,
-      progress: progress?.progress_summary || null
+    console.log('Reward Engine: Weekly challenges debug:', {
+      raw_weekly_challenges: progress?.progress_summary?.weekly_debug,
+      calculated_weekly_challenges: progress?.progress_summary?.weekly_challenges,
+      debug_info: progress?.progress_summary?.debug_info
     });
+
+    // Ensure weekly_challenges is included in the response
+    const progressSummary = progress?.progress_summary || {};
+    const response = {
+      rewards: rewards.results,
+      progress: {
+        ...progressSummary,
+        weekly_challenges: progressSummary.weekly_challenges || 0
+      }
+    };
+
+    return c.json(response);
   } catch (error) {
     console.error('Error fetching rewards and progress:', error);
     return c.json({ error: 'Failed to fetch rewards and progress' }, 500);
