@@ -184,21 +184,25 @@ export async function getRewardsAndProgress(c: Context) {
     });
 
     // Return the response with weekly challenges count
-    return c.json({
+    const progressSummary = progress?.progress_summary || {};
+    const response = {
       rewards: rewards,
       progress: {
-        total_challenges: progress?.progress_summary?.total_challenges || 0,
-        current_streak: progress?.progress_summary?.current_streak || 0,
-        longest_streak: progress?.progress_summary?.longest_streak || 0,
+        total_challenges: progressSummary.total_challenges || 0,
+        current_streak: progressSummary.current_streak || 0,
+        longest_streak: progressSummary.longest_streak || 0,
         weekly_challenges: weeklyChallengesCount?.count || 0,
-        pillar_progress: progress?.progress_summary?.pillar_progress || {},
-        milestone_progress: progress?.progress_summary?.milestone_progress || {
+        pillar_progress: progressSummary.pillar_progress || {},
+        milestone_progress: progressSummary.milestone_progress || {
           current: 0,
           next: 20,
           percentage: 0
         }
       }
-    });
+    };
+
+    console.log('Reward Engine: Final response:', response);
+    return c.json(response);
   } catch (error) {
     console.error('Error fetching rewards and progress:', error);
     return c.json({ error: 'Failed to fetch rewards and progress' }, 500);
