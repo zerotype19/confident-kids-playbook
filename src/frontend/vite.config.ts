@@ -13,6 +13,7 @@ export default defineConfig({
     assetsDir: 'assets',
     copyPublicDir: true,
     rollupOptions: {
+      external: ['@heroicons/react'],
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
@@ -29,7 +30,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@types': path.resolve(__dirname, '../types')
+      '@types': path.resolve(__dirname, '../types'),
+      '@heroicons/react': path.resolve(__dirname, 'node_modules/@heroicons/react')
     }
   },
   publicDir: 'public'
