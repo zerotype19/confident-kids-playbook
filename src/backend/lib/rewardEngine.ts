@@ -220,16 +220,34 @@ export async function getChildProgress(childId: string, env: Env) {
     )
     SELECT 
       p.id as pillar_id,
+      p.name as pillar_name,
       COALESCE(cc.completed, 0) as completed,
       COALESCE(pt.total, 0) as total
     FROM pillars p
     LEFT JOIN pillar_totals pt ON p.id = pt.pillar_id
     LEFT JOIN completed_challenges cc ON p.id = cc.pillar_id
     ORDER BY p.id
-  `).bind(age_range, childId).all<{ pillar_id: number; completed: number; total: number }>();
+  `).bind(age_range, childId).all<{ pillar_id: number; pillar_name: string; completed: number; total: number }>();
 
-  console.log('Reward Engine: Pillar progress:', {
+  // Debug logging
+  console.log('Reward Engine: Debug info:', {
     age_range,
+    child_id: childId,
+    pillar_totals: await env.DB.prepare(`
+      SELECT pillar_id, COUNT(*) as total
+      FROM challenges
+      WHERE age_range = ?
+      GROUP BY pillar_id
+    `).bind(age_range).all(),
+    completed_challenges: await env.DB.prepare(`
+      SELECT 
+        c.pillar_id,
+        COUNT(*) as completed
+      FROM challenge_logs cl
+      JOIN challenges c ON cl.challenge_id = c.id
+      WHERE cl.child_id = ?
+      GROUP BY c.pillar_id
+    `).bind(childId).all(),
     results: pillarProgress.results
   });
 
