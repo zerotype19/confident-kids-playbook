@@ -87,6 +87,7 @@ export default function RewardsPage() {
           milestones_completed: data.progress.total_challenges,
           current_streak: data.progress.current_streak,
           longest_streak: data.progress.longest_streak,
+          weekly_challenges: data.progress.weekly_challenges,
           pillar_progress: pillarProgress,
           milestone_progress: data.progress.milestone_progress
         });
