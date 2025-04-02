@@ -79,18 +79,15 @@ export default function RewardsPage() {
 
         const data = await response.json();
         setRewards(data.rewards || []);
+        
+        // Ensure pillar_progress is an object
+        const pillarProgress = data.progress.pillar_progress || {};
+        
         setProgress({
           milestones_completed: data.progress.total_challenges,
           current_streak: data.progress.current_streak,
           longest_streak: data.progress.longest_streak,
-          pillar_progress: data.progress.pillar_progress.reduce((acc: any, pillar: any) => {
-            acc[pillar.pillar_id] = {
-              completed: pillar.completed || 0,
-              total: pillar.total || 0,
-              percentage: pillar.total > 0 ? (pillar.completed / pillar.total) * 100 : 0
-            };
-            return acc;
-          }, {}),
+          pillar_progress: pillarProgress,
           milestone_progress: data.progress.milestone_progress
         });
       } catch (err) {

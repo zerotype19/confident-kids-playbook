@@ -267,7 +267,7 @@ export async function getChildProgress(childId: string, env: Env) {
   };
 
   // Transform pillar progress into the expected format
-  const transformedPillarProgress = pillarProgress.results.reduce((acc: any, pillar: any) => {
+  const transformedPillarProgress = (pillarProgress.results || []).reduce((acc: any, pillar: any) => {
     acc[pillar.pillar_id] = {
       completed: pillar.completed,
       total: pillar.total,
