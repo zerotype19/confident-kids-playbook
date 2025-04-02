@@ -108,12 +108,20 @@ export async function getRewardsAndProgress(c: Context) {
         SELECT COUNT(*) as completed
         FROM challenge_logs
         WHERE child_id = ? AND completed = 1
+      ),
+      weekly_progress AS (
+        SELECT COUNT(*) as count
+        FROM challenge_logs
+        WHERE child_id = ?
+        AND completed = 1
+        AND date(completed_at) >= date('now', 'weekday 0')
       )
       SELECT 
         json_object(
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
+          'weekly_challenges', (SELECT count FROM weekly_progress),
           'pillar_progress', json_object(
             'mindfulness', mindfulness_progress,
             'gratitude', gratitude_progress,
@@ -146,7 +154,7 @@ export async function getRewardsAndProgress(c: Context) {
         total_challenges: progressSummary.total_challenges || 0,
         current_streak: progressSummary.current_streak || 0,
         longest_streak: progressSummary.longest_streak || 0,
-        weekly_challenges: weeklyChallengesResult?.count || 0,
+        weekly_challenges: progressSummary.weekly_challenges || 0,
         pillar_progress: progressSummary.pillar_progress || {},
         milestone_progress: progressSummary.milestone_progress || {
           current: 0,
