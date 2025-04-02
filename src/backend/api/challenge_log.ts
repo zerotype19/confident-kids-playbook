@@ -56,7 +56,39 @@ export async function onRequest(context: { request: Request; env: Env }) {
       });
     }
 
-    // Check for duplicate log
+    // Verify child belongs to user's family
+    const childResult = await env.DB.prepare(`
+      SELECT c.*, f.id as family_id
+      FROM children c
+      JOIN families f ON c.family_id = f.id
+      WHERE c.id = ? AND f.id IN (
+        SELECT family_id FROM family_members WHERE user_id = ?
+      )
+    `).bind(body.child_id, payload.sub).first();
+
+    if (!childResult) {
+      return new Response(JSON.stringify({ error: 'Child not found or access denied' }), {
+        status: 404,
+        headers: corsHeaders()
+      });
+    }
+
+    // Check if challenge exists and is not already completed
+    const challengeResult = await env.DB.prepare(`
+      SELECT * FROM challenges 
+      WHERE id = ? AND id NOT IN (
+        SELECT challenge_id FROM challenge_logs WHERE child_id = ?
+      )
+    `).bind(body.challenge_id, body.child_id).first();
+
+    if (!challengeResult) {
+      return new Response(JSON.stringify({ error: 'Challenge not found or already completed' }), {
+        status: 404,
+        headers: corsHeaders()
+      });
+    }
+
+    // Check for duplicate log for today
     const existingLog = await env.DB.prepare(`
       SELECT id FROM challenge_logs 
       WHERE child_id = ? 
@@ -85,7 +117,27 @@ export async function onRequest(context: { request: Request; env: Env }) {
     // Evaluate and grant rewards
     await evaluateAndGrantRewards(body.child_id, env);
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Calculate updated stats
+    const statsResult = await env.DB.prepare(`
+      WITH streak_info AS (
+        SELECT 
+          COUNT(*) as total_completed,
+          MAX(completed_at) as last_completed,
+          COUNT(DISTINCT date(completed_at)) as unique_days
+        FROM challenge_logs
+        WHERE child_id = ?
+      )
+      SELECT 
+        total_completed,
+        unique_days as current_streak,
+        (SELECT COUNT(*) FROM challenge_logs WHERE child_id = ?) as total_coins
+      FROM streak_info
+    `).bind(body.child_id, body.child_id).first();
+
+    return new Response(JSON.stringify({
+      success: true,
+      stats: statsResult
+    }), {
       headers: corsHeaders()
     });
 

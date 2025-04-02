@@ -40,16 +40,22 @@ export const ChallengeViewer: React.FC = () => {
     setIsSubmitting(true);
     try {
       // First, complete the challenge
-      const completeResponse = await fetch('/api/challenges/complete', {
+      const completeResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
           child_id: selectedChild.id,
           challenge_id: challenge.id
         })
       });
 
-      if (!completeResponse.ok) throw new Error('Failed to complete challenge');
+      if (!completeResponse.ok) {
+        const data = await completeResponse.json();
+        throw new Error(data.error || 'Failed to complete challenge');
+      }
 
       // Then, create a journal entry
       const journalResponse = await fetch('/api/journal/create', {

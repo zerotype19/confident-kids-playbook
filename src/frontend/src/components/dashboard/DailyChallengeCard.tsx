@@ -57,7 +57,7 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
       if (!token) return;
 
       const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${apiUrl}/api/challenges/complete`, {
+      const response = await fetch(`${apiUrl}/api/challenge-log`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -70,7 +70,8 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
       });
 
       if (!response.ok) {
-        throw new Error('Failed to complete challenge');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to complete challenge');
       }
 
       setChallenge(prev => prev ? { ...prev, is_completed: true } : null);

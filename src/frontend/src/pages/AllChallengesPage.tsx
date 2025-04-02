@@ -190,7 +190,7 @@ export default function AllChallengesPage() {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/challenges/complete`,
+        `${import.meta.env.VITE_API_URL}/api/challenge-log`,
         {
           method: 'POST',
           headers: {
