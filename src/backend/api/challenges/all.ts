@@ -92,7 +92,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 
     const challenges = await env.DB.prepare(`
       SELECT c.*, 
-             CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
+             CASE WHEN cl.completed_at IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
         AND cl.child_id = ?
