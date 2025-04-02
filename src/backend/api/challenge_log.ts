@@ -80,25 +80,36 @@ export async function onRequest(context: { request: Request; env: Env }) {
     `).bind(body.challenge_id).first();
 
     if (!challengeResult) {
+      console.log('Challenge not found:', body.challenge_id);
       return new Response(JSON.stringify({ error: 'Challenge not found' }), {
         status: 404,
         headers: corsHeaders()
       });
     }
 
+    console.log('Found challenge:', challengeResult);
+
     // Check if challenge has ever been completed by this child
+    console.log('Checking for existing completion:', {
+      childId: body.child_id,
+      challengeId: body.challenge_id
+    });
+
     const existingLog = await env.DB.prepare(`
-      SELECT id FROM challenge_logs 
+      SELECT id, completed_at FROM challenge_logs 
       WHERE child_id = ? 
       AND challenge_id = ?
     `).bind(body.child_id, body.challenge_id).first();
 
     if (existingLog) {
+      console.log('Found existing completion:', existingLog);
       return new Response(JSON.stringify({ error: 'Challenge already completed' }), {
         status: 400,
         headers: corsHeaders()
       });
     }
+
+    console.log('No existing completion found, proceeding with insert');
 
     // Insert new log
     const logId = uuidv4();

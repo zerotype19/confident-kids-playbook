@@ -189,6 +189,11 @@ export default function AllChallengesPage() {
         throw new Error('No child selected');
       }
 
+      console.log('Attempting to complete challenge:', {
+        challengeId,
+        childId: selectedChild.id
+      });
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/challenge-log`,
         {
@@ -204,10 +209,14 @@ export default function AllChallengesPage() {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to mark challenge as complete');
+        console.error('Challenge completion failed:', data);
+        throw new Error(data.error || 'Failed to mark challenge as complete');
       }
+
+      console.log('Challenge completed successfully:', data);
 
       // Refetch challenges to get updated data
       const challengesResponse = await fetch(
