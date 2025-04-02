@@ -7,7 +7,6 @@ import { evaluateAndGrantRewards } from '../lib/rewardEngine';
 interface ChallengeLogRequest {
   child_id: string;
   challenge_id: string;
-  reflection?: string;
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
@@ -75,13 +74,12 @@ export async function onRequest(context: { request: Request; env: Env }) {
     // Insert new log
     const logId = uuidv4();
     await env.DB.prepare(`
-      INSERT INTO challenge_logs (id, child_id, challenge_id, completed_at, reflection)
-      VALUES (?, ?, ?, datetime('now'), ?)
+      INSERT INTO challenge_logs (id, child_id, challenge_id, completed_at)
+      VALUES (?, ?, ?, datetime('now'))
     `).bind(
       logId,
       body.child_id,
-      body.challenge_id,
-      body.reflection || null
+      body.challenge_id
     ).run();
 
     // Evaluate and grant rewards

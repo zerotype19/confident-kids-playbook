@@ -12,8 +12,6 @@ export const ChallengeViewer: React.FC = () => {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reflection, setReflection] = useState('');
-  const [moodRating, setMoodRating] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -47,9 +45,7 @@ export const ChallengeViewer: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           child_id: selectedChild.id,
-          challenge_id: challenge.id,
-          reflection,
-          mood_rating: moodRating
+          challenge_id: challenge.id
         })
       });
 
@@ -62,7 +58,7 @@ export const ChallengeViewer: React.FC = () => {
         body: JSON.stringify({
           child_id: selectedChild.id,
           challenge_id: challenge.id,
-          text: reflection
+          text: ''
         })
       });
 
@@ -123,43 +119,6 @@ export const ChallengeViewer: React.FC = () => {
 
       <form onSubmit={handleComplete} className="bg-white p-6 rounded-xl shadow-sm">
         <h2 className="text-xl font-semibold mb-4">Complete Challenge</h2>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            What happened during this challenge?
-          </label>
-          <textarea
-            value={reflection}
-            onChange={(e) => setReflection(e.target.value)}
-            className="w-full p-2 border rounded-md"
-            rows={4}
-            required
-            placeholder="Share your experience..."
-          />
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            How did it go?
-          </label>
-          <div className="flex gap-4">
-            {[1, 2, 3, 4, 5].map((rating) => (
-              <button
-                key={rating}
-                type="button"
-                onClick={() => setMoodRating(rating)}
-                className={`w-10 h-10 rounded-full ${
-                  moodRating === rating
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100'
-                }`}
-              >
-                {['😢', '😕', '😐', '🙂', '😊'][rating - 1]}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <button
           type="submit"
           disabled={isSubmitting}

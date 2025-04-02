@@ -52,8 +52,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         },
         body: JSON.stringify({
           child_id: childId,
-          challenge_id: challenge.id,
-          reflection: "Completed the challenge"
+          challenge_id: challenge.id
         })
       });
 

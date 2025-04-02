@@ -17,7 +17,6 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reflection, setReflection] = useState('');
   const { isFeatureEnabled } = useFeatureFlags();
   const isPremium = isFeatureEnabled('premium.dashboard_insights');
 
@@ -66,8 +65,7 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
         },
         body: JSON.stringify({
           challenge_id: challenge.id,
-          child_id: childId,
-          reflection
+          child_id: childId
         })
       });
 
@@ -76,7 +74,6 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
       }
 
       setChallenge(prev => prev ? { ...prev, is_completed: true } : null);
-      setReflection('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete challenge');
     }
@@ -106,12 +103,6 @@ export default function DailyChallengeCard({ childId }: DailyChallengeCardProps)
 
       {isPremium && !challenge.is_completed && (
         <div className="space-y-3">
-          <textarea
-            value={reflection}
-            onChange={(e) => setReflection(e.target.value)}
-            placeholder="Add a reflection note..."
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full h-24"
-          />
           <button
             onClick={handleComplete}
             className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
