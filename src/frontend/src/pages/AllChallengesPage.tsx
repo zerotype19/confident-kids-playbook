@@ -7,13 +7,13 @@ import Icon from '../components/common/Icon';
 
 interface ChallengeGroup {
   pillar_id: number;
-  age_range: string;
+  difficulty_level: number;
   titles: string[];
 }
 
 interface ChallengeFilters {
   pillarId: number | null;
-  ageRange: string | null;
+  difficulty: number | null;
   title: string | null;
   showCompleted: boolean;
 }
@@ -27,7 +27,7 @@ export default function AllChallengesPage() {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<ChallengeFilters>({
     pillarId: null,
-    ageRange: null,
+    difficulty: null,
     title: null,
     showCompleted: false
   });
@@ -69,7 +69,7 @@ export default function AllChallengesPage() {
     fetchChildren();
   }, [setSelectedChild, selectedChild]);
 
-  // Fetch challenges and group them by pillar and age range
+  // Fetch challenges and group them by pillar and difficulty
   useEffect(() => {
     const fetchChallenges = async () => {
       if (!selectedChild) return;
@@ -99,10 +99,10 @@ export default function AllChallengesPage() {
         const data = await response.json();
         setChallenges(data);
 
-        // Group challenges by pillar and age range
+        // Group challenges by pillar and difficulty
         const groups = data.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
           const existingGroup = acc.find(
-            group => group.pillar_id === challenge.pillar_id && group.age_range === challenge.age_range
+            group => group.pillar_id === challenge.pillar_id && group.difficulty_level === challenge.difficulty_level
           );
 
           if (existingGroup) {
@@ -112,7 +112,7 @@ export default function AllChallengesPage() {
           } else {
             acc.push({
               pillar_id: challenge.pillar_id,
-              age_range: challenge.age_range,
+              difficulty_level: challenge.difficulty_level,
               titles: [challenge.title]
             });
           }
@@ -135,30 +135,30 @@ export default function AllChallengesPage() {
   // Filter challenges based on selected filters
   const filteredChallenges = challenges.filter(challenge => {
     if (filters.pillarId && challenge.pillar_id !== filters.pillarId) return false;
-    if (filters.ageRange && challenge.age_range !== filters.ageRange) return false;
+    if (filters.difficulty && challenge.difficulty_level !== filters.difficulty) return false;
     if (filters.title && challenge.title !== filters.title) return false;
     if (!filters.showCompleted && challenge.is_completed) return false;
     return true;
   });
 
-  // Get unique age ranges from challenge groups
-  const ageRanges = Array.from(new Set(challengeGroups.map(group => group.age_range)));
+  // Get unique difficulties from challenge groups
+  const difficulties = Array.from(new Set(challengeGroups.map(group => group.difficulty_level))).sort();
 
   // Get unique pillar IDs from challenge groups
   const pillarIds = Array.from(new Set(challengeGroups.map(group => group.pillar_id)));
 
-  // Get titles for selected pillar and age range
+  // Get titles for selected pillar and difficulty
   const availableTitles = challengeGroups
     .find(group => 
       group.pillar_id === filters.pillarId && 
-      group.age_range === filters.ageRange
+      group.difficulty_level === filters.difficulty
     )?.titles || [];
 
   // Clear all filters
   const handleClearFilters = () => {
     setFilters({
       pillarId: null,
-      ageRange: null,
+      difficulty: null,
       title: null,
       showCompleted: false
     });
@@ -222,33 +222,33 @@ export default function AllChallengesPage() {
                 </select>
               </div>
 
-              {/* Age Range Filter */}
+              {/* Difficulty Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Age Range
+                  Difficulty
                 </label>
                 <select
-                  value={filters.ageRange || ''}
+                  value={filters.difficulty || ''}
                   onChange={(e) => setFilters((prev: ChallengeFilters) => ({
                     ...prev,
-                    ageRange: e.target.value || null,
-                    title: null // Reset title when age range changes
+                    difficulty: e.target.value ? Number(e.target.value) : null,
+                    title: null // Reset title when difficulty changes
                   }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
                 >
-                  <option value="">All Ages</option>
-                  {ageRanges.map(range => (
-                    <option key={range} value={range}>
-                      {range}
+                  <option value="">All Difficulties</option>
+                  {difficulties.map(level => (
+                    <option key={level} value={level}>
+                      {level === 1 ? 'Easy' : level === 2 ? 'Medium' : 'Hard'}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Title Filter */}
+              {/* Challenge Type Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Challenge Title
+                  Challenge Type
                 </label>
                 <select
                   value={filters.title || ''}
@@ -256,10 +256,10 @@ export default function AllChallengesPage() {
                     ...prev,
                     title: e.target.value || null
                   }))}
-                  disabled={!filters.pillarId || !filters.ageRange}
+                  disabled={!filters.pillarId || !filters.difficulty}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-kidoova-accent focus:border-transparent disabled:bg-gray-100"
                 >
-                  <option value="">Select a Challenge</option>
+                  <option value="">Select a Challenge Type</option>
                   {availableTitles.map((title: string) => (
                     <option key={title} value={title}>
                       {title}
@@ -283,7 +283,7 @@ export default function AllChallengesPage() {
                 {filters.showCompleted ? 'Show All Challenges' : 'Show Incomplete Only'}
               </button>
 
-              {(filters.pillarId || filters.ageRange || filters.title || filters.showCompleted) && (
+              {(filters.pillarId || filters.difficulty || filters.title || filters.showCompleted) && (
                 <button
                   onClick={handleClearFilters}
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
