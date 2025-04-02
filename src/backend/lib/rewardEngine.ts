@@ -203,17 +203,21 @@ export async function getChildProgress(childId: string, env: Env) {
 
   // Get pillar progress with age range filter
   const pillarProgress = await env.DB.prepare(`
+    WITH pillar_totals AS (
+      SELECT pillar_id, COUNT(*) as total
+      FROM challenges
+      WHERE age_range = ?
+      GROUP BY pillar_id
+    )
     SELECT 
       c.pillar_id,
       COUNT(*) as completed,
-      (SELECT COUNT(*) 
-       FROM challenges 
-       WHERE pillar_id = c.pillar_id 
-       AND age_range = ?) as total
+      COALESCE(pt.total, 0) as total
     FROM challenge_logs cl
     JOIN challenges c ON cl.challenge_id = c.id
+    LEFT JOIN pillar_totals pt ON c.pillar_id = pt.pillar_id
     WHERE cl.child_id = ?
-    GROUP BY c.pillar_id
+    GROUP BY c.pillar_id, pt.total
   `).bind(age_range, childId).all<{ pillar_id: number; completed: number; total: number }>();
 
   // Calculate milestone progress
