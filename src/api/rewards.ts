@@ -45,11 +45,12 @@ export async function getRewardsAndProgress(c: Context) {
           GROUP_CONCAT(completed_at) as raw_dates,
           date('now', 'weekday 0') as week_start,
           date('now') as current_date,
-          GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results
+          GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results,
+          GROUP_CONCAT(completed_at) as all_completed_dates
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
-        AND date(completed_at) >= date('now', 'weekday 0')
+        AND completed_at >= datetime('now', 'weekday 0')
       ),
       debug_weekly AS (
         SELECT 
@@ -63,8 +64,9 @@ export async function getRewardsAndProgress(c: Context) {
           date('now') as current_date,
           date('now', 'weekday 0') as week_start_date,
           date('now', 'weekday 6') as week_end_date,
-          GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results,
-          GROUP_CONCAT(date(completed_at)) as all_dates
+          GROUP_CONCAT(completed_at >= datetime('now', 'weekday 0')) as date_comparison_results,
+          GROUP_CONCAT(date(completed_at)) as all_dates,
+          GROUP_CONCAT(completed_at) as all_raw_dates
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -101,8 +103,9 @@ export async function getRewardsAndProgress(c: Context) {
               'raw_dates', raw_dates,
               'week_start', week_start,
               'current_date', current_date,
-              'date_comparison', date('now', 'weekday 0'),
-              'date_comparison_results', date_comparison_results
+              'date_comparison', datetime('now', 'weekday 0'),
+              'date_comparison_results', date_comparison_results,
+              'all_completed_dates', all_completed_dates
             )
             FROM weekly_challenges
           ),
@@ -120,9 +123,10 @@ export async function getRewardsAndProgress(c: Context) {
               'week_end_date', week_end_date,
               'date_comparison_results', date_comparison_results,
               'all_dates', all_dates,
+              'all_raw_dates', all_raw_dates,
               'query_params', json_object(
                 'child_id', ?,
-                'week_start', date('now', 'weekday 0')
+                'week_start', datetime('now', 'weekday 0')
               )
             )
             FROM debug_weekly
