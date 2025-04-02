@@ -85,9 +85,9 @@ export default function RewardsPage() {
           longest_streak: data.progress.longest_streak,
           pillar_progress: data.progress.pillar_progress.reduce((acc: any, pillar: any) => {
             acc[pillar.pillar_id] = {
-              completed: pillar.completed,
-              total: pillar.total,
-              percentage: (pillar.completed / pillar.total) * 100
+              completed: pillar.completed || 0,
+              total: pillar.total || 0,
+              percentage: pillar.total > 0 ? (pillar.completed / pillar.total) * 100 : 0
             };
             return acc;
           }, {}),
