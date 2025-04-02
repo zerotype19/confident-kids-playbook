@@ -1,86 +1,98 @@
 import React, { useState } from 'react';
+import { Challenge, PILLAR_NAMES, PillarId } from '../../types';
 import ChallengeCard from './ChallengeCard';
-import { Challenge } from '../../types';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 interface GroupedChallengesProps {
   challenges: Challenge[];
   childId: string;
-  itemsPerPage?: number;
 }
 
-export default function GroupedChallenges({ 
-  challenges, 
-  childId, 
-  itemsPerPage = 9 
-}: GroupedChallengesProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  
-  // Group challenges by title
+export default function GroupedChallenges({ challenges, childId }: GroupedChallengesProps) {
+  const [expandedPillars, setExpandedPillars] = useState<Set<number>>(new Set([1])); // Start with first pillar expanded
+
+  // Group challenges by pillar
   const groupedChallenges = challenges.reduce((acc, challenge) => {
-    const title = challenge.title;
-    if (!acc[title]) {
-      acc[title] = [];
+    const pillarId = challenge.pillar_id;
+    if (!acc[pillarId]) {
+      acc[pillarId] = [];
     }
-    acc[title].push(challenge);
+    acc[pillarId].push(challenge);
     return acc;
-  }, {} as Record<string, Challenge[]>);
+  }, {} as Record<number, Challenge[]>);
 
-  // Convert grouped challenges to array and sort by title
-  const sortedGroups = Object.entries(groupedChallenges)
-    .sort(([titleA], [titleB]) => titleA.localeCompare(titleB));
+  // Calculate pillar progress
+  const pillarProgress = Object.entries(groupedChallenges).reduce((acc, [pillarId, pillarChallenges]) => {
+    const completed = pillarChallenges.filter(c => c.is_completed).length;
+    const total = pillarChallenges.length;
+    acc[Number(pillarId)] = {
+      completed,
+      total,
+      percentage: (completed / total) * 100
+    };
+    return acc;
+  }, {} as Record<number, { completed: number; total: number; percentage: number }>);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedGroups.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentGroups = sortedGroups.slice(startIndex, endIndex);
+  const togglePillar = (pillarId: number) => {
+    const newExpanded = new Set(expandedPillars);
+    if (newExpanded.has(pillarId)) {
+      newExpanded.delete(pillarId);
+    } else {
+      newExpanded.add(pillarId);
+    }
+    setExpandedPillars(newExpanded);
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Challenge Groups */}
-      <div className="space-y-8">
-        {currentGroups.map(([title, challenges]) => (
-          <div key={title} className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">
-              {title}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {challenges.map((challenge) => (
-                <ChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  childId={childId}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-6">
+      {Object.entries(groupedChallenges).map(([pillarId, pillarChallenges]) => {
+        const numericPillarId = Number(pillarId) as PillarId;
+        const isExpanded = expandedPillars.has(numericPillarId);
+        const progress = pillarProgress[numericPillarId];
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center space-x-2 mt-8">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          
-          <span className="px-4 py-2 text-sm font-medium text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
+        return (
+          <div key={pillarId} className="border rounded-lg shadow-sm bg-white overflow-hidden">
+            <button
+              onClick={() => togglePillar(numericPillarId)}
+              className="w-full p-4 flex items-center justify-between text-left bg-gradient-to-r from-kidoova-primary to-kidoova-accent text-white hover:from-kidoova-primary/90 hover:to-kidoova-accent/90 transition-colors"
+            >
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold">{PILLAR_NAMES[numericPillarId]}</h3>
+                <div className="mt-2">
+                  <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-white transition-all duration-500 ease-out"
+                      style={{ width: `${progress.percentage}%` }}
+                    />
+                  </div>
+                  <p className="text-sm mt-1">
+                    {progress.completed} of {progress.total} challenges completed
+                  </p>
+                </div>
+              </div>
+              {isExpanded ? (
+                <ChevronUpIcon className="w-6 h-6 flex-shrink-0" />
+              ) : (
+                <ChevronDownIcon className="w-6 h-6 flex-shrink-0" />
+              )}
+            </button>
+            
+            {isExpanded && (
+              <div className="p-4 bg-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {pillarChallenges.map((challenge) => (
+                    <ChallengeCard
+                      key={challenge.id}
+                      challenge={challenge}
+                      childId={childId}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 } 

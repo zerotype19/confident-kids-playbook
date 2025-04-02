@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Challenge, PILLAR_NAMES } from '../../types';
+import { Challenge } from '../../types';
+import { CheckCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -10,12 +12,10 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reflection, setReflection] = useState('');
-  const isCompleted = challenge.is_completed === 1;
 
-  const handleMarkComplete = async () => {
-    if (isCompleted) return;
-
+  const handleStartChallenge = async () => {
+    if (isCompleting) return;
+    
     setIsCompleting(true);
     setError(null);
 
@@ -25,168 +25,157 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          challenge_id: challenge.id,
-          child_id: childId,
-          reflection
-        })
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/challenges/${challenge.id}/complete`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ child_id: childId }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to complete challenge');
       }
 
-      // Update the challenge in the parent component
-      challenge.is_completed = 1;
-      setReflection('');
+      // Show completion animation or notification here
+      window.dispatchEvent(new CustomEvent('challengeCompleted', {
+        detail: {
+          challengeId: challenge.id,
+          title: challenge.title,
+        }
+      }));
+
     } catch (err) {
-      console.error('Error marking challenge complete:', err);
-      setError(err instanceof Error ? err.message : 'Failed to mark challenge as complete');
+      console.error('Error completing challenge:', err);
+      setError('Failed to complete challenge. Please try again.');
     } finally {
       setIsCompleting(false);
     }
   };
 
+  const getDifficultyColor = (level: number) => {
+    switch (level) {
+      case 1: return 'bg-green-500';
+      case 2: return 'bg-yellow-500';
+      case 3: return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   return (
-    <div 
-      className={`
-        bg-white shadow-md rounded-lg p-4 flex flex-col space-y-4 
-        hover:shadow-xl transform hover:scale-105 transition duration-200
-        ${isCompleted ? 'border-2 border-kidoova-accent' : 'border border-gray-200'}
-      `}
-    >
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <h3 className="text-lg font-semibold text-kidoova-green">{challenge.title}</h3>
-        <div className="flex items-center gap-2">
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-            {PILLAR_NAMES[challenge.pillar_id as keyof typeof PILLAR_NAMES]}
-          </span>
-          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-            {challenge.difficulty_level === 1 ? 'Easy' :
-             challenge.difficulty_level === 2 ? 'Medium' :
-             'Hard'}
-          </span>
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="text-sm text-gray-600 line-clamp-2">{challenge.description}</p>
-
-      {/* Progress Bar */}
-      <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-        <div 
-          className={`h-full rounded-full transition-all duration-500 ${
-            isCompleted ? 'bg-kidoova-accent' : 'bg-kidoova-yellow'
-          }`}
-          style={{ width: isCompleted ? '100%' : '0%' }}
-        />
-      </div>
-
-      {/* Action Button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className={`
-          w-full px-4 py-2 rounded-lg font-medium text-white
-          ${isCompleted 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors'
-          }
-        `}
-        disabled={isCompleted}
-      >
-        {isCompleted ? 'Completed' : isExpanded ? 'Show Less' : 'Start Challenge'}
-      </button>
-
-      {/* Expanded Content */}
-      {isExpanded && !isCompleted && (
-        <div className="space-y-4 pt-4 border-t border-gray-100">
-          {/* Goal Section */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Your Goal</h4>
-            <p className="text-sm text-gray-600">{challenge.goal}</p>
-          </div>
-
-          {/* Steps Section */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Steps to Try</h4>
-            <ul className="space-y-2">
-              {(() => {
-                let stepsArray: string[];
-                if (typeof challenge.steps === 'string') {
-                  try {
-                    stepsArray = JSON.parse(challenge.steps);
-                  } catch (e) {
-                    stepsArray = [challenge.steps];
-                  }
-                } else {
-                  stepsArray = challenge.steps;
-                }
-                return stepsArray.map((step, index) => (
-                  <li key={index} className="flex items-start text-sm text-gray-600">
-                    <span className="flex-shrink-0 w-5 h-5 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1 text-xs">
-                      {index + 1}
-                    </span>
-                    <span>{step}</span>
-                  </li>
-                ));
-              })()}
-            </ul>
-          </div>
-
-          {/* Tip Section */}
-          {challenge.tip && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Helpful Tip</h4>
-              <p className="text-sm text-gray-600">{challenge.tip}</p>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow overflow-hidden">
+      <div className="p-4">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+              {challenge.title}
+            </h3>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(challenge.difficulty_level)} text-white`}>
+                Level {challenge.difficulty_level}
+              </span>
+              {Boolean(challenge.is_completed) ? (
+                <span className="inline-flex items-center text-green-600 text-sm">
+                  <CheckCircleSolidIcon className="w-4 h-4 mr-1" />
+                  Completed
+                </span>
+              ) : null}
             </div>
-          )}
-
-          {/* Example Dialogue */}
-          {challenge.example_dialogue && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Try Saying This</h4>
-              <p className="text-sm text-gray-600 italic">"{challenge.example_dialogue}"</p>
-            </div>
-          )}
-
-          {/* Reflection Input */}
-          <div>
-            <textarea
-              value={reflection}
-              onChange={(e) => setReflection(e.target.value)}
-              placeholder="Add a reflection note..."
-              className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
-            />
           </div>
-
-          {/* Complete Button */}
           <button
-            onClick={handleMarkComplete}
-            disabled={isCompleting}
-            className={`
-              w-full px-4 py-2 rounded-lg font-medium text-white
-              ${isCompleting 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors'
-              }
-            `}
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="ml-4 text-gray-400 hover:text-gray-500"
           >
-            {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
+            {isExpanded ? (
+              <ChevronUpIcon className="w-5 h-5" />
+            ) : (
+              <ChevronDownIcon className="w-5 h-5" />
+            )}
           </button>
         </div>
-      )}
 
-      {/* Error Message */}
-      {error && (
-        <div className="text-red-600 text-sm text-center">
-          {error}
+        {/* Progress Bar */}
+        <div className="mt-4">
+          <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 ease-out ${
+                Boolean(challenge.is_completed) ? 'bg-green-500' : 'bg-yellow-500'
+              }`}
+              style={{ width: Boolean(challenge.is_completed) ? '100%' : '0%' }}
+            />
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="mt-4">
+          <button
+            onClick={handleStartChallenge}
+            disabled={isCompleting || Boolean(challenge.is_completed)}
+            className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+              Boolean(challenge.is_completed)
+                ? 'bg-green-100 text-green-700 cursor-default'
+                : isCompleting
+                ? 'bg-gray-100 text-gray-500 cursor-wait'
+                : 'bg-kidoova-accent text-white hover:bg-kidoova-accent/90'
+            }`}
+          >
+            {Boolean(challenge.is_completed) ? (
+              <span className="flex items-center justify-center">
+                <CheckCircleIcon className="w-5 h-5 mr-2" />
+                Completed
+              </span>
+            ) : isCompleting ? (
+              'Completing...'
+            ) : (
+              'Start Challenge'
+            )}
+          </button>
+          {error && (
+            <p className="mt-2 text-sm text-red-600">{error}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Expandable Content */}
+      {isExpanded && (
+        <div className="px-4 pb-4 space-y-4">
+          <div className="pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-900">Goal</h4>
+            <p className="mt-1 text-sm text-gray-600">{challenge.goal}</p>
+          </div>
+
+          {Array.isArray(challenge.steps) && challenge.steps.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium text-gray-900">Steps to Try</h4>
+              <ul className="mt-1 space-y-2">
+                {challenge.steps.map((step, index) => (
+                  <li key={index} className="text-sm text-gray-600 flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {challenge.tip && (
+            <div>
+              <h4 className="text-sm font-medium text-gray-900">Helpful Tip</h4>
+              <p className="mt-1 text-sm text-gray-600">{challenge.tip}</p>
+            </div>
+          )}
+
+          {challenge.example_dialogue && (
+            <div>
+              <h4 className="text-sm font-medium text-gray-900">Example Dialogue</h4>
+              <p className="mt-1 text-sm text-gray-600">{challenge.example_dialogue}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
