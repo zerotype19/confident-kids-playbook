@@ -77,13 +77,13 @@ export async function onRequest(context: { request: Request; env: Env }) {
     const logId = uuidv4();
     await env.DB.prepare(`
       INSERT INTO challenge_logs (id, child_id, challenge_id, completed_at, reflection, mood_rating)
-      VALUES (?, ?, ?, datetime('now'), ?, ?)
+      VALUES (?, ?, ?, datetime('now'), ?, COALESCE(?, 0))
     `).bind(
       logId,
       body.child_id,
       body.challenge_id,
       body.reflection || null,
-      body.mood_rating || 0
+      body.mood_rating
     ).run();
 
     // Evaluate and grant rewards
