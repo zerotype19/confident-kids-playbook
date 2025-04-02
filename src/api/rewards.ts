@@ -59,14 +59,33 @@ export async function getRewardsAndProgress(c: Context) {
 
     // Get weekly challenges count directly
     const weeklyChallengesResult = await db.prepare(`
-      SELECT COUNT(*) as count
+      SELECT 
+        COUNT(*) as count,
+        date('now', 'weekday 0') as week_start,
+        date('now') as current_date
       FROM challenge_logs
       WHERE child_id = ? 
       AND completed = 1
-      AND completed_at >= datetime('now', 'weekday 0')
-    `).bind(childId).first<{ count: number }>();
+      AND date(completed_at) >= date('now', 'weekday 0')
+    `).bind(childId).first<{ count: number; week_start: string; current_date: string }>();
     
-    console.log('Direct weekly challenges count:', weeklyChallengesResult);
+    console.log('Direct weekly challenges count:', {
+      result: weeklyChallengesResult,
+      count: weeklyChallengesResult?.count,
+      weekStart: weeklyChallengesResult?.week_start,
+      currentDate: weeklyChallengesResult?.current_date
+    });
+
+    // Also get a raw count for verification
+    const rawCount = await db.prepare(`
+      SELECT COUNT(*) as count
+      FROM challenge_logs
+      WHERE child_id = ?
+      AND completed = 1
+      AND date(completed_at) >= date('now', 'weekday 0')
+    `).bind(childId).first<{ count: number }>();
+
+    console.log('Raw weekly count:', rawCount);
 
     const progress = await db.prepare(`
       WITH challenge_progress AS (
@@ -113,8 +132,10 @@ export async function getRewardsAndProgress(c: Context) {
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
     console.log('Reward Engine: Weekly challenges calculation:', {
       childId,
-      weekStart: new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).toISOString(),
-      weeklyTotal: weeklyChallengesResult?.count || 0
+      weekStart: weeklyChallengesResult?.week_start,
+      currentDate: weeklyChallengesResult?.current_date,
+      weeklyTotal: weeklyChallengesResult?.count || 0,
+      rawCount: rawCount?.count || 0
     });
 
     // Return the response with weekly challenges count
