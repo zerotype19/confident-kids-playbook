@@ -18,6 +18,17 @@ export async function getRewardsAndProgress(c: Context) {
     // Fetch child's progress
     console.log('Reward Engine: Starting progress calculation for child:', childId);
     
+    // First, let's get the weekly challenges count directly
+    const weeklyChallenges = await db.prepare(`
+      SELECT COUNT(*) as count
+      FROM challenge_logs
+      WHERE child_id = ?
+      AND completed = 1
+      AND completed_at >= datetime('now', 'weekday 0')
+    `).bind(childId).first<{ count: number }>();
+
+    console.log('Reward Engine: Weekly challenges count:', weeklyChallenges);
+
     const progress = await db.prepare(`
       WITH challenge_progress AS (
         SELECT 
@@ -193,7 +204,7 @@ export async function getRewardsAndProgress(c: Context) {
             FROM debug_weekly
           )
         ) as progress_summary
-    `).bind(childId, childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+    `).bind(childId, childId, childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     // Log the progress summary before returning
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
@@ -202,7 +213,8 @@ export async function getRewardsAndProgress(c: Context) {
       weekStart: new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).toISOString(),
       weeklyTotal: progress?.progress_summary?.weekly_challenges || 0,
       weeklyDebug: progress?.progress_summary?.weekly_debug,
-      debugInfo: progress?.progress_summary?.debug_info
+      debugInfo: progress?.progress_summary?.debug_info,
+      directCount: weeklyChallenges?.count || 0
     });
 
     // Return the response
