@@ -8,6 +8,16 @@ interface RewardsOverviewProps {
 export default function RewardsOverview({ progress }: RewardsOverviewProps) {
   if (!progress) return null;
 
+  console.log('RewardsOverview: Progress data:', {
+    total_challenges: progress.milestones_completed,
+    weekly_challenges: progress.weekly_challenges,
+    current_streak: progress.current_streak,
+    longest_streak: progress.longest_streak,
+    pillar_progress: progress.pillar_progress,
+    milestone_progress: progress.milestone_progress,
+    next_reward: progress.next_reward
+  });
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
       <h2 className="text-xl font-heading">Overview</h2>

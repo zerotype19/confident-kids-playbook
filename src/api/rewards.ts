@@ -75,7 +75,15 @@ export async function getRewardsAndProgress(c: Context) {
           GROUP_CONCAT(DISTINCT completed_at) as unique_all_completed_dates,
           datetime('now', 'weekday 0') as week_start_datetime,
           datetime('now') as current_datetime,
-          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0')) as datetime_comparison_results
+          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0')) as datetime_comparison_results,
+          GROUP_CONCAT(DISTINCT child_id) as child_ids,
+          GROUP_CONCAT(DISTINCT challenge_id) as challenge_ids,
+          GROUP_CONCAT(DISTINCT date(completed_at)) as all_dates,
+          GROUP_CONCAT(DISTINCT completed_at) as all_raw_dates,
+          GROUP_CONCAT(DISTINCT date(completed_at) >= date('now', 'weekday 0')) as all_date_comparison_results,
+          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0')) as all_datetime_comparison_results,
+          GROUP_CONCAT(DISTINCT date(completed_at) >= date('now', 'weekday 0', '-7 days')) as last_week_comparison_results,
+          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0', '-7 days')) as last_week_datetime_comparison_results
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -143,6 +151,14 @@ export async function getRewardsAndProgress(c: Context) {
               'week_start_datetime', week_start_datetime,
               'current_datetime', current_datetime,
               'datetime_comparison_results', datetime_comparison_results,
+              'child_ids', child_ids,
+              'challenge_ids', challenge_ids,
+              'all_dates', all_dates,
+              'all_raw_dates', all_raw_dates,
+              'all_date_comparison_results', all_date_comparison_results,
+              'all_datetime_comparison_results', all_datetime_comparison_results,
+              'last_week_comparison_results', last_week_comparison_results,
+              'last_week_datetime_comparison_results', last_week_datetime_comparison_results,
               'sql_query', 'SELECT COUNT(*) as completed FROM challenge_logs WHERE child_id = ? AND completed = 1 AND completed_at >= datetime("now", "weekday 0")'
             )
             FROM weekly_challenges
