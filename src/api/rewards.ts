@@ -112,7 +112,7 @@ export async function getRewardsAndProgress(c: Context) {
       )
       SELECT 
         json_object(
-          'milestones_completed', (SELECT completed FROM milestone_progress),
+          'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
           'weekly_challenges', COALESCE((SELECT count FROM weekly_progress), 0),
