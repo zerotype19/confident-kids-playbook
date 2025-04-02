@@ -201,7 +201,7 @@ export async function getRewardsAndProgress(c: Context) {
       }
     };
 
-    console.log('Reward Engine: Final response:', response);
+    console.log('Reward Engine: Final response:', JSON.stringify(response, null, 2));
     return c.json(response);
   } catch (error) {
     console.error('Error fetching rewards and progress:', error);
