@@ -95,8 +95,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
              CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
-        AND cl.child_id = ? 
-        AND date(cl.completed_at) = date('now')
+        AND cl.child_id = ?
       WHERE REPLACE(REPLACE(REPLACE(c.age_range, '–', '-'), '—', '-'), ' ', '') = 
             REPLACE(REPLACE(REPLACE(?, '–', '-'), '—', '-'), ' ', '')
       ORDER BY c.pillar_id, c.difficulty_level
