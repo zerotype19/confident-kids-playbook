@@ -16,7 +16,6 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
-      external: ['@heroicons/react'],
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'logo.png') {
@@ -30,7 +29,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@types': path.resolve(__dirname, '../types')
+      '@types': path.resolve(__dirname, '../types'),
+      '@heroicons/react': path.resolve(__dirname, 'node_modules/@heroicons/react')
     }
   },
   publicDir: 'public'
