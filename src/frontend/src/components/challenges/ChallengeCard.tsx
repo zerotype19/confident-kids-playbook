@@ -21,10 +21,16 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
     setIsCompleting(true);
     setError(null);
     try {
-      await onComplete(Number(challenge.id));
+      // Ensure challenge.id is a number before passing it
+      const challengeId = parseInt(challenge.id.toString(), 10);
+      if (isNaN(challengeId)) {
+        throw new Error('Invalid challenge ID');
+      }
+      await onComplete(challengeId);
     } catch (err) {
       setError('Failed to mark challenge as complete');
       console.error('Error completing challenge:', err);
+      setIsCompleting(false); // Reset the completing state on error
     }
   };
 

@@ -173,6 +173,10 @@ export default function AllChallengesPage() {
         throw new Error('No authentication token found');
       }
 
+      if (!selectedChild?.id) {
+        throw new Error('No child selected');
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/challenges/${challengeId}/complete`,
         {
@@ -181,7 +185,7 @@ export default function AllChallengesPage() {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ child_id: selectedChild?.id })
+          body: JSON.stringify({ child_id: selectedChild.id })
         }
       );
 
@@ -192,7 +196,7 @@ export default function AllChallengesPage() {
       // Update the challenge in the local state
       setChallenges(prevChallenges => 
         prevChallenges.map(challenge => 
-          Number(challenge.id) === challengeId 
+          parseInt(challenge.id.toString(), 10) === challengeId 
             ? { ...challenge, is_completed: 1 }
             : challenge
         )
@@ -204,7 +208,7 @@ export default function AllChallengesPage() {
           ...group,
           titles: group.titles.filter(title => 
             !challenges.find(c => 
-              Number(c.id) === challengeId && c.title === title
+              parseInt(c.id.toString(), 10) === challengeId && c.title === title
             )
           )
         })).filter(group => group.titles.length > 0)
