@@ -6,14 +6,22 @@ export default defineConfig({
   plugins: [react()],
   root: './',
   optimizeDeps: {
-    include: ['@heroicons/react']
+    include: [
+      '@heroicons/react',
+      '@heroicons/react/24/solid',
+      '@heroicons/react/24/outline'
+    ]
   },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     copyPublicDir: true,
     rollupOptions: {
-      external: ['@heroicons/react'],
+      external: [
+        '@heroicons/react',
+        '@heroicons/react/24/solid',
+        '@heroicons/react/24/outline'
+      ],
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
@@ -31,7 +39,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@types': path.resolve(__dirname, '../types'),
-      '@heroicons/react': path.resolve(__dirname, 'node_modules/@heroicons/react')
+      '@heroicons/react': path.resolve(__dirname, 'node_modules/@heroicons/react'),
+      '@heroicons/react/24/solid': path.resolve(__dirname, 'node_modules/@heroicons/react/24/solid'),
+      '@heroicons/react/24/outline': path.resolve(__dirname, 'node_modules/@heroicons/react/24/outline')
     }
   },
   publicDir: 'public'
