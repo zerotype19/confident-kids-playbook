@@ -59,20 +59,16 @@ export async function getRewardsAndProgress(c: Context) {
 
     // Get weekly challenges count directly
     const weeklyCount = await db.prepare(`
-      SELECT 
-        COUNT(*) as count,
-        date('now', 'weekday 0') as week_start,
-        date('now') as current_date
+      SELECT COUNT(*) as count
       FROM challenge_logs
-      WHERE child_id = ? 
+      WHERE child_id = ?
       AND completed = 1
       AND date(completed_at) >= date('now', 'weekday 0')
-    `).bind(childId).first<{ count: number; week_start: string; current_date: string }>();
+    `).bind(childId).first<{ count: number }>();
 
     console.log('Weekly challenges count:', {
       count: weeklyCount?.count,
-      weekStart: weeklyCount?.week_start,
-      currentDate: weeklyCount?.current_date
+      childId
     });
 
     // Also get a raw count for verification
@@ -113,13 +109,6 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', (
-            SELECT COUNT(*)
-            FROM challenge_logs
-            WHERE child_id = ?
-            AND completed = 1
-            AND date(completed_at) >= date('now', 'weekday 0')
-          ),
           'pillar_progress', json_object(
             '1', json_object(
               'completed', COALESCE(SUM(CASE WHEN cp.pillar_id = 1 THEN cp.completed ELSE 0 END), 0),
@@ -174,7 +163,7 @@ export async function getRewardsAndProgress(c: Context) {
           )
         ) as progress_summary
       FROM challenge_progress cp
-    `).bind(childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+    `).bind(childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     // Log the progress summary before returning
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
