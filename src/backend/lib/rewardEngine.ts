@@ -151,6 +151,9 @@ export async function getChildProgress(childId: string, env: Env) {
     throw new Error('Child not found');
   }
 
+  // Normalize the age range format (replace en dash with regular hyphen)
+  const normalizedAgeRange = age_range.replace(/–/g, '-');
+
   // Get total completed challenges
   const { total } = await env.DB.prepare(`
     SELECT COUNT(*) as total 
@@ -230,18 +233,19 @@ export async function getChildProgress(childId: string, env: Env) {
     LEFT JOIN completed_challenges cc ON p.id = cc.pillar_id
     WHERE p.id IN (1, 2, 3, 4, 5)
     ORDER BY p.id
-  `).bind(age_range, childId).all<{ pillar_id: number; pillar_name: string; completed: number; total: number }>();
+  `).bind(normalizedAgeRange, childId).all<{ pillar_id: number; pillar_name: string; completed: number; total: number }>();
 
   // Debug logging
   console.log('Reward Engine: Debug info:', {
     age_range,
+    normalized_age_range: normalizedAgeRange,
     child_id: childId,
     raw_challenges: await env.DB.prepare(`
       SELECT pillar_id, COUNT(*) as total
       FROM challenges
       WHERE age_range = ?
       GROUP BY pillar_id
-    `).bind(age_range).all(),
+    `).bind(normalizedAgeRange).all(),
     raw_completed: await env.DB.prepare(`
       SELECT 
         c.pillar_id,
