@@ -104,6 +104,9 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
 
     // Insert new log
+    const logId = uuidv4();
+    console.log('Generated log ID:', logId);
+    
     const insertResult = await env.DB.prepare(`
       INSERT INTO challenge_logs (
         id,
@@ -112,10 +115,11 @@ export async function onRequest(context: { request: Request; env: Env }) {
         completed_at
       ) VALUES (?, ?, ?, datetime('now'))
     `)
-      .bind(uuidv4(), body.child_id, body.challenge_id)
+      .bind(logId, body.child_id, body.challenge_id)
       .run();
 
     if (!insertResult.success) {
+      console.error('Insert failed:', insertResult);
       throw new Error('Failed to insert challenge log');
     }
 
