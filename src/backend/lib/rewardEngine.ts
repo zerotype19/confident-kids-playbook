@@ -229,9 +229,6 @@ export async function getChildProgress(childId: string, env: Env) {
     GROUP BY c.pillar_id
   `).bind(normalizedAgeRange, childId).all<{ pillar_id: number; completed: number; total: number }>();
 
-  // Get next reward progress
-  const nextReward = await getNextRewardProgress(childId, env);
-
   // Debug logging
   console.log('Reward Engine: Debug info:', {
     age_range,
@@ -280,7 +277,6 @@ export async function getChildProgress(childId: string, env: Env) {
     longest_streak: longest_streak || 0,
     weekly_challenges: weekly_challenges || 0,
     pillar_progress: transformedPillarProgress,
-    milestone_progress: milestoneProgress,
-    next_reward
+    milestone_progress: milestoneProgress
   };
 } 
