@@ -64,7 +64,7 @@ export async function getRewardsAndProgress(c: Context) {
       WHERE child_id = ? 
       AND completed = 1
       AND completed_at >= datetime('now', 'weekday 0')
-    `).bind(childId).first();
+    `).bind(childId).first<{ count: number }>();
     
     console.log('Direct weekly challenges count:', weeklyChallengesResult);
 
