@@ -121,12 +121,44 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', (SELECT count FROM weekly_progress),
+          'weekly_challenges', COALESCE((SELECT count FROM weekly_progress), 0),
           'pillar_progress', json_object(
-            'mindfulness', mindfulness_progress,
-            'gratitude', gratitude_progress,
-            'growth', growth_progress,
-            'kindness', kindness_progress
+            '1', json_object(
+              'completed', COALESCE(SUM(CASE WHEN cp.pillar_id = 1 THEN cp.completed ELSE 0 END), 0),
+              'total', COALESCE(SUM(CASE WHEN cp.pillar_id = 1 THEN cp.total ELSE 0 END), 0),
+              'percentage', CASE 
+                WHEN COALESCE(SUM(CASE WHEN cp.pillar_id = 1 THEN cp.total ELSE 0 END), 0) = 0 THEN 0 
+                ELSE (COALESCE(SUM(CASE WHEN cp.pillar_id = 1 THEN cp.completed ELSE 0 END), 0) * 100.0 / 
+                      COALESCE(SUM(CASE WHEN cp.pillar_id = 1 THEN cp.total ELSE 0 END), 0))
+              END
+            ),
+            '2', json_object(
+              'completed', COALESCE(SUM(CASE WHEN cp.pillar_id = 2 THEN cp.completed ELSE 0 END), 0),
+              'total', COALESCE(SUM(CASE WHEN cp.pillar_id = 2 THEN cp.total ELSE 0 END), 0),
+              'percentage', CASE 
+                WHEN COALESCE(SUM(CASE WHEN cp.pillar_id = 2 THEN cp.total ELSE 0 END), 0) = 0 THEN 0 
+                ELSE (COALESCE(SUM(CASE WHEN cp.pillar_id = 2 THEN cp.completed ELSE 0 END), 0) * 100.0 / 
+                      COALESCE(SUM(CASE WHEN cp.pillar_id = 2 THEN cp.total ELSE 0 END), 0))
+              END
+            ),
+            '3', json_object(
+              'completed', COALESCE(SUM(CASE WHEN cp.pillar_id = 3 THEN cp.completed ELSE 0 END), 0),
+              'total', COALESCE(SUM(CASE WHEN cp.pillar_id = 3 THEN cp.total ELSE 0 END), 0),
+              'percentage', CASE 
+                WHEN COALESCE(SUM(CASE WHEN cp.pillar_id = 3 THEN cp.total ELSE 0 END), 0) = 0 THEN 0 
+                ELSE (COALESCE(SUM(CASE WHEN cp.pillar_id = 3 THEN cp.completed ELSE 0 END), 0) * 100.0 / 
+                      COALESCE(SUM(CASE WHEN cp.pillar_id = 3 THEN cp.total ELSE 0 END), 0))
+              END
+            ),
+            '4', json_object(
+              'completed', COALESCE(SUM(CASE WHEN cp.pillar_id = 4 THEN cp.completed ELSE 0 END), 0),
+              'total', COALESCE(SUM(CASE WHEN cp.pillar_id = 4 THEN cp.total ELSE 0 END), 0),
+              'percentage', CASE 
+                WHEN COALESCE(SUM(CASE WHEN cp.pillar_id = 4 THEN cp.total ELSE 0 END), 0) = 0 THEN 0 
+                ELSE (COALESCE(SUM(CASE WHEN cp.pillar_id = 4 THEN cp.completed ELSE 0 END), 0) * 100.0 / 
+                      COALESCE(SUM(CASE WHEN cp.pillar_id = 4 THEN cp.total ELSE 0 END), 0))
+              END
+            )
           ),
           'milestone_progress', json_object(
             'current', (SELECT completed FROM milestone_progress),
@@ -134,7 +166,8 @@ export async function getRewardsAndProgress(c: Context) {
             'percentage', (SELECT completed FROM milestone_progress) * 100.0 / 20
           )
         ) as progress_summary
-    `).bind(childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+      FROM challenge_progress cp
+    `).bind(childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     // Log the progress summary before returning
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
