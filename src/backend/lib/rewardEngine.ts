@@ -79,7 +79,7 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
   
   console.log('Reward Engine: Pillar counts:', pillarCounts);
   
-  for (const { pillar_id, count } of pillarCounts) {
+  for (const { pillar_id, count } of pillarCounts.results || []) {
     if (count >= 3) {
       await grantRewardIfNew(env.DB, childId, 'pillar', 3, pillar_id);
     }
