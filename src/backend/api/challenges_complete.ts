@@ -1,27 +1,21 @@
 // src/backend/api/challenges_complete.ts
 
-import { verifyToken } from '../auth';
-import { getDB } from '../db';
+import { verifyJWT } from '../auth';
+import { DB } from '../db';
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   try {
     // Verify authentication
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Missing or invalid authorization header' }), {
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No authorization header' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const token = authHeader.split(' ')[1];
-    const decodedToken = await verifyToken(token, env);
-    if (!decodedToken) {
-      return new Response(JSON.stringify({ error: 'Invalid token' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    const token = authHeader.replace('Bearer ', '');
+    const decodedToken = await verifyJWT(token, env);
 
     // Parse request body
     const body = await request.json();
@@ -34,11 +28,8 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    // Get database connection
-    const db = getDB(env);
-
     // Verify child belongs to user's family
-    const childResult = await db.prepare(`
+    const childResult = await env.DB.prepare(`
       SELECT c.*, f.id as family_id
       FROM children c
       JOIN families f ON c.family_id = f.id
@@ -55,7 +46,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     // Check if challenge exists and is not already completed
-    const challengeResult = await db.prepare(`
+    const challengeResult = await env.DB.prepare(`
       SELECT * FROM challenges 
       WHERE id = ? AND id NOT IN (
         SELECT challenge_id FROM challenge_logs WHERE child_id = ?
@@ -70,31 +61,42 @@ export async function onRequestPost({ request, env }) {
     }
 
     // Insert challenge completion log
-    await db.prepare(`
+    await env.DB.prepare(`
       INSERT INTO challenge_logs (child_id, challenge_id, completed_at)
       VALUES (?, ?, datetime('now'))
     `).bind(child_id, challenge_id).run();
 
-    // Get updated streak and coins
-    const statsResult = await db.prepare(`
+    // Calculate updated stats
+    const statsResult = await env.DB.prepare(`
+      WITH streak_info AS (
+        SELECT 
+          COUNT(*) as total_completed,
+          MAX(completed_at) as last_completed,
+          COUNT(DISTINCT date(completed_at)) as unique_days
+        FROM challenge_logs
+        WHERE child_id = ?
+      )
       SELECT 
-        (SELECT COUNT(*) FROM challenge_logs 
-         WHERE child_id = ? AND completed_at >= date('now', '-7 days')) as current_streak,
-        (SELECT COALESCE(SUM(coins_earned), 0) FROM challenge_logs 
-         WHERE child_id = ?) as total_coins
+        total_completed,
+        unique_days as current_streak,
+        (SELECT COUNT(*) FROM challenge_logs WHERE child_id = ?) as total_coins
+      FROM streak_info
     `).bind(child_id, child_id).first();
 
     return new Response(JSON.stringify({
-      success: true,
-      message: 'Challenge marked complete',
-      new_streak: statsResult.current_streak,
-      new_coins: statsResult.total_coins
+      message: 'Challenge marked as complete',
+      stats: statsResult
     }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
+
   } catch (error) {
     console.error('Error completing challenge:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Failed to complete challenge',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
