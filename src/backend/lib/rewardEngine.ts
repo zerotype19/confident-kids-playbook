@@ -209,6 +209,7 @@ export async function getChildProgress(childId: string, env: Env) {
         COUNT(*) as total
       FROM challenges
       WHERE age_range = ?
+        AND pillar_id IS NOT NULL
       GROUP BY pillar_id
     ),
     completed_challenges AS (
@@ -218,6 +219,7 @@ export async function getChildProgress(childId: string, env: Env) {
       FROM challenge_logs cl
       JOIN challenges c ON cl.challenge_id = c.id
       WHERE cl.child_id = ?
+        AND c.pillar_id IS NOT NULL
       GROUP BY c.pillar_id
     )
     SELECT 
@@ -228,7 +230,6 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM pillars p
     LEFT JOIN pillar_totals pt ON p.id = pt.pillar_id
     LEFT JOIN completed_challenges cc ON p.id = cc.pillar_id
-    WHERE p.id IN (1, 2, 3, 4, 5)
     ORDER BY p.id
   `).bind(age_range, childId).all<{ pillar_id: number; pillar_name: string; completed: number; total: number }>();
 
@@ -240,6 +241,7 @@ export async function getChildProgress(childId: string, env: Env) {
       SELECT pillar_id, COUNT(*) as total
       FROM challenges
       WHERE age_range = ?
+        AND pillar_id IS NOT NULL
       GROUP BY pillar_id
     `).bind(age_range).all(),
     raw_completed: await env.DB.prepare(`
@@ -249,6 +251,7 @@ export async function getChildProgress(childId: string, env: Env) {
       FROM challenge_logs cl
       JOIN challenges c ON cl.challenge_id = c.id
       WHERE cl.child_id = ?
+        AND c.pillar_id IS NOT NULL
       GROUP BY c.pillar_id
     `).bind(childId).all(),
     results: pillarProgress.results
