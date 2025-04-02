@@ -1,20 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import ChallengeCard from '../components/challenges/ChallengeCard';
-import ChallengeFilters from '../components/challenges/ChallengeFilters';
 import ChildSelector from '../components/dashboard/ChildSelector';
-import { Child, Challenge, PillarId } from '../types';
+import { Child, Challenge, PILLAR_NAMES } from '../types';
 import { useChildContext } from '../contexts/ChildContext';
+import Icon from '../components/common/Icon';
+
+interface ChallengeGroup {
+  pillar_id: number;
+  age_range: string;
+  titles: string[];
+}
+
+interface ChallengeFilters {
+  pillarId: number | null;
+  ageRange: string | null;
+  title: string | null;
+  showCompleted: boolean;
+}
 
 export default function AllChallengesPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPillar, setSelectedPillar] = useState<PillarId | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'completed'>('newest');
+  const [filters, setFilters] = useState<ChallengeFilters>({
+    pillarId: null,
+    ageRange: null,
+    title: null,
+    showCompleted: false
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const challengesPerPage = 12;
 
@@ -53,7 +69,7 @@ export default function AllChallengesPage() {
     fetchChildren();
   }, [setSelectedChild, selectedChild]);
 
-  // Fetch challenges when selected child changes
+  // Fetch challenges and group them by pillar and age range
   useEffect(() => {
     const fetchChallenges = async () => {
       if (!selectedChild) return;
@@ -82,6 +98,29 @@ export default function AllChallengesPage() {
 
         const data = await response.json();
         setChallenges(data);
+
+        // Group challenges by pillar and age range
+        const groups = data.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
+          const existingGroup = acc.find(
+            group => group.pillar_id === challenge.pillar_id && group.age_range === challenge.age_range
+          );
+
+          if (existingGroup) {
+            if (!existingGroup.titles.includes(challenge.title)) {
+              existingGroup.titles.push(challenge.title);
+            }
+          } else {
+            acc.push({
+              pillar_id: challenge.pillar_id,
+              age_range: challenge.age_range,
+              titles: [challenge.title]
+            });
+          }
+
+          return acc;
+        }, []);
+
+        setChallengeGroups(groups);
       } catch (err) {
         console.error('Error fetching challenges:', err);
         setError('Failed to load challenges');
@@ -93,45 +132,36 @@ export default function AllChallengesPage() {
     fetchChallenges();
   }, [selectedChild]);
 
-  // Filter and sort challenges
-  const filteredChallenges = challenges
-    .filter(challenge => {
-      if (selectedPillar && challenge.pillar_id !== Number(selectedPillar)) return false;
-      if (selectedDifficulty && challenge.difficulty_level !== selectedDifficulty) return false;
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          challenge.title.toLowerCase().includes(searchLower) ||
-          challenge.description.toLowerCase().includes(searchLower)
-        );
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case 'popular':
-          return b.is_completed - a.is_completed;
-        case 'completed':
-          return b.is_completed - a.is_completed;
-        default:
-          return 0;
-      }
-    });
+  // Filter challenges based on selected filters
+  const filteredChallenges = challenges.filter(challenge => {
+    if (filters.pillarId && challenge.pillar_id !== filters.pillarId) return false;
+    if (filters.ageRange && challenge.age_range !== filters.ageRange) return false;
+    if (filters.title && challenge.title !== filters.title) return false;
+    if (!filters.showCompleted && challenge.is_completed) return false;
+    return true;
+  });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredChallenges.length / challengesPerPage);
-  const paginatedChallenges = filteredChallenges.slice(
-    (currentPage - 1) * challengesPerPage,
-    currentPage * challengesPerPage
-  );
+  // Get unique age ranges from challenge groups
+  const ageRanges = Array.from(new Set(challengeGroups.map(group => group.age_range)));
+
+  // Get unique pillar IDs from challenge groups
+  const pillarIds = Array.from(new Set(challengeGroups.map(group => group.pillar_id)));
+
+  // Get titles for selected pillar and age range
+  const availableTitles = challengeGroups
+    .find(group => 
+      group.pillar_id === filters.pillarId && 
+      group.age_range === filters.ageRange
+    )?.titles || [];
 
   // Clear all filters
   const handleClearFilters = () => {
-    setSelectedPillar(null);
-    setSelectedDifficulty(null);
-    setSearchTerm('');
+    setFilters({
+      pillarId: null,
+      ageRange: null,
+      title: null,
+      showCompleted: false
+    });
     setCurrentPage(1);
   };
 
@@ -167,38 +197,112 @@ export default function AllChallengesPage() {
       {selectedChild ? (
         <>
           {/* Filters */}
-          <ChallengeFilters
-            selectedPillars={selectedPillar ? [selectedPillar] : []}
-            selectedDifficulties={selectedDifficulty ? [selectedDifficulty.toString()] : []}
-            onPillarChange={(pillarId) => setSelectedPillar(pillarId)}
-            onDifficultyChange={(difficulty) => setSelectedDifficulty(parseInt(difficulty))}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onClearFilters={handleClearFilters}
-          />
+          <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Pillar Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pillar
+                </label>
+                <select
+                  value={filters.pillarId || ''}
+                  onChange={(e) => setFilters((prev: ChallengeFilters) => ({
+                    ...prev,
+                    pillarId: e.target.value ? Number(e.target.value) : null,
+                    title: null // Reset title when pillar changes
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
+                >
+                  <option value="">All Pillars</option>
+                  {pillarIds.map(id => (
+                    <option key={id} value={id}>
+                      {PILLAR_NAMES[id as keyof typeof PILLAR_NAMES]}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Sort Options */}
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">Sort by:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'newest' | 'popular' | 'completed')}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
-            >
-              <option value="newest">Newest First</option>
-              <option value="popular">Most Popular</option>
-              <option value="completed">Most Completed</option>
-            </select>
+              {/* Age Range Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Age Range
+                </label>
+                <select
+                  value={filters.ageRange || ''}
+                  onChange={(e) => setFilters((prev: ChallengeFilters) => ({
+                    ...prev,
+                    ageRange: e.target.value || null,
+                    title: null // Reset title when age range changes
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
+                >
+                  <option value="">All Ages</option>
+                  {ageRanges.map(range => (
+                    <option key={range} value={range}>
+                      {range}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Title Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Challenge Title
+                </label>
+                <select
+                  value={filters.title || ''}
+                  onChange={(e) => setFilters((prev: ChallengeFilters) => ({
+                    ...prev,
+                    title: e.target.value || null
+                  }))}
+                  disabled={!filters.pillarId || !filters.ageRange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-kidoova-accent focus:border-transparent disabled:bg-gray-100"
+                >
+                  <option value="">Select a Challenge</option>
+                  {availableTitles.map((title: string) => (
+                    <option key={title} value={title}>
+                      {title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Completion Filter */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setFilters((prev: ChallengeFilters) => ({ ...prev, showCompleted: !prev.showCompleted }))}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  filters.showCompleted
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Icon name={filters.showCompleted ? 'check-circle' : 'x-circle'} className="w-4 h-4 mr-2 inline" />
+                {filters.showCompleted ? 'Show All Challenges' : 'Show Incomplete Only'}
+              </button>
+
+              {(filters.pillarId || filters.ageRange || filters.title || filters.showCompleted) && (
+                <button
+                  onClick={handleClearFilters}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                >
+                  <Icon name="x-mark" className="w-4 h-4 mr-2 inline" />
+                  Clear Filters
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Challenges Grid */}
-          {paginatedChallenges.length === 0 ? (
+          {filteredChallenges.length === 0 ? (
             <div className="text-center py-8 text-gray-600">
               No challenges found for the selected filters.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {paginatedChallenges.map((challenge) => (
+            <div className="grid grid-cols-1 gap-6">
+              {filteredChallenges.map((challenge) => (
                 <ChallengeCard
                   key={challenge.id}
                   challenge={challenge}
@@ -208,29 +312,6 @@ export default function AllChallengesPage() {
                   }}
                 />
               ))}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-8">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-700">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
             </div>
           )}
         </>
