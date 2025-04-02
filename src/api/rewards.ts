@@ -1,6 +1,27 @@
 import { Context } from 'hono';
-import { db } from '../db';
+import { db } from '@db';
 import { Reward, ProgressSummary } from '../frontend/src/types';
+
+// Add type declarations for missing modules
+declare module 'hono' {
+  export interface Context {
+    req: {
+      query: (key: string) => string | undefined;
+    };
+    json: (data: any, status?: number) => Response;
+  }
+}
+
+declare module '../db' {
+  export const db: {
+    prepare: (sql: string) => {
+      bind: (...params: any[]) => {
+        first: <T>() => Promise<T | null>;
+        all: <T>() => Promise<{ results: T[] }>;
+      };
+    };
+  };
+}
 
 export async function getRewardsAndProgress(c: Context) {
   try {
