@@ -106,26 +106,40 @@ export async function onRequest(context: { request: Request; env: Env }) {
     // Insert new log
     const logId = uuidv4();
     console.log('Generated log ID:', logId);
+    console.log('Inserting with values:', {
+      logId,
+      childId: body.child_id,
+      challengeId: body.challenge_id
+    });
     
     const insertResult = await env.DB.prepare(`
       INSERT INTO challenge_logs (
         id,
         child_id,
-        challenge_id
-      ) VALUES (?, ?, ?)
+        challenge_id,
+        completed_at
+      ) VALUES (?, ?, ?, datetime('now'))
     `)
       .bind(logId, body.child_id, body.challenge_id)
       .run();
 
     if (!insertResult.success) {
       console.error('Insert failed:', insertResult);
-      throw new Error('Failed to insert challenge log');
+      return new Response(JSON.stringify({ error: 'Failed to log challenge completion' }), {
+        status: 500,
+        headers: corsHeaders()
+      });
     }
 
+    console.log('Challenge log inserted successfully:', insertResult);
+
     // Evaluate and grant rewards
+    console.log('Starting reward evaluation...');
     await evaluateAndGrantRewards(body.child_id, env);
+    console.log('Reward evaluation complete');
 
     // Calculate updated stats
+    console.log('Calculating updated stats...');
     const statsResult = await env.DB.prepare(`
       WITH streak_info AS (
         SELECT 
@@ -141,6 +155,8 @@ export async function onRequest(context: { request: Request; env: Env }) {
         (SELECT COUNT(*) FROM challenge_logs WHERE child_id = ?) as total_coins
       FROM streak_info
     `).bind(body.child_id, body.child_id).first();
+
+    console.log('Stats calculated:', statsResult);
 
     return new Response(JSON.stringify({
       success: true,

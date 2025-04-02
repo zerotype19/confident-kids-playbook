@@ -21,68 +21,76 @@ interface ChildReward {
 export async function evaluateAndGrantRewards(childId: string, env: Env) {
   console.log('Reward Engine: Starting reward evaluation for child:', childId);
   
-  // 1. Check milestone rewards
-  const { total } = await env.DB.prepare(`
-    SELECT COUNT(*) as total 
-    FROM challenge_logs 
-    WHERE child_id = ?
-  `).bind(childId).first<{ total: number }>();
-  
-  console.log('Reward Engine: Total completed challenges:', total);
-  
-  const milestones = [5, 10, 20];
-  for (const value of milestones) {
-    if (total >= value) {
-      await grantRewardIfNew(env.DB, childId, 'milestone', value);
-    }
-  }
-
-  // 2. Check streak rewards
-  const { current_streak } = await env.DB.prepare(`
-    WITH RECURSIVE dates AS (
-      SELECT date(completed_at) as date
-      FROM challenge_logs
+  try {
+    // 1. Check milestone rewards
+    const { total } = await env.DB.prepare(`
+      SELECT COUNT(*) as total 
+      FROM challenge_logs 
       WHERE child_id = ?
-      ORDER BY completed_at DESC
-      LIMIT 1
-    ),
-    consecutive_days AS (
-      SELECT date, 1 as streak
-      FROM dates
-      UNION ALL
-      SELECT date(cl.completed_at), cd.streak + 1
-      FROM challenge_logs cl
-      JOIN consecutive_days cd ON date(cl.completed_at) = date(cd.date, '-1 day')
-      WHERE cl.child_id = ?
-    )
-    SELECT MAX(streak) as current_streak
-    FROM consecutive_days
-  `).bind(childId, childId).first<{ current_streak: number }>();
-  
-  console.log('Reward Engine: Current streak:', current_streak);
-  
-  const streaks = [3, 5, 10];
-  for (const value of streaks) {
-    if (current_streak >= value) {
-      await grantRewardIfNew(env.DB, childId, 'streak', value);
+    `).bind(childId).first<{ total: number }>();
+    
+    console.log('Reward Engine: Total completed challenges:', total);
+    
+    const milestones = [5, 10, 20];
+    for (const value of milestones) {
+      console.log('Reward Engine: Checking milestone:', value);
+      if (total >= value) {
+        await grantRewardIfNew(env.DB, childId, 'milestone', value);
+      }
     }
-  }
 
-  // 3. Check pillar rewards
-  const pillarCounts = await env.DB.prepare(`
-    SELECT c.pillar_id, COUNT(*) as count
-    FROM challenge_logs cl
-    JOIN challenges c ON cl.challenge_id = c.id
-    WHERE cl.child_id = ?
-    GROUP BY c.pillar_id
-  `).bind(childId).all<{ pillar_id: number; count: number }>();
-  
-  console.log('Reward Engine: Pillar counts:', pillarCounts);
-  
-  for (const { pillar_id, count } of pillarCounts.results || []) {
-    if (count >= 3) {
-      await grantRewardIfNew(env.DB, childId, 'pillar', 3, pillar_id);
+    // 2. Check streak rewards
+    const { current_streak } = await env.DB.prepare(`
+      WITH RECURSIVE dates AS (
+        SELECT date(completed_at) as date
+        FROM challenge_logs
+        WHERE child_id = ?
+        ORDER BY completed_at DESC
+        LIMIT 1
+      ),
+      consecutive_days AS (
+        SELECT date, 1 as streak
+        FROM dates
+        UNION ALL
+        SELECT date(cl.completed_at), cd.streak + 1
+        FROM challenge_logs cl
+        JOIN consecutive_days cd ON date(cl.completed_at) = date(cd.date, '-1 day')
+        WHERE cl.child_id = ?
+      )
+      SELECT MAX(streak) as current_streak
+      FROM consecutive_days
+    `).bind(childId, childId).first<{ current_streak: number }>();
+    
+    console.log('Reward Engine: Current streak:', current_streak);
+    
+    const streaks = [3, 5, 10];
+    for (const value of streaks) {
+      console.log('Reward Engine: Checking streak:', value);
+      if (current_streak >= value) {
+        await grantRewardIfNew(env.DB, childId, 'streak', value);
+      }
     }
+
+    // 3. Check pillar rewards
+    const pillarCounts = await env.DB.prepare(`
+      SELECT c.pillar_id, COUNT(*) as count
+      FROM challenge_logs cl
+      JOIN challenges c ON cl.challenge_id = c.id
+      WHERE cl.child_id = ?
+      GROUP BY c.pillar_id
+    `).bind(childId).all<{ pillar_id: number; count: number }>();
+    
+    console.log('Reward Engine: Pillar counts:', pillarCounts);
+    
+    for (const { pillar_id, count } of pillarCounts.results || []) {
+      console.log('Reward Engine: Checking pillar:', pillar_id, 'count:', count);
+      if (count >= 3) {
+        await grantRewardIfNew(env.DB, childId, 'pillar', 3, pillar_id);
+      }
+    }
+  } catch (error) {
+    console.error('Reward Engine: Error during reward evaluation:', error);
+    throw error;
   }
 }
 
@@ -115,8 +123,8 @@ async function grantRewardIfNew(
   if (!alreadyGranted) {
     console.log('Reward Engine: Granting new reward:', reward.id);
     await db.prepare(`
-      INSERT INTO child_rewards (id, child_id, reward_id)
-      VALUES (?, ?, ?)
+      INSERT INTO child_rewards (id, child_id, reward_id, granted_at)
+      VALUES (?, ?, ?, datetime('now'))
     `).bind(uuidv4(), childId, reward.id).run();
   } else {
     console.log('Reward Engine: Reward already granted');
