@@ -58,7 +58,7 @@ export async function getRewardsAndProgress(c: Context) {
     });
 
     // Get weekly challenges count directly
-    const weeklyChallengesResult = await db.prepare(`
+    const weeklyCount = await db.prepare(`
       SELECT 
         COUNT(*) as count,
         date('now', 'weekday 0') as week_start,
@@ -68,12 +68,11 @@ export async function getRewardsAndProgress(c: Context) {
       AND completed = 1
       AND date(completed_at) >= date('now', 'weekday 0')
     `).bind(childId).first<{ count: number; week_start: string; current_date: string }>();
-    
-    console.log('Direct weekly challenges count:', {
-      result: weeklyChallengesResult,
-      count: weeklyChallengesResult?.count,
-      weekStart: weeklyChallengesResult?.week_start,
-      currentDate: weeklyChallengesResult?.current_date
+
+    console.log('Weekly challenges count:', {
+      count: weeklyCount?.count,
+      weekStart: weeklyCount?.week_start,
+      currentDate: weeklyCount?.current_date
     });
 
     // Also get a raw count for verification
@@ -181,9 +180,9 @@ export async function getRewardsAndProgress(c: Context) {
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
     console.log('Reward Engine: Weekly challenges calculation:', {
       childId,
-      weekStart: weeklyChallengesResult?.week_start,
-      currentDate: weeklyChallengesResult?.current_date,
-      weeklyTotal: weeklyChallengesResult?.count || 0,
+      weekStart: weeklyCount?.week_start,
+      currentDate: weeklyCount?.current_date,
+      weeklyTotal: weeklyCount?.count || 0,
       rawCount: rawCount?.count || 0
     });
 
@@ -195,7 +194,7 @@ export async function getRewardsAndProgress(c: Context) {
         total_challenges: progressSummary.total_challenges || 0,
         current_streak: progressSummary.current_streak || 0,
         longest_streak: progressSummary.longest_streak || 0,
-        weekly_challenges: progressSummary.weekly_challenges || 0,
+        weekly_challenges: weeklyCount?.count || 0,
         pillar_progress: progressSummary.pillar_progress || {},
         milestone_progress: progressSummary.milestone_progress || {
           current: 0,
