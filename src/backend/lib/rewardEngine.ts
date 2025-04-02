@@ -208,17 +208,30 @@ export async function getChildProgress(childId: string, env: Env) {
       FROM challenges
       WHERE age_range = ?
       GROUP BY pillar_id
+    ),
+    completed_challenges AS (
+      SELECT 
+        c.pillar_id,
+        COUNT(*) as completed
+      FROM challenge_logs cl
+      JOIN challenges c ON cl.challenge_id = c.id
+      WHERE cl.child_id = ?
+      GROUP BY c.pillar_id
     )
     SELECT 
-      c.pillar_id,
-      COUNT(*) as completed,
+      p.id as pillar_id,
+      COALESCE(cc.completed, 0) as completed,
       COALESCE(pt.total, 0) as total
-    FROM challenge_logs cl
-    JOIN challenges c ON cl.challenge_id = c.id
-    LEFT JOIN pillar_totals pt ON c.pillar_id = pt.pillar_id
-    WHERE cl.child_id = ?
-    GROUP BY c.pillar_id, pt.total
+    FROM pillars p
+    LEFT JOIN pillar_totals pt ON p.id = pt.pillar_id
+    LEFT JOIN completed_challenges cc ON p.id = cc.pillar_id
+    ORDER BY p.id
   `).bind(age_range, childId).all<{ pillar_id: number; completed: number; total: number }>();
+
+  console.log('Reward Engine: Pillar progress:', {
+    age_range,
+    results: pillarProgress.results
+  });
 
   // Calculate milestone progress
   const milestones = [5, 10, 20];
