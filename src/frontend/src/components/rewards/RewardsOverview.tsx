@@ -9,10 +9,10 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
   if (!progress) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-heading mb-6">Overview</h2>
+    <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+      <h2 className="text-xl font-heading">Overview</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Total Challenges Completed */}
         <div className="bg-kidoova-yellow/10 rounded-lg p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Challenges Completed</h3>
@@ -22,7 +22,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
               <div className="text-2xl font-bold text-kidoova-accent">
                 {progress.milestones_completed}
               </div>
-              <p className="text-sm text-gray-600">Total challenges</p>
+              <p className="text-sm text-gray-600">Total challenges completed</p>
             </div>
           </div>
         </div>
@@ -36,7 +36,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
               <div className="text-2xl font-bold text-kidoova-accent">
                 {progress.current_streak} days
               </div>
-              <p className="text-sm text-gray-600">Keep it up!</p>
+              <p className="text-sm text-gray-600">Keep the momentum going!</p>
             </div>
           </div>
         </div>
