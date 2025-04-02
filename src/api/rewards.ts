@@ -39,7 +39,10 @@ export async function getRewardsAndProgress(c: Context) {
         WHERE child_id = ? AND completed = 1
       ),
       weekly_challenges AS (
-        SELECT COUNT(*) as completed
+        SELECT 
+          COUNT(*) as completed,
+          GROUP_CONCAT(date(completed_at)) as dates,
+          GROUP_CONCAT(completed_at) as raw_dates
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -87,6 +90,14 @@ export async function getRewardsAndProgress(c: Context) {
           'longest_streak', (SELECT longest_streak FROM streak_info),
           'milestones_completed', (SELECT completed FROM milestone_progress),
           'weekly_challenges', COALESCE((SELECT completed FROM weekly_challenges), 0),
+          'weekly_debug', (
+            SELECT json_object(
+              'completed', completed,
+              'dates', dates,
+              'raw_dates', raw_dates
+            )
+            FROM weekly_challenges
+          ),
           'debug_info', (
             SELECT json_object(
               'week_start', week_start,
