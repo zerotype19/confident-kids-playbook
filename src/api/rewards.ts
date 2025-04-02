@@ -183,10 +183,13 @@ export async function getRewardsAndProgress(c: Context) {
       directWeekStartDateTime: weeklyChallenges?.week_start_datetime
     });
 
-    // Return the response
+    // Return the response with weekly challenges count
     return c.json({
-      rewards: rewards.results,
-      progress: progress?.progress_summary || null
+      rewards: rewards,
+      progress: {
+        ...progress?.progress_summary,
+        weekly_challenges: weeklyChallengesCount?.count || 0
+      }
     });
   } catch (error) {
     console.error('Error fetching rewards and progress:', error);
