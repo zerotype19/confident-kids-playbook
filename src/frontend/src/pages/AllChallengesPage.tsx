@@ -198,8 +198,8 @@ export default function AllChallengesPage() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
-            child_id: selectedChild.id,
-            challenge_id: challengeId
+            challenge_id: challengeId,
+            child_id: selectedChild.id
           })
         }
       );
@@ -208,7 +208,7 @@ export default function AllChallengesPage() {
         throw new Error('Failed to mark challenge as complete');
       }
 
-      // Update the challenge in the local state
+      // Update the specific challenge in the state instead of refetching all
       setChallenges(prevChallenges => 
         prevChallenges.map(challenge => 
           challenge.id === challengeId 
@@ -217,16 +217,14 @@ export default function AllChallengesPage() {
         )
       );
 
-      // Update challenge groups
+      // Update challenge groups to reflect the change
       setChallengeGroups(prevGroups => 
-        prevGroups.map(group => ({
-          ...group,
-          titles: group.titles.filter(title => 
-            !challenges.find(c => 
-              c.id === challengeId && c.title === title
-            )
-          )
-        })).filter(group => group.titles.length > 0)
+        prevGroups.map(group => {
+          const updatedTitles = group.titles.filter(title => 
+            challenges.find(c => c.title === title && c.id !== challengeId)
+          );
+          return { ...group, titles: updatedTitles };
+        })
       );
     } catch (err) {
       console.error('Error completing challenge:', err);

@@ -32,8 +32,8 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-500 ${
-        isCompleting ? 'opacity-0 transform -translate-y-full' : ''
+      className={`bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 ${
+        isCompleting ? 'h-0 opacity-0' : 'h-auto opacity-100'
       }`}
     >
       {/* Header */}
