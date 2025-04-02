@@ -20,7 +20,14 @@ export async function onRequestGet({ request, env }: { request: Request; env: En
 
     return new Response(JSON.stringify({
       rewards: rewards.results || [],
-      progress
+      progress: {
+        total_challenges: progress.total_challenges,
+        current_streak: progress.current_streak,
+        longest_streak: progress.longest_streak,
+        weekly_challenges: progress.weekly_challenges,
+        pillar_progress: progress.pillar_progress,
+        milestone_progress: progress.milestone_progress
+      }
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
