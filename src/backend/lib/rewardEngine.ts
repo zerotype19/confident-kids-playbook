@@ -228,6 +228,7 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM pillars p
     LEFT JOIN pillar_totals pt ON p.id = pt.pillar_id
     LEFT JOIN completed_challenges cc ON p.id = cc.pillar_id
+    WHERE p.id IN (1, 2, 3, 4, 5)
     ORDER BY p.id
   `).bind(age_range, childId).all<{ pillar_id: number; pillar_name: string; completed: number; total: number }>();
 
