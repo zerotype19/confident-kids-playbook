@@ -54,7 +54,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
           child_id: childId,
           challenge_id: challenge.id,
           reflection: "Completed the challenge",
-          mood_rating: 0
+          mood_rating: 3
         })
       });
 
