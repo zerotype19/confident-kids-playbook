@@ -264,7 +264,7 @@ export async function getChildProgress(childId: string, env: Env) {
   const milestoneProgress = {
     current: total,
     next: nextMilestone,
-    percentage: (total / nextMilestone) * 100
+    percentage: total >= 20 ? 100 : (total / nextMilestone) * 100
   };
 
   // Transform pillar progress into the expected format
