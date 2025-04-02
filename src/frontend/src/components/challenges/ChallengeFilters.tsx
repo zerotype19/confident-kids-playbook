@@ -1,150 +1,112 @@
 import React, { useState } from 'react';
 import { PILLAR_NAMES, PillarId } from '../../types';
-import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import Icon from '../common/Icon';
 
 interface ChallengeFiltersProps {
-  selectedPillar: number | null;
-  onPillarChange: (pillarId: number | null) => void;
-  selectedDifficulty: number | null;
-  onDifficultyChange: (level: number | null) => void;
+  selectedPillars: PillarId[];
+  selectedDifficulties: string[];
+  onPillarChange: (pillarId: PillarId) => void;
+  onDifficultyChange: (difficulty: string) => void;
   searchTerm: string;
   onSearchChange: (term: string) => void;
-  showCompleted: boolean;
-  onCompletedChange: (show: boolean) => void;
   onClearFilters: () => void;
 }
 
-export default function ChallengeFilters({
-  selectedPillar,
+const ChallengeFilters: React.FC<ChallengeFiltersProps> = ({
+  selectedPillars,
+  selectedDifficulties,
   onPillarChange,
-  selectedDifficulty,
   onDifficultyChange,
   searchTerm,
   onSearchChange,
-  showCompleted,
-  onCompletedChange,
-  onClearFilters,
-}: ChallengeFiltersProps) {
+  onClearFilters
+}) => {
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
 
-  const hasActiveFilters = selectedPillar !== null || selectedDifficulty !== null || !showCompleted;
+  const difficulties = ['easy', 'medium', 'hard'];
 
   return (
-    <div className="space-y-4">
-      {/* Search and Filter Toggle */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search challenges..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-kidoova-accent focus:border-transparent"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          )}
+    <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
+      {/* Search Bar */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon name="magnifying-glass" className="h-5 w-5 text-gray-400" />
         </div>
-        <button
-          onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
-          className={`flex items-center px-4 py-2 rounded-lg border ${
-            hasActiveFilters
-              ? 'border-kidoova-accent bg-kidoova-accent/10 text-kidoova-accent'
-              : 'border-gray-300 hover:bg-gray-50 text-gray-700'
-          }`}
-        >
-          <FunnelIcon className="w-5 h-5 mr-2" />
-          Filters
-          {hasActiveFilters && (
-            <span className="ml-2 bg-kidoova-accent text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-              {(selectedPillar !== null ? 1 : 0) +
-                (selectedDifficulty !== null ? 1 : 0) +
-                (!showCompleted ? 1 : 0)}
-            </span>
-          )}
-        </button>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search challenges..."
+          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        />
       </div>
 
-      {/* Expanded Filters */}
-      {isFiltersExpanded && (
-        <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm space-y-6">
-          {/* Pillar Filter */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Filter by Pillar</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {Object.entries(PILLAR_NAMES).map(([id, name]) => (
-                <button
-                  key={id}
-                  onClick={() => onPillarChange(selectedPillar === Number(id) ? null : Number(id))}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                    selectedPillar === Number(id)
-                      ? 'bg-kidoova-accent text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {name}
-                </button>
-              ))}
+      {/* Filters Section */}
+      <div>
+        <button
+          onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+          className="w-full flex items-center justify-between text-sm text-gray-600 hover:text-gray-900"
+        >
+          <span className="flex items-center">
+            <Icon name="funnel" className="w-4 h-4 mr-2" />
+            Filters
+          </span>
+          <Icon name={isFiltersExpanded ? 'chevron-up' : 'chevron-down'} className="w-4 h-4" />
+        </button>
+
+        {isFiltersExpanded && (
+          <div className="mt-4 space-y-4">
+            {/* Pillars Filter */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Pillars</h4>
+              <div className="space-y-2">
+                {Object.entries(PILLAR_NAMES).map(([id, name]) => (
+                  <label key={id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedPillars.includes(Number(id))}
+                      onChange={() => onPillarChange(Number(id))}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{name}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Difficulty Filter */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Filter by Difficulty</h3>
-            <div className="flex flex-wrap gap-2">
-              {[1, 2, 3].map((level) => (
-                <button
-                  key={level}
-                  onClick={() => onDifficultyChange(selectedDifficulty === level ? null : level)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                    selectedDifficulty === level
-                      ? 'bg-kidoova-accent text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Level {level}
-                </button>
-              ))}
+            {/* Difficulty Filter */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Difficulty</h4>
+              <div className="space-y-2">
+                {difficulties.map((difficulty) => (
+                  <label key={difficulty} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedDifficulties.includes(difficulty)}
+                      onChange={() => onDifficultyChange(difficulty)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 capitalize">{difficulty}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Completion Status Filter */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Completion Status</h3>
-            <button
-              onClick={() => onCompletedChange(!showCompleted)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                !showCompleted
-                  ? 'bg-kidoova-accent text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {showCompleted ? 'Show All Challenges' : 'Show Incomplete Only'}
-            </button>
-          </div>
-
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <div className="pt-4 border-t border-gray-200">
+            {/* Clear Filters Button */}
+            {(selectedPillars.length > 0 || selectedDifficulties.length > 0) && (
               <button
-                onClick={() => {
-                  onClearFilters();
-                  setIsFiltersExpanded(false);
-                }}
-                className="text-sm text-kidoova-accent hover:text-kidoova-accent/80"
+                onClick={onClearFilters}
+                className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Clear all filters
+                <Icon name="x-mark" className="w-4 h-4 mr-2" />
+                Clear Filters
               </button>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
-} 
+};
+
+export default ChallengeFilters; 
