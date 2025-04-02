@@ -62,7 +62,8 @@ export async function getRewardsAndProgress(c: Context) {
       SELECT COUNT(*) as count
       FROM challenge_logs
       WHERE child_id = ? 
-      AND created_at >= datetime('now', '-7 days')
+      AND completed = 1
+      AND completed_at >= datetime('now', 'weekday 0')
     `).bind(childId).first();
     
     console.log('Direct weekly challenges count:', weeklyChallengesResult);
@@ -88,37 +89,12 @@ export async function getRewardsAndProgress(c: Context) {
         SELECT COUNT(*) as completed
         FROM challenge_logs
         WHERE child_id = ? AND completed = 1
-      ),
-      weekly_progress AS (
-        SELECT COUNT(*) as weekly_challenges
-        FROM challenge_logs
-        WHERE child_id = ?
-        AND created_at >= datetime('now', '-7 days')
-      ),
-      next_reward AS (
-        SELECT 
-          r.*,
-          CASE 
-            WHEN r.type = 'milestone' THEN 
-              (SELECT completed FROM milestone_progress) * 100.0 / r.criteria_value
-            WHEN r.type = 'streak' THEN 
-              (SELECT current_streak FROM streak_info) * 100.0 / r.criteria_value
-            WHEN r.type = 'pillar' THEN 
-              (SELECT completed FROM challenge_progress WHERE pillar_id = r.pillar_id) * 100.0 / r.criteria_value
-          END as progress
-        FROM rewards r
-        WHERE r.id NOT IN (
-          SELECT reward_id FROM child_rewards WHERE child_id = ?
-        )
-        ORDER BY progress DESC
-        LIMIT 1
       )
       SELECT 
         json_object(
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', COALESCE(wp.weekly_challenges, 0),
           'pillar_progress', json_object(
             'mindfulness', mindfulness_progress,
             'gratitude', gratitude_progress,
@@ -129,48 +105,16 @@ export async function getRewardsAndProgress(c: Context) {
             'current', (SELECT completed FROM milestone_progress),
             'next', 20,
             'percentage', (SELECT completed FROM milestone_progress) * 100.0 / 20
-          ),
-          'next_reward', (
-            SELECT json_object(
-              'id', id,
-              'title', title,
-              'description', description,
-              'icon', icon,
-              'type', type,
-              'criteria_value', criteria_value,
-              'pillar_id', pillar_id,
-              'progress', progress
-            )
-            FROM next_reward
-          ),
-          'weekly_debug', (
-            SELECT json_object(
-              'count', count,
-              'dates', dates,
-              'week_start', week_start,
-              'current_date', current_date,
-              'current_datetime', current_datetime,
-              'week_start_datetime', week_start_datetime
-            )
-            FROM weekly_progress
           )
         ) as progress_summary
-    `).bind(childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+    `).bind(childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     // Log the progress summary before returning
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
     console.log('Reward Engine: Weekly challenges calculation:', {
       childId,
       weekStart: new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).toISOString(),
-      weeklyTotal: progress?.progress_summary?.weekly_challenges || 0,
-      weeklyDebug: progress?.progress_summary?.weekly_debug,
-      directCount: weeklyChallengesResult?.count || 0,
-      rawCount: rawWeeklyCount?.count || 0,
-      directDates: weeklyChallenges?.dates,
-      directWeekStart: weeklyChallenges?.week_start,
-      directCurrentDate: weeklyChallenges?.current_date,
-      directCurrentDateTime: weeklyChallenges?.current_datetime,
-      directWeekStartDateTime: weeklyChallenges?.week_start_datetime
+      weeklyTotal: weeklyChallengesResult?.count || 0
     });
 
     // Return the response with weekly challenges count
@@ -181,7 +125,7 @@ export async function getRewardsAndProgress(c: Context) {
         total_challenges: progressSummary.total_challenges || 0,
         current_streak: progressSummary.current_streak || 0,
         longest_streak: progressSummary.longest_streak || 0,
-        weekly_challenges: progressSummary.weekly_challenges || 0,
+        weekly_challenges: weeklyChallengesResult?.count || 0,
         pillar_progress: progressSummary.pillar_progress || {},
         milestone_progress: progressSummary.milestone_progress || {
           current: 0,
