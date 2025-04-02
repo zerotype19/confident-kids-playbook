@@ -103,11 +103,25 @@ async function grantRewardIfNew(
 ) {
   console.log('Reward Engine: Checking reward:', { type, value, pillarId });
   
-  const reward = await db.prepare(`
+  let query = `
     SELECT id 
     FROM rewards 
-    WHERE type = ? AND criteria_value = ? AND (pillar_id = ? OR (pillar_id IS NULL AND ? IS NULL))
-  `).bind(type, value, pillarId, pillarId).first<{ id: string }>();
+    WHERE type = ? AND criteria_value = ?
+  `;
+  let params = [type, value];
+
+  if (pillarId !== undefined) {
+    query += ' AND pillar_id = ?';
+    params.push(pillarId);
+  } else {
+    query += ' AND pillar_id IS NULL';
+  }
+
+  console.log('Reward Engine: Executing query:', { query, params });
+  
+  const reward = await db.prepare(query)
+    .bind(...params)
+    .first<{ id: string }>();
   
   if (!reward) {
     console.log('Reward Engine: No matching reward found');
