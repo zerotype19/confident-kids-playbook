@@ -104,7 +104,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-6 flex items-start gap-4 hover:bg-gray-50 transition-colors"
@@ -124,7 +124,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
               <span>Progress</span>
               <span>{Math.round(progress)}%</span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-300"
                 style={{ 
@@ -138,11 +138,11 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
       </button>
 
       {isExpanded && (
-        <div className="border-t p-6">
+        <div className="border-t border-gray-200 p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Challenge Types</h3>
           <div className="space-y-4">
             {uniqueChallenges.map((challenge) => (
-              <div key={challenge.id} className="border rounded-lg p-4">
+              <div key={challenge.id} className="border border-gray-200 rounded-lg p-4 bg-white">
                 <h4 className="font-medium text-gray-900">{challenge.title}</h4>
                 <p className="text-gray-600 mt-1">{challenge.description}</p>
                 <p className="text-sm text-gray-500 mt-2">Goal: {challenge.goal}</p>
@@ -152,7 +152,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
 
           <button
             onClick={handleViewAll}
-            className="mt-6 w-full bg-kidoova-accent text-white py-2 px-4 rounded-lg hover:bg-kidoova-accent/90 transition-colors"
+            className="mt-6 w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
           >
             View All Challenges
           </button>
