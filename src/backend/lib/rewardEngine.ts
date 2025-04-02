@@ -204,36 +204,33 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM consecutive_days
   `).bind(childId, childId).first<{ longest_streak: number }>();
 
-  // Get pillar progress with age range filter
+  // Get challenges completed this week
+  const { weekly_challenges } = await env.DB.prepare(`
+    SELECT COUNT(*) as weekly_challenges
+    FROM challenge_logs
+    WHERE child_id = ?
+    AND date(completed_at) >= date('now', 'weekday 0', '-7 days')
+  `).bind(childId).first<{ weekly_challenges: number }>();
+
+  // Get pillar progress
   const pillarProgress = await env.DB.prepare(`
-    WITH pillar_totals AS (
-      SELECT 
-        pillar_id,
-        COUNT(*) as total
-      FROM challenges
-      WHERE age_range = ?
-      GROUP BY pillar_id
-    ),
-    completed_challenges AS (
-      SELECT 
-        c.pillar_id,
-        COUNT(*) as completed
-      FROM challenge_logs cl
-      JOIN challenges c ON cl.challenge_id = c.id
-      WHERE cl.child_id = ?
-      GROUP BY c.pillar_id
-    )
     SELECT 
-      p.id as pillar_id,
-      p.name as pillar_name,
-      COALESCE(cc.completed, 0) as completed,
-      COALESCE(pt.total, 0) as total
-    FROM pillars p
-    LEFT JOIN pillar_totals pt ON p.id = pt.pillar_id
-    LEFT JOIN completed_challenges cc ON p.id = cc.pillar_id
-    WHERE p.id IN (1, 2, 3, 4, 5)
-    ORDER BY p.id
-  `).bind(normalizedAgeRange, childId).all<{ pillar_id: number; pillar_name: string; completed: number; total: number }>();
+      c.pillar_id,
+      COUNT(*) as completed,
+      (
+        SELECT COUNT(*)
+        FROM challenges c2
+        WHERE c2.pillar_id = c.pillar_id
+        AND c2.age_range = ?
+      ) as total
+    FROM challenge_logs cl
+    JOIN challenges c ON cl.challenge_id = c.id
+    WHERE cl.child_id = ?
+    GROUP BY c.pillar_id
+  `).bind(normalizedAgeRange, childId).all<{ pillar_id: number; completed: number; total: number }>();
+
+  // Get next reward progress
+  const nextReward = await getNextRewardProgress(childId, env);
 
   // Debug logging
   console.log('Reward Engine: Debug info:', {
@@ -281,7 +278,9 @@ export async function getChildProgress(childId: string, env: Env) {
     total_challenges: total,
     current_streak: current_streak || 0,
     longest_streak: longest_streak || 0,
+    weekly_challenges: weekly_challenges || 0,
     pillar_progress: transformedPillarProgress,
-    milestone_progress: milestoneProgress
+    milestone_progress: milestoneProgress,
+    next_reward
   };
 } 
