@@ -5,6 +5,9 @@ import path from 'node:path'
 export default defineConfig({
   plugins: [react()],
   root: './',
+  optimizeDeps: {
+    include: ['@heroicons/react']
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
