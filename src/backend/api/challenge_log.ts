@@ -111,9 +111,8 @@ export async function onRequest(context: { request: Request; env: Env }) {
       INSERT INTO challenge_logs (
         id,
         child_id,
-        challenge_id,
-        completed_at
-      ) VALUES (?, ?, ?, datetime('now'))
+        challenge_id
+      ) VALUES (?, ?, ?)
     `)
       .bind(logId, body.child_id, body.challenge_id)
       .run();
