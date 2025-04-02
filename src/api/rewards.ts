@@ -114,7 +114,7 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', (SELECT count FROM weekly_challenges),
+          'weekly_challenges', COALESCE((SELECT count FROM weekly_challenges), 0),
           'pillar_progress', json_group_object(
             pillar_id,
             json_object(
@@ -146,7 +146,9 @@ export async function getRewardsAndProgress(c: Context) {
               'count', count,
               'dates', dates,
               'week_start', week_start,
-              'current_date', current_date
+              'current_date', current_date,
+              'query_date', datetime('now'),
+              'week_start_datetime', datetime('now', 'weekday 0')
             )
             FROM weekly_challenges
           ),
