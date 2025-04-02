@@ -61,6 +61,7 @@ export interface ProgressSummary {
   milestones_completed: number;
   current_streak: number;
   longest_streak: number;
+  weekly_challenges: number;
   pillar_progress: {
     [key: number]: {
       completed: number;
