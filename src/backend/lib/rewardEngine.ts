@@ -230,7 +230,6 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM pillars p
     LEFT JOIN pillar_totals pt ON p.id = pt.pillar_id
     LEFT JOIN completed_challenges cc ON p.id = cc.pillar_id
-    WHERE p.id IS NOT NULL
     ORDER BY p.id
   `).bind(age_range, childId).all<{ pillar_id: number; pillar_name: string; completed: number; total: number }>();
 
@@ -267,11 +266,21 @@ export async function getChildProgress(childId: string, env: Env) {
     percentage: (total / nextMilestone) * 100
   };
 
+  // Transform pillar progress into the expected format
+  const transformedPillarProgress = pillarProgress.results.reduce((acc: any, pillar: any) => {
+    acc[pillar.pillar_id] = {
+      completed: pillar.completed,
+      total: pillar.total,
+      percentage: pillar.total > 0 ? (pillar.completed / pillar.total) * 100 : 0
+    };
+    return acc;
+  }, {});
+
   return {
     total_challenges: total,
     current_streak: current_streak || 0,
     longest_streak: longest_streak || 0,
-    pillar_progress: pillarProgress.results || [],
+    pillar_progress: transformedPillarProgress,
     milestone_progress: milestoneProgress
   };
 } 

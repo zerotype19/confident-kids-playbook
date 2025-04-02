@@ -84,7 +84,7 @@ export default function ProgressTracker({ progress, childId }: ProgressTrackerPr
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-kidoova-accent transition-all duration-300"
-                  style={{ width: `${data.percentage}%` }}
+                  style={{ width: `${data.total > 0 ? (data.completed / data.total) * 100 : 0}%` }}
                 />
               </div>
             </div>
