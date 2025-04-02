@@ -106,14 +106,13 @@ export async function onRequest(context: { request: Request; env: Env }) {
     // Insert new log
     const insertResult = await env.DB.prepare(`
       INSERT INTO challenge_logs (
+        id,
         child_id,
         challenge_id,
-        completed_at,
-        created_at,
-        updated_at
-      ) VALUES (?, ?, datetime('now'), datetime('now'), datetime('now'))
+        completed_at
+      ) VALUES (?, ?, ?, datetime('now'))
     `)
-      .bind(body.child_id, body.challenge_id)
+      .bind(uuidv4(), body.child_id, body.challenge_id)
       .run();
 
     if (!insertResult.success) {
