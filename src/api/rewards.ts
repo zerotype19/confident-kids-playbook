@@ -24,19 +24,23 @@ export async function getRewardsAndProgress(c: Context) {
         COUNT(*) as count,
         GROUP_CONCAT(completed_at) as dates,
         date('now', 'weekday 0') as week_start,
-        date('now') as current_date
+        date('now') as current_date,
+        datetime('now') as current_datetime,
+        datetime('now', 'weekday 0') as week_start_datetime
       FROM challenge_logs
       WHERE child_id = ?
       AND completed = 1
       AND completed_at >= datetime('now', 'weekday 0')
-    `).bind(childId).first<{ count: number; dates: string; week_start: string; current_date: string }>();
+    `).bind(childId).first<{ count: number; dates: string; week_start: string; current_date: string; current_datetime: string; week_start_datetime: string }>();
 
     console.log('Reward Engine: Weekly challenges direct query:', {
       childId,
       count: weeklyChallenges?.count || 0,
       dates: weeklyChallenges?.dates,
       weekStart: weeklyChallenges?.week_start,
-      currentDate: weeklyChallenges?.current_date
+      currentDate: weeklyChallenges?.current_date,
+      currentDateTime: weeklyChallenges?.current_datetime,
+      weekStartDateTime: weeklyChallenges?.week_start_datetime
     });
 
     const progress = await db.prepare(`
@@ -66,7 +70,9 @@ export async function getRewardsAndProgress(c: Context) {
           COUNT(*) as count,
           GROUP_CONCAT(completed_at) as dates,
           date('now', 'weekday 0') as week_start,
-          date('now') as current_date
+          date('now') as current_date,
+          datetime('now') as current_datetime,
+          datetime('now', 'weekday 0') as week_start_datetime
         FROM challenge_logs
         WHERE child_id = ?
         AND completed = 1
@@ -114,13 +120,7 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', (
-            SELECT COUNT(*) 
-            FROM challenge_logs 
-            WHERE child_id = ? 
-            AND completed = 1 
-            AND completed_at >= datetime('now', 'weekday 0')
-          ),
+          'weekly_challenges', (SELECT count FROM weekly_challenges),
           'pillar_progress', json_group_object(
             pillar_id,
             json_object(
@@ -149,20 +149,17 @@ export async function getRewardsAndProgress(c: Context) {
           ),
           'weekly_debug', (
             SELECT json_object(
-              'count', COUNT(*),
-              'dates', GROUP_CONCAT(completed_at),
-              'week_start', date('now', 'weekday 0'),
-              'current_date', date('now'),
-              'query_date', datetime('now'),
-              'week_start_datetime', datetime('now', 'weekday 0')
+              'count', count,
+              'dates', dates,
+              'week_start', week_start,
+              'current_date', current_date,
+              'current_datetime', current_datetime,
+              'week_start_datetime', week_start_datetime
             )
-            FROM challenge_logs
-            WHERE child_id = ?
-            AND completed = 1
-            AND completed_at >= datetime('now', 'weekday 0')
+            FROM weekly_challenges
           )
         ) as progress_summary
-    `).bind(childId, childId, childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+    `).bind(childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     // Log the progress summary before returning
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
@@ -171,11 +168,12 @@ export async function getRewardsAndProgress(c: Context) {
       weekStart: new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).toISOString(),
       weeklyTotal: progress?.progress_summary?.weekly_challenges || 0,
       weeklyDebug: progress?.progress_summary?.weekly_debug,
-      debugInfo: progress?.progress_summary?.debug_info,
       directCount: weeklyChallenges?.count || 0,
       directDates: weeklyChallenges?.dates,
       directWeekStart: weeklyChallenges?.week_start,
-      directCurrentDate: weeklyChallenges?.current_date
+      directCurrentDate: weeklyChallenges?.current_date,
+      directCurrentDateTime: weeklyChallenges?.current_datetime,
+      directWeekStartDateTime: weeklyChallenges?.week_start_datetime
     });
 
     // Return the response
