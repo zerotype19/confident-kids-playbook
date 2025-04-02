@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   root: './',
   optimizeDeps: {
-    include: ['@heroicons/react']
+    include: ['@heroicons/react/24/outline', '@heroicons/react/24/solid']
   },
   build: {
     outDir: 'dist',
@@ -29,8 +29,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@types': path.resolve(__dirname, '../types'),
-      '@heroicons/react': path.resolve(__dirname, 'node_modules/@heroicons/react')
+      '@types': path.resolve(__dirname, '../types')
     }
   },
   publicDir: 'public'

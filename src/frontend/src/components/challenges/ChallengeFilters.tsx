@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PILLAR_NAMES, PillarId } from '../../types';
-import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react';
+import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ChallengeFiltersProps {
   selectedPillar: number | null;
