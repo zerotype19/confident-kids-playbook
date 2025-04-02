@@ -40,7 +40,7 @@ CREATE TABLE challenge_logs (
   challenge_id TEXT NOT NULL,
   completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   reflection TEXT,
-  mood_rating INTEGER,
+  mood_rating INTEGER NULL,
   FOREIGN KEY (child_id) REFERENCES children(id),
   FOREIGN KEY (challenge_id) REFERENCES challenges(id)
 );

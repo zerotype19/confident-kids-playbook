@@ -83,7 +83,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
       body.child_id,
       body.challenge_id,
       body.reflection || null,
-      body.mood_rating || 0
+      body.mood_rating || null
     ).run();
 
     // Evaluate and grant rewards
