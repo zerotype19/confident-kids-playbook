@@ -187,8 +187,16 @@ export async function getRewardsAndProgress(c: Context) {
     return c.json({
       rewards: rewards,
       progress: {
-        ...progress?.progress_summary,
-        weekly_challenges: weeklyChallengesCount?.count || 0
+        total_challenges: progress?.progress_summary?.total_challenges || 0,
+        current_streak: progress?.progress_summary?.current_streak || 0,
+        longest_streak: progress?.progress_summary?.longest_streak || 0,
+        weekly_challenges: weeklyChallengesCount?.count || 0,
+        pillar_progress: progress?.progress_summary?.pillar_progress || {},
+        milestone_progress: progress?.progress_summary?.milestone_progress || {
+          current: 0,
+          next: 20,
+          percentage: 0
+        }
       }
     });
   } catch (error) {
