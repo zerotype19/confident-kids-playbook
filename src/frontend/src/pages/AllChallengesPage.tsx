@@ -166,7 +166,7 @@ export default function AllChallengesPage() {
   };
 
   // Handle challenge completion
-  const handleChallengeComplete = async (challengeId: number) => {
+  const handleChallengeComplete = async (challengeId: string) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -199,7 +199,7 @@ export default function AllChallengesPage() {
       // Update the challenge in the local state
       setChallenges(prevChallenges => 
         prevChallenges.map(challenge => 
-          parseInt(challenge.id.toString(), 10) === challengeId 
+          challenge.id === challengeId 
             ? { ...challenge, is_completed: 1 }
             : challenge
         )
@@ -211,7 +211,7 @@ export default function AllChallengesPage() {
           ...group,
           titles: group.titles.filter(title => 
             !challenges.find(c => 
-              parseInt(c.id.toString(), 10) === challengeId && c.title === title
+              c.id === challengeId && c.title === title
             )
           )
         })).filter(group => group.titles.length > 0)
