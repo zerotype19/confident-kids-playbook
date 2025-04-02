@@ -9,6 +9,8 @@ export async function getRewardsAndProgress(c: Context) {
       return c.json({ error: 'Child ID is required' }, 400);
     }
 
+    console.log('Reward Engine: Starting progress calculation for child:', childId);
+
     // Fetch all rewards
     const rewards = await db.prepare(`
       SELECT * FROM rewards
@@ -68,7 +70,8 @@ export async function getRewardsAndProgress(c: Context) {
 
     console.log('Weekly challenges count:', {
       count: weeklyCount?.count,
-      childId
+      childId,
+      query: `SELECT COUNT(*) as count FROM challenge_logs WHERE child_id = '${childId}' AND completed = 1 AND date(completed_at) >= date('now', 'weekday 0')`
     });
 
     // Also get a raw count for verification
