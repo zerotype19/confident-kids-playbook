@@ -67,7 +67,15 @@ export async function getRewardsAndProgress(c: Context) {
           date('now', 'weekday 0') as week_start,
           date('now') as current_date,
           GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results,
-          GROUP_CONCAT(completed_at) as all_completed_dates
+          GROUP_CONCAT(completed_at) as all_completed_dates,
+          COUNT(*) as total_count,
+          GROUP_CONCAT(DISTINCT date(completed_at)) as unique_dates,
+          GROUP_CONCAT(DISTINCT completed_at) as unique_raw_dates,
+          GROUP_CONCAT(DISTINCT date(completed_at) >= date('now', 'weekday 0')) as unique_date_comparison_results,
+          GROUP_CONCAT(DISTINCT completed_at) as unique_all_completed_dates,
+          datetime('now', 'weekday 0') as week_start_datetime,
+          datetime('now') as current_datetime,
+          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0')) as datetime_comparison_results
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -127,6 +135,14 @@ export async function getRewardsAndProgress(c: Context) {
               'date_comparison', datetime('now', 'weekday 0'),
               'date_comparison_results', date_comparison_results,
               'all_completed_dates', all_completed_dates,
+              'total_count', total_count,
+              'unique_dates', unique_dates,
+              'unique_raw_dates', unique_raw_dates,
+              'unique_date_comparison_results', unique_date_comparison_results,
+              'unique_all_completed_dates', unique_all_completed_dates,
+              'week_start_datetime', week_start_datetime,
+              'current_datetime', current_datetime,
+              'datetime_comparison_results', datetime_comparison_results,
               'sql_query', 'SELECT COUNT(*) as completed FROM challenge_logs WHERE child_id = ? AND completed = 1 AND completed_at >= datetime("now", "weekday 0")'
             )
             FROM weekly_challenges
