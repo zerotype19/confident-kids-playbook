@@ -114,7 +114,13 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', COALESCE((SELECT count FROM weekly_challenges), 0),
+          'weekly_challenges', (
+            SELECT COUNT(*) 
+            FROM challenge_logs 
+            WHERE child_id = ? 
+            AND completed = 1 
+            AND completed_at >= datetime('now', 'weekday 0')
+          ),
           'pillar_progress', json_group_object(
             pillar_id,
             json_object(
@@ -143,32 +149,17 @@ export async function getRewardsAndProgress(c: Context) {
           ),
           'weekly_debug', (
             SELECT json_object(
-              'count', count,
-              'dates', dates,
-              'week_start', week_start,
-              'current_date', current_date,
+              'count', COUNT(*),
+              'dates', GROUP_CONCAT(completed_at),
+              'week_start', date('now', 'weekday 0'),
+              'current_date', date('now'),
               'query_date', datetime('now'),
               'week_start_datetime', datetime('now', 'weekday 0')
             )
-            FROM weekly_challenges
-          ),
-          'debug_info', (
-            SELECT json_object(
-              'week_start', week_start,
-              'total_completed', total_completed,
-              'completed_dates', completed_dates,
-              'raw_dates', raw_dates,
-              'completion_status', completion_status,
-              'challenge_ids', challenge_ids,
-              'child_ids', child_ids,
-              'current_date', current_date,
-              'week_start_date', week_start_date,
-              'week_end_date', week_end_date,
-              'date_comparison_results', date_comparison_results,
-              'all_dates', all_dates,
-              'all_raw_dates', all_raw_dates
-            )
-            FROM debug_weekly
+            FROM challenge_logs
+            WHERE child_id = ?
+            AND completed = 1
+            AND completed_at >= datetime('now', 'weekday 0')
           )
         ) as progress_summary
     `).bind(childId, childId, childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
