@@ -5,6 +5,9 @@ import path from 'node:path'
 export default defineConfig({
   plugins: [react()],
   root: './',
+  optimizeDeps: {
+    include: ['@heroicons/react']
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -13,7 +16,6 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
-      external: ['@heroicons/react'],
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'logo.png') {

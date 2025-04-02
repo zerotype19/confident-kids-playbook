@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Challenge } from '../../types';
-import { CheckCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -81,7 +81,7 @@ export default function ChallengeCard({ challenge, childId }: ChallengeCardProps
               </span>
               {Boolean(challenge.is_completed) ? (
                 <span className="inline-flex items-center text-green-600 text-sm">
-                  <CheckCircleSolidIcon className="w-4 h-4 mr-1" />
+                  <CheckCircleIcon className="w-4 h-4 mr-1" />
                   Completed
                 </span>
               ) : null}
