@@ -49,7 +49,9 @@ export async function getRewardsAndProgress(c: Context) {
         SELECT 
           date('now', 'weekday 0') as week_start,
           COUNT(*) as total_completed,
-          GROUP_CONCAT(date(completed_at)) as completed_dates
+          GROUP_CONCAT(date(completed_at)) as completed_dates,
+          GROUP_CONCAT(completed_at) as raw_dates,
+          GROUP_CONCAT(completed) as completion_status
         FROM challenge_logs
         WHERE child_id = ? 
         AND completed = 1
@@ -84,7 +86,9 @@ export async function getRewardsAndProgress(c: Context) {
             SELECT json_object(
               'week_start', week_start,
               'total_completed', total_completed,
-              'completed_dates', completed_dates
+              'completed_dates', completed_dates,
+              'raw_dates', raw_dates,
+              'completion_status', completion_status
             )
             FROM debug_weekly
           ),
