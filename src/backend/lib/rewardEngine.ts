@@ -140,6 +140,17 @@ export async function getChildRewards(childId: string, env: Env): Promise<Reward
 export async function getChildProgress(childId: string, env: Env) {
   console.log('Reward Engine: Fetching progress for child:', childId);
 
+  // First get the child's age range
+  const { age_range } = await env.DB.prepare(`
+    SELECT age_range 
+    FROM children 
+    WHERE id = ?
+  `).bind(childId).first<{ age_range: string }>();
+
+  if (!age_range) {
+    throw new Error('Child not found');
+  }
+
   // Get total completed challenges
   const { total } = await env.DB.prepare(`
     SELECT COUNT(*) as total 
@@ -190,17 +201,20 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM consecutive_days
   `).bind(childId, childId).first<{ longest_streak: number }>();
 
-  // Get pillar progress
+  // Get pillar progress with age range filter
   const pillarProgress = await env.DB.prepare(`
     SELECT 
       c.pillar_id,
       COUNT(*) as completed,
-      (SELECT COUNT(*) FROM challenges WHERE pillar_id = c.pillar_id) as total
+      (SELECT COUNT(*) 
+       FROM challenges 
+       WHERE pillar_id = c.pillar_id 
+       AND age_range = ?) as total
     FROM challenge_logs cl
     JOIN challenges c ON cl.challenge_id = c.id
     WHERE cl.child_id = ?
     GROUP BY c.pillar_id
-  `).bind(childId).all<{ pillar_id: number; completed: number; total: number }>();
+  `).bind(age_range, childId).all<{ pillar_id: number; completed: number; total: number }>();
 
   // Calculate milestone progress
   const milestones = [5, 10, 20];
