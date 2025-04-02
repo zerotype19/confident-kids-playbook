@@ -205,27 +205,49 @@ export default function AllChallengesPage() {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to mark challenge as complete');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to mark challenge as complete');
       }
 
-      // Update the specific challenge in the state instead of refetching all
-      setChallenges(prevChallenges => 
-        prevChallenges.map(challenge => 
-          challenge.id === challengeId 
-            ? { ...challenge, is_completed: 1 }
-            : challenge
-        )
+      // Refetch challenges to get updated data
+      const challengesResponse = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/challenges/all?child_id=${selectedChild.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
 
-      // Update challenge groups to reflect the change
-      setChallengeGroups(prevGroups => 
-        prevGroups.map(group => {
-          const updatedTitles = group.titles.filter(title => 
-            challenges.find(c => c.title === title && c.id !== challengeId)
-          );
-          return { ...group, titles: updatedTitles };
-        })
-      );
+      if (!challengesResponse.ok) {
+        throw new Error('Failed to fetch updated challenges');
+      }
+
+      const updatedChallenges = await challengesResponse.json();
+      setChallenges(updatedChallenges);
+
+      // Update challenge groups with the new data
+      const groups = updatedChallenges.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
+        const existingGroup = acc.find(
+          group => group.pillar_id === challenge.pillar_id && group.difficulty_level === challenge.difficulty_level
+        );
+
+        if (existingGroup) {
+          if (!existingGroup.titles.includes(challenge.title)) {
+            existingGroup.titles.push(challenge.title);
+          }
+        } else {
+          acc.push({
+            pillar_id: challenge.pillar_id,
+            difficulty_level: challenge.difficulty_level,
+            titles: [challenge.title]
+          });
+        }
+
+        return acc;
+      }, []);
+
+      setChallengeGroups(groups);
     } catch (err) {
       console.error('Error completing challenge:', err);
       throw err;
