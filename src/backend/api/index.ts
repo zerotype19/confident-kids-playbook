@@ -8,7 +8,7 @@ import auth from './auth';
 import children from './children';
 import challenges from './challenges';
 import pillars from './pillars';
-import rewards from './rewards';
+import rewards from './rewards/[childId]';
 
 const app = new Hono<{ Bindings: { DB: D1Database } }>();
 
@@ -22,6 +22,6 @@ app.route('/api/auth', auth);
 app.route('/api/children', children);
 app.route('/api/challenges', challenges);
 app.route('/api/pillars', pillars);
-app.route('/api/rewards', rewards);
+app.route('/api/rewards/:childId', rewards);
 
 export default app; 
