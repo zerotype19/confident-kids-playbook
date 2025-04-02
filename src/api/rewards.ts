@@ -20,14 +20,24 @@ export async function getRewardsAndProgress(c: Context) {
     
     // First, let's get the weekly challenges count directly
     const weeklyChallenges = await db.prepare(`
-      SELECT COUNT(*) as count
+      SELECT 
+        COUNT(*) as count,
+        GROUP_CONCAT(completed_at) as dates,
+        date('now', 'weekday 0') as week_start,
+        date('now') as current_date
       FROM challenge_logs
       WHERE child_id = ?
       AND completed = 1
       AND completed_at >= datetime('now', 'weekday 0')
-    `).bind(childId).first<{ count: number }>();
+    `).bind(childId).first<{ count: number; dates: string; week_start: string; current_date: string }>();
 
-    console.log('Reward Engine: Weekly challenges count:', weeklyChallenges);
+    console.log('Reward Engine: Weekly challenges direct query:', {
+      childId,
+      count: weeklyChallenges?.count || 0,
+      dates: weeklyChallenges?.dates,
+      weekStart: weeklyChallenges?.week_start,
+      currentDate: weeklyChallenges?.current_date
+    });
 
     const progress = await db.prepare(`
       WITH challenge_progress AS (
@@ -53,31 +63,12 @@ export async function getRewardsAndProgress(c: Context) {
       ),
       weekly_challenges AS (
         SELECT 
-          COUNT(*) as completed,
-          GROUP_CONCAT(date(completed_at)) as dates,
-          GROUP_CONCAT(completed_at) as raw_dates,
+          COUNT(*) as count,
+          GROUP_CONCAT(completed_at) as dates,
           date('now', 'weekday 0') as week_start,
-          date('now') as current_date,
-          GROUP_CONCAT(date(completed_at) >= date('now', 'weekday 0')) as date_comparison_results,
-          GROUP_CONCAT(completed_at) as all_completed_dates,
-          COUNT(*) as total_count,
-          GROUP_CONCAT(DISTINCT date(completed_at)) as unique_dates,
-          GROUP_CONCAT(DISTINCT completed_at) as unique_raw_dates,
-          GROUP_CONCAT(DISTINCT date(completed_at) >= date('now', 'weekday 0')) as unique_date_comparison_results,
-          GROUP_CONCAT(DISTINCT completed_at) as unique_all_completed_dates,
-          datetime('now', 'weekday 0') as week_start_datetime,
-          datetime('now') as current_datetime,
-          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0')) as datetime_comparison_results,
-          GROUP_CONCAT(DISTINCT child_id) as child_ids,
-          GROUP_CONCAT(DISTINCT challenge_id) as challenge_ids,
-          GROUP_CONCAT(DISTINCT date(completed_at)) as all_dates,
-          GROUP_CONCAT(DISTINCT completed_at) as all_raw_dates,
-          GROUP_CONCAT(DISTINCT date(completed_at) >= date('now', 'weekday 0')) as all_date_comparison_results,
-          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0')) as all_datetime_comparison_results,
-          GROUP_CONCAT(DISTINCT date(completed_at) >= date('now', 'weekday 0', '-7 days')) as last_week_comparison_results,
-          GROUP_CONCAT(DISTINCT completed_at >= datetime('now', 'weekday 0', '-7 days')) as last_week_datetime_comparison_results
+          date('now') as current_date
         FROM challenge_logs
-        WHERE child_id = ? 
+        WHERE child_id = ?
         AND completed = 1
         AND completed_at >= datetime('now', 'weekday 0')
       ),
@@ -123,13 +114,7 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', (
-            SELECT COUNT(*) 
-            FROM challenge_logs 
-            WHERE child_id = ? 
-            AND completed = 1 
-            AND completed_at >= datetime('now', 'weekday 0')
-          ),
+          'weekly_challenges', (SELECT count FROM weekly_challenges),
           'pillar_progress', json_group_object(
             pillar_id,
             json_object(
@@ -158,30 +143,10 @@ export async function getRewardsAndProgress(c: Context) {
           ),
           'weekly_debug', (
             SELECT json_object(
-              'completed', completed,
+              'count', count,
               'dates', dates,
-              'raw_dates', raw_dates,
               'week_start', week_start,
-              'current_date', current_date,
-              'date_comparison', datetime('now', 'weekday 0'),
-              'date_comparison_results', date_comparison_results,
-              'all_completed_dates', all_completed_dates,
-              'total_count', total_count,
-              'unique_dates', unique_dates,
-              'unique_raw_dates', unique_raw_dates,
-              'unique_date_comparison_results', unique_date_comparison_results,
-              'unique_all_completed_dates', unique_all_completed_dates,
-              'week_start_datetime', week_start_datetime,
-              'current_datetime', current_datetime,
-              'datetime_comparison_results', datetime_comparison_results,
-              'child_ids', child_ids,
-              'challenge_ids', challenge_ids,
-              'all_dates', all_dates,
-              'all_raw_dates', all_raw_dates,
-              'all_date_comparison_results', all_date_comparison_results,
-              'all_datetime_comparison_results', all_datetime_comparison_results,
-              'last_week_comparison_results', last_week_comparison_results,
-              'last_week_datetime_comparison_results', last_week_datetime_comparison_results
+              'current_date', current_date
             )
             FROM weekly_challenges
           ),
@@ -215,13 +180,9 @@ export async function getRewardsAndProgress(c: Context) {
       weeklyDebug: progress?.progress_summary?.weekly_debug,
       debugInfo: progress?.progress_summary?.debug_info,
       directCount: weeklyChallenges?.count || 0,
-      rawWeeklyChallenges: await db.prepare(`
-        SELECT COUNT(*) as count, GROUP_CONCAT(completed_at) as dates
-        FROM challenge_logs
-        WHERE child_id = ?
-        AND completed = 1
-        AND completed_at >= datetime('now', 'weekday 0')
-      `).bind(childId).first()
+      directDates: weeklyChallenges?.dates,
+      directWeekStart: weeklyChallenges?.week_start,
+      directCurrentDate: weeklyChallenges?.current_date
     });
 
     // Return the response

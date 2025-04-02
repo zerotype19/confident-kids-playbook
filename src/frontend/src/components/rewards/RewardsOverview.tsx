@@ -8,14 +8,13 @@ interface RewardsOverviewProps {
 export default function RewardsOverview({ progress }: RewardsOverviewProps) {
   if (!progress) return null;
 
-  console.log('RewardsOverview: Progress data:', {
-    total_challenges: progress.milestones_completed,
-    weekly_challenges: progress.weekly_challenges,
-    current_streak: progress.current_streak,
-    longest_streak: progress.longest_streak,
-    pillar_progress: progress.pillar_progress,
-    milestone_progress: progress.milestone_progress,
-    next_reward: progress.next_reward
+  console.log('RewardsOverview: Raw progress data:', progress);
+  console.log('RewardsOverview: Weekly challenges:', {
+    value: progress.weekly_challenges,
+    type: typeof progress.weekly_challenges,
+    isUndefined: progress.weekly_challenges === undefined,
+    isNull: progress.weekly_challenges === null,
+    displayValue: progress.weekly_challenges || 0
   });
 
   return (
@@ -44,7 +43,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
             <div className="text-3xl">📅</div>
             <div>
               <div className="text-2xl font-bold text-kidoova-accent">
-                {progress.weekly_challenges || 0}
+                {typeof progress.weekly_challenges === 'number' ? progress.weekly_challenges : 0}
               </div>
               <p className="text-sm text-gray-600">Challenges completed this week</p>
             </div>
