@@ -43,6 +43,20 @@ export async function getRewardsAndProgress(c: Context) {
       weekStartDateTime: weeklyChallenges?.week_start_datetime
     });
 
+    // Let's also get a raw count of all completed challenges for this week
+    const rawWeeklyCount = await db.prepare(`
+      SELECT COUNT(*) as count
+      FROM challenge_logs
+      WHERE child_id = ?
+      AND completed = 1
+      AND completed_at >= datetime('now', 'weekday 0')
+    `).bind(childId).first<{ count: number }>();
+
+    console.log('Reward Engine: Raw weekly count:', {
+      childId,
+      count: rawWeeklyCount?.count || 0
+    });
+
     const progress = await db.prepare(`
       WITH challenge_progress AS (
         SELECT 
@@ -65,7 +79,7 @@ export async function getRewardsAndProgress(c: Context) {
         FROM challenge_logs
         WHERE child_id = ? AND completed = 1
       ),
-      weekly_challenges AS (
+      weekly_progress AS (
         SELECT 
           COUNT(*) as count,
           GROUP_CONCAT(completed_at) as dates,
@@ -77,25 +91,6 @@ export async function getRewardsAndProgress(c: Context) {
         WHERE child_id = ?
         AND completed = 1
         AND completed_at >= datetime('now', 'weekday 0')
-      ),
-      debug_weekly AS (
-        SELECT 
-          date('now', 'weekday 0') as week_start,
-          COUNT(*) as total_completed,
-          GROUP_CONCAT(date(completed_at)) as completed_dates,
-          GROUP_CONCAT(completed_at) as raw_dates,
-          GROUP_CONCAT(completed) as completion_status,
-          GROUP_CONCAT(challenge_id) as challenge_ids,
-          GROUP_CONCAT(child_id) as child_ids,
-          date('now') as current_date,
-          date('now', 'weekday 0') as week_start_date,
-          date('now', 'weekday 6') as week_end_date,
-          GROUP_CONCAT(completed_at >= datetime('now', 'weekday 0')) as date_comparison_results,
-          GROUP_CONCAT(date(completed_at)) as all_dates,
-          GROUP_CONCAT(completed_at) as all_raw_dates
-        FROM challenge_logs
-        WHERE child_id = ? 
-        AND completed = 1
       ),
       next_reward AS (
         SELECT 
@@ -120,7 +115,7 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', COALESCE((SELECT count FROM weekly_challenges), 0),
+          'weekly_challenges', COALESCE((SELECT count FROM weekly_progress), 0),
           'pillar_progress', json_group_object(
             pillar_id,
             json_object(
@@ -156,7 +151,7 @@ export async function getRewardsAndProgress(c: Context) {
               'current_datetime', current_datetime,
               'week_start_datetime', week_start_datetime
             )
-            FROM weekly_challenges
+            FROM weekly_progress
           )
         ) as progress_summary
     `).bind(childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
@@ -169,6 +164,7 @@ export async function getRewardsAndProgress(c: Context) {
       weeklyTotal: progress?.progress_summary?.weekly_challenges || 0,
       weeklyDebug: progress?.progress_summary?.weekly_debug,
       directCount: weeklyChallenges?.count || 0,
+      rawCount: rawWeeklyCount?.count || 0,
       directDates: weeklyChallenges?.dates,
       directWeekStart: weeklyChallenges?.week_start,
       directCurrentDate: weeklyChallenges?.current_date,
