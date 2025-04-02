@@ -8,7 +8,6 @@ interface ChallengeLogRequest {
   child_id: string;
   challenge_id: string;
   reflection?: string;
-  mood_rating?: number;
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
@@ -76,14 +75,13 @@ export async function onRequest(context: { request: Request; env: Env }) {
     // Insert new log
     const logId = uuidv4();
     await env.DB.prepare(`
-      INSERT INTO challenge_logs (id, child_id, challenge_id, completed_at, reflection, mood_rating)
-      VALUES (?, ?, ?, datetime('now'), ?, COALESCE(?, 0))
+      INSERT INTO challenge_logs (id, child_id, challenge_id, completed_at, reflection)
+      VALUES (?, ?, ?, datetime('now'), ?)
     `).bind(
       logId,
       body.child_id,
       body.challenge_id,
-      body.reflection || null,
-      body.mood_rating
+      body.reflection || null
     ).run();
 
     // Evaluate and grant rewards
