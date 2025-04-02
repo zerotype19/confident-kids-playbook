@@ -65,7 +65,7 @@ export default function RewardsPage() {
         }
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/rewards?childId=${selectedChild.id}`,
+          `${import.meta.env.VITE_API_URL}/rewards?childId=${selectedChild.id}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
