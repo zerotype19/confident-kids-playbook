@@ -83,12 +83,24 @@ export interface ProgressSummary {
   current_streak: number;
   longest_streak: number;
   weekly_challenges: number;
-  pillar_progress: Record<string, { total: number; completed: number }>;
-  milestone_progress: Record<string, { total: number; completed: number }>;
+  pillar_progress: Record<string, {
+    total: number;
+    completed: number;
+    percentage: number;
+  }>;
+  milestone_progress: {
+    current: number;
+    next: number;
+    percentage: number;
+  };
   next_reward?: {
+    id: string;
     title: string;
     description: string;
     icon: string;
+    type: 'milestone' | 'streak' | 'pillar';
+    criteria_value: number;
+    pillar_id?: number;
     progress: number;
   };
 } 

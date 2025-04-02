@@ -34,7 +34,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
             <div className="text-3xl">📅</div>
             <div>
               <div className="text-2xl font-bold text-kidoova-accent">
-                {progress.weekly_challenges}
+                {progress.weekly_challenges || 0}
               </div>
               <p className="text-sm text-gray-600">Challenges completed this week</p>
             </div>
