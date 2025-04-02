@@ -16,6 +16,8 @@ export async function getRewardsAndProgress(c: Context) {
     `).all<Reward>();
 
     // Fetch child's progress
+    console.log('Reward Engine: Starting progress calculation for child:', childId);
+    
     const progress = await db.prepare(`
       WITH challenge_progress AS (
         SELECT 
@@ -110,60 +112,13 @@ export async function getRewardsAndProgress(c: Context) {
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'milestones_completed', (SELECT completed FROM milestone_progress),
-          'weekly_challenges', COALESCE((SELECT completed FROM weekly_challenges), 0),
-          'weekly_debug', (
-            SELECT json_object(
-              'completed', completed,
-              'dates', dates,
-              'raw_dates', raw_dates,
-              'week_start', week_start,
-              'current_date', current_date,
-              'date_comparison', datetime('now', 'weekday 0'),
-              'date_comparison_results', date_comparison_results,
-              'all_completed_dates', all_completed_dates,
-              'total_count', total_count,
-              'unique_dates', unique_dates,
-              'unique_raw_dates', unique_raw_dates,
-              'unique_date_comparison_results', unique_date_comparison_results,
-              'unique_all_completed_dates', unique_all_completed_dates,
-              'week_start_datetime', week_start_datetime,
-              'current_datetime', current_datetime,
-              'datetime_comparison_results', datetime_comparison_results,
-              'child_ids', child_ids,
-              'challenge_ids', challenge_ids,
-              'all_dates', all_dates,
-              'all_raw_dates', all_raw_dates,
-              'all_date_comparison_results', all_date_comparison_results,
-              'all_datetime_comparison_results', all_datetime_comparison_results,
-              'last_week_comparison_results', last_week_comparison_results,
-              'last_week_datetime_comparison_results', last_week_datetime_comparison_results,
-              'sql_query', 'SELECT COUNT(*) as completed FROM challenge_logs WHERE child_id = ? AND completed = 1 AND completed_at >= datetime("now", "weekday 0")'
-            )
-            FROM weekly_challenges
-          ),
-          'debug_info', (
-            SELECT json_object(
-              'week_start', week_start,
-              'total_completed', total_completed,
-              'completed_dates', completed_dates,
-              'raw_dates', raw_dates,
-              'completion_status', completion_status,
-              'challenge_ids', challenge_ids,
-              'child_ids', child_ids,
-              'current_date', current_date,
-              'week_start_date', week_start_date,
-              'week_end_date', week_end_date,
-              'date_comparison_results', date_comparison_results,
-              'all_dates', all_dates,
-              'all_raw_dates', all_raw_dates,
-              'query_params', json_object(
-                'child_id', ?,
-                'week_start', datetime('now', 'weekday 0')
-              )
-            )
-            FROM debug_weekly
-          ),
+          'weekly_challenges', COALESCE((
+            SELECT COUNT(*) 
+            FROM challenge_logs 
+            WHERE child_id = ? 
+            AND completed = 1 
+            AND completed_at >= datetime('now', 'weekday 0')
+          ), 0),
           'pillar_progress', json_group_object(
             pillar_id,
             json_object(
@@ -189,29 +144,72 @@ export async function getRewardsAndProgress(c: Context) {
               'progress', progress
             )
             FROM next_reward
+          ),
+          'weekly_debug', (
+            SELECT json_object(
+              'completed', completed,
+              'dates', dates,
+              'raw_dates', raw_dates,
+              'week_start', week_start,
+              'current_date', current_date,
+              'date_comparison', datetime('now', 'weekday 0'),
+              'date_comparison_results', date_comparison_results,
+              'all_completed_dates', all_completed_dates,
+              'total_count', total_count,
+              'unique_dates', unique_dates,
+              'unique_raw_dates', unique_raw_dates,
+              'unique_date_comparison_results', unique_date_comparison_results,
+              'unique_all_completed_dates', unique_all_completed_dates,
+              'week_start_datetime', week_start_datetime,
+              'current_datetime', current_datetime,
+              'datetime_comparison_results', datetime_comparison_results,
+              'child_ids', child_ids,
+              'challenge_ids', challenge_ids,
+              'all_dates', all_dates,
+              'all_raw_dates', all_raw_dates,
+              'all_date_comparison_results', all_date_comparison_results,
+              'all_datetime_comparison_results', all_datetime_comparison_results,
+              'last_week_comparison_results', last_week_comparison_results,
+              'last_week_datetime_comparison_results', last_week_datetime_comparison_results
+            )
+            FROM weekly_challenges
+          ),
+          'debug_info', (
+            SELECT json_object(
+              'week_start', week_start,
+              'total_completed', total_completed,
+              'completed_dates', completed_dates,
+              'raw_dates', raw_dates,
+              'completion_status', completion_status,
+              'challenge_ids', challenge_ids,
+              'child_ids', child_ids,
+              'current_date', current_date,
+              'week_start_date', week_start_date,
+              'week_end_date', week_end_date,
+              'date_comparison_results', date_comparison_results,
+              'all_dates', all_dates,
+              'all_raw_dates', all_raw_dates
+            )
+            FROM debug_weekly
           )
         ) as progress_summary
-    `).bind(childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
+    `).bind(childId, childId, childId, childId, childId, childId, childId, childId).first<{ progress_summary: ProgressSummary }>();
 
     // Log the progress summary before returning
     console.log('Reward Engine: Progress summary:', progress?.progress_summary);
-    console.log('Reward Engine: Weekly challenges debug:', {
-      raw_weekly_challenges: progress?.progress_summary?.weekly_debug,
-      calculated_weekly_challenges: progress?.progress_summary?.weekly_challenges,
-      debug_info: progress?.progress_summary?.debug_info
+    console.log('Reward Engine: Weekly challenges calculation:', {
+      childId,
+      weekStart: new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).toISOString(),
+      weeklyTotal: progress?.progress_summary?.weekly_challenges || 0,
+      weeklyDebug: progress?.progress_summary?.weekly_debug,
+      debugInfo: progress?.progress_summary?.debug_info
     });
 
-    // Ensure weekly_challenges is included in the response
-    const progressSummary = progress?.progress_summary || {};
-    const response = {
+    // Return the response
+    return c.json({
       rewards: rewards.results,
-      progress: {
-        ...progressSummary,
-        weekly_challenges: progressSummary.weekly_challenges || 0
-      }
-    };
-
-    return c.json(response);
+      progress: progress?.progress_summary || null
+    });
   } catch (error) {
     console.error('Error fetching rewards and progress:', error);
     return c.json({ error: 'Failed to fetch rewards and progress' }, 500);
