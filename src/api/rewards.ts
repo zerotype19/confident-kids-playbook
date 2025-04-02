@@ -105,7 +105,8 @@ export async function getRewardsAndProgress(c: Context) {
               'current_date', current_date,
               'date_comparison', datetime('now', 'weekday 0'),
               'date_comparison_results', date_comparison_results,
-              'all_completed_dates', all_completed_dates
+              'all_completed_dates', all_completed_dates,
+              'sql_query', 'SELECT COUNT(*) as completed FROM challenge_logs WHERE child_id = ? AND completed = 1 AND completed_at >= datetime("now", "weekday 0")'
             )
             FROM weekly_challenges
           ),
