@@ -18,6 +18,7 @@ import { onRequestGet as pillars } from './api/pillars/index'
 import { onRequestGet as pillarProgress } from './api/pillars/[id]/progress'
 import { onRequestGet as pillar } from './api/pillars/[id]'
 import { onRequestGet as pillarChallenges } from './api/pillars/[id]/challenges'
+import { onRequestPost as challengesComplete } from './api/challenges_complete'
 
 const router = Router()
 
@@ -102,6 +103,7 @@ router.post('/api/notes', (request, context) => createNote({ request, env: conte
 
 // All challenges route
 router.get('/api/challenges/all', (request, context) => allChallenges({ request, env: context.env }))
+router.post('/api/challenges/complete', (request, context) => challengesComplete({ request, env: context.env }))
 
 // Pillars route
 router.get('/api/pillars', (request, context) => pillars({ request, env: context.env }))
