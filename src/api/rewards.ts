@@ -57,6 +57,17 @@ export async function getRewardsAndProgress(c: Context) {
       count: rawWeeklyCount?.count || 0
     });
 
+    // Get weekly challenges count directly
+    const weeklyChallengesCount = await db.prepare(`
+      SELECT COUNT(*) as count
+      FROM challenge_logs
+      WHERE child_id = ?
+      AND completed = 1
+      AND completed_at >= datetime('now', 'weekday 0')
+    `).bind(childId).first<{ count: number }>();
+
+    console.log('Reward Engine: Direct weekly challenges count:', weeklyChallengesCount);
+
     const progress = await db.prepare(`
       WITH challenge_progress AS (
         SELECT 
@@ -163,7 +174,7 @@ export async function getRewardsAndProgress(c: Context) {
       weekStart: new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).toISOString(),
       weeklyTotal: progress?.progress_summary?.weekly_challenges || 0,
       weeklyDebug: progress?.progress_summary?.weekly_debug,
-      directCount: weeklyChallenges?.count || 0,
+      directCount: weeklyChallengesCount?.count || 0,
       rawCount: rawWeeklyCount?.count || 0,
       directDates: weeklyChallenges?.dates,
       directWeekStart: weeklyChallenges?.week_start,
