@@ -108,20 +108,19 @@ export async function getRewardsAndProgress(c: Context) {
         SELECT COUNT(*) as completed
         FROM challenge_logs
         WHERE child_id = ? AND completed = 1
-      ),
-      weekly_progress AS (
-        SELECT COUNT(*) as count
-        FROM challenge_logs
-        WHERE child_id = ?
-        AND completed = 1
-        AND date(completed_at) >= date('now', 'weekday 0')
       )
       SELECT 
         json_object(
           'total_challenges', (SELECT completed FROM milestone_progress),
           'current_streak', (SELECT current_streak FROM streak_info),
           'longest_streak', (SELECT longest_streak FROM streak_info),
-          'weekly_challenges', COALESCE((SELECT count FROM weekly_progress), 0),
+          'weekly_challenges', (
+            SELECT COUNT(*)
+            FROM challenge_logs
+            WHERE child_id = ?
+            AND completed = 1
+            AND date(completed_at) >= date('now', 'weekday 0')
+          ),
           'pillar_progress', json_object(
             '1', json_object(
               'completed', COALESCE(SUM(CASE WHEN cp.pillar_id = 1 THEN cp.completed ELSE 0 END), 0),
