@@ -27,16 +27,16 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
           </div>
         </div>
 
-        {/* Current Streak */}
+        {/* Weekly Challenges */}
         <div className="bg-kidoova-yellow/10 rounded-lg p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Current Streak</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">This Week's Progress</h3>
           <div className="flex items-center gap-4">
-            <div className="text-3xl">🔥</div>
+            <div className="text-3xl">📅</div>
             <div>
               <div className="text-2xl font-bold text-kidoova-accent">
-                {progress.current_streak} days
+                {progress.weekly_challenges}
               </div>
-              <p className="text-sm text-gray-600">Keep the momentum going!</p>
+              <p className="text-sm text-gray-600">Challenges completed this week</p>
             </div>
           </div>
         </div>
