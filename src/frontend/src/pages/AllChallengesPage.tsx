@@ -165,6 +165,56 @@ export default function AllChallengesPage() {
     setCurrentPage(1);
   };
 
+  // Handle challenge completion
+  const handleChallengeComplete = async (challengeId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/challenges/${challengeId}/complete`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ child_id: selectedChild?.id })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to mark challenge as complete');
+      }
+
+      // Update the challenge in the local state
+      setChallenges(prevChallenges => 
+        prevChallenges.map(challenge => 
+          Number(challenge.id) === challengeId 
+            ? { ...challenge, is_completed: 1 }
+            : challenge
+        )
+      );
+
+      // Update challenge groups
+      setChallengeGroups(prevGroups => 
+        prevGroups.map(group => ({
+          ...group,
+          titles: group.titles.filter(title => 
+            !challenges.find(c => 
+              Number(c.id) === challengeId && c.title === title
+            )
+          )
+        })).filter(group => group.titles.length > 0)
+      );
+    } catch (err) {
+      console.error('Error completing challenge:', err);
+      throw err;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -306,10 +356,7 @@ export default function AllChallengesPage() {
                 <ChallengeCard
                   key={challenge.id}
                   challenge={challenge}
-                  onComplete={async (challengeId) => {
-                    // TODO: Implement challenge completion
-                    console.log('Challenge completed:', challengeId);
-                  }}
+                  onComplete={handleChallengeComplete}
                 />
               ))}
             </div>
