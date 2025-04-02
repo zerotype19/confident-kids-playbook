@@ -196,7 +196,7 @@ export async function getRewardsAndProgress(c: Context) {
         total_challenges: progressSummary.total_challenges || 0,
         current_streak: progressSummary.current_streak || 0,
         longest_streak: progressSummary.longest_streak || 0,
-        weekly_challenges: weeklyChallengesResult?.count || 0,
+        weekly_challenges: progressSummary.weekly_challenges || 0,
         pillar_progress: progressSummary.pillar_progress || {},
         milestone_progress: progressSummary.milestone_progress || {
           current: 0,
