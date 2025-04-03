@@ -9,6 +9,7 @@ import PillarsPage from "./pages/PillarsPage"
 import PillarDetailPage from "./pages/PillarDetailPage"
 import RewardsPage from "./pages/RewardsPage"
 import ManageChildrenPage from "./pages/ManageChildrenPage"
+import { ManageProfilePage } from "./pages/ManageProfilePage"
 import { PrivateRoute } from "./components/PrivateRoute"
 import PageWrapper from "./components/PageWrapper"
 
@@ -86,6 +87,16 @@ export default function App(): JSX.Element {
               } 
             >
               <Route index element={<ManageChildrenPage />} />
+            </Route>
+            <Route 
+              path="/manage-profile" 
+              element={
+                <PrivateRoute>
+                  <PageWrapper />
+                </PrivateRoute>
+              } 
+            >
+              <Route index element={<ManageProfilePage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

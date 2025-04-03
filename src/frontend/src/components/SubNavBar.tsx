@@ -24,8 +24,8 @@ export default function SubNavBar() {
     { path: '/pillars', label: 'Pillars', icon: '🎯' },
     { path: '/all-challenges', label: 'Challenges', icon: '🧠' },
     { path: '/rewards', label: 'Rewards', icon: '🎁' },
-    { path: '/manage-children', label: 'Children', icon: '👶' },
-    { path: '/profile', label: 'Profile', icon: '👤' },
+    { path: '/manage-children', label: 'Children', icon: '��' },
+    { path: '/manage-profile', label: 'Profile Settings', icon: '👤' },
   ];
 
   // Don't show nav on login, onboarding, or root pages
