@@ -81,10 +81,8 @@ export default function ChildSelector({ children: propChildren }: ChildSelectorP
                   setSelectedChild(child);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2 text-sm ${
-                  selectedChild?.id === child.id
-                    ? 'bg-gray-200 text-gray-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                className={`w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${
+                  selectedChild?.id === child.id ? 'bg-gray-100' : ''
                 }`}
                 role="menuitem"
               >
