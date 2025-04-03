@@ -126,7 +126,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
         child_id,
         challenge_id,
         completed_at
-      ) VALUES (?, ?, ?, datetime('now'))
+      ) VALUES (?, ?, ?, datetime('now', 'localtime', 'America/New_York'))
     `)
       .bind(logId, body.child_id, body.challenge_id)
       .run();
