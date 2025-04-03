@@ -14,6 +14,15 @@ export default function ChildSelector({ children: propChildren }: ChildSelectorP
   // Use children from props if provided, otherwise use from context
   const children = propChildren || contextChildren;
 
+  // Add debug logging
+  useEffect(() => {
+    console.log('🎯 ChildSelector - Context Children:', contextChildren);
+    console.log('🎯 ChildSelector - Prop Children:', propChildren);
+    console.log('🎯 ChildSelector - Final Children:', children);
+    console.log('🎯 ChildSelector - Selected Child:', selectedChild);
+    console.log('🎯 ChildSelector - Is Loading:', isLoading);
+  }, [contextChildren, propChildren, children, selectedChild, isLoading]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -66,6 +75,7 @@ export default function ChildSelector({ children: propChildren }: ChildSelectorP
               <button
                 key={child.id}
                 onClick={() => {
+                  console.log('👆 Child selected:', child);
                   setSelectedChild(child);
                   setIsOpen(false);
                 }}
