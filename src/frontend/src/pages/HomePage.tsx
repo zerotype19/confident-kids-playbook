@@ -319,7 +319,7 @@ export default function HomePage(): JSX.Element {
               <ul className="space-y-2">
                 <li><a href="#" className="text-gray-600 hover:text-gray-900">Our Story</a></li>
                 <li><a href="#" className="text-gray-600 hover:text-gray-900">Team</a></li>
-                <li><a href="/confident_kids_playbook.html" className="text-gray-600 hover:text-gray-900">Kidoova Confident Kids Playbook</a></li>
+                <li><a href="/playbook" className="text-gray-600 hover:text-gray-900">Kidoova Confident Kids Playbook</a></li>
               </ul>
             </div>
             <div>

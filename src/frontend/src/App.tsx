@@ -10,6 +10,7 @@ import PillarDetailPage from "./pages/PillarDetailPage"
 import RewardsPage from "./pages/RewardsPage"
 import ManageChildrenPage from "./pages/ManageChildrenPage"
 import { ManageProfilePage } from "./pages/ManageProfilePage"
+import PlaybookPage from "./pages/PlaybookPage"
 import { PrivateRoute } from "./components/PrivateRoute"
 import PageWrapper from "./components/PageWrapper"
 
@@ -21,6 +22,7 @@ export default function App(): JSX.Element {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/playbook" element={<PlaybookPage />} />
             <Route 
               path="/onboarding" 
               element={
