@@ -278,7 +278,7 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM challenge_logs
     WHERE child_id = ?
     AND completed_at IS NOT NULL
-    AND datetime(completed_at, 'localtime', 'America/New_York') >= datetime('now', 'localtime', 'America/New_York', '-7 days')
+    AND date(datetime(completed_at, 'localtime', 'America/New_York')) >= date('now', 'localtime', 'America/New_York', '-7 days')
   `).bind(childId).first<{ 
     weekly_challenges: number;
     current_time: string;
