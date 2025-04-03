@@ -1,5 +1,5 @@
 {
-    "name": "api.kidoova.com",
+    "name": "kidoova-api",
     "private": true,
     "type": "module",
     "main": "index.ts",

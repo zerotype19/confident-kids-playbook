@@ -1,4 +1,4 @@
-name = "api.kidoova.com"
+name = "kidoova-api"
 type = "javascript"
 main = "index.ts"
 compatibility_date = "2024-12-01"
