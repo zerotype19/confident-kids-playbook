@@ -50,11 +50,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const customerId = subscription.customer as string;
         const userId = subscription.metadata.user_id;
         
+        // Get the product details
+        const price = subscription.items.data[0].price;
+        const product = price.product as Stripe.Product;
+        
         console.log('Subscription data:', {
           customerId,
           userId,
           subscriptionId: subscription.id,
-          plan: subscription.items.data[0].price.nickname || 'premium',
+          plan: product.name,
           status: subscription.status,
           currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
           cancelAtPeriodEnd: subscription.cancel_at_period_end
@@ -88,7 +92,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             userId,
             customerId,
             subscription.id,
-            subscription.items.data[0].price.nickname || 'premium',
+            product.name,
             subscription.status,
             new Date(subscription.current_period_end * 1000).toISOString(),
             subscription.cancel_at_period_end ? 1 : 0
