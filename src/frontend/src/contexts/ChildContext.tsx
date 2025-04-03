@@ -47,22 +47,22 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
 
         const data = await response.json();
-        setChildrenList(data);
+        setChildrenList(data.children || []);
 
         // If we have a selectedChildId from auth context, find and set the corresponding child
         if (selectedChildId) {
-          const child = data.find((c: Child) => c.id === selectedChildId);
+          const child = (data.children || []).find((c: Child) => c.id === selectedChildId);
           if (child) {
             setSelectedChildState(child);
-          } else if (data.length > 0) {
+          } else if (data.children && data.children.length > 0) {
             // If the selected child not found but we have children, select the first one
-            setSelectedChildState(data[0]);
-            setSelectedChildId(data[0].id);
+            setSelectedChildState(data.children[0]);
+            setSelectedChildId(data.children[0].id);
           }
-        } else if (data.length > 0) {
+        } else if (data.children && data.children.length > 0) {
           // If no selected child ID but we have children, select the first one
-          setSelectedChildState(data[0]);
-          setSelectedChildId(data[0].id);
+          setSelectedChildState(data.children[0]);
+          setSelectedChildId(data.children[0].id);
         }
       } catch (err) {
         console.error('Error fetching children:', err);
