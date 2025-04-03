@@ -1,3 +1,5 @@
+import { D1Database } from '@cloudflare/workers-types';
+
 export interface Env {
   DB: D1Database;
   STRIPE_SECRET_KEY: string;
@@ -41,21 +43,20 @@ export interface PortalRequest {
 
 export interface Child {
   id: string;
-  name: string;
-  age: number;
-  age_range: string;
   family_id: string;
+  name: string;
+  birthdate: string;
+  gender: string;
+  age_range: string;
+  avatar_url: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export interface FamilyMember {
-  id: string;
-  user_id: string;
   family_id: string;
-  role: 'owner' | 'member';
+  user_id: string;
+  role: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface Family {
@@ -120,23 +121,58 @@ export interface FeatureFlags {
   'premium.family_sharing': boolean;
 }
 
+export interface Reward {
+  id: string;
+  child_id: string;
+  name: string;
+  description: string;
+  points: number;
+  created_at: string;
+}
+
+export interface Challenge {
+  id: string;
+  pillar_id: string;
+  title: string;
+  description: string;
+  points: number;
+  age_range: string;
+  created_at: string;
+}
+
+export interface Pillar {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  created_at: string;
+}
+
+export interface D1Result<T = unknown> {
+  results: T[];
+  success: boolean;
+  meta: {
+    changes: number;
+    duration: number;
+    last_row_id: number;
+    served_by: string;
+  };
+}
+
 // Cloudflare Workers types
 export interface D1Database {
   prepare(query: string): D1PreparedStatement;
-  exec(query: string): Promise<D1Result>;
+  dump(): Promise<ArrayBuffer>;
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]>;
+  exec<T = unknown>(query: string): Promise<D1Result<T>>;
 }
 
 export interface D1PreparedStatement {
   bind(...values: any[]): D1PreparedStatement;
-  first<T = unknown>(colName?: string): Promise<T>;
+  first<T = unknown>(colName?: string): Promise<T | null>;
+  run<T = unknown>(): Promise<D1Result<T>>;
   all<T = unknown>(): Promise<D1Result<T>>;
-  run(): Promise<D1Result>;
-}
-
-export interface D1Result<T = unknown> {
-  results?: T[];
-  success: boolean;
-  error?: string;
+  raw<T = unknown>(): Promise<T[]>;
 }
 
 export interface R2Bucket {

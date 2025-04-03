@@ -2,26 +2,32 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
-import { D1Database } from '@cloudflare/workers-types';
-
-import auth from './auth';
-import children from './children';
-import challenges from './challenges';
+import { Env } from '../types';
+import { verifyJWT } from '../auth';
+import { onRequest as childrenHandler } from './children';
+import { onRequestGet as challengesTodayHandler } from './challenges_today';
 import pillars from './pillars';
-import rewards from './rewards/[childId]';
+import { onRequestGet as rewardsHandler } from './rewards/[childId]';
+import { onRequest as childrenUpdate } from './children_update';
 
-const app = new Hono<{ Bindings: { DB: D1Database } }>();
+const app = new Hono<{ Bindings: Env }>();
 
 // Middleware
 app.use('*', logger());
 app.use('*', cors());
 app.use('*', prettyJSON());
 
-// Routes
-app.route('/api/auth', auth);
-app.route('/api/children', children);
-app.route('/api/challenges', challenges);
+// Children routes
+app.all('/api/children', childrenHandler);
+app.all('/api/children/:id', childrenUpdate);
+
+// Challenges routes
+app.get('/api/challenges/today', challengesTodayHandler);
+
+// Pillars routes
 app.route('/api/pillars', pillars);
-app.route('/api/rewards/:childId', rewards);
+
+// Rewards routes
+app.get('/api/rewards/:childId', rewardsHandler);
 
 export default app; 
