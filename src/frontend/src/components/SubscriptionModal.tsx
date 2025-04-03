@@ -28,18 +28,6 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       '24/7 support'
     ],
     interval: 'month'
-  },
-  {
-    id: 'yearly',
-    name: 'Yearly Plan',
-    price: 99.99,
-    features: [
-      'All Monthly Plan features',
-      'Save 16% compared to monthly',
-      'Priority support',
-      'Early access to new features'
-    ],
-    interval: 'year'
   }
 ];
 
@@ -77,8 +65,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          child_id: selectedChildId,
-          price_id: import.meta.env.VITE_STRIPE_PRICE_ID || ''
+          child_id: selectedChildId
         }),
       });
 
@@ -135,7 +122,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {SUBSCRIPTION_PLANS.map((plan) => (
             <div
               key={plan.id}

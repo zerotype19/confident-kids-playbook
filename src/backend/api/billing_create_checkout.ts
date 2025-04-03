@@ -3,24 +3,16 @@ import Stripe from 'stripe';
 
 interface CheckoutRequest {
   child_id: string;
-  price_id: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   
   try {
-    const { child_id, price_id } = await request.json() as CheckoutRequest;
+    const { child_id } = await request.json() as CheckoutRequest;
     
     if (!child_id) {
       return new Response(JSON.stringify({ error: 'child_id is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (!price_id) {
-      return new Response(JSON.stringify({ error: 'price_id is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -50,26 +42,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Initialize Stripe with the secret key
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
       apiVersion: '2023-10-16',
     });
 
-    // Create a checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: price_id,
+          price: env.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: `${env.FRONTEND_URL}/manage-profile?success=true`,
-      cancel_url: `${env.FRONTEND_URL}/manage-profile?canceled=true`,
+      success_url: `${env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${env.FRONTEND_URL}/cancel`,
       metadata: {
         user_id: user.id,
-        child_id: child_id,
       },
     });
 
