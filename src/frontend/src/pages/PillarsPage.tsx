@@ -87,34 +87,43 @@ export default function PillarsPage() {
     fetchPillars();
   }, [selectedChild]);
 
-  if (!selectedChild) {
+  if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-600 mb-4">Please select a child to view their pillars</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kidoova-accent"></div>
       </div>
     );
   }
 
-  if (isLoading) {
-    return <div className="text-center py-8">Loading pillars...</div>;
-  }
-
   if (error) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-500">{error}</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500 text-center">
+          <p className="text-lg font-medium">Error loading pillars</p>
+          <p className="text-sm mt-2">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedChild) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">Please select a child to view their pillars</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-heading text-gray-900">Pillars of Growth</h1>
+        <h1 className="text-3xl font-heading text-gray-900">Pillars of Growth</h1>
         <ChildSelector children={children} />
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {pillars.map((pillar) => (
           <ExpandedPillar
             key={pillar.id}
