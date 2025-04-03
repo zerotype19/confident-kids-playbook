@@ -21,6 +21,8 @@ import { onRequestGet as pillar } from './api/pillars/[id]'
 import { onRequestGet as pillarChallenges } from './api/pillars/[id]/challenges'
 import { onRequestPost as challengesComplete } from './api/challenges_complete'
 import { onRequest as userSelectedChild } from './api/user_selected_child'
+import { onRequestGet as billingStatus } from './api/billing_status'
+import { onRequestPost as billingCreatePortal } from './api/billing_create_portal'
 
 const router = Router()
 
@@ -84,6 +86,10 @@ router.post('/api/auth/google', (request, context) => authGoogle({ request, env:
 // User profile routes
 router.get('/api/user/profile', (request, context) => userProfile({ request, env: context.env }))
 router.put('/api/user/selected-child', (request, context) => userSelectedChild({ request, env: context.env }))
+
+// Billing routes
+router.get('/api/billing_status', (request, context) => billingStatus({ request, env: context.env }))
+router.post('/api/billing_create_portal', (request, context) => billingCreatePortal({ request, env: context.env }))
 
 // Onboarding routes
 router.get('/api/onboarding/status', (request, context) => onboardingStatus({ request, env: context.env }))
