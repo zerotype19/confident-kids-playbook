@@ -11,6 +11,8 @@ import RewardsPage from "./pages/RewardsPage"
 import ManageChildrenPage from "./pages/ManageChildrenPage"
 import { ManageProfilePage } from "./pages/ManageProfilePage"
 import PlaybookPage from "./pages/PlaybookPage"
+import SuccessPage from "./pages/SuccessPage"
+import CancelPage from "./pages/CancelPage"
 import { PrivateRoute } from "./components/PrivateRoute"
 import PageWrapper from "./components/PageWrapper"
 
@@ -23,6 +25,8 @@ export default function App(): JSX.Element {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/playbook" element={<PlaybookPage />} />
+            <Route path="/success" element={<SuccessPage />} />
+            <Route path="/cancel" element={<CancelPage />} />
             <Route 
               path="/onboarding" 
               element={
