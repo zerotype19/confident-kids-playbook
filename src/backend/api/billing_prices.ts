@@ -10,10 +10,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       apiVersion: '2023-10-16',
     });
 
-    // Get the prices from Stripe
+    // Get the prices from Stripe, only active products
     const prices = await stripe.prices.list({
       active: true,
       expand: ['data.product'],
+      query: 'active:\'true\' AND product:\'prod_Rz40ev2BvHHJPI,prod_S3uZxpqZtkYe6V\'',
     });
 
     // Format the prices for the frontend
@@ -23,7 +24,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         id: product.metadata.plan_type || 'single',
         name: product.name,
         price: price.unit_amount ? price.unit_amount / 100 : 0,
-        features: product.features?.map(f => f.name) || [],
+        features: JSON.parse(product.metadata.features || '[]'),
         interval: price.recurring?.interval || 'month',
         price_id: price.id
       };

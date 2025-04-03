@@ -127,34 +127,11 @@ export const ManageProfilePage: React.FC = () => {
         return;
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/billing_create_checkout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ 
-          child_id: selectedChildId,
-          price_id: import.meta.env.VITE_STRIPE_PRICE_ID || ''
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
-      }
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
+      // Show subscription modal instead of direct upgrade
+      setIsSubscriptionModalOpen(true);
     } catch (err) {
-      console.error('Error creating checkout session:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create checkout session');
+      console.error('Error handling subscription upgrade:', err);
+      setError(err instanceof Error ? err.message : 'Failed to handle subscription upgrade');
     }
   };
 
