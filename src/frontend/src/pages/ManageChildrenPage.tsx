@@ -45,7 +45,7 @@ export default function ManageChildrenPage() {
       }
 
       const data = await response.json();
-      setChildren(data);
+      setChildren(data.children || []);
     } catch (err) {
       console.error('Error fetching children:', err);
       setError('Failed to load children');
