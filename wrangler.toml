@@ -19,8 +19,8 @@ name = "@tsndr/cloudflare-worker-jwt"
 
 [vars]
 # Add any environment variables here
-STRIPE_SECRET_KEY = "sk_test_your_stripe_secret_key"
-STRIPE_PRICE_ID = "price_your_stripe_price_id"
+STRIPE_SECRET_KEY = "sk_test_51R55ZbPEQoD1awJQDbDTRm5vQ8ng5R8FB7RVpfrh7ZOElp3PgmiAa17ZmiPOoxksDgaKxOt13DQAJxZEmRJp0wj6003MGORtGG"
+STRIPE_PRICE_ID = "price_1R55sbPEQoD1awJQfStxQA3F"
 STRIPE_WEBHOOK_SECRET = "whsec_your_stripe_webhook_secret"
 FRONTEND_URL = "https://confident-kids-playbook.pages.dev"
 
