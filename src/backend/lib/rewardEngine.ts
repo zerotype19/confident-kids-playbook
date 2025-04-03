@@ -1,4 +1,4 @@
-import { Env } from "../types";
+import { Env, D1Database } from "../types";
 import { v4 as uuidv4 } from 'uuid';
 
 interface Reward {
@@ -9,6 +9,9 @@ interface Reward {
   type: 'milestone' | 'streak' | 'pillar';
   criteria_value: number;
   pillar_id?: number;
+  level?: number;
+  unlockable_content?: string;
+  reward_type?: string;
 }
 
 interface ChildReward {
@@ -31,7 +34,7 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
     
     console.log('Reward Engine: Total completed challenges:', total);
     
-    const milestones = [5, 10, 20];
+    const milestones = [5, 10, 20, 50, 100];
     for (const value of milestones) {
       console.log('Reward Engine: Checking milestone:', value);
       if (total >= value) {
@@ -63,7 +66,7 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
     
     console.log('Reward Engine: Current streak:', current_streak);
     
-    const streaks = [3, 5, 10];
+    const streaks = [3, 5, 10, 15, 20, 30];
     for (const value of streaks) {
       console.log('Reward Engine: Checking streak:', value);
       if (current_streak >= value) {
@@ -84,8 +87,13 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
     
     for (const { pillar_id, count } of pillarCounts.results || []) {
       console.log('Reward Engine: Checking pillar:', pillar_id, 'count:', count);
+      // Level 1 rewards (3 challenges)
       if (count >= 3) {
         await grantRewardIfNew(env.DB, childId, 'pillar', 3, pillar_id);
+      }
+      // Level 2 rewards (10 challenges)
+      if (count >= 10) {
+        await grantRewardIfNew(env.DB, childId, 'pillar', 10, pillar_id);
       }
     }
   } catch (error) {
@@ -121,7 +129,7 @@ async function grantRewardIfNew(
   
   const reward = await db.prepare(query)
     .bind(...params)
-    .first<{ id: string }>();
+    .first<{ id: number }>();
   
   if (!reward) {
     console.log('Reward Engine: No matching reward found');
@@ -148,7 +156,7 @@ async function grantRewardIfNew(
 export async function getChildRewards(childId: string, env: Env): Promise<Reward[]> {
   console.log('Reward Engine: Fetching rewards for child:', childId);
   
-  const rewards = await env.DB.prepare(`
+  const result = await env.DB.prepare(`
     SELECT r.*
     FROM rewards r
     JOIN child_rewards cr ON r.id = cr.reward_id
@@ -156,8 +164,8 @@ export async function getChildRewards(childId: string, env: Env): Promise<Reward
     ORDER BY cr.granted_at DESC
   `).bind(childId).all<Reward>();
   
-  console.log('Reward Engine: Found rewards:', rewards);
-  return rewards;
+  console.log('Reward Engine: Found rewards:', result);
+  return result.results || [];
 }
 
 export async function getChildProgress(childId: string, env: Env) {
@@ -252,37 +260,52 @@ export async function getChildProgress(childId: string, env: Env) {
     GROUP BY c.pillar_id
   `).bind(normalizedAgeRange, childId).all<{ pillar_id: number; completed: number; total: number }>();
 
-  // Debug logging
-  console.log('Reward Engine: Debug info:', {
-    age_range,
-    normalized_age_range: normalizedAgeRange,
-    child_id: childId,
-    raw_challenges: await env.DB.prepare(`
-      SELECT pillar_id, COUNT(*) as total
-      FROM challenges
-      WHERE age_range = ?
-      GROUP BY pillar_id
-    `).bind(normalizedAgeRange).all(),
-    raw_completed: await env.DB.prepare(`
-      SELECT 
-        c.pillar_id,
-        COUNT(*) as completed
-      FROM challenge_logs cl
-      JOIN challenges c ON cl.challenge_id = c.id
-      WHERE cl.child_id = ?
-      GROUP BY c.pillar_id
-    `).bind(childId).all(),
-    results: pillarProgress.results
-  });
-
-  // Calculate milestone progress
-  const milestones = [5, 10, 20];
-  const nextMilestone = milestones.find(m => m > total) || milestones[milestones.length - 1];
-  const milestoneProgress = {
-    current: total,
-    next: nextMilestone,
-    percentage: total >= 20 ? 100 : (total / nextMilestone) * 100
+  // Calculate next rewards
+  const nextRewards = {
+    milestone: null as any,
+    streak: null as any,
+    pillar: null as any
   };
+
+  // Next milestone reward
+  const milestones = [5, 10, 20, 50, 100];
+  const nextMilestone = milestones.find(m => m > total);
+  if (nextMilestone) {
+    const reward = await env.DB.prepare(`
+      SELECT * FROM rewards 
+      WHERE type = 'milestone' AND criteria_value = ?
+      AND NOT EXISTS (
+        SELECT 1 FROM child_rewards 
+        WHERE child_id = ? AND reward_id = rewards.id
+      )
+    `).bind(nextMilestone, childId).first<Reward>();
+    if (reward) {
+      nextRewards.milestone = {
+        ...reward,
+        progress: (total / nextMilestone) * 100
+      };
+    }
+  }
+
+  // Next streak reward
+  const streaks = [3, 5, 10, 15, 20, 30];
+  const nextStreak = streaks.find(s => s > (current_streak || 0));
+  if (nextStreak) {
+    const reward = await env.DB.prepare(`
+      SELECT * FROM rewards 
+      WHERE type = 'streak' AND criteria_value = ?
+      AND NOT EXISTS (
+        SELECT 1 FROM child_rewards 
+        WHERE child_id = ? AND reward_id = rewards.id
+      )
+    `).bind(nextStreak, childId).first<Reward>();
+    if (reward) {
+      nextRewards.streak = {
+        ...reward,
+        progress: ((current_streak || 0) / nextStreak) * 100
+      };
+    }
+  }
 
   // Transform pillar progress into the expected format
   const transformedPillarProgress = (pillarProgress.results || []).reduce((acc: any, pillar: any) => {
@@ -300,6 +323,6 @@ export async function getChildProgress(childId: string, env: Env) {
     longest_streak: longest_streak || 0,
     weekly_challenges: weekly_challenges || 0,
     pillar_progress: transformedPillarProgress,
-    milestone_progress: milestoneProgress
+    next_rewards: nextRewards
   };
 } 

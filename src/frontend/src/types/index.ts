@@ -78,6 +78,21 @@ export interface Challenge {
   is_completed: boolean;
 }
 
+export interface Reward {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  type: 'milestone' | 'streak' | 'pillar';
+  criteria_value: number;
+  pillar_id?: number;
+  level?: number;
+  unlockable_content?: string;
+  reward_type: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ProgressSummary {
   milestones_completed: number;
   current_streak: number;
