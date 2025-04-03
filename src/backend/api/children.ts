@@ -52,7 +52,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
     // Get all children for the family
     const children = await env.DB.prepare(`
-      SELECT id, name, age_range, avatar_url, created_at
+      SELECT id, name, birthdate, gender, age_range, avatar_url, created_at
       FROM children
       WHERE family_id = ?
       ORDER BY created_at DESC
