@@ -15,9 +15,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   token: string | null;
+  selectedChildId: string | null;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUserData: (token: string) => Promise<void>;
+  setSelectedChildId: (childId: string | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -67,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [selectedChildId, setSelectedChildIdState] = useState<string | null>(null);
 
   const fetchUserData = async (authToken: string) => {
     try {
@@ -101,6 +104,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("👤 Mapped user data:", userData);
       setUser(userData);
       console.log("✅ User state updated with:", userData);
+      
+      // Set selected child ID from localStorage or use the first child if available
+      const storedChildId = localStorage.getItem('selectedChildId');
+      if (storedChildId && data.children?.some((child: any) => child.id === storedChildId)) {
+        setSelectedChildIdState(storedChildId);
+      } else if (data.children?.length > 0) {
+        // If no stored child ID or it's invalid, use the first child
+        setSelectedChildIdState(data.children[0].id);
+        localStorage.setItem('selectedChildId', data.children[0].id);
+      }
     } catch (error) {
       console.error('Error fetching user data:', error);
       // If we can't fetch user data, clear the token and user state
@@ -144,13 +157,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     // Clear local storage and state
     localStorage.removeItem('token');
+    localStorage.removeItem('selectedChildId');
     setToken(null);
     setIsAuthenticated(false);
     setUser(null);
+    setSelectedChildIdState(null);
+  };
+
+  const setSelectedChildId = async (childId: string | null) => {
+    if (childId) {
+      localStorage.setItem('selectedChildId', childId);
+      setSelectedChildIdState(childId);
+      
+      // Update the selected child in the backend if authenticated
+      if (token) {
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL;
+          await fetch(`${apiUrl}/api/user/selected-child`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ childId })
+          });
+        } catch (error) {
+          console.error('Error updating selected child:', error);
+        }
+      }
+    } else {
+      localStorage.removeItem('selectedChildId');
+      setSelectedChildIdState(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout, fetchUserData }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      user, 
+      token, 
+      selectedChildId,
+      login, 
+      logout, 
+      fetchUserData,
+      setSelectedChildId
+    }}>
       {children}
     </AuthContext.Provider>
   );

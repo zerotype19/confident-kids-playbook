@@ -3,13 +3,16 @@ import { Child } from '../../types';
 import { useChildContext } from '../../contexts/ChildContext';
 
 interface ChildSelectorProps {
-  children: Child[];
+  children?: Child[];
 }
 
-export default function ChildSelector({ children }: ChildSelectorProps) {
-  const { selectedChild, setSelectedChild } = useChildContext();
+export default function ChildSelector({ children: propChildren }: ChildSelectorProps) {
+  const { selectedChild, setSelectedChild, children: contextChildren, isLoading } = useChildContext();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Use children from props if provided, otherwise use from context
+  const children = propChildren || contextChildren;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -20,6 +23,16 @@ export default function ChildSelector({ children }: ChildSelectorProps) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="relative inline-block w-48 sm:w-56 text-left">
+        <div className="w-full inline-flex justify-between items-center rounded-xl bg-gray-200 text-white font-bold px-4 py-2 shadow-kidoova">
+          <span className="truncate">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative inline-block w-48 sm:w-56 text-left" ref={dropdownRef}>
@@ -46,7 +59,7 @@ export default function ChildSelector({ children }: ChildSelectorProps) {
         </button>
       </div>
 
-      {isOpen && (
+      {isOpen && children && children.length > 0 && (
         <div className="absolute right-0 mt-2 w-48 sm:w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
           <div className="py-1" role="menu">
             {children.map((child) => (

@@ -8,6 +8,9 @@ interface FamilyMember {
 
 interface Child {
   id: string;
+  name: string;
+  birthdate: string;
+  gender: string;
 }
 
 interface User {
@@ -15,6 +18,7 @@ interface User {
   email: string;
   name: string;
   has_completed_onboarding: boolean;
+  selected_child_id: string | null;
 }
 
 interface DBResult<T> {
@@ -69,7 +73,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
     // Get user data from database
     const userResult = await env.DB.prepare(`
-      SELECT id, email, name, has_completed_onboarding
+      SELECT id, email, name, has_completed_onboarding, selected_child_id
       FROM users
       WHERE id = ?
     `).bind(payload.sub).first<User>();
@@ -90,7 +94,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
     `).bind(payload.sub).first();
 
     // Get children if family exists
-    let children = [];
+    let children: Child[] = [];
     if (familyResult) {
       const childrenResult = await env.DB.prepare(`
         SELECT id, name, birthdate, gender
@@ -108,6 +112,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
       hasCompletedOnboarding: userResult.has_completed_onboarding,
       hasFamily: !!familyResult,
       hasChild: children.length > 0,
+      selectedChildId: userResult.selected_child_id,
       family: familyResult ? {
         id: familyResult.id,
         name: familyResult.name

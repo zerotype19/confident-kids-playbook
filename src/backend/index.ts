@@ -20,6 +20,7 @@ import { onRequestGet as pillarProgress } from './api/pillars/[id]/progress'
 import { onRequestGet as pillar } from './api/pillars/[id]'
 import { onRequestGet as pillarChallenges } from './api/pillars/[id]/challenges'
 import { onRequestPost as challengesComplete } from './api/challenges_complete'
+import { onRequest as userSelectedChild } from './api/user_selected_child'
 
 const router = Router()
 
@@ -82,6 +83,7 @@ router.post('/api/auth/google', (request, context) => authGoogle({ request, env:
 
 // User profile routes
 router.get('/api/user/profile', (request, context) => userProfile({ request, env: context.env }))
+router.put('/api/user/selected-child', (request, context) => userSelectedChild({ request, env: context.env }))
 
 // Onboarding routes
 router.get('/api/onboarding/status', (request, context) => onboardingStatus({ request, env: context.env }))
