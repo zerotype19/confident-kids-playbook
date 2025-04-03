@@ -29,14 +29,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/prices`, {
           headers: {
-            'Authorization': `Bearer ${user?.accessToken}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
         
@@ -55,7 +55,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     if (isOpen) {
       fetchPlans();
     }
-  }, [isOpen, user?.accessToken]);
+  }, [isOpen, token]);
 
   const handleSubscribe = async (planId: string) => {
     try {
@@ -78,7 +78,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       const response = await fetch(`${apiUrl}${endpoint}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user?.accessToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
