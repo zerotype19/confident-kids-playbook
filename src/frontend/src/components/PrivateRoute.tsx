@@ -62,7 +62,7 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 
   // If user hasn't completed onboarding and tries to access dashboard or profile
   if (user && !user.hasCompletedOnboarding && 
-      (location.pathname === '/dashboard' || location.pathname === '/profile')) {
+      (location.pathname === '/dashboard')) {
     console.log('🔄 User not completed onboarding, redirecting to onboarding');
     return <Navigate to="/onboarding" replace />;
   }
