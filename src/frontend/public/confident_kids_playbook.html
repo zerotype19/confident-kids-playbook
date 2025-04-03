@@ -14,7 +14,17 @@
     </style>
 </head>
 <body class="min-h-screen">
-    <div class="max-w-3xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/">
+                <img src="/logo.png" alt="Kidoova Logo" class="h-8 md:h-10" />
+            </a>
+            <div id="google-login-button"></div>
+        </div>
+    </header>
+
+    <div class="max-w-3xl mx-auto px-4 py-8 mt-16">
         <!-- Header -->
         <header class="mb-8">
             <h1 class="text-2xl font-bold text-neutral-900 mb-4">Raising Confident Kids Playbook</h1>
@@ -196,5 +206,31 @@
             </div>
         </details>
     </div>
+
+    <!-- Add Google Sign-In Script -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        function handleCredentialResponse(response) {
+            // Store credential temporarily
+            localStorage.setItem('google_credential', response.credential);
+            // Redirect to main page for authentication
+            window.location.href = '/';
+        }
+
+        window.onload = function () {
+            const clientId = window.location.hostname === 'localhost' 
+                ? 'YOUR_LOCAL_CLIENT_ID'  // Replace with your local client ID
+                : 'YOUR_PRODUCTION_CLIENT_ID'; // Replace with your production client ID
+
+            google.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("google-login-button"),
+                { theme: "filled", size: "large", shape: "pill" }
+            );
+        }
+    </script>
 </body>
 </html> 
