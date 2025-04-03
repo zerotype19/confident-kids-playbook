@@ -68,6 +68,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       metadata: {
         user_id: user.id,
       },
+      subscription_data: {
+        metadata: {
+          user_id: user.id,
+        },
+      },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
