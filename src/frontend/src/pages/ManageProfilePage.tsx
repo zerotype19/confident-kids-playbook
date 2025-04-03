@@ -10,7 +10,7 @@ interface SubscriptionStatus {
 }
 
 export const ManageProfilePage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, selectedChildId } = useAuth();
   const navigate = useNavigate();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,8 +19,20 @@ export const ManageProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
       try {
+        if (!selectedChildId) {
+          console.error('No child ID selected');
+          setSubscriptionStatus({
+            isActive: false,
+            plan: 'Free',
+            currentPeriodEnd: null,
+            cancelAtPeriodEnd: false
+          });
+          setIsLoading(false);
+          return;
+        }
+
         const apiUrl = import.meta.env.VITE_API_URL || '';
-        const response = await fetch(`${apiUrl}/api/billing_status?child_id=${user?.uid}`, {
+        const response = await fetch(`${apiUrl}/api/billing_status?child_id=${selectedChildId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json',
@@ -54,12 +66,8 @@ export const ManageProfilePage: React.FC = () => {
       }
     };
 
-    if (user?.uid) {
-      fetchSubscriptionStatus();
-    } else {
-      setIsLoading(false);
-    }
-  }, [user?.uid]);
+    fetchSubscriptionStatus();
+  }, [selectedChildId]);
 
   const handleLogout = async () => {
     try {
@@ -72,28 +80,36 @@ export const ManageProfilePage: React.FC = () => {
 
   const handleManageSubscription = async () => {
     try {
+      if (!selectedChildId) {
+        setError('No child selected');
+        return;
+      }
+
       const apiUrl = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/api/billing_create_portal`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
+        headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ child_id: user?.uid }),
+        body: JSON.stringify({ child_id: selectedChildId }),
       });
 
       if (!response.ok) {
-        console.error('Failed to create portal session:', response.status, response.statusText);
-        setError('Failed to open subscription management portal');
-        return;
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create billing portal session');
       }
-      
-      const { url } = await response.json();
-      window.location.href = url;
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No portal URL returned');
+      }
     } catch (err) {
-      setError('Failed to open subscription management portal');
-      console.error('Error creating portal session:', err);
+      console.error('Error creating billing portal session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create billing portal session');
     }
   };
 
