@@ -1,5 +1,5 @@
 {
-    "name": "confidence-worker-api",
+    "name": "api.kidoova.com",
     "private": true,
     "type": "module",
     "main": "index.ts",
