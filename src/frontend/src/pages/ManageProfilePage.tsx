@@ -311,6 +311,8 @@ export const ManageProfilePage: React.FC = () => {
         isOpen={isSubscriptionModalOpen}
         onClose={() => setIsSubscriptionModalOpen(false)}
         selectedChildId={selectedChildId}
+        hasActiveSubscription={subscriptionStatus?.isActive || false}
+        currentPlan={subscriptionStatus?.plan}
       />
     </div>
   );

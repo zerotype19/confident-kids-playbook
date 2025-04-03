@@ -4,6 +4,8 @@ interface SubscriptionModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedChildId: string | null;
+  hasActiveSubscription: boolean;
+  currentPlan?: string;
 }
 
 interface SubscriptionPlan {
@@ -41,7 +43,13 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   }
 ];
 
-export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, onClose, selectedChildId }) => {
+export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  selectedChildId,
+  hasActiveSubscription,
+  currentPlan
+}) => {
   const [selectedPlan, setSelectedPlan] = useState<string>('monthly');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +67,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, on
       setError(null);
 
       const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/billing_create_checkout`, {
+      const endpoint = hasActiveSubscription ? '/api/billing_create_portal' : '/api/billing_create_checkout';
+      
+      const response = await fetch(`${apiUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -74,18 +84,18 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, on
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
+        throw new Error(errorData.error || 'Failed to process subscription request');
       }
 
       const { url } = await response.json();
       if (url) {
         window.location.href = url;
       } else {
-        throw new Error('No checkout URL returned');
+        throw new Error('No URL returned');
       }
     } catch (err) {
-      console.error('Error creating checkout session:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create checkout session');
+      console.error('Error processing subscription:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process subscription request');
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +105,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, on
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Choose Your Plan</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {hasActiveSubscription ? 'Manage Your Subscription' : 'Choose Your Plan'}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -105,6 +117,17 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, on
             </svg>
           </button>
         </div>
+
+        {hasActiveSubscription && currentPlan && (
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">
+              Current Plan: <span className="font-medium">{currentPlan}</span>
+            </p>
+            <p className="text-sm text-gray-600 mt-1">
+              Click on a plan to change your subscription or manage your billing details.
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-md">
@@ -144,11 +167,22 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ isOpen, on
                     : 'bg-gray-600 hover:bg-gray-700'
                 }`}
               >
-                {isLoading ? 'Processing...' : 'Select Plan'}
+                {isLoading ? 'Processing...' : hasActiveSubscription ? 'Change Plan' : 'Select Plan'}
               </button>
             </div>
           ))}
         </div>
+
+        {hasActiveSubscription && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => handleSubscribe('cancel')}
+              className="text-sm text-red-600 hover:text-red-700"
+            >
+              Cancel Subscription
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
