@@ -25,6 +25,7 @@ import { onRequestGet as billingStatus } from './api/billing_status'
 import { onRequestPost as billingCreatePortal } from './api/billing_create_portal'
 import { onRequestPost as billingWebhook } from './api/billing_webhook'
 import { onRequestPost as billingCreateCheckout } from './api/billing_create_checkout'
+import { onRequestGet as billingPrices } from './api/billing_prices'
 
 const router = Router()
 
@@ -94,6 +95,7 @@ router.get('/api/billing_status', (request, context) => billingStatus({ request,
 router.post('/api/billing_create_portal', (request, context) => billingCreatePortal({ request, env: context.env }))
 router.post('/api/billing_webhook', (request, context) => billingWebhook({ request, env: context.env }))
 router.post('/api/billing/create-checkout-session', (request, context) => billingCreateCheckout({ request, env: context.env }))
+router.get('/api/prices', (request, context) => billingPrices({ request, env: context.env }))
 
 // Onboarding routes
 router.get('/api/onboarding/status', (request, context) => onboardingStatus({ request, env: context.env }))
