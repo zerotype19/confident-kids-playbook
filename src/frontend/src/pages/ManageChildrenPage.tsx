@@ -237,12 +237,11 @@ export default function ManageChildrenPage() {
       <Dialog
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        className="fixed inset-0 z-10 overflow-y-auto"
+        className="relative z-50"
       >
-        <div className="flex items-center justify-center min-h-screen">
-          <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-
-          <div className="relative bg-white rounded-lg max-w-md w-full mx-4 p-6">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="relative bg-white rounded-lg max-w-md w-full mx-4 p-6">
             <Dialog.Title className="text-xl font-semibold mb-4">Add New Child</Dialog.Title>
             
             <form onSubmit={handleAddChild}>
@@ -318,7 +317,7 @@ export default function ManageChildrenPage() {
                 </button>
               </div>
             </form>
-          </div>
+          </Dialog.Panel>
         </div>
       </Dialog>
 
@@ -326,12 +325,11 @@ export default function ManageChildrenPage() {
       <Dialog
         open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        className="fixed inset-0 z-10 overflow-y-auto"
+        className="relative z-50"
       >
-        <div className="flex items-center justify-center min-h-screen">
-          <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-
-          <div className="relative bg-white rounded-lg max-w-md w-full mx-4 p-6">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="relative bg-white rounded-lg max-w-md w-full mx-4 p-6">
             <Dialog.Title className="text-xl font-semibold mb-4">Edit Child</Dialog.Title>
             
             <form onSubmit={handleEditChild}>
@@ -407,7 +405,7 @@ export default function ManageChildrenPage() {
                 </button>
               </div>
             </form>
-          </div>
+          </Dialog.Panel>
         </div>
       </Dialog>
 
@@ -415,12 +413,11 @@ export default function ManageChildrenPage() {
       <Dialog
         open={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        className="fixed inset-0 z-10 overflow-y-auto"
+        className="relative z-50"
       >
-        <div className="flex items-center justify-center min-h-screen">
-          <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-
-          <div className="relative bg-white rounded-lg max-w-md w-full mx-4 p-6">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="relative bg-white rounded-lg max-w-md w-full mx-4 p-6">
             <Dialog.Title className="text-xl font-semibold mb-4">Confirm Removal</Dialog.Title>
             
             <p className="mb-4">
@@ -441,7 +438,7 @@ export default function ManageChildrenPage() {
                 Yes, Remove
               </button>
             </div>
-          </div>
+          </Dialog.Panel>
         </div>
       </Dialog>
     </div>
