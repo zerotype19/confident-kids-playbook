@@ -2,11 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 console.log("✅ AuthContext loaded");
 
-interface User {
+export interface User {
   uid: string;
-  email: string | null;
+  email: string;
   displayName: string | null;
   photoURL: string | null;
+  accessToken: string;
   hasCompletedOnboarding: boolean;
   childId: string;
 }
@@ -98,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: data.email,
         displayName: data.name,
         photoURL: data.picture,
+        accessToken: data.accessToken,
         hasCompletedOnboarding: data.hasCompletedOnboarding,
         childId: data.childId
       };

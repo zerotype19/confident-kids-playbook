@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -9,42 +10,13 @@ interface SubscriptionModalProps {
 }
 
 interface SubscriptionPlan {
-  id: 'monthly' | 'yearly';
+  id: 'single' | 'family';
   name: string;
   price: number;
   features: string[];
-  interval: 'month' | 'year';
+  interval: 'month';
   price_id: string;
 }
-
-const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
-  {
-    id: 'monthly',
-    name: 'Monthly Plan',
-    price: 9.99,
-    features: [
-      'Unlimited access to all content',
-      'Personalized learning paths',
-      'Progress tracking',
-      '24/7 support'
-    ],
-    interval: 'month',
-    price_id: 'price_1R55sbPEQoD1awJQfStxQA3F' // Replace with your actual monthly price ID
-  },
-  {
-    id: 'yearly',
-    name: 'Yearly Plan',
-    price: 99.99,
-    features: [
-      'All Monthly Plan features',
-      'Save 16% compared to monthly',
-      'Priority support',
-      'Early access to new features'
-    ],
-    interval: 'year',
-    price_id: 'price_1R55sbPEQoD1awJQfStxQA3F' // Replace with your actual yearly price ID
-  }
-];
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ 
   isOpen, 
@@ -53,11 +25,37 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   hasActiveSubscription,
   currentPlan
 }) => {
-  const [selectedPlan, setSelectedPlan] = useState<string>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<string>('single');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const { user } = useAuth();
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/prices`, {
+          headers: {
+            'Authorization': `Bearer ${user?.accessToken}`,
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch subscription plans');
+        }
+        
+        const data = await response.json();
+        setPlans(data.plans);
+      } catch (err) {
+        console.error('Error fetching plans:', err);
+        setError('Failed to load subscription plans');
+      }
+    };
+
+    if (isOpen) {
+      fetchPlans();
+    }
+  }, [isOpen, user?.accessToken]);
 
   const handleSubscribe = async (planId: string) => {
     try {
@@ -72,7 +70,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       const apiUrl = import.meta.env.VITE_API_URL || '';
       const endpoint = hasActiveSubscription ? '/api/billing_create_portal' : '/api/billing_create_checkout';
       
-      const selectedPlanDetails = SUBSCRIPTION_PLANS.find(plan => plan.id === planId);
+      const selectedPlanDetails = plans.find(plan => plan.id === planId);
       if (!selectedPlanDetails) {
         throw new Error('Invalid plan selected');
       }
@@ -80,7 +78,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       const response = await fetch(`${apiUrl}${endpoint}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${user?.accessToken}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -108,6 +106,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setIsLoading(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -144,7 +144,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {SUBSCRIPTION_PLANS.map((plan) => (
+          {plans.map((plan) => (
             <div
               key={plan.id}
               className={`border rounded-lg p-6 ${
