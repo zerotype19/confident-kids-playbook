@@ -139,7 +139,12 @@ export default function HomePage(): JSX.Element {
           document.getElementById("google-login-button"),
           { theme: "filled", size: "large", shape: "pill" }
         )
-        console.log("✅ Google sign-in button rendered")
+        // Also render the hero button
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-login-button-hero"),
+          { theme: "filled", size: "large", shape: "pill" }
+        )
+        console.log("✅ Google sign-in buttons rendered")
       }
     }
 
@@ -203,8 +208,15 @@ export default function HomePage(): JSX.Element {
           </p>
           <div className="flex flex-col items-center space-y-6">
             <button 
-              onClick={() => document.getElementById('google-login-button-hero')?.click()}
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+              onClick={() => {
+                const googleButton = document.getElementById('google-login-button-hero');
+                if (googleButton) {
+                  googleButton.click();
+                } else {
+                  console.error('Google login button not found');
+                }
+              }}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-12 rounded-full text-xl md:text-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
             >
               Get Started
             </button>
