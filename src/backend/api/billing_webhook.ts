@@ -54,11 +54,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const price = subscription.items.data[0].price;
         const product = price.product as Stripe.Product;
         
+        // Get the product name from the product object
+        const planName = product.name || 'Unknown Plan';
+        
         console.log('📝 Subscription data:', {
           customerId,
           userId,
           subscriptionId: subscription.id,
-          plan: product.name,
+          plan: planName,
           status: subscription.status,
           currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -93,27 +96,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
               updated_at = CURRENT_TIMESTAMP
           `;
           
-          console.log('🔍 Executing SQL:', sql);
-          console.log('🔍 With parameters:', {
+          const params = {
             id: crypto.randomUUID(),
             userId,
             customerId,
             subscriptionId: subscription.id,
-            plan: product.name,
+            plan: planName,
             status: subscription.status,
             currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
             cancelAtPeriodEnd: subscription.cancel_at_period_end ? 1 : 0
-          });
+          };
+
+          console.log('🔍 Executing SQL:', sql);
+          console.log('🔍 With parameters:', params);
 
           const result = await env.DB.prepare(sql).bind(
-            crypto.randomUUID(),
-            userId,
-            customerId,
-            subscription.id,
-            product.name,
-            subscription.status,
-            new Date(subscription.current_period_end * 1000).toISOString(),
-            subscription.cancel_at_period_end ? 1 : 0
+            params.id,
+            params.userId,
+            params.customerId,
+            params.subscriptionId,
+            params.plan,
+            params.status,
+            params.currentPeriodEnd,
+            params.cancelAtPeriodEnd
           ).run();
           
           console.log('✅ Database update result:', result);
