@@ -152,8 +152,8 @@ export async function onRequest(context: { request: Request; env: Env }) {
       WITH streak_info AS (
         SELECT 
           COUNT(*) as total_completed,
-          MAX(completed_at) as last_completed,
-          COUNT(DISTINCT date(completed_at)) as unique_days
+          MAX(datetime(completed_at, 'localtime', 'America/New_York')) as last_completed,
+          COUNT(DISTINCT date(datetime(completed_at, 'localtime', 'America/New_York'))) as unique_days
         FROM challenge_logs
         WHERE child_id = ?
       )
