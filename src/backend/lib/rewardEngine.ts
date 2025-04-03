@@ -241,17 +241,41 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM consecutive_days
   `).bind(childId, childId).first<{ longest_streak: number }>();
 
+  // Debug query to see all completed challenges
+  const debugQuery = await env.DB.prepare(`
+    SELECT 
+      id,
+      challenge_id,
+      date(datetime(completed_at, 'localtime', 'America/New_York')) as completed_date,
+      datetime(completed_at, 'localtime', 'America/New_York') as completed_datetime
+    FROM challenge_logs
+    WHERE child_id = ?
+    AND completed_at IS NOT NULL
+    ORDER BY completed_at DESC
+  `).bind(childId).all<{
+    id: string;
+    challenge_id: string;
+    completed_date: string;
+    completed_datetime: string;
+  }>();
+
+  console.log('Debug - All completed challenges:', {
+    childId,
+    totalChallenges: debugQuery?.results?.length || 0,
+    challenges: debugQuery?.results
+  });
+
   // Get challenges completed this week
   const weeklyChallengesQuery = await env.DB.prepare(`
     SELECT 
       COUNT(*) as weekly_challenges,
       datetime('now', 'localtime', 'America/New_York') as current_time,
-      datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days') as week_start,
+      datetime('now', 'localtime', 'America/New_York', '-7 days') as week_start,
       GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as completed_dates
     FROM challenge_logs
     WHERE child_id = ?
     AND completed_at IS NOT NULL
-    AND datetime(completed_at, 'localtime', 'America/New_York') >= datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days')
+    AND datetime(completed_at, 'localtime', 'America/New_York') >= datetime('now', 'localtime', 'America/New_York', '-7 days')
   `).bind(childId).first<{ 
     weekly_challenges: number;
     current_time: string;
