@@ -8,6 +8,7 @@ import AllChallengesPage from "./pages/AllChallengesPage"
 import PillarsPage from "./pages/PillarsPage"
 import PillarDetailPage from "./pages/PillarDetailPage"
 import RewardsPage from "./pages/RewardsPage"
+import ManageChildrenPage from "./pages/ManageChildrenPage"
 import { PrivateRoute } from "./components/PrivateRoute"
 import PageWrapper from "./components/PageWrapper"
 
@@ -75,6 +76,16 @@ export default function App(): JSX.Element {
               } 
             >
               <Route index element={<RewardsPage />} />
+            </Route>
+            <Route 
+              path="/manage-children" 
+              element={
+                <PrivateRoute>
+                  <PageWrapper />
+                </PrivateRoute>
+              } 
+            >
+              <Route index element={<ManageChildrenPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

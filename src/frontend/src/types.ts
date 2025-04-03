@@ -1,9 +1,12 @@
 export interface Child {
   id: string;
   name: string;
-  age_range: string;
+  birthdate?: string;
+  gender?: string;
   avatar_url?: string;
+  age_range: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Challenge {
