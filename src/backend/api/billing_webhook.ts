@@ -50,22 +50,31 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const customerId = subscription.customer as string;
         const userId = subscription.metadata.user_id;
         
-        // Get the product details
-        const price = subscription.items.data[0].price;
-        const product = price.product as Stripe.Product;
+        // Get the product details from the subscription items
+        const subscriptionItem = subscription.items.data[0];
+        const price = subscriptionItem.price;
+        const productId = price.product as string;
         
-        // Get the product name from the product object
-        const planName = product.name || 'Unknown Plan';
+        // Fetch the product details to get the name
+        let productName = 'Unknown Plan';
+        try {
+          const product = await stripe.products.retrieve(productId);
+          productName = product.name;
+          console.log('📦 Retrieved product:', product);
+        } catch (productError) {
+          console.error('❌ Error fetching product:', productError);
+        }
         
         console.log('📝 Subscription data:', {
           customerId,
           userId,
           subscriptionId: subscription.id,
-          plan: planName,
+          plan: productName,
           status: subscription.status,
           currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          eventType: event.type
+          eventType: event.type,
+          productId
         });
         
         if (!userId) {
@@ -101,7 +110,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             userId,
             customerId,
             subscriptionId: subscription.id,
-            plan: planName,
+            plan: productName,
             status: subscription.status,
             currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
             cancelAtPeriodEnd: subscription.cancel_at_period_end ? 1 : 0
