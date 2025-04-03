@@ -14,11 +14,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const prices = await stripe.prices.list({
       active: true,
       expand: ['data.product'],
-      product: 'prod_Rz40ev2BvHHJPI,prod_S3uZxpqZtkYe6V'
+      limit: 100
+    });
+
+    // Filter prices for our specific products
+    const filteredPrices = prices.data.filter(price => {
+      const product = price.product as Stripe.Product;
+      return product.id === 'prod_Rz40ev2BvHHJPI' || product.id === 'prod_S3uZxpqZtkYe6V';
     });
 
     // Format the prices for the frontend
-    const plans = prices.data.map(price => {
+    const plans = filteredPrices.map(price => {
       const product = price.product as Stripe.Product;
       return {
         id: product.metadata.plan_type || 'single',
