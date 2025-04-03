@@ -246,20 +246,21 @@ export async function getChildProgress(childId: string, env: Env) {
     SELECT 
       id,
       challenge_id,
-      date(datetime(completed_at, 'localtime', 'America/New_York')) as completed_date,
-      datetime(completed_at, 'localtime', 'America/New_York') as completed_datetime
+      completed_at,
+      datetime(completed_at, 'localtime', 'America/New_York') as completed_datetime_est,
+      date(datetime(completed_at, 'localtime', 'America/New_York')) as completed_date_est
     FROM challenge_logs
     WHERE child_id = ?
-    AND completed_at IS NOT NULL
     ORDER BY completed_at DESC
   `).bind(childId).all<{
     id: string;
     challenge_id: string;
-    completed_date: string;
-    completed_datetime: string;
+    completed_at: string | null;
+    completed_datetime_est: string | null;
+    completed_date_est: string | null;
   }>();
 
-  console.log('Debug - All completed challenges:', {
+  console.log('Debug - All challenge logs:', {
     childId,
     totalChallenges: debugQuery?.results?.length || 0,
     challenges: debugQuery?.results
