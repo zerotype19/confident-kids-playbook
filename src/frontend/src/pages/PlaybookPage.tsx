@@ -72,7 +72,7 @@ export default function PlaybookPage() {
                     activeSection === 'communication' ? 'bg-neutral-200 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-100'
                   }`}
                 >
-                  Communication
+                  Communication Guide
                 </button>
               </li>
               <li>
@@ -164,10 +164,10 @@ export default function PlaybookPage() {
                     <h3 className="text-lg font-medium text-neutral-700 mb-2">The Power of Words</h3>
                     <p className="text-neutral-700">How we communicate with our children shapes their self-perception and confidence. Use these strategies to build a positive communication foundation:</p>
                     <ul className="list-disc pl-6 mt-4 space-y-2 text-neutral-700">
-                      <li>Use specific praise instead of general statements</li>
-                      <li>Focus on effort and progress rather than outcomes</li>
-                      <li>Ask open-ended questions to encourage critical thinking</li>
-                      <li>Validate feelings while guiding behavior</li>
+                      <li>Ask, Don't Tell – Instead of giving answers, ask questions that help kids think for themselves.</li>
+                      <li>Praise the Process, Not Just the Outcome – Recognize effort, perseverance, and problem-solving, not just success.</li>
+                      <li>Encourage Without Pushing – Create opportunities for kids to explore and try without pressure to be perfect.</li>
+                      <li>Model Confidence Yourself – Kids learn by example - show resilience, self-belief, and positive self-talk in your own life.</li>
                     </ul>
                   </div>
                 </div>
@@ -213,45 +213,45 @@ export default function PlaybookPage() {
 
                   {/* Pillar 3 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 3: Emotional Intelligence</h3>
-                    <p className="text-neutral-700">Understanding and managing emotions is crucial for confidence and healthy relationships.</p>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 3: Social Confidence & Communication</h3>
+                    <p className="text-neutral-700">Building social skills and communication abilities helps children navigate relationships and express themselves confidently.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>
                       <ul className="list-disc pl-6 space-y-2 text-neutral-700">
-                        <li>Name and validate emotions</li>
-                        <li>Teach emotional regulation techniques</li>
-                        <li>Model healthy emotional expression</li>
-                        <li>Practice empathy and perspective-taking</li>
+                        <li>Practice conversation starters</li>
+                        <li>Role-play social scenarios</li>
+                        <li>Teach active listening</li>
+                        <li>Encourage self-expression</li>
                       </ul>
                     </div>
                   </div>
 
                   {/* Pillar 4 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 4: Self-Advocacy & Boundaries</h3>
-                    <p className="text-neutral-700">Teaching children to speak up for themselves and set healthy boundaries builds self-respect and confidence.</p>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 4: Purpose & Strength Discovery</h3>
+                    <p className="text-neutral-700">Helping children discover their unique strengths and find purpose in their activities builds lasting confidence.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>
                       <ul className="list-disc pl-6 space-y-2 text-neutral-700">
-                        <li>Practice assertive communication</li>
-                        <li>Respect children's boundaries</li>
-                        <li>Teach decision-making skills</li>
-                        <li>Encourage self-expression</li>
+                        <li>Use the "Strength Journal" exercise</li>
+                        <li>Encourage exploration of interests</li>
+                        <li>Celebrate unique talents</li>
+                        <li>Connect activities to personal values</li>
                       </ul>
                     </div>
                   </div>
 
                   {/* Pillar 5 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 5: Purpose & Contribution</h3>
-                    <p className="text-neutral-700">Helping children find meaning and make a positive impact builds confidence through purpose.</p>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 5: Managing Fear & Anxiety</h3>
+                    <p className="text-neutral-700">Teaching children to handle fear and anxiety builds resilience and confidence in facing challenges.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>
                       <ul className="list-disc pl-6 space-y-2 text-neutral-700">
-                        <li>Encourage community involvement</li>
-                        <li>Support passion projects</li>
-                        <li>Teach the value of helping others</li>
-                        <li>Celebrate contributions to family and community</li>
+                        <li>Use the "Reframe the Fear" technique</li>
+                        <li>Break challenges into smaller steps</li>
+                        <li>Practice calming techniques</li>
+                        <li>Celebrate brave actions</li>
                       </ul>
                     </div>
                   </div>
