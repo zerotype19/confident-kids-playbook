@@ -23,6 +23,7 @@ import { onRequestPost as challengesComplete } from './api/challenges_complete'
 import { onRequest as userSelectedChild } from './api/user_selected_child'
 import { onRequestGet as billingStatus } from './api/billing_status'
 import { onRequestPost as billingCreatePortal } from './api/billing_create_portal'
+import { onRequestPost as billingWebhook } from './api/billing_webhook'
 
 const router = Router()
 
@@ -90,6 +91,7 @@ router.put('/api/user/selected-child', (request, context) => userSelectedChild({
 // Billing routes
 router.get('/api/billing_status', (request, context) => billingStatus({ request, env: context.env }))
 router.post('/api/billing_create_portal', (request, context) => billingCreatePortal({ request, env: context.env }))
+router.post('/api/billing_webhook', (request, context) => billingWebhook({ request, env: context.env }))
 
 // Onboarding routes
 router.get('/api/onboarding/status', (request, context) => onboardingStatus({ request, env: context.env }))

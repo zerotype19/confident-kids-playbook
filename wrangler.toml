@@ -19,6 +19,10 @@ name = "@tsndr/cloudflare-worker-jwt"
 
 [vars]
 # Add any environment variables here
+STRIPE_SECRET_KEY = "sk_test_your_stripe_secret_key"
+STRIPE_PRICE_ID = "price_your_stripe_price_id"
+STRIPE_WEBHOOK_SECRET = "whsec_your_stripe_webhook_secret"
+FRONTEND_URL = "https://confident-kids-playbook.pages.dev"
 
 [[d1_databases]]
 binding = "DB"
