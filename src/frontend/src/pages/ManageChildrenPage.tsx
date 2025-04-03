@@ -149,6 +149,11 @@ export default function ManageChildrenPage() {
     }
   };
 
+  const formatGender = (gender: string) => {
+    if (!gender) return '';
+    return gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+  };
+
   const openEditModal = (child: Child) => {
     // Format the birthdate to YYYY-MM-DD for the date input
     const formattedBirthdate = child.birthdate 
@@ -215,7 +220,7 @@ export default function ManageChildrenPage() {
                 <div>
                   <h3 className="text-xl font-semibold">{child.name}</h3>
                   <p className="text-gray-600">Age Range: {child.age_range}</p>
-                  {child.gender && <p className="text-gray-600">Gender: {child.gender}</p>}
+                  {child.gender && <p className="text-gray-600">Gender: {formatGender(child.gender)}</p>}
                   {child.birthdate && <p className="text-gray-600">Birthdate: {new Date(child.birthdate).toLocaleDateString()}</p>}
                 </div>
               </div>
