@@ -140,7 +140,7 @@ export default function HomePage(): JSX.Element {
           document.getElementById("google-login-button"),
           { theme: "filled", size: "large", shape: "pill" }
         )
-        // Also render the hero button
+        // Also render the hero button with extra large size
         window.google.accounts.id.renderButton(
           document.getElementById("google-login-button-hero"),
           { theme: "filled", size: "large", shape: "pill" }
@@ -236,8 +236,12 @@ export default function HomePage(): JSX.Element {
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Kidoova helps kids build self-esteem with fun daily challenges and progress tracking!
           </p>
-          <div className="flex flex-col items-center space-y-6">
-            <div id="google-login-button-hero" className="w-full max-w-md"></div>
+          <div className="flex flex-col items-center justify-center space-y-6">
+            <div 
+              id="google-login-button-hero" 
+              className="w-full max-w-md transform scale-125 md:scale-150"
+              style={{ margin: '0 auto' }}
+            ></div>
           </div>
         </div>
       </section>
