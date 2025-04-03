@@ -13,9 +13,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    // First, get the user_id from the children table
+    // First, get the family_id from the children table
     const child = await env.DB.prepare(
-      `SELECT user_id FROM children WHERE id = ?`
+      `SELECT family_id FROM children WHERE id = ?`
     ).bind(child_id).first();
 
     if (!child) {
@@ -29,10 +29,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
+    // Get the user_id from the users table where selected_child_id matches the child_id
+    const user = await env.DB.prepare(
+      `SELECT id FROM users WHERE selected_child_id = ?`
+    ).bind(child_id).first();
+
+    if (!user) {
+      return new Response(JSON.stringify({
+        isActive: false,
+        plan: 'free',
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Query the database for subscription status using user_id
     const subscription = await env.DB.prepare(
       `SELECT * FROM subscriptions WHERE user_id = ?`
-    ).bind(child.user_id).first();
+    ).bind(user.id).first();
 
     if (!subscription) {
       return new Response(JSON.stringify({
