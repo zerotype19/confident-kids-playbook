@@ -236,12 +236,29 @@ export async function getChildProgress(childId: string, env: Env) {
   `).bind(childId, childId).first<{ longest_streak: number }>();
 
   // Get challenges completed this week
-  const { weekly_challenges } = await env.DB.prepare(`
-    SELECT COUNT(*) as weekly_challenges
+  const weeklyChallengesQuery = await env.DB.prepare(`
+    SELECT 
+      COUNT(*) as weekly_challenges,
+      datetime('now', 'localtime', 'America/New_York') as current_time,
+      datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days') as week_start,
+      GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as completed_dates
     FROM challenge_logs
     WHERE child_id = ?
     AND datetime(completed_at, 'localtime', 'America/New_York') >= datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days')
-  `).bind(childId).first<{ weekly_challenges: number }>();
+  `).bind(childId).first<{ 
+    weekly_challenges: number;
+    current_time: string;
+    week_start: string;
+    completed_dates: string;
+  }>();
+
+  console.log('Weekly challenges calculation:', {
+    childId,
+    currentTime: weeklyChallengesQuery?.current_time,
+    weekStart: weeklyChallengesQuery?.week_start,
+    completedDates: weeklyChallengesQuery?.completed_dates,
+    count: weeklyChallengesQuery?.weekly_challenges
+  });
 
   // Get pillar progress
   const pillarProgress = await env.DB.prepare(`
@@ -328,8 +345,9 @@ export async function getChildProgress(childId: string, env: Env) {
     total_challenges: total,
     current_streak: current_streak || 0,
     longest_streak: longest_streak || 0,
-    weekly_challenges: weekly_challenges || 0,
+    weekly_challenges: weeklyChallengesQuery?.weekly_challenges || 0,
     pillar_progress: transformedPillarProgress,
+    milestone_progress: milestoneProgress,
     next_rewards: nextRewards
   };
 } 
