@@ -9,7 +9,8 @@ export default defineConfig({
     include: [
       '@heroicons/react',
       '@heroicons/react/24/solid',
-      '@heroicons/react/24/outline'
+      '@heroicons/react/24/outline',
+      '@headlessui/react'
     ]
   },
   build: {
@@ -20,7 +21,8 @@ export default defineConfig({
       external: [
         '@heroicons/react',
         '@heroicons/react/24/solid',
-        '@heroicons/react/24/outline'
+        '@heroicons/react/24/outline',
+        '@headlessui/react'
       ],
       input: {
         main: path.resolve(__dirname, 'index.html'),
@@ -41,7 +43,8 @@ export default defineConfig({
       '@types': path.resolve(__dirname, '../types'),
       '@heroicons/react': path.resolve(__dirname, 'node_modules/@heroicons/react'),
       '@heroicons/react/24/solid': path.resolve(__dirname, 'node_modules/@heroicons/react/24/solid'),
-      '@heroicons/react/24/outline': path.resolve(__dirname, 'node_modules/@heroicons/react/24/outline')
+      '@heroicons/react/24/outline': path.resolve(__dirname, 'node_modules/@heroicons/react/24/outline'),
+      '@headlessui/react': path.resolve(__dirname, 'node_modules/@headlessui/react')
     }
   },
   publicDir: 'public'
