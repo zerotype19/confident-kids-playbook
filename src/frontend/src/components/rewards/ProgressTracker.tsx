@@ -52,16 +52,16 @@ export default function ProgressTracker({ progress, childId }: ProgressTrackerPr
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-kidoova-accent transition-all duration-300"
-                  style={{ width: `${(progress.milestones_completed / 20) * 100}%` }}
+                  style={{ width: `${progress.milestone_progress.percentage}%` }}
                 />
               </div>
               <div className="flex justify-between text-sm text-gray-600 mt-1">
                 <span>Milestone Progress</span>
-                <span>{progress.milestones_completed} of 20</span>
+                <span>{progress.milestone_progress.current} of {progress.milestone_progress.next}</span>
               </div>
             </div>
             <div className="text-xl font-bold text-kidoova-accent">
-              {Math.round((progress.milestones_completed / 20) * 100)}%
+              {Math.round(progress.milestone_progress.percentage)}%
             </div>
           </div>
         </div>
