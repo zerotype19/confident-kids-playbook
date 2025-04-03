@@ -129,12 +129,12 @@ export default function RewardsPage() {
       </div>
 
       {selectedChild ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-12rem)]">
           <div className="space-y-8">
             <RewardsOverview progress={progress} />
             <ProgressTracker progress={progress} childId={selectedChild.id} />
           </div>
-          <div>
+          <div className="h-full w-full">
             <TrophyCase rewards={rewards} />
           </div>
         </div>
