@@ -94,7 +94,7 @@ router.put('/api/user/selected-child', (request, context) => userSelectedChild({
 router.get('/api/billing_status', (request, context) => billingStatus({ request, env: context.env }))
 router.post('/api/billing_create_portal', (request, context) => billingCreatePortal({ request, env: context.env }))
 router.post('/api/billing_webhook', (request, context) => billingWebhook({ request, env: context.env }))
-router.post('/api/billing/create-checkout-session', (request, context) => billingCreateCheckout({ request, env: context.env }))
+router.post('/api/billing_create_checkout', (request, context) => billingCreateCheckout({ request, env: context.env }))
 router.get('/api/prices', (request, context) => billingPrices({ request, env: context.env }))
 
 // Onboarding routes
