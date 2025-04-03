@@ -46,6 +46,7 @@ interface GoogleIdentityServices {
   ) => void;
   disableAutoSelect: () => Promise<void>;
   revoke: () => Promise<void>;
+  prompt: () => void;
 }
 
 // Declare Google Identity Services types
@@ -187,6 +188,35 @@ export default function HomePage(): JSX.Element {
     setActiveModal(null)
   }
 
+  const handleGetStarted = () => {
+    // Create a temporary button element
+    const tempButton = document.createElement('div');
+    tempButton.id = 'temp-google-button';
+    tempButton.style.display = 'none';
+    document.body.appendChild(tempButton);
+    
+    // Render the Google button on this temporary element
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.renderButton(
+        tempButton,
+        { theme: "filled", size: "large", shape: "pill" }
+      );
+      
+      // Trigger a click on the button
+      const googleButton = document.querySelector('#temp-google-button > div');
+      if (googleButton) {
+        (googleButton as HTMLElement).click();
+      }
+      
+      // Clean up after a short delay
+      setTimeout(() => {
+        document.body.removeChild(tempButton);
+      }, 1000);
+    } else {
+      console.error('Google Identity Services not loaded');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -207,20 +237,7 @@ export default function HomePage(): JSX.Element {
             Kidoova helps kids build self-esteem with fun daily challenges and progress tracking!
           </p>
           <div className="flex flex-col items-center space-y-6">
-            <button 
-              onClick={() => {
-                const googleButton = document.getElementById('google-login-button-hero');
-                if (googleButton) {
-                  googleButton.click();
-                } else {
-                  console.error('Google login button not found');
-                }
-              }}
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-12 rounded-full text-xl md:text-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-            >
-              Get Started
-            </button>
-            <div id="google-login-button-hero" className="hidden"></div>
+            <div id="google-login-button-hero" className="w-full max-w-md"></div>
           </div>
         </div>
       </section>
