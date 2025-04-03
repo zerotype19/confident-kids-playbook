@@ -83,7 +83,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
               stripe_customer_id = excluded.stripe_customer_id,
               stripe_subscription_id = excluded.stripe_subscription_id,
               plan = excluded.plan,
-              status = excluded.status,
+              status = CASE 
+                WHEN excluded.cancel_at_period_end = 1 THEN 'canceled'
+                ELSE excluded.status
+              END,
               current_period_end = excluded.current_period_end,
               cancel_at_period_end = excluded.cancel_at_period_end,
               updated_at = CURRENT_TIMESTAMP
@@ -125,7 +128,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           // Update the subscription status to canceled
           const result = await env.DB.prepare(`
             UPDATE subscriptions 
-            SET status = 'canceled', updated_at = CURRENT_TIMESTAMP
+            SET status = 'canceled', 
+                cancel_at_period_end = 1,
+                updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
           `).bind(userId).run();
           
