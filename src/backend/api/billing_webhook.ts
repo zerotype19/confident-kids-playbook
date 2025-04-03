@@ -14,7 +14,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   try {
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-02-24.acacia',
+      apiVersion: '2023-10-16',
     });
 
     const body = await request.text();
@@ -27,35 +27,48 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        const child_id = session.metadata?.child_id;
+        const user_id = session.metadata?.user_id;
         const customer_id = session.customer as string;
 
-        if (!child_id) {
-          throw new Error('No child_id in session metadata');
+        if (!user_id) {
+          throw new Error('No user_id in session metadata');
         }
 
-        // Create subscription record
-        await env.DB.prepare(`
-          INSERT INTO subscriptions (
-            child_id,
-            stripe_customer_id,
-            stripe_subscription_id,
-            plan_id,
-            status,
-            current_period_end,
-            cancel_at_period_end,
-            created_at,
-            updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-        `).bind(
-          child_id,
-          customer_id,
-          session.subscription as string,
-          session.metadata?.plan_id || 'premium',
-          'active',
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-          0
-        ).run();
+        // Create or update subscription record
+        const existingSubscription = await env.DB.prepare(
+          `SELECT id FROM subscriptions WHERE user_id = ?`
+        ).bind(user_id).first();
+
+        if (existingSubscription) {
+          // Update existing subscription
+          await env.DB.prepare(`
+            UPDATE subscriptions 
+            SET stripe_customer_id = ?,
+                plan = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+          `).bind(
+            customer_id,
+            'premium',
+            user_id
+          ).run();
+        } else {
+          // Create new subscription
+          await env.DB.prepare(`
+            INSERT INTO subscriptions (
+              id,
+              user_id,
+              stripe_customer_id,
+              plan,
+              updated_at
+            ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+          `).bind(
+            `sub_${Date.now()}`,
+            user_id,
+            customer_id,
+            'premium'
+          ).run();
+        }
 
         break;
       }
@@ -65,9 +78,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const subscription = event.data.object as Stripe.Subscription;
         const customer_id = subscription.customer as string;
 
-        // Get child_id from our database
+        // Get user_id from our database
         const record = await env.DB.prepare(
-          'SELECT child_id FROM subscriptions WHERE stripe_customer_id = ?'
+          'SELECT user_id FROM subscriptions WHERE stripe_customer_id = ?'
         ).bind(customer_id).first();
 
         if (!record) {
@@ -77,15 +90,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         // Update subscription status
         await env.DB.prepare(`
           UPDATE subscriptions 
-          SET status = ?,
-              current_period_end = ?,
-              cancel_at_period_end = ?,
-              updated_at = datetime('now')
+          SET plan = ?,
+              updated_at = CURRENT_TIMESTAMP
           WHERE stripe_customer_id = ?
         `).bind(
-          subscription.status,
-          new Date(subscription.current_period_end * 1000).toISOString(),
-          subscription.cancel_at_period_end ? 1 : 0,
+          subscription.status === 'active' ? 'premium' : 'free',
           customer_id
         ).run();
 

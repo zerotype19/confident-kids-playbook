@@ -13,10 +13,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    // First, get the user_id from the children table
+    const child = await env.DB.prepare(
+      `SELECT user_id FROM children WHERE id = ?`
+    ).bind(child_id).first();
+
+    if (!child) {
+      return new Response(JSON.stringify({ error: 'Child not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get the customer ID from the database
     const subscription = await env.DB.prepare(
-      `SELECT stripe_customer_id FROM subscriptions WHERE child_id = ? AND status = 'active'`
-    ).bind(child_id).first();
+      `SELECT stripe_customer_id FROM subscriptions WHERE user_id = ?`
+    ).bind(child.user_id).first();
 
     if (!subscription?.stripe_customer_id) {
       return new Response(JSON.stringify({ error: 'No active subscription found' }), {
@@ -26,7 +38,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-02-24.acacia',
+      apiVersion: '2023-10-16',
     });
 
     // Create a portal session

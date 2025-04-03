@@ -13,10 +13,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    // Query the database for subscription status
-    const subscription = await env.DB.prepare(
-      `SELECT * FROM subscriptions WHERE child_id = ? AND status = 'active'`
+    // First, get the user_id from the children table
+    const child = await env.DB.prepare(
+      `SELECT user_id FROM children WHERE id = ?`
     ).bind(child_id).first();
+
+    if (!child) {
+      return new Response(JSON.stringify({
+        isActive: false,
+        plan: 'free',
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Query the database for subscription status using user_id
+    const subscription = await env.DB.prepare(
+      `SELECT * FROM subscriptions WHERE user_id = ?`
+    ).bind(child.user_id).first();
 
     if (!subscription) {
       return new Response(JSON.stringify({
@@ -29,11 +45,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
+    // Determine if the subscription is active based on the plan
+    const isActive = subscription.plan === 'premium';
+
     return new Response(JSON.stringify({
-      isActive: true,
-      plan: subscription.plan_id,
-      currentPeriodEnd: subscription.current_period_end,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end === 1
+      isActive,
+      plan: subscription.plan,
+      currentPeriodEnd: null, // Not available in the current schema
+      cancelAtPeriodEnd: false // Not available in the current schema
     }), {
       headers: { 'Content-Type': 'application/json' },
     });

@@ -13,8 +13,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    // First, get the user_id from the children table
+    const child = await env.DB.prepare(
+      `SELECT user_id FROM children WHERE id = ?`
+    ).bind(child_id).first();
+
+    if (!child) {
+      return new Response(JSON.stringify({ error: 'Child not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-02-24.acacia',
+      apiVersion: '2023-10-16',
     });
 
     // Create a checkout session
@@ -31,7 +43,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       cancel_url: `${env.FRONTEND_URL}/settings/billing?canceled=true`,
       client_reference_id: child_id,
       metadata: {
-        child_id,
+        user_id: child.user_id,
       },
     });
 
