@@ -73,7 +73,7 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     fetchChildren();
-  }, [token, selectedChildId, setSelectedChildId]);
+  }, [token]);
 
   // Update selected child when selectedChildId changes
   useEffect(() => {

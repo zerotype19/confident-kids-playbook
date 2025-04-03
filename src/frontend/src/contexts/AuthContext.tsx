@@ -137,10 +137,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Check for existing session
     const storedToken = localStorage.getItem('token');
+    const storedChildId = localStorage.getItem('selectedChildId');
+    
     if (storedToken) {
       console.log("🔑 Found stored token, initializing auth state");
       setToken(storedToken);
       setIsAuthenticated(true);
+      
+      // Set the selected child ID from localStorage before fetching user data
+      if (storedChildId) {
+        console.log("🔍 Setting initial selected child ID from localStorage:", storedChildId);
+        setSelectedChildIdState(storedChildId);
+      }
+      
       fetchUserData(storedToken);
     }
   }, []);
