@@ -74,7 +74,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
           eventType: event.type,
-          productId
+          productId,
+          paymentStatus: subscription.latest_invoice ? await stripe.invoices.retrieve(subscription.latest_invoice as string).then(inv => inv.status) : 'unknown'
         });
         
         if (!userId) {
@@ -170,6 +171,35 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           console.log('✅ Subscription deletion result:', result);
         } catch (dbError) {
           console.error('❌ Database error during deletion:', dbError);
+          throw dbError;
+        }
+        
+        break;
+      }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.subscription as string;
+        
+        console.log('💰 Invoice paid for subscription:', subscriptionId);
+        
+        try {
+          // Update the subscription status to active
+          const sql = `
+            UPDATE subscriptions 
+            SET status = 'active',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE stripe_subscription_id = ?
+          `;
+          
+          console.log('🔍 Executing SQL:', sql);
+          console.log('🔍 With parameters:', { subscriptionId });
+
+          const result = await env.DB.prepare(sql).bind(subscriptionId).run();
+          
+          console.log('✅ Subscription status update result:', result);
+        } catch (dbError) {
+          console.error('❌ Database error during status update:', dbError);
           throw dbError;
         }
         
