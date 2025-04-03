@@ -213,6 +213,17 @@ export default function AllChallengesPage() {
 
       if (!response.ok) {
         console.error('Challenge completion failed:', data);
+        // If the challenge is already completed, update the UI to reflect this
+        if (data.error === 'Challenge already completed') {
+          setChallenges(prevChallenges => 
+            prevChallenges.map(challenge => 
+              challenge.id === challengeId 
+                ? { ...challenge, is_completed: 1 }
+                : challenge
+            )
+          );
+          return;
+        }
         throw new Error(data.error || 'Failed to mark challenge as complete');
       }
 
