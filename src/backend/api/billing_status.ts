@@ -1,5 +1,14 @@
 import { Env } from '../types';
 
+interface Subscription {
+  id: string;
+  user_id: string;
+  plan: string;
+  status: string;
+  current_period_end: string;
+  cancel_at_period_end: number;
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -47,8 +56,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     // Query the database for subscription status using user_id
     const subscription = await env.DB.prepare(
-      `SELECT * FROM subscriptions WHERE user_id = ?`
-    ).bind(user.id).first();
+      `SELECT * FROM subscriptions WHERE user_id = ? AND status = 'active'`
+    ).bind(user.id).first() as Subscription | null;
 
     if (!subscription) {
       return new Response(JSON.stringify({
@@ -61,8 +70,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Determine if the subscription is active based on the status
-    const isActive = subscription.status === 'active';
+    // Determine if the subscription is active based on the status and current_period_end
+    const currentPeriodEnd = new Date(subscription.current_period_end);
+    const isActive = subscription.status === 'active' && currentPeriodEnd > new Date();
 
     return new Response(JSON.stringify({
       isActive,
