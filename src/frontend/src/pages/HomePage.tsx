@@ -1,6 +1,7 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import Modal from "../components/Modal"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -62,6 +63,7 @@ export default function HomePage(): JSX.Element {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const navigate = useNavigate()
   const { isAuthenticated, login } = useAuth()
+  const [activeModal, setActiveModal] = useState<string | null>(null)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -172,6 +174,14 @@ export default function HomePage(): JSX.Element {
     }
   }, [googleClientId])
 
+  const openModal = (modalName: string) => {
+    setActiveModal(modalName)
+  }
+
+  const closeModal = () => {
+    setActiveModal(null)
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -191,8 +201,14 @@ export default function HomePage(): JSX.Element {
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Kidoova helps kids build self-esteem with fun daily challenges and progress tracking!
           </p>
-          <div className="flex justify-center">
-            <div id="google-login-button-hero" className="transform hover:scale-105 transition-transform"></div>
+          <div className="flex flex-col items-center space-y-6">
+            <button 
+              onClick={() => document.getElementById('google-login-button-hero')?.click()}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            >
+              Get Started
+            </button>
+            <div id="google-login-button-hero" className="hidden"></div>
           </div>
         </div>
       </section>
@@ -212,7 +228,10 @@ export default function HomePage(): JSX.Element {
               <p className="text-gray-600 mb-6">
                 Help your child build confidence with bite-sized, daily tasks designed to improve problem-solving, social skills, and emotional growth.
               </p>
-              <button className="text-green-500 font-semibold hover:text-green-600 transition-colors">
+              <button 
+                onClick={() => openModal('daily-challenges')}
+                className="text-green-500 font-semibold hover:text-green-600 transition-colors"
+              >
                 Learn More →
               </button>
             </div>
@@ -228,7 +247,10 @@ export default function HomePage(): JSX.Element {
               <p className="text-gray-600 mb-6">
                 Stay motivated by seeing your child's progress and achievements in real-time!
               </p>
-              <button className="text-blue-500 font-semibold hover:text-blue-600 transition-colors">
+              <button 
+                onClick={() => openModal('progress-tracking')}
+                className="text-blue-500 font-semibold hover:text-blue-600 transition-colors"
+              >
                 Learn More →
               </button>
             </div>
@@ -244,7 +266,10 @@ export default function HomePage(): JSX.Element {
               <p className="text-gray-600 mb-6">
                 Get expert tips, activities, and resources to make parenting easier while building your child's confidence.
               </p>
-              <button className="text-yellow-500 font-semibold hover:text-yellow-600 transition-colors">
+              <button 
+                onClick={() => openModal('parent-resources')}
+                className="text-yellow-500 font-semibold hover:text-yellow-600 transition-colors"
+              >
                 Learn More →
               </button>
             </div>
@@ -303,6 +328,94 @@ export default function HomePage(): JSX.Element {
           </div>
         </div>
       </footer>
+
+      {/* Modals */}
+      <Modal 
+        isOpen={activeModal === 'daily-challenges'} 
+        onClose={closeModal} 
+        title="Daily Challenges"
+      >
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Purpose</h3>
+            <p>Help your child grow their confidence through bite-sized, interactive tasks.</p>
+          </div>
+          
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Benefits</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Focus on problem-solving, social skills, and emotional growth.</li>
+              <li>Challenges are designed to be engaging and fun, keeping your child excited to learn every day.</li>
+              <li>Simple, actionable steps to build skills and self-esteem, one task at a time.</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Example Challenge</h3>
+            <p className="italic">"Lead a group discussion and encourage others to participate."</p>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal 
+        isOpen={activeModal === 'progress-tracking'} 
+        onClose={closeModal} 
+        title="Progress Tracking"
+      >
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Purpose</h3>
+            <p>Keep track of your child's growth and development.</p>
+          </div>
+          
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Features</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>See real-time updates on your child's achievements and completed challenges.</li>
+              <li>Track streaks to encourage consistent progress.</li>
+              <li>Visual progress bars and milestones to make learning feel rewarding and fun.</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Benefits</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Helps you stay motivated with clear visual tracking of your child's improvement.</li>
+              <li>Celebrate small wins and reward progress as your child moves toward their goals.</li>
+            </ul>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal 
+        isOpen={activeModal === 'parent-resources'} 
+        onClose={closeModal} 
+        title="Parent Resources"
+      >
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Purpose</h3>
+            <p>Access helpful tools, tips, and expert advice to support your child's journey.</p>
+          </div>
+          
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">What You'll Find</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Guides and articles on positive reinforcement, growth mindset, and confidence-building.</li>
+              <li>Expert parenting tips to help manage challenging situations and nurture a confident child.</li>
+              <li>Fun, interactive activities to enhance your parenting experience.</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Benefits</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Get actionable tips you can start using today.</li>
+              <li>Learn how to build a strong emotional connection with your child while fostering independence and self-esteem.</li>
+            </ul>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 } 
