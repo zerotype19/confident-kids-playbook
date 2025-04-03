@@ -9,7 +9,7 @@ const weeklyChallenges = await db.prepare(`
     datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days') as week_start_datetime
   FROM challenge_logs
   WHERE child_id = ?
-  AND completed = 1
+  AND status = 'completed'
   AND datetime(completed_at, 'localtime', 'America/New_York') >= datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days')
 `).bind(childId).first<{ 
   count: number; 
@@ -35,6 +35,6 @@ const rawWeeklyCount = await db.prepare(`
   SELECT COUNT(*) as count
   FROM challenge_logs
   WHERE child_id = ?
-  AND completed = 1
+  AND status = 'completed'
   AND datetime(completed_at, 'localtime', 'America/New_York') >= datetime('now', 'localtime', 'America/New_York', 'weekday 0')
 `).bind(childId).first<{ count: number }>(); 
