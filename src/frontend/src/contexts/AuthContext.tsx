@@ -107,10 +107,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set selected child ID from localStorage or use the first child if available
       const storedChildId = localStorage.getItem('selectedChildId');
+      console.log("🔍 Stored child ID:", storedChildId);
+      
       if (storedChildId && data.children?.some((child: any) => child.id === storedChildId)) {
+        console.log("✅ Using stored child ID:", storedChildId);
         setSelectedChildIdState(storedChildId);
+      } else if (data.selectedChildId) {
+        // If the backend has a selected child ID, use that
+        console.log("✅ Using backend selected child ID:", data.selectedChildId);
+        setSelectedChildIdState(data.selectedChildId);
+        localStorage.setItem('selectedChildId', data.selectedChildId);
       } else if (data.children?.length > 0) {
         // If no stored child ID or it's invalid, use the first child
+        console.log("✅ Using first child as default:", data.children[0].id);
         setSelectedChildIdState(data.children[0].id);
         localStorage.setItem('selectedChildId', data.children[0].id);
       }

@@ -75,6 +75,16 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchChildren();
   }, [token, selectedChildId, setSelectedChildId]);
 
+  // Update selected child when selectedChildId changes
+  useEffect(() => {
+    if (selectedChildId && childrenList.length > 0) {
+      const child = childrenList.find(c => c.id === selectedChildId);
+      if (child) {
+        setSelectedChildState(child);
+      }
+    }
+  }, [selectedChildId, childrenList]);
+
   const setSelectedChild = (child: Child) => {
     setSelectedChildState(child);
     setSelectedChildId(child.id);
