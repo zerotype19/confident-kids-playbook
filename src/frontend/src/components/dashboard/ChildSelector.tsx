@@ -50,7 +50,7 @@ export default function ChildSelector({ children: propChildren }: ChildSelectorP
       <div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full inline-flex justify-between items-center rounded-xl bg-kidoova-accent text-white font-bold px-4 py-2 shadow-kidoova hover:bg-kidoova-green transition"
+          className="w-full inline-flex justify-between items-center rounded-xl bg-gray-200 text-gray-700 font-bold px-4 py-2 shadow-kidoova hover:bg-gray-300 transition"
         >
           <span className="truncate">
             {selectedChild ? selectedChild.name : 'Select Child'}
@@ -83,7 +83,7 @@ export default function ChildSelector({ children: propChildren }: ChildSelectorP
                 }}
                 className={`w-full text-left px-4 py-2 text-sm ${
                   selectedChild?.id === child.id
-                    ? 'bg-kidoova-accent text-white'
+                    ? 'bg-gray-200 text-gray-700'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
                 role="menuitem"
