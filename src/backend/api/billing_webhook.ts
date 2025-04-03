@@ -16,7 +16,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const body = await request.text();
-    console.log('Received webhook event:', body);
+    console.log('🎯 Received webhook event:', body);
     
     // Initialize Stripe with the secret key
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -31,16 +31,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         signature,
         env.STRIPE_WEBHOOK_SECRET
       );
-      console.log('Successfully verified webhook signature');
+      console.log('✅ Successfully verified webhook signature');
     } catch (err) {
-      console.error('Webhook signature verification failed:', err);
+      console.error('❌ Webhook signature verification failed:', err);
       return new Response(JSON.stringify({ error: 'Webhook signature verification failed' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('Processing event type:', event.type);
+    console.log('🎯 Processing event type:', event.type);
 
     // Handle the event
     switch (event.type) {
@@ -54,18 +54,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const price = subscription.items.data[0].price;
         const product = price.product as Stripe.Product;
         
-        console.log('Subscription data:', {
+        console.log('📝 Subscription data:', {
           customerId,
           userId,
           subscriptionId: subscription.id,
           plan: product.name,
           status: subscription.status,
           currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
-          cancelAtPeriodEnd: subscription.cancel_at_period_end
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          eventType: event.type
         });
         
         if (!userId) {
-          console.error('No user_id in subscription metadata');
+          console.error('❌ No user_id in subscription metadata');
           return new Response(JSON.stringify({ error: 'No user_id in subscription metadata' }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
@@ -74,7 +75,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         try {
           // Update or insert the subscription in the database
-          const result = await env.DB.prepare(`
+          const sql = `
             INSERT INTO subscriptions (
               id, user_id, stripe_customer_id, stripe_subscription_id, 
               plan, status, current_period_end, cancel_at_period_end
@@ -90,7 +91,21 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
               current_period_end = excluded.current_period_end,
               cancel_at_period_end = excluded.cancel_at_period_end,
               updated_at = CURRENT_TIMESTAMP
-          `).bind(
+          `;
+          
+          console.log('🔍 Executing SQL:', sql);
+          console.log('🔍 With parameters:', {
+            id: crypto.randomUUID(),
+            userId,
+            customerId,
+            subscriptionId: subscription.id,
+            plan: product.name,
+            status: subscription.status,
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+            cancelAtPeriodEnd: subscription.cancel_at_period_end ? 1 : 0
+          });
+
+          const result = await env.DB.prepare(sql).bind(
             crypto.randomUUID(),
             userId,
             customerId,
@@ -101,9 +116,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             subscription.cancel_at_period_end ? 1 : 0
           ).run();
           
-          console.log('Database update result:', result);
+          console.log('✅ Database update result:', result);
         } catch (dbError) {
-          console.error('Database error:', dbError);
+          console.error('❌ Database error:', dbError);
           throw dbError;
         }
         
@@ -114,10 +129,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata.user_id;
         
-        console.log('Deleting subscription for user:', userId);
+        console.log('🗑️ Deleting subscription for user:', userId);
         
         if (!userId) {
-          console.error('No user_id in subscription metadata');
+          console.error('❌ No user_id in subscription metadata');
           return new Response(JSON.stringify({ error: 'No user_id in subscription metadata' }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
@@ -125,18 +140,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         }
 
         try {
-          // Update the subscription status to canceled
-          const result = await env.DB.prepare(`
+          const sql = `
             UPDATE subscriptions 
             SET status = 'canceled', 
                 cancel_at_period_end = 1,
                 updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
-          `).bind(userId).run();
+          `;
           
-          console.log('Subscription deletion result:', result);
+          console.log('🔍 Executing SQL:', sql);
+          console.log('🔍 With parameters:', { userId });
+
+          const result = await env.DB.prepare(sql).bind(userId).run();
+          
+          console.log('✅ Subscription deletion result:', result);
         } catch (dbError) {
-          console.error('Database error during deletion:', dbError);
+          console.error('❌ Database error during deletion:', dbError);
           throw dbError;
         }
         
@@ -148,7 +167,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error('❌ Error processing webhook:', error);
     return new Response(JSON.stringify({ error: 'Failed to process webhook' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
