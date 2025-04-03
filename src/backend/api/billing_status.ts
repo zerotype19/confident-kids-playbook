@@ -45,14 +45,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Determine if the subscription is active based on the plan
-    const isActive = subscription.plan === 'premium';
+    // Determine if the subscription is active based on the status
+    const isActive = subscription.status === 'active';
 
     return new Response(JSON.stringify({
       isActive,
       plan: subscription.plan,
-      currentPeriodEnd: null, // Not available in the current schema
-      cancelAtPeriodEnd: false // Not available in the current schema
+      currentPeriodEnd: subscription.current_period_end,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end === 1
     }), {
       headers: { 'Content-Type': 'application/json' },
     });

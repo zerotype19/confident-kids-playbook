@@ -39,8 +39,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${env.FRONTEND_URL}/settings/billing?success=true`,
-      cancel_url: `${env.FRONTEND_URL}/settings/billing?canceled=true`,
+      success_url: `${env.FRONTEND_URL}/manage-profile?success=true`,
+      cancel_url: `${env.FRONTEND_URL}/manage-profile?canceled=true`,
       client_reference_id: child_id,
       metadata: {
         user_id: child.user_id,

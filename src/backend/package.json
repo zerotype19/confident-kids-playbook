@@ -12,6 +12,7 @@
         "db:auth": "npx wrangler d1 execute confident-kids-playbook-db --file=./migrations/0004_create_auth_tables.sql",
         "db:media": "npx wrangler d1 execute confident-kids-playbook-db --file=./migrations/0005_create_media_table.sql",
         "db:subscriptions": "npx wrangler d1 execute confident-kids-playbook-db --file=./migrations/0003_create_subscriptions.sql",
+        "db:update_subscriptions": "npx wrangler d1 execute confident-kids-playbook-db --file=./migrations/0007_update_subscriptions_schema.sql",
         "db:setup": "npm run db:create && npm run db:init && npm run db:auth && npm run db:media && npm run db:subscriptions",
         "db:seed": "npx wrangler d1 execute confident-kids-playbook-db --file=./seed_data.sql",
         "db:reset": "npm run db:setup && npm run db:seed",

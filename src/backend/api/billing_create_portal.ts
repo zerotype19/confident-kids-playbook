@@ -43,8 +43,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Create a portal session
     const session = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
-      return_url: `${env.FRONTEND_URL}/settings/billing`,
+      customer: subscription.stripe_customer_id as string,
+      return_url: `${env.FRONTEND_URL}/manage-profile`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
