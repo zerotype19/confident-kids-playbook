@@ -1,4 +1,4 @@
-export function calculateAgeRange(birthdate: Date): string {
+export function calculateAgeRange(birthdate: Date): string | null {
   const today = new Date();
   let age = today.getFullYear() - birthdate.getFullYear();
   const monthDiff = today.getMonth() - birthdate.getMonth();
@@ -8,15 +8,8 @@ export function calculateAgeRange(birthdate: Date): string {
     age--;
   }
 
-  if (age < 2) {
-    return '0-2 years';
-  } else if (age < 5) {
-    return '2-5 years';
-  } else if (age < 8) {
-    return '5-8 years';
-  } else if (age < 12) {
-    return '8-12 years';
-  } else {
-    return '12+ years';
-  }
+  if (age >= 3 && age <= 5) return '3-5';
+  if (age >= 6 && age <= 9) return '6-9';
+  if (age >= 10 && age <= 13) return '10-13';
+  return null;
 } 

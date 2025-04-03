@@ -1,35 +1,14 @@
-import { Env } from '../types';
+import { Env, FamilyMember } from '../types';
 import { verifyJWT } from '../auth';
-import { nanoid } from 'nanoid';
 import { corsHeaders, handleOptions } from '../lib/cors';
+import { nanoid } from 'nanoid';
+import { calculateAgeRange } from '../utils/ageUtils';
 
 interface CreateChildRequest {
   name: string;
   birthdate: string;
   gender: string;
   avatar_url?: string;
-}
-
-interface FamilyMemberResult {
-  family_id: string;
-}
-
-function calculateAgeRange(birthdate: string): string | null {
-  const birth = new Date(birthdate);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  const dayDiff = today.getDate() - birth.getDate();
-  
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    // hasn't had birthday yet this year
-    age -= 1;
-  }
-
-  if (age >= 3 && age <= 5) return "3–5";
-  if (age >= 6 && age <= 9) return "6–9";
-  if (age >= 10 && age <= 13) return "10–13";
-  return null;
 }
 
 export async function onRequest(context: { request: Request; env: Env }) {
@@ -82,12 +61,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
       SELECT family_id FROM family_members 
       WHERE user_id = ? 
       LIMIT 1
-    `).bind(payload.sub).first() as FamilyMemberResult | null;
-
-    console.log('👨‍👩‍👧‍👦 Family lookup result:', {
-      hasFamily: !!familyMember,
-      familyId: familyMember?.family_id
-    });
+    `).bind(payload.sub).first<FamilyMember>();
 
     if (!familyMember) {
       return new Response(JSON.stringify({ error: 'No family found' }), {
@@ -114,7 +88,7 @@ export async function onRequest(context: { request: Request; env: Env }) {
     }
 
     // Calculate age range from birthdate
-    const ageRange = calculateAgeRange(body.birthdate);
+    const ageRange = calculateAgeRange(new Date(body.birthdate));
     if (!ageRange) {
       return new Response(JSON.stringify({ 
         error: 'Child must be between ages 3 and 13',
