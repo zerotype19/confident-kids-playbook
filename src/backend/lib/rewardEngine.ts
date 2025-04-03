@@ -287,6 +287,13 @@ export async function getChildProgress(childId: string, env: Env) {
     }
   }
 
+  // Calculate milestone progress
+  const milestoneProgress = {
+    current: total,
+    next: nextMilestone || Math.ceil(total / 10) * 10 + 10, // If no next milestone, use next multiple of 10
+    percentage: nextMilestone ? (total / nextMilestone) * 100 : (total % 10) * 10
+  };
+
   // Next streak reward
   const streaks = [3, 5, 10, 15, 20, 30];
   const nextStreak = streaks.find(s => s > (current_streak || 0));
