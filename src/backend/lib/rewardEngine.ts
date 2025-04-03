@@ -188,14 +188,16 @@ export async function getChildProgress(childId: string, env: Env) {
   const normalizedAgeRange = age_range.replace(/–/g, '-');
 
   // Get total completed challenges
-  const { total } = await env.DB.prepare(`
+  const totalResult = await env.DB.prepare(`
     SELECT COUNT(*) as total 
     FROM challenge_logs 
     WHERE child_id = ?
   `).bind(childId).first<{ total: number }>();
+  
+  const total = totalResult?.total || 0;
 
   // Get current streak
-  const { current_streak } = await env.DB.prepare(`
+  const streakResult = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
       SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
       FROM challenge_logs
@@ -217,9 +219,11 @@ export async function getChildProgress(childId: string, env: Env) {
     SELECT MAX(streak) as current_streak
     FROM consecutive_days
   `).bind(childId, childId).first<{ current_streak: number }>();
+  
+  const current_streak = streakResult?.current_streak || 0;
 
   // Get longest streak
-  const { longest_streak } = await env.DB.prepare(`
+  const longestStreakResult = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
       SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
       FROM challenge_logs
@@ -240,6 +244,8 @@ export async function getChildProgress(childId: string, env: Env) {
     SELECT MAX(streak) as longest_streak
     FROM consecutive_days
   `).bind(childId, childId).first<{ longest_streak: number }>();
+  
+  const longest_streak = longestStreakResult?.longest_streak || 0;
 
   // Debug query to see all completed challenges
   const debugQuery = await env.DB.prepare(`
@@ -345,8 +351,8 @@ export async function getChildProgress(childId: string, env: Env) {
   // Calculate milestone progress
   const milestoneProgress = {
     current: total,
-    next: nextMilestone || Math.ceil(total / 10) * 10 + 10, // If no next milestone, use next multiple of 10
-    percentage: nextMilestone ? (total / nextMilestone) * 100 : (total % 10) * 10
+    next: nextMilestone || (total >= 20 ? Math.ceil(total / 10) * 10 + 10 : 20), // If over 20, increment by 10, otherwise use 20 as first target
+    percentage: nextMilestone ? (total / nextMilestone) * 100 : (total / (total >= 20 ? Math.ceil(total / 10) * 10 + 10 : 20)) * 100
   };
 
   // Next streak reward
