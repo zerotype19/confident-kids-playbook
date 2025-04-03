@@ -11,12 +11,12 @@ interface UpdateChildRequest {
   avatar_url?: string;
 }
 
-export async function onRequest(c: Context<{ Bindings: Env; Variables: { id: string } }>) {
-  const { request, env } = c;
-  const childId = c.get('id');
+export async function onRequest(context: { request: Request; env: Env; id?: string }) {
+  const { request, env, id } = context;
   console.log('🚀 Children update endpoint called:', {
     method: request.method,
     url: request.url,
+    id,
     headers: Object.fromEntries(request.headers.entries())
   });
   
@@ -57,7 +57,7 @@ export async function onRequest(c: Context<{ Bindings: Env; Variables: { id: str
       email: payload.email
     });
 
-    if (!childId) {
+    if (!id) {
       return new Response(JSON.stringify({ error: 'Child ID is required' }), {
         status: 400,
         headers: corsHeaders()
@@ -82,7 +82,7 @@ export async function onRequest(c: Context<{ Bindings: Env; Variables: { id: str
     const childCheck = await env.DB.prepare(`
       SELECT * FROM children 
       WHERE id = ? AND family_id = ?
-    `).bind(childId, familyMember.family_id).first<Child>();
+    `).bind(id, familyMember.family_id).first<Child>();
 
     if (!childCheck) {
       return new Response(JSON.stringify({ error: 'Child not found or access denied' }), {
@@ -121,7 +121,7 @@ export async function onRequest(c: Context<{ Bindings: Env; Variables: { id: str
     }
 
     console.log('👶 Updating child with:', {
-      childId,
+      childId: id,
       name: body.name,
       birthdate: body.birthdate,
       ageRange,
@@ -141,7 +141,7 @@ export async function onRequest(c: Context<{ Bindings: Env; Variables: { id: str
       body.gender,
       body.avatar_url || null,
       ageRange,
-      childId,
+      id,
       familyMember.family_id
     ).run();
 
@@ -150,13 +150,13 @@ export async function onRequest(c: Context<{ Bindings: Env; Variables: { id: str
     }
 
     console.log('✅ Child updated successfully:', {
-      childId,
+      childId: id,
       familyId: familyMember.family_id
     });
 
     return new Response(JSON.stringify({
       success: true,
-      childId
+      childId: id
     }), {
       headers: corsHeaders()
     });

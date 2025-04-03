@@ -8,6 +8,7 @@ import { onRequest as childrenCreate } from './api/children_create'
 import { onRequest as onboardingComplete } from './api/onboarding_complete'
 import { onRequest as userProfile } from './api/user_profile'
 import { onRequest as children } from './api/children'
+import { onRequest as childrenUpdate } from './api/children_update'
 import { challenge } from './api/dashboard/challenge'
 import { notes, createNote } from './api/notes'
 import { onRequest as challengeLog } from './api/challenge_log'
@@ -90,6 +91,11 @@ router.post('/api/onboarding/complete', (request, context) => onboardingComplete
 
 // Children routes
 router.get('/api/children', (request, context) => children({ request, env: context.env }))
+router.put('/api/children/:id', (request, context) => {
+  const url = new URL(request.url);
+  const id = url.pathname.split('/').pop();
+  return childrenUpdate({ request, env: context.env, id });
+})
 
 // Dashboard routes
 router.get('/api/dashboard/challenge', (request, context) => challenge({ request, env: context.env }))
