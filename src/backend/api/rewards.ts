@@ -3,10 +3,10 @@ const weeklyChallenges = await db.prepare(`
   SELECT 
     COUNT(*) as count,
     GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as dates,
-    datetime('now', 'localtime', 'America/New_York', 'weekday 0') as week_start,
+    datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days') as week_start,
     datetime('now', 'localtime', 'America/New_York') as current_date,
     datetime('now', 'localtime', 'America/New_York') as current_datetime,
-    datetime('now', 'localtime', 'America/New_York', 'weekday 0') as week_start_datetime
+    datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days') as week_start_datetime
   FROM challenge_logs
   WHERE child_id = ?
   AND completed = 1

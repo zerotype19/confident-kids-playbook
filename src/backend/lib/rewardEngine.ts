@@ -45,9 +45,10 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
     // 2. Check streak rewards
     const { current_streak } = await env.DB.prepare(`
       WITH RECURSIVE dates AS (
-        SELECT datetime(completed_at, 'localtime', 'America/New_York') as date
+        SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
         FROM challenge_logs
         WHERE child_id = ?
+        AND completed = 1
         ORDER BY completed_at DESC
         LIMIT 1
       ),
@@ -55,10 +56,11 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
         SELECT date, 1 as streak
         FROM dates
         UNION ALL
-        SELECT datetime(cl.completed_at, 'localtime', 'America/New_York'), cd.streak + 1
+        SELECT date(datetime(cl.completed_at, 'localtime', 'America/New_York')), cd.streak + 1
         FROM challenge_logs cl
         JOIN consecutive_days cd ON date(datetime(cl.completed_at, 'localtime', 'America/New_York')) = date(datetime(cd.date, 'localtime', 'America/New_York'), '-1 day')
         WHERE cl.child_id = ?
+        AND cl.completed = 1
       )
       SELECT MAX(streak) as current_streak
       FROM consecutive_days
@@ -195,9 +197,10 @@ export async function getChildProgress(childId: string, env: Env) {
   // Get current streak
   const { current_streak } = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
-      SELECT datetime(completed_at, 'localtime', 'America/New_York') as date
+      SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
       FROM challenge_logs
       WHERE child_id = ?
+      AND completed = 1
       ORDER BY completed_at DESC
       LIMIT 1
     ),
@@ -205,10 +208,11 @@ export async function getChildProgress(childId: string, env: Env) {
       SELECT date, 1 as streak
       FROM dates
       UNION ALL
-      SELECT datetime(cl.completed_at, 'localtime', 'America/New_York'), cd.streak + 1
+      SELECT date(datetime(cl.completed_at, 'localtime', 'America/New_York')), cd.streak + 1
       FROM challenge_logs cl
       JOIN consecutive_days cd ON date(datetime(cl.completed_at, 'localtime', 'America/New_York')) = date(datetime(cd.date, 'localtime', 'America/New_York'), '-1 day')
       WHERE cl.child_id = ?
+      AND cl.completed = 1
     )
     SELECT MAX(streak) as current_streak
     FROM consecutive_days
@@ -217,19 +221,21 @@ export async function getChildProgress(childId: string, env: Env) {
   // Get longest streak
   const { longest_streak } = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
-      SELECT datetime(completed_at, 'localtime', 'America/New_York') as date
+      SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
       FROM challenge_logs
       WHERE child_id = ?
+      AND completed = 1
       ORDER BY completed_at DESC
     ),
     consecutive_days AS (
       SELECT date, 1 as streak
       FROM dates
       UNION ALL
-      SELECT datetime(cl.completed_at, 'localtime', 'America/New_York'), cd.streak + 1
+      SELECT date(datetime(cl.completed_at, 'localtime', 'America/New_York')), cd.streak + 1
       FROM challenge_logs cl
       JOIN consecutive_days cd ON date(datetime(cl.completed_at, 'localtime', 'America/New_York')) = date(datetime(cd.date, 'localtime', 'America/New_York'), '-1 day')
       WHERE cl.child_id = ?
+      AND cl.completed = 1
     )
     SELECT MAX(streak) as longest_streak
     FROM consecutive_days
@@ -244,6 +250,7 @@ export async function getChildProgress(childId: string, env: Env) {
       GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as completed_dates
     FROM challenge_logs
     WHERE child_id = ?
+    AND completed = 1
     AND datetime(completed_at, 'localtime', 'America/New_York') >= datetime('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days')
   `).bind(childId).first<{ 
     weekly_challenges: number;
