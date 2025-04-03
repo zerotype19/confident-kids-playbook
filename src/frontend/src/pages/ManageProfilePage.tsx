@@ -19,13 +19,36 @@ export const ManageProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
       try {
-        const response = await fetch(`/api/billing_status?child_id=${user?.uid}`);
-        if (!response.ok) throw new Error('Failed to fetch subscription status');
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/billing_status?child_id=${user?.uid}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          console.error('Failed to fetch subscription status:', response.status, response.statusText);
+          setSubscriptionStatus({
+            isActive: false,
+            plan: 'Free',
+            currentPeriodEnd: null,
+            cancelAtPeriodEnd: false
+          });
+          return;
+        }
+        
         const data = await response.json();
         setSubscriptionStatus(data);
       } catch (err) {
-        setError('Failed to load subscription information');
         console.error('Error fetching subscription:', err);
+        setSubscriptionStatus({
+          isActive: false,
+          plan: 'Free',
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false
+        });
       } finally {
         setIsLoading(false);
       }
@@ -33,6 +56,8 @@ export const ManageProfilePage: React.FC = () => {
 
     if (user?.uid) {
       fetchSubscriptionStatus();
+    } else {
+      setIsLoading(false);
     }
   }, [user?.uid]);
 
@@ -47,13 +72,23 @@ export const ManageProfilePage: React.FC = () => {
 
   const handleManageSubscription = async () => {
     try {
-      const response = await fetch('/api/billing_create_portal', {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/billing_create_portal`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ child_id: user?.uid }),
       });
 
-      if (!response.ok) throw new Error('Failed to create portal session');
+      if (!response.ok) {
+        console.error('Failed to create portal session:', response.status, response.statusText);
+        setError('Failed to open subscription management portal');
+        return;
+      }
+      
       const { url } = await response.json();
       window.location.href = url;
     } catch (err) {
@@ -107,7 +142,7 @@ export const ManageProfilePage: React.FC = () => {
             <div className="flex-shrink-0">
               <img
                 className="h-12 w-12 rounded-full"
-                src={user?.photoURL || 'https://via.placeholder.com/150'}
+                src={user?.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.displayName || 'User')}
                 alt="Profile"
               />
             </div>
