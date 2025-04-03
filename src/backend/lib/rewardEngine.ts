@@ -271,7 +271,9 @@ export async function getChildProgress(childId: string, env: Env) {
       COUNT(*) as weekly_challenges,
       datetime('now', 'localtime', 'America/New_York') as current_time,
       datetime('now', 'localtime', 'America/New_York', '-7 days') as week_start,
-      GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as completed_dates
+      GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as completed_dates,
+      GROUP_CONCAT(id) as challenge_ids,
+      GROUP_CONCAT(challenge_id) as challenge_types
     FROM challenge_logs
     WHERE child_id = ?
     AND completed_at IS NOT NULL
@@ -281,6 +283,8 @@ export async function getChildProgress(childId: string, env: Env) {
     current_time: string;
     week_start: string;
     completed_dates: string;
+    challenge_ids: string;
+    challenge_types: string;
   }>();
 
   console.log('Weekly challenges calculation:', {
@@ -288,6 +292,8 @@ export async function getChildProgress(childId: string, env: Env) {
     currentTime: weeklyChallengesQuery?.current_time,
     weekStart: weeklyChallengesQuery?.week_start,
     completedDates: weeklyChallengesQuery?.completed_dates,
+    challengeIds: weeklyChallengesQuery?.challenge_ids,
+    challengeTypes: weeklyChallengesQuery?.challenge_types,
     count: weeklyChallengesQuery?.weekly_challenges
   });
 
