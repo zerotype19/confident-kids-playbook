@@ -98,18 +98,61 @@ export const ManageProfilePage: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (response.status === 404 && errorData.error === 'No active subscription found') {
+          // Redirect to subscription page if no active subscription
+          window.location.href = '/subscribe';
+          return;
+        }
         throw new Error(errorData.error || 'Failed to create billing portal session');
+      }
+
+      const { url } = await response.json();
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No billing portal URL returned');
+      }
+    } catch (err) {
+      console.error('Error creating billing portal session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create billing portal session');
+    }
+  };
+
+  const handleUpgradeSubscription = async () => {
+    try {
+      if (!selectedChildId) {
+        setError('No child selected');
+        return;
+      }
+
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/billing_create_checkout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          child_id: selectedChildId,
+          price_id: import.meta.env.VITE_STRIPE_PRICE_ID || ''
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
       }
 
       const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error('No portal URL returned');
+        throw new Error('No checkout URL returned');
       }
     } catch (err) {
-      console.error('Error creating billing portal session:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create billing portal session');
+      console.error('Error creating checkout session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create checkout session');
     }
   };
 
@@ -231,7 +274,7 @@ export const ManageProfilePage: React.FC = () => {
                 <div className="space-y-4">
                   <p className="text-sm text-gray-500">You are currently on the free plan.</p>
                   <button
-                    onClick={handleManageSubscription}
+                    onClick={handleUpgradeSubscription}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Upgrade Plan
