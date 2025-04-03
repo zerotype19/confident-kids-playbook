@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { SubscriptionModal } from '../components/SubscriptionModal';
 
 interface SubscriptionStatus {
   isActive: boolean;
@@ -15,6 +16,7 @@ export const ManageProfilePage: React.FC = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
@@ -99,8 +101,8 @@ export const ManageProfilePage: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 404 && errorData.error === 'No active subscription found') {
-          // Redirect to subscription page if no active subscription
-          window.location.href = '/subscribe';
+          // Show subscription modal instead of redirecting
+          setIsSubscriptionModalOpen(true);
           return;
         }
         throw new Error(errorData.error || 'Failed to create billing portal session');
@@ -274,7 +276,7 @@ export const ManageProfilePage: React.FC = () => {
                 <div className="space-y-4">
                   <p className="text-sm text-gray-500">You are currently on the free plan.</p>
                   <button
-                    onClick={handleUpgradeSubscription}
+                    onClick={() => setIsSubscriptionModalOpen(true)}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Upgrade Plan
@@ -304,6 +306,12 @@ export const ManageProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <SubscriptionModal
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+        selectedChildId={selectedChildId}
+      />
     </div>
   );
 }; 
