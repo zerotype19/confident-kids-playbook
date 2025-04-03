@@ -1,4 +1,4 @@
-export const ALLOWED_ORIGIN = 'https://confident-kids-playbook.pages.dev'
+export const ALLOWED_ORIGIN = 'https://kidoova.com'
 
 interface CorsOptions {
   allowedMethods?: string[]
