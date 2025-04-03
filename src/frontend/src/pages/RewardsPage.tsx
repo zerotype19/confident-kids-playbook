@@ -35,11 +35,17 @@ export default function RewardsPage() {
         }
 
         const data = await response.json();
-        setChildren(data);
+        if (!data.success) {
+          throw new Error('API response indicated failure');
+        }
+        if (!Array.isArray(data.children)) {
+          throw new Error('Invalid response format: children is not an array');
+        }
+        setChildren(data.children);
         
         // Auto-select first child if only one exists
-        if (data.length === 1 && !selectedChild) {
-          setSelectedChild(data[0]);
+        if (data.children.length === 1 && !selectedChild) {
+          setSelectedChild(data.children[0]);
         }
       } catch (err) {
         console.error('Error fetching children:', err);
