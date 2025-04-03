@@ -150,10 +150,15 @@ export default function ManageChildrenPage() {
   };
 
   const openEditModal = (child: Child) => {
+    // Format the birthdate to YYYY-MM-DD for the date input
+    const formattedBirthdate = child.birthdate 
+      ? new Date(child.birthdate).toISOString().split('T')[0]
+      : '';
+
     setEditingChild({
       id: child.id,
       name: child.name,
-      birthdate: child.birthdate || '',
+      birthdate: formattedBirthdate,
       gender: child.gender || '',
       avatar_url: child.avatar_url || ''
     });
@@ -333,63 +338,69 @@ export default function ManageChildrenPage() {
             <Dialog.Title className="text-xl font-semibold mb-4">Edit Child</Dialog.Title>
             
             <form onSubmit={handleEditChild}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={editingChild.name}
-                  onChange={(e) => setEditingChild({ ...editingChild, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  required
-                />
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="edit-name"
+                    value={editingChild.name}
+                    onChange={(e) => setEditingChild({ ...editingChild, name: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-birthdate" className="block text-sm font-medium text-gray-700">
+                    Birthdate
+                  </label>
+                  <input
+                    type="date"
+                    id="edit-birthdate"
+                    value={editingChild.birthdate}
+                    onChange={(e) => setEditingChild({ ...editingChild, birthdate: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-gender" className="block text-sm font-medium text-gray-700">
+                    Gender
+                  </label>
+                  <select
+                    id="edit-gender"
+                    value={editingChild.gender}
+                    onChange={(e) => setEditingChild({ ...editingChild, gender: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    required
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="edit-avatar" className="block text-sm font-medium text-gray-700">
+                    Avatar URL
+                  </label>
+                  <input
+                    type="url"
+                    id="edit-avatar"
+                    value={editingChild.avatar_url}
+                    onChange={(e) => setEditingChild({ ...editingChild, avatar_url: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    placeholder="https://example.com/avatar.jpg"
+                  />
+                </div>
               </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Birthdate
-                </label>
-                <input
-                  type="date"
-                  value={editingChild.birthdate}
-                  onChange={(e) => setEditingChild({ ...editingChild, birthdate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gender
-                </label>
-                <select
-                  value={editingChild.gender}
-                  onChange={(e) => setEditingChild({ ...editingChild, gender: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  required
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Avatar URL (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={editingChild.avatar_url}
-                  onChange={(e) => setEditingChild({ ...editingChild, avatar_url: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="https://example.com/avatar.jpg"
-                />
-              </div>
-              
-              <div className="flex justify-end space-x-2 mt-6">
+
+              <div className="mt-6 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
@@ -399,9 +410,9 @@ export default function ManageChildrenPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-kidoova-accent text-white rounded-md hover:bg-kidoova-green"
+                  className="px-4 py-2 bg-kidoova-accent text-white rounded-md hover:bg-kidoova-accent-dark"
                 >
-                  Update Child
+                  Save Changes
                 </button>
               </div>
             </form>
