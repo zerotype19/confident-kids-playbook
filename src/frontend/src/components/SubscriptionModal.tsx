@@ -9,11 +9,12 @@ interface SubscriptionModalProps {
 }
 
 interface SubscriptionPlan {
-  id: string;
+  id: 'monthly' | 'yearly';
   name: string;
   price: number;
   features: string[];
   interval: 'month' | 'year';
+  price_id: string;
 }
 
 const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
@@ -27,7 +28,21 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Progress tracking',
       '24/7 support'
     ],
-    interval: 'month'
+    interval: 'month',
+    price_id: 'price_1R55sbPEQoD1awJQfStxQA3F' // Replace with your actual monthly price ID
+  },
+  {
+    id: 'yearly',
+    name: 'Yearly Plan',
+    price: 99.99,
+    features: [
+      'All Monthly Plan features',
+      'Save 16% compared to monthly',
+      'Priority support',
+      'Early access to new features'
+    ],
+    interval: 'year',
+    price_id: 'price_1R55sbPEQoD1awJQfStxQA3F' // Replace with your actual yearly price ID
   }
 ];
 
@@ -57,6 +72,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       const apiUrl = import.meta.env.VITE_API_URL || '';
       const endpoint = hasActiveSubscription ? '/api/billing_create_portal' : '/api/billing_create_checkout';
       
+      const selectedPlanDetails = SUBSCRIPTION_PLANS.find(plan => plan.id === planId);
+      if (!selectedPlanDetails) {
+        throw new Error('Invalid plan selected');
+      }
+
       const response = await fetch(`${apiUrl}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -65,7 +85,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          child_id: selectedChildId
+          child_id: selectedChildId,
+          price_id: selectedPlanDetails.price_id
         }),
       });
 
@@ -122,7 +143,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {SUBSCRIPTION_PLANS.map((plan) => (
             <div
               key={plan.id}

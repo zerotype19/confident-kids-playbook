@@ -3,16 +3,24 @@ import Stripe from 'stripe';
 
 interface CheckoutRequest {
   child_id: string;
+  price_id: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   
   try {
-    const { child_id } = await request.json() as CheckoutRequest;
+    const { child_id, price_id } = await request.json() as CheckoutRequest;
     
     if (!child_id) {
       return new Response(JSON.stringify({ error: 'child_id is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!price_id) {
+      return new Response(JSON.stringify({ error: 'price_id is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -50,7 +58,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: env.STRIPE_PRICE_ID,
+          price: price_id,
           quantity: 1,
         },
       ],
