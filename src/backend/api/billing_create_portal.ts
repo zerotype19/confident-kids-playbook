@@ -10,6 +10,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   
   try {
     const { child_id } = await request.json() as PortalRequest;
+    console.log('Received request with child_id:', child_id);
     
     if (!child_id) {
       return new Response(JSON.stringify({ error: 'child_id is required' }), {
@@ -23,6 +24,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `SELECT family_id FROM children WHERE id = ?`
     ).bind(child_id).first();
 
+    console.log('Child record:', child);
+
     if (!child) {
       return new Response(JSON.stringify({ error: 'Child not found' }), {
         status: 404,
@@ -35,6 +38,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `SELECT id FROM users WHERE selected_child_id = ?`
     ).bind(child_id).first();
 
+    console.log('User record:', user);
+
     if (!user) {
       return new Response(JSON.stringify({ error: 'User not found' }), {
         status: 404,
@@ -46,6 +51,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const subscription = await env.DB.prepare(
       `SELECT stripe_customer_id FROM subscriptions WHERE user_id = ? AND status = 'active'`
     ).bind(user.id).first();
+
+    console.log('Subscription record:', subscription);
 
     if (!subscription || !subscription.stripe_customer_id) {
       return new Response(JSON.stringify({ error: 'No active subscription found' }), {
