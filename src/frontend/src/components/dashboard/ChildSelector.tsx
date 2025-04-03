@@ -21,6 +21,8 @@ export default function ChildSelector({ children: propChildren }: ChildSelectorP
     console.log('🎯 ChildSelector - Final Children:', children);
     console.log('🎯 ChildSelector - Selected Child:', selectedChild);
     console.log('🎯 ChildSelector - Is Loading:', isLoading);
+    console.log('🎯 ChildSelector - Children Length:', children?.length);
+    console.log('🎯 ChildSelector - Children Array:', children);
   }, [contextChildren, propChildren, children, selectedChild, isLoading]);
 
   useEffect(() => {

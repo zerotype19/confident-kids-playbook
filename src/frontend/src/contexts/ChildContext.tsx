@@ -71,6 +71,7 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         // If we have a selectedChildId from auth context, find and set the corresponding child
         if (selectedChildId) {
+          console.log('🔍 Looking for selected child with ID:', selectedChildId);
           const child = childrenArray.find((c: Child) => c.id === selectedChildId);
           if (child) {
             console.log('✅ Found selected child:', child);
