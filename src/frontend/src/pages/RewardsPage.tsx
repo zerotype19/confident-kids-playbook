@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useChildContext } from '../contexts/ChildContext';
 import { Reward, ProgressSummary } from '../types';
 import RewardsOverview from '../components/rewards/RewardsOverview';
-import TrophyCase from '../components/rewards/TrophyCase';
+import { TrophyCase } from '../components/rewards/TrophyCase';
 import ProgressTracker from '../components/rewards/ProgressTracker';
 import ChildSelector from '../components/dashboard/ChildSelector';
 
