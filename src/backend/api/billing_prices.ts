@@ -14,7 +14,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const prices = await stripe.prices.list({
       active: true,
       expand: ['data.product'],
-      product: ['prod_Rz40ev2BvHHJPI', 'prod_S3uZxpqZtkYe6V']
+      product: 'prod_Rz40ev2BvHHJPI,prod_S3uZxpqZtkYe6V'
     });
 
     // Format the prices for the frontend
