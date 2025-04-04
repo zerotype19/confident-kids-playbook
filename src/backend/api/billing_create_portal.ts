@@ -1,48 +1,31 @@
 import { Env } from '../types';
 import Stripe from 'stripe';
+import { verifyJWT, JwtPayload } from '../auth';
 
-interface PortalRequest {
-  child_id: string;
+interface SubscriptionRecord {
+  stripe_customer_id: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   
   try {
-    const { child_id } = await request.json() as PortalRequest;
-    console.log('Received request with child_id:', child_id);
-    
-    if (!child_id) {
-      return new Response(JSON.stringify({ error: 'child_id is required' }), {
-        status: 400,
+    // Verify the JWT token and get the user ID
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // First, get the family_id from the children table
-    const child = await env.DB.prepare(
-      `SELECT family_id FROM children WHERE id = ?`
-    ).bind(child_id).first();
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyJWT(token, env);
+    const userId = payload.sub;
 
-    console.log('Child record:', child);
-
-    if (!child) {
-      return new Response(JSON.stringify({ error: 'Child not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Get the user_id from the users table where selected_child_id matches the child_id
-    const user = await env.DB.prepare(
-      `SELECT id FROM users WHERE selected_child_id = ?`
-    ).bind(child_id).first();
-
-    console.log('User record:', user);
-
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'User not found' }), {
-        status: 404,
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -50,7 +33,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Get the subscription to check if it exists and is active
     const subscription = await env.DB.prepare(
       `SELECT stripe_customer_id FROM subscriptions WHERE user_id = ? AND status = 'active'`
-    ).bind(user.id).first();
+    ).bind(userId).first() as SubscriptionRecord | null;
 
     console.log('Subscription record:', subscription);
 
