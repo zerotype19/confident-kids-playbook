@@ -7,6 +7,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     console.log('🔔 Webhook received - Headers:', Object.fromEntries(request.headers.entries()));
     console.log('🔔 Webhook received - URL:', request.url);
+    console.log('🔔 Webhook received - Method:', request.method);
     
     const signature = request.headers.get('stripe-signature');
     
@@ -38,6 +39,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       console.log('✅ Successfully verified webhook signature for event:', event.type);
     } catch (err) {
       console.error('❌ Webhook signature verification failed:', err);
+      console.error('❌ Webhook signature:', signature);
+      console.error('❌ Webhook body:', body);
       return new Response(JSON.stringify({ error: 'Webhook signature verification failed' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -154,6 +157,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
   } catch (error) {
     console.error('❌ Error processing webhook:', error);
+    if (error instanceof Error) {
+      console.error('❌ Error stack:', error.stack);
+    }
     return new Response(JSON.stringify({ error: 'Failed to process webhook' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
