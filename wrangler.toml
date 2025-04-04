@@ -1,4 +1,4 @@
-name = "confident-kids-playbook"
+name = "confidence-worker-api"
 type = "webpack"
 account_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
 workers_dev = true
