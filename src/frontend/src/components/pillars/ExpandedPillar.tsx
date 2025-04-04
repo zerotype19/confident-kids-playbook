@@ -104,10 +104,11 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+    <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 mb-6">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-6 flex items-start gap-4 hover:bg-gray-50 transition-colors border-0 focus:outline-none focus:ring-0 appearance-none cursor-pointer"
+        className="w-full p-6 flex items-start gap-4 bg-white hover:bg-gray-50 transition-colors border-0 focus:outline-none focus:ring-0 appearance-none cursor-pointer"
+        style={{ backgroundColor: 'white' }}
       >
         <span className="text-4xl">{pillar.icon}</span>
         <div className="flex-1 text-left">
@@ -138,11 +139,11 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
       </button>
 
       {isExpanded && (
-        <div className="border-t border-gray-200 p-6">
+        <div className="border-t border-gray-200 p-6 bg-white">
           <h3 className="text-lg font-heading text-gray-900 mb-4">Challenge Types</h3>
           <div className="space-y-4">
             {uniqueChallenges.map((challenge) => (
-              <div key={challenge.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+              <div key={challenge.id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
                 <h4 className="font-heading text-gray-900">{challenge.title}</h4>
                 <p className="text-gray-600 mt-1">{challenge.description}</p>
                 <p className="text-sm text-gray-500 mt-2">Goal: {challenge.goal}</p>
@@ -152,7 +153,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
 
           <button
             onClick={handleViewAll}
-            className="mt-6 w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+            className="mt-6 w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
           >
             View All Challenges
           </button>
