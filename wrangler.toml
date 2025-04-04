@@ -1,7 +1,9 @@
 name = "confident-kids-playbook"
-main = "src/backend/index.ts"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
+type = "webpack"
+account_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
+workers_dev = true
+route = { pattern = "kidoova.com/*", zone_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6" }
+compatibility_date = "2023-10-16"
 
 [build]
 command = "npm run build"
@@ -24,9 +26,9 @@ exclude = ["node_modules/**/*"]
 
 [vars]
 # Add any environment variables here
-STRIPE_SECRET_KEY = "sk_test_51R55ZbPEQoD1awJQDbDTRm5vQ8ng5R8FB7RVpfrh7ZOElp3PgmiAa17ZmiPOoxksDgaKxOt13DQAJxZEmRJp0wj6003MGORtGG"
+STRIPE_SECRET_KEY = "sk_live_51P8Qwj2eZvKYlo2C0JZJQZvK"
 STRIPE_PRICE_ID = "price_1R55sbPEQoD1awJQfStxQA3F"
-STRIPE_WEBHOOK_SECRET = "whsec_d4439e65890a40463058d7484738c5fe979e57b97a700103e6af8703992a48b7"
+STRIPE_WEBHOOK_SECRET = "whsec_WIU3GZ6t7TdP7jH6Qmw8LvXyv3s1Jx6F"
 FRONTEND_URL = "https://kidoova.com"
 
 [[d1_databases]]
