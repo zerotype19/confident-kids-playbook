@@ -59,6 +59,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         console.log(`Processing subscription ${subscription.id} for user ${userId} with status ${subscription.status}`);
 
+        // Get the plan name from the subscription items
+        const plan = subscription.items.data[0]?.price?.nickname || 'free';
+
         // First, check if a subscription record exists
         const existingSubscription = await env.DB.prepare(`
           SELECT id, status FROM subscriptions WHERE user_id = ?
@@ -70,11 +73,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             UPDATE subscriptions 
             SET status = ?, 
                 stripe_subscription_id = ?,
+                stripe_customer_id = ?,
+                plan = ?,
+                current_period_end = ?,
+                cancel_at_period_end = ?,
                 updated_at = datetime('now')
             WHERE user_id = ?
           `).bind(
             subscription.status,
             subscription.id,
+            subscription.customer,
+            plan,
+            new Date(subscription.current_period_end * 1000).toISOString(),
+            subscription.cancel_at_period_end ? 1 : 0,
             userId
           ).run();
           console.log(`Updated subscription status for user ${userId} from ${existingSubscription.status} to ${subscription.status}`);
@@ -85,13 +96,21 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
               user_id,
               status,
               stripe_subscription_id,
+              stripe_customer_id,
+              plan,
+              current_period_end,
+              cancel_at_period_end,
               created_at,
               updated_at
-            ) VALUES (?, ?, ?, datetime('now'), datetime('now'))
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
           `).bind(
             userId,
             subscription.status,
-            subscription.id
+            subscription.id,
+            subscription.customer,
+            plan,
+            new Date(subscription.current_period_end * 1000).toISOString(),
+            subscription.cancel_at_period_end ? 1 : 0
           ).run();
           console.log(`Created new subscription for user ${userId} with status ${subscription.status}`);
         }
@@ -115,6 +134,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             UPDATE subscriptions 
             SET status = 'canceled',
                 stripe_subscription_id = NULL,
+                stripe_customer_id = NULL,
+                current_period_end = NULL,
+                cancel_at_period_end = 0,
                 updated_at = datetime('now')
             WHERE user_id = ?
           `).bind(userId).run();
