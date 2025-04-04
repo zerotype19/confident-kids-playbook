@@ -21,27 +21,26 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
     setIsCompleting(true);
     setError(null);
     try {
-      // Pass the challenge ID directly as a string
       await onComplete(challenge.id);
     } catch (err) {
       setError('Failed to mark challenge as complete');
       console.error('Error completing challenge:', err);
-      setIsCompleting(false); // Reset the completing state on error
+      setIsCompleting(false);
     }
   };
 
   return (
-    <div
-      className={`bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 ${
-        isCompleting ? 'h-0 opacity-0' : 'h-auto opacity-100'
-      }`}
-    >
-      {/* Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-lg font-medium text-gray-900">{challenge.title}</h3>
-            <div className="mt-1 flex items-center gap-2">
+    <div className={`bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 transition-all duration-300 ${
+      isCompleting ? 'opacity-50' : 'opacity-100'
+    }`}>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-6 flex items-start gap-4 bg-white hover:bg-gray-50 transition-colors border-0 focus:outline-none focus:ring-0 appearance-none cursor-pointer"
+      >
+        <div className="flex-1 text-left">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-heading text-gray-900">{challenge.title}</h2>
+            <div className="flex items-center gap-3">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 challenge.difficulty_level === 1 
                   ? 'bg-green-100 text-green-800'
@@ -51,57 +50,57 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
               }`}>
                 {challenge.difficulty_level === 1 ? 'Easy' : challenge.difficulty_level === 2 ? 'Medium' : 'Hard'}
               </span>
-              <span className="text-sm text-gray-500">
-                {challenge.is_completed ? 'Completed' : 'In Progress'}
+              <span className="text-gray-500 text-xl font-medium">
+                {isExpanded ? '−' : '+'}
               </span>
             </div>
           </div>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="ml-4 text-gray-400 hover:text-gray-500"
-          >
-            <Icon name={isExpanded ? 'chevron-up' : 'chevron-down'} className="w-5 h-5" />
-          </button>
+          <p className="text-gray-600 mt-1">{challenge.description}</p>
+          {challenge.is_completed && (
+            <div className="mt-2 flex items-center text-kidoova-accent">
+              <Icon name="check-circle" className="w-4 h-4 mr-1" />
+              <span className="text-sm">Completed</span>
+            </div>
+          )}
         </div>
-      </div>
+      </button>
 
-      {/* Progress Bar */}
-      <div className="px-4 py-2 bg-gray-50">
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className={`h-full bg-kidoova-accent transition-all duration-500 ${
-              challenge.is_completed ? 'w-full' : 'w-0'
-            }`}
-          />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className={`transition-all duration-300 ${isExpanded ? 'max-h-[1000px]' : 'max-h-0'}`}>
-        <div className="p-4 space-y-4">
-          {/* Description */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Description</h4>
-            <p className="text-sm text-gray-600">{challenge.description}</p>
+      {isExpanded && (
+        <div className="p-6 space-y-6">
+          {/* Goal */}
+          <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+            <h3 className="text-lg font-semibold text-kidoova-green mb-2">Your Goal</h3>
+            <p className="text-text-base">{challenge.goal}</p>
           </div>
 
           {/* Steps */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Steps to Try</h4>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+          <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+            <h3 className="text-lg font-semibold text-kidoova-green mb-2">Steps to Try</h3>
+            <ol className="space-y-2">
               {Array.isArray(steps) && steps.map((step: string, index: number) => (
-                <li key={index} className="ml-2">{step}</li>
+                <li key={index} className="flex items-start">
+                  <span className="flex-shrink-0 w-6 h-6 bg-kidoova-accent text-white rounded-full flex items-center justify-center mr-2 mt-1">
+                    {index + 1}
+                  </span>
+                  <span className="text-text-base">{step}</span>
+                </li>
               ))}
             </ol>
           </div>
 
           {/* Helpful Tips */}
           {challenge.tip && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Helpful Tips</h4>
-              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                <li className="ml-2">{challenge.tip}</li>
-              </ul>
+            <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+              <h3 className="text-lg font-semibold text-kidoova-green mb-2">Helpful Tip</h3>
+              <p className="text-text-base">{challenge.tip}</p>
+            </div>
+          )}
+
+          {/* Example Dialogue */}
+          {challenge.example_dialogue && (
+            <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+              <h3 className="text-lg font-semibold text-kidoova-green mb-2">Try Saying This</h3>
+              <p className="text-text-base italic">"{challenge.example_dialogue}"</p>
             </div>
           )}
 
@@ -128,7 +127,7 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
             </button>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 } 
