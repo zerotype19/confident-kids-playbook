@@ -30,12 +30,12 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 transition-all duration-300 ${
+    <div className={`bg-kidoova-background rounded-xl shadow-yellowSoft overflow-hidden border border-gray-200 transition-all duration-300 ${
       isCompleting ? 'opacity-50' : 'opacity-100'
     }`}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-6 flex items-start gap-4 bg-white hover:bg-gray-50 transition-colors border-0 focus:outline-none focus:ring-0 appearance-none cursor-pointer"
+        className="w-full p-6 flex items-start gap-4 bg-kidoova-background hover:bg-kidoova-background/90 transition-colors border-0 focus:outline-none focus:ring-0 appearance-none cursor-pointer"
       >
         <div className="flex-1 text-left">
           <div className="flex items-center justify-between">
