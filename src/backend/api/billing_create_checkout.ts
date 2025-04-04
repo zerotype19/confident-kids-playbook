@@ -47,13 +47,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Verify that the child belongs to the user's family
-    const child = await env.DB.prepare(
-      `SELECT c.family_id 
-       FROM children c
-       JOIN users u ON u.family_id = c.family_id
-       WHERE c.id = ? AND u.id = ?`
-    ).bind(child_id, userId).first();
+    // Verify that the child belongs to the user's family by joining through family_members
+    const child = await env.DB.prepare(`
+      SELECT c.family_id 
+      FROM children c
+      JOIN family_members fm ON fm.family_id = c.family_id
+      WHERE c.id = ? AND fm.user_id = ?
+    `).bind(child_id, userId).first();
 
     if (!child) {
       return new Response(JSON.stringify({ error: 'Child not found or not authorized' }), {
