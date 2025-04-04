@@ -8,9 +8,9 @@ export default {
     extend: {
       colors: {
         kidoova: {
-          yellow: '#FACC15',      // Star color
+          yellow: '#FACC15',      // Star color (used sparingly)
           green: '#065F46',       // Logo text color
-          accent: '#10B981',      // Glowing highlight
+          accent: '#10B981',      // Optional highlight use
           background: '#F9FDFB',  // Soft off-white for body
         },
         'accent-blue': '#3B82F6',
@@ -20,9 +20,9 @@ export default {
         sans: ['"Fredoka"', 'Nunito', 'ui-sans-serif', 'system-ui'],
       },
       boxShadow: {
-        kidoova: '0 4px 20px rgba(16, 185, 129, 0.2)',  // soft green glow
-        yellowSoft: '0 4px 12px rgba(250, 204, 21, 0.3)', // soft yellow glow
-        card: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        kidoova: '0 4px 12px rgba(0, 0, 0, 0.1)',  // replaced green glow with neutral gray
+        yellowSoft: '0 4px 12px rgba(0, 0, 0, 0.05)', // replaced yellow glow with subtle shadow
+        card: '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
       },
       borderRadius: {
         xl: '1rem',
@@ -31,4 +31,4 @@ export default {
     },
   },
   plugins: [],
-} 
+}
