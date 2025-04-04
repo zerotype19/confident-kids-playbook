@@ -38,7 +38,7 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
       >
         <div className="flex-1 text-left">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-heading text-gray-900">{challenge.title}</h2>
+            <h2 className="text-xl font-heading text-kidoova-green">{challenge.title}</h2>
             <div className="flex items-center gap-3">
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 challenge.difficulty_level === 1 
