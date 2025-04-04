@@ -20,9 +20,9 @@ export default {
         sans: ['"Fredoka"', 'Nunito', 'ui-sans-serif', 'system-ui'],
       },
       boxShadow: {
-        kidoova: '0 4px 12px rgba(0, 0, 0, 0.1)',  // replaced green glow with neutral gray
-        yellowSoft: '0 4px 12px rgba(0, 0, 0, 0.05)', // replaced yellow glow with subtle shadow
-        card: '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
+        kidoova: '0 6px 12px rgba(0, 0, 0, 0.1)',  // replaced green glow with neutral gray
+        yellowSoft: '0 6px 12px rgba(0, 0, 0, 0.05)', // replaced yellow glow with subtle shadow
+        card: '0 6px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
       },
       borderRadius: {
         xl: '1rem',
