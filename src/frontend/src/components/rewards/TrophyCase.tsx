@@ -8,7 +8,7 @@ interface TrophyCaseProps {
 export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
   if (!rewards || rewards.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center p-8 bg-white rounded-lg shadow-sm">
+      <div className="h-full flex items-center justify-center p-8 bg-white rounded-lg shadow-xl">
         <p className="text-gray-500">Complete challenges to earn rewards!</p>
       </div>
     );
@@ -27,7 +27,7 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
     .sort((a, b) => (a.pillar_id || 0) - (b.pillar_id || 0));
 
   return (
-    <div className="h-full bg-white rounded-lg shadow-sm p-6 overflow-y-auto">
+    <div className="h-full bg-white rounded-lg shadow-xl p-6 overflow-y-auto">
       <div className="space-y-8">
         {/* Milestone Trophies */}
         {milestoneRewards.length > 0 && (
