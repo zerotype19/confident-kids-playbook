@@ -1,5 +1,6 @@
 import { Env } from '../types';
 import Stripe from 'stripe';
+import { verifyToken } from '../lib/auth';
 
 interface CheckoutRequest {
   child_id: string;
@@ -10,6 +11,26 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   
   try {
+    // Verify the auth token and get the user ID
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Authorization header is required' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const decodedToken = await verifyToken(token, env.JWT_SECRET);
+    const userId = decodedToken.sub;
+
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { child_id, price_id } = await request.json() as CheckoutRequest;
     
     if (!child_id) {
@@ -26,25 +47,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // First, get the family_id from the children table
+    // Verify that the child belongs to the user's family
     const child = await env.DB.prepare(
-      `SELECT family_id FROM children WHERE id = ?`
-    ).bind(child_id).first();
+      `SELECT c.family_id 
+       FROM children c
+       JOIN users u ON u.family_id = c.family_id
+       WHERE c.id = ? AND u.id = ?`
+    ).bind(child_id, userId).first();
 
     if (!child) {
-      return new Response(JSON.stringify({ error: 'Child not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Get the user_id from the users table where selected_child_id matches the child_id
-    const user = await env.DB.prepare(
-      `SELECT id FROM users WHERE selected_child_id = ?`
-    ).bind(child_id).first();
-
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'User not found' }), {
+      return new Response(JSON.stringify({ error: 'Child not found or not authorized' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -66,11 +78,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       success_url: `${env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${env.FRONTEND_URL}/cancel`,
       metadata: {
-        user_id: user.id,
+        user_id: userId,
       },
       subscription_data: {
         metadata: {
-          user_id: user.id,
+          user_id: userId,
         },
       },
     });
