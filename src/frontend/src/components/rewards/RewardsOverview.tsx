@@ -18,7 +18,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
   });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+    <div className="bg-white rounded-xl shadow-xl p-6 space-y-6">
       <h2 className="text-xl font-heading">Overview</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

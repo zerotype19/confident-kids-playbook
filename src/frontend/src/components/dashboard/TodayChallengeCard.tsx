@@ -76,7 +76,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-heading text-gray-900">Daily Challenge</h2>
-      <div className={`bg-white rounded-2xl shadow-kidoova p-6 space-y-6 border ${isCompleted ? 'border-kidoova-accent' : 'border-kidoova-yellow/20'}`}>
+      <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
         {/* Title Section */}
         <div className="text-center">
           <h2 className="text-2xl font-bold text-kidoova-green mb-2">

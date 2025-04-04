@@ -11,7 +11,7 @@ export default function ProgressTracker({ progress, childId }: ProgressTrackerPr
   if (!progress) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+    <div className="bg-white rounded-xl shadow-xl p-6 space-y-6">
       <h2 className="text-xl font-heading">Progress Tracker</h2>
 
       {/* Streak Information */}
