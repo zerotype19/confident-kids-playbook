@@ -5,19 +5,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   
   try {
-    console.log('🔔 Webhook received - Headers:', Object.fromEntries(request.headers.entries()));
+    // Log all headers for debugging
+    const headers = Object.fromEntries(request.headers.entries());
+    console.log('🔔 All request headers:', headers);
+    console.log('🔔 Stripe signature header:', request.headers.get('stripe-signature'));
     console.log('🔔 Webhook received - URL:', request.url);
     console.log('🔔 Webhook received - Method:', request.method);
-    console.log('🔔 Webhook received - Request:', {
-      method: request.method,
-      url: request.url,
-      headers: Object.fromEntries(request.headers.entries()),
-    });
     
     const signature = request.headers.get('stripe-signature');
     
     if (!signature) {
       console.error('❌ Missing stripe-signature header');
+      console.error('❌ Available headers:', Object.keys(headers).join(', '));
       return new Response(JSON.stringify({ error: 'Missing stripe-signature header' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
