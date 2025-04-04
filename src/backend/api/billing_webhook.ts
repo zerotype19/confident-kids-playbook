@@ -57,9 +57,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           return new Response('No user_id in metadata', { status: 400 });
         }
 
+        console.log(`Processing subscription ${subscription.id} for user ${userId} with status ${subscription.status}`);
+
         // First, check if a subscription record exists
         const existingSubscription = await env.DB.prepare(`
-          SELECT id FROM subscriptions WHERE user_id = ?
+          SELECT id, status FROM subscriptions WHERE user_id = ?
         `).bind(userId).first();
 
         if (existingSubscription) {
@@ -75,7 +77,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             subscription.id,
             userId
           ).run();
-          console.log(`Updated subscription status for user ${userId} to ${subscription.status}`);
+          console.log(`Updated subscription status for user ${userId} from ${existingSubscription.status} to ${subscription.status}`);
         } else {
           // Insert new subscription
           await env.DB.prepare(`
@@ -105,9 +107,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           return new Response('No user_id in metadata', { status: 400 });
         }
 
+        console.log(`Processing subscription deletion for user ${userId}`);
+
         // Update the subscription status to canceled
         try {
-          await env.DB.prepare(`
+          const result = await env.DB.prepare(`
             UPDATE subscriptions 
             SET status = 'canceled',
                 stripe_subscription_id = NULL,
@@ -115,7 +119,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             WHERE user_id = ?
           `).bind(userId).run();
 
-          console.log(`Canceled subscription for user ${userId}`);
+          if (result.success) {
+            console.log(`Successfully canceled subscription for user ${userId}`);
+          } else {
+            console.error(`Failed to cancel subscription for user ${userId}: No rows affected`);
+          }
         } catch (err) {
           console.error('Failed to update subscription status:', err);
           return new Response('Database update failed', { status: 500 });
