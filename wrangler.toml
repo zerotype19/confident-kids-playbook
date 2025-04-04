@@ -30,7 +30,7 @@ exclude = ["node_modules/**/*"]
 # Add any environment variables here
 STRIPE_SECRET_KEY = "sk_live_51P8Qwj2eZvKYlo2C0JZJQZvK"
 STRIPE_PRICE_ID = "price_1R55sbPEQoD1awJQfStxQA3F"
-STRIPE_WEBHOOK_SECRET = "whsec_WIU3GZ6t7TdP7jH6Qmw8LvXyv3s1Jx6F"
+STRIPE_WEBHOOK_SECRET = "whsec_bmIbEpc7URzKLoPSnf1LQtiRpA3piP3H"
 FRONTEND_URL = "https://kidoova.com"
 
 [[d1_databases]]
