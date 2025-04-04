@@ -143,10 +143,10 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
           <h3 className="text-lg font-heading text-gray-900 mb-4">Challenge Types</h3>
           <div className="space-y-4">
             {uniqueChallenges.map((challenge) => (
-              <div key={challenge.id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
-                <h4 className="font-heading text-gray-900">{challenge.title}</h4>
-                <p className="text-gray-600 mt-1">{challenge.description}</p>
-                <p className="text-sm text-gray-500 mt-2">Goal: {challenge.goal}</p>
+              <div key={challenge.id} className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
+                <h3 className="text-lg font-semibold text-kidoova-green mb-2">{challenge.title}</h3>
+                <p className="text-text-base">{challenge.description}</p>
+                <p className="text-text-base mt-2">Goal: {challenge.goal}</p>
               </div>
             ))}
           </div>
