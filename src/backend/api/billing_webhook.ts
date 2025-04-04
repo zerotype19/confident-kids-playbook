@@ -12,10 +12,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return new Response('No signature', { status: 400 });
     }
 
+    // Log all headers for debugging
+    console.log('All headers:', Object.fromEntries(request.headers.entries()));
+
     // Get the raw body
     const rawBody = await request.text();
     console.log('Received webhook with signature:', signature);
     console.log('Webhook body:', rawBody);
+    console.log('Webhook secret being used:', env.STRIPE_WEBHOOK_SECRET);
 
     // Initialize Stripe
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -30,8 +34,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         signature,
         env.STRIPE_WEBHOOK_SECRET
       );
+      console.log('Successfully verified webhook signature');
     } catch (err) {
       console.error('Webhook signature verification failed:', err);
+      console.error('Error details:', {
+        signature,
+        rawBodyLength: rawBody.length,
+        webhookSecretLength: env.STRIPE_WEBHOOK_SECRET.length
+      });
       return new Response('Invalid signature', { status: 400 });
     }
 
