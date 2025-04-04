@@ -1,4 +1,5 @@
 name = "confidence-worker-api"
+main = "src/backend/index.ts"
 type = "webpack"
 account_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
 workers_dev = true
