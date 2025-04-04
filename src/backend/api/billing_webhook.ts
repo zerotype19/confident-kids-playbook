@@ -8,16 +8,38 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Log all headers for debugging
     const headers = Object.fromEntries(request.headers.entries());
     console.log('🔔 All request headers:', headers);
-    console.log('🔔 Stripe signature header:', request.headers.get('stripe-signature'));
-    console.log('🔔 Webhook received - URL:', request.url);
-    console.log('🔔 Webhook received - Method:', request.method);
     
-    const signature = request.headers.get('stripe-signature');
+    // Log Cloudflare-specific headers
+    console.log('🔵 Cloudflare headers:', {
+      cfRay: request.headers.get('cf-ray'),
+      cfConnectingIp: request.headers.get('cf-connecting-ip'),
+      cfIpCountry: request.headers.get('cf-ipcountry'),
+      cfVisitor: request.headers.get('cf-visitor'),
+      cfWorker: request.headers.get('cf-worker'),
+      host: request.headers.get('host')
+    });
+
+    // Check for alternate header names that Stripe might use
+    const possibleSignatureHeaders = [
+      request.headers.get('stripe-signature'),
+      request.headers.get('Stripe-Signature'),
+      request.headers.get('x-stripe-signature'),
+      request.headers.get('X-Stripe-Signature')
+    ];
+    
+    console.log('🔍 Checking possible signature headers:', possibleSignatureHeaders);
+    
+    const signature = possibleSignatureHeaders.find(h => h !== null);
     
     if (!signature) {
       console.error('❌ Missing stripe-signature header');
       console.error('❌ Available headers:', Object.keys(headers).join(', '));
-      return new Response(JSON.stringify({ error: 'Missing stripe-signature header' }), {
+      return new Response(JSON.stringify({ 
+        error: 'Missing stripe-signature header',
+        availableHeaders: Object.keys(headers),
+        host: request.headers.get('host'),
+        url: request.url
+      }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
