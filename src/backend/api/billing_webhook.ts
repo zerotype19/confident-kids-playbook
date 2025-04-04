@@ -8,6 +8,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     console.log('🔔 Webhook received - Headers:', Object.fromEntries(request.headers.entries()));
     console.log('🔔 Webhook received - URL:', request.url);
     console.log('🔔 Webhook received - Method:', request.method);
+    console.log('🔔 Webhook received - Request:', {
+      method: request.method,
+      url: request.url,
+      headers: Object.fromEntries(request.headers.entries()),
+    });
     
     const signature = request.headers.get('stripe-signature');
     
