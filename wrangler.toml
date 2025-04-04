@@ -3,7 +3,6 @@ type = "webpack"
 account_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
 workers_dev = true
 route = { pattern = "kidoova.com/*", zone_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6" }
-route = { pattern = "https://confidence-worker-api.kevin-mcgovern.workers.dev/api/billing_webhook", zone_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6" }
 compatibility_date = "2023-10-16"
 
 [build]
