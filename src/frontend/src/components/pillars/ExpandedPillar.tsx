@@ -139,7 +139,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
       </button>
 
       {isExpanded && (
-        <div className="border-t border-gray-200 p-6 bg-white">
+        <div className="border-t border-gray-200 p-6">
           <h3 className="text-lg font-heading text-gray-900 mb-4">Challenge Types</h3>
           <div className="space-y-4">
             {uniqueChallenges.map((challenge) => (
