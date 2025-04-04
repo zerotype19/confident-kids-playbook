@@ -1,4 +1,4 @@
-name = "kidoova-api"
+name = "confidence-worker-api"
 type = "javascript"
 main = "index.ts"
 compatibility_date = "2024-12-01"
