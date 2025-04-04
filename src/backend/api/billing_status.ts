@@ -38,10 +38,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Get the user_id from the users table where selected_child_id matches the child_id
-    const user = await env.DB.prepare(
+    // First try to get the user by selected_child_id
+    let user = await env.DB.prepare(
       `SELECT id FROM users WHERE selected_child_id = ?`
     ).bind(child_id).first();
+
+    // If not found, try to get the user by family_id
+    if (!user) {
+      user = await env.DB.prepare(
+        `SELECT id FROM users WHERE family_id = ?`
+      ).bind(child.family_id).first();
+    }
 
     if (!user) {
       return new Response(JSON.stringify({
