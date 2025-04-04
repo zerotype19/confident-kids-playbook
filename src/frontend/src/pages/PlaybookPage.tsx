@@ -6,6 +6,7 @@ export default function PlaybookPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('user-guide');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -18,6 +19,10 @@ export default function PlaybookPage() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
       setActiveSection(sectionId);
+      // Close sidebar on mobile after selecting a section
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
     }
   };
 
@@ -27,9 +32,19 @@ export default function PlaybookPage() {
       <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <a href="/" className="flex items-center">
-              <img src="/logo.png" alt="Kidoova" className="h-8 w-auto" />
-            </a>
+            <div className="flex items-center">
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="md:hidden mr-4 text-neutral-600 hover:text-neutral-900"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <a href="/" className="flex items-center">
+                <img src="/logo.png" alt="Kidoova" className="h-8 w-auto" />
+              </a>
+            </div>
             <div id="g_id_onload"
               data-client_id={window.location.hostname === 'localhost' ? process.env.REACT_APP_GOOGLE_CLIENT_ID : process.env.REACT_APP_GOOGLE_CLIENT_ID_PROD}
               data-context="signin"
@@ -51,7 +66,9 @@ export default function PlaybookPage() {
       {/* Main Content with Sidebar */}
       <div className="pt-16 flex">
         {/* Sidebar Navigation */}
-        <nav className="w-64 fixed h-[calc(100vh-4rem)] overflow-y-auto bg-neutral-50 p-4 border-r border-neutral-200">
+        <nav className={`fixed md:static w-64 h-[calc(100vh-4rem)] overflow-y-auto bg-neutral-50 p-4 border-r border-neutral-200 transform transition-transform duration-200 ease-in-out ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        } z-40`}>
           <div className="sticky top-0">
             <h2 className="text-lg font-semibold text-neutral-800 mb-4">Table of Contents</h2>
             <ul className="space-y-2">
@@ -129,8 +146,16 @@ export default function PlaybookPage() {
           </div>
         </nav>
 
+        {/* Overlay for mobile */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
         {/* Main Content */}
-        <main className="flex-1 ml-64 p-8">
+        <main className="flex-1 p-4 md:ml-64">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold text-neutral-900 mb-6">Raising Confident Kids Playbook</h1>
             <p className="text-lg text-neutral-700 mb-8">A comprehensive guide for parents to help their children develop confidence, resilience, and independence.</p>
