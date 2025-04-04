@@ -26,10 +26,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       apiVersion: '2023-10-16',
     });
 
-    // Verify the webhook signature
+    // Verify the webhook signature using the async version
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(
+      event = await stripe.webhooks.constructEventAsync(
         rawBody,
         signature,
         env.STRIPE_WEBHOOK_SECRET
