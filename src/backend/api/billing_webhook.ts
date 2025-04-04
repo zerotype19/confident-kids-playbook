@@ -57,8 +57,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           return new Response('No user_id in metadata', { status: 400 });
         }
 
-        // Update the subscription status in the database
-        try {
+        // First, check if a subscription record exists
+        const existingSubscription = await env.DB.prepare(`
+          SELECT id FROM subscriptions WHERE user_id = ?
+        `).bind(userId).first();
+
+        if (existingSubscription) {
+          // Update existing subscription
           await env.DB.prepare(`
             UPDATE subscriptions 
             SET status = ?, 
@@ -70,11 +75,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             subscription.id,
             userId
           ).run();
-
           console.log(`Updated subscription status for user ${userId} to ${subscription.status}`);
-        } catch (err) {
-          console.error('Failed to update subscription status:', err);
-          return new Response('Database update failed', { status: 500 });
+        } else {
+          // Insert new subscription
+          await env.DB.prepare(`
+            INSERT INTO subscriptions (
+              user_id,
+              status,
+              stripe_subscription_id,
+              created_at,
+              updated_at
+            ) VALUES (?, ?, ?, datetime('now'), datetime('now'))
+          `).bind(
+            userId,
+            subscription.status,
+            subscription.id
+          ).run();
+          console.log(`Created new subscription for user ${userId} with status ${subscription.status}`);
         }
         break;
       }
