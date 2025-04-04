@@ -6,6 +6,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   
   try {
     console.log('🔔 Webhook received - Headers:', Object.fromEntries(request.headers.entries()));
+    console.log('🔔 Webhook received - URL:', request.url);
     
     const signature = request.headers.get('stripe-signature');
     
@@ -44,6 +45,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     console.log('🎯 Processing event type:', event.type);
+    console.log('🎯 Full event data:', JSON.stringify(event, null, 2));
 
     // Handle the event
     switch (event.type) {
@@ -60,7 +62,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           status: subscription.status,
           currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          eventType: event.type
+          eventType: event.type,
+          metadata: subscription.metadata
         });
         
         if (!userId) {
