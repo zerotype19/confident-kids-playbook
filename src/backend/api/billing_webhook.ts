@@ -77,7 +77,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         if (existingSubscription) {
           // Update existing subscription
-          await env.DB.prepare(`
+          const result = await env.DB.prepare(`
             UPDATE subscriptions 
             SET status = ?, 
                 stripe_subscription_id = ?,
@@ -96,10 +96,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             subscription.cancel_at_period_end ? 1 : 0,
             userId
           ).run();
-          console.log(`Updated subscription status for user ${userId} from ${existingSubscription.status} to ${subscription.status}`);
+
+          if (result.success) {
+            console.log(`Updated subscription status for user ${userId} from ${existingSubscription.status} to ${subscription.status}`);
+          } else {
+            console.error(`Failed to update subscription for user ${userId}`);
+            return new Response('Failed to update subscription', { status: 500 });
+          }
         } else {
           // Insert new subscription
-          await env.DB.prepare(`
+          const result = await env.DB.prepare(`
             INSERT INTO subscriptions (
               user_id,
               status,
@@ -120,7 +126,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             new Date(subscription.current_period_end * 1000).toISOString(),
             subscription.cancel_at_period_end ? 1 : 0
           ).run();
-          console.log(`Created new subscription for user ${userId} with status ${subscription.status}`);
+
+          if (result.success) {
+            console.log(`Created new subscription for user ${userId} with status ${subscription.status}`);
+          } else {
+            console.error(`Failed to create subscription for user ${userId}`);
+            return new Response('Failed to create subscription', { status: 500 });
+          }
         }
         break;
       }
