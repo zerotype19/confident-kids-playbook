@@ -59,8 +59,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         console.log(`Processing subscription ${subscription.id} for user ${userId} with status ${subscription.status}`);
 
-        // Get the plan name from the subscription items
-        const plan = subscription.items.data[0]?.price?.nickname || 'free';
+        // Get the product name from the subscription items
+        const price = subscription.items.data[0]?.price;
+        if (!price) {
+          console.error('No price found in subscription items');
+          return new Response('No price found', { status: 400 });
+        }
+
+        // Fetch the product details to get the name
+        const product = await stripe.products.retrieve(price.product as string);
+        const plan = product.name;
 
         // First, check if a subscription record exists
         const existingSubscription = await env.DB.prepare(`
@@ -135,6 +143,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             SET status = 'canceled',
                 stripe_subscription_id = NULL,
                 stripe_customer_id = NULL,
+                plan = 'free',
                 current_period_end = NULL,
                 cancel_at_period_end = 0,
                 updated_at = datetime('now')
