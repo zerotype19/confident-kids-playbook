@@ -57,14 +57,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           return new Response('No user_id in metadata', { status: 400 });
         }
 
-        // Update the user's subscription status in the database
+        // Update the subscription status in the database
         try {
           await env.DB.prepare(`
-            UPDATE users 
-            SET subscription_status = ?, 
-                subscription_id = ?,
+            UPDATE subscriptions 
+            SET status = ?, 
+                stripe_subscription_id = ?,
                 updated_at = datetime('now')
-            WHERE id = ?
+            WHERE user_id = ?
           `).bind(
             subscription.status,
             subscription.id,
@@ -88,14 +88,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           return new Response('No user_id in metadata', { status: 400 });
         }
 
-        // Update the user's subscription status to canceled
+        // Update the subscription status to canceled
         try {
           await env.DB.prepare(`
-            UPDATE users 
-            SET subscription_status = 'canceled',
-                subscription_id = NULL,
+            UPDATE subscriptions 
+            SET status = 'canceled',
+                stripe_subscription_id = NULL,
                 updated_at = datetime('now')
-            WHERE id = ?
+            WHERE user_id = ?
           `).bind(userId).run();
 
           console.log(`Canceled subscription for user ${userId}`);
