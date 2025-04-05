@@ -1,7 +1,7 @@
 name = "confidence-worker-api"
 main = "src/backend/index.ts"
 type = "webpack"
-account_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
+account_id = "315111a87fcb293ac0efd819b6e59147"
 workers_dev = true
 route = { pattern = "kidoova.com/*", zone_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6" }
 compatibility_date = "2023-10-16"
