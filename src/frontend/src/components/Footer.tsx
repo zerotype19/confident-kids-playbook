@@ -1,84 +1,72 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Container, Grid, Typography, Link as MuiLink } from '@mui/material';
 
 const Footer: React.FC = () => {
   return (
-    <Box component="footer" sx={{ bgcolor: 'background.paper', py: 6 }}>
-      <Container maxWidth="lg">
-        <Grid container spacing={4}>
+    <footer className="bg-white py-12">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Our Story */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6" color="text.primary" gutterBottom>
-              Our Story
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Our Story</h3>
+            <p className="text-gray-600 mb-4">
               It started with two kids—and two parents who wanted to do better.
-            </Typography>
-            <MuiLink component={Link} to="/our-story" color="inherit">
+            </p>
+            <Link to="/our-story" className="text-gray-600 hover:text-gray-900">
               Learn More
-            </MuiLink>
-          </Grid>
+            </Link>
+          </div>
 
           {/* Team */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6" color="text.primary" gutterBottom>
-              Team
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Team</h3>
+            <p className="text-gray-600 mb-4">
               We're a team of parents, educators, and child development researchers.
-            </Typography>
-            <MuiLink component={Link} to="/team" color="inherit">
+            </p>
+            <Link to="/team" className="text-gray-600 hover:text-gray-900">
               Meet the Team
-            </MuiLink>
-          </Grid>
+            </Link>
+          </div>
 
           {/* Support */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6" color="text.primary" gutterBottom>
-              Support
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Support</h3>
+            <p className="text-gray-600 mb-4">
               Need help? We're here for you.
-            </Typography>
-            <MuiLink component={Link} to="/support" color="inherit">
+            </p>
+            <Link to="/support" className="text-gray-600 hover:text-gray-900">
               Get Support
-            </MuiLink>
-          </Grid>
+            </Link>
+          </div>
 
           {/* Feedback */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6" color="text.primary" gutterBottom>
-              Feedback
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Feedback</h3>
+            <p className="text-gray-600 mb-4">
               Help us improve Kidoova.
-            </Typography>
-            <MuiLink component={Link} to="/feedback" color="inherit">
+            </p>
+            <Link to="/feedback" className="text-gray-600 hover:text-gray-900">
               Share Feedback
-            </MuiLink>
-          </Grid>
+            </Link>
+          </div>
+        </div>
 
-          {/* Legal Links */}
-          <Grid item xs={12}>
-            <Box sx={{ borderTop: 1, borderColor: 'divider', pt: 2, mt: 2 }}>
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item>
-                  <MuiLink component={Link} to="/privacy-policy" color="text.secondary">
-                    Privacy Policy
-                  </MuiLink>
-                </Grid>
-                <Grid item>
-                  <MuiLink component={Link} to="/terms-of-service" color="text.secondary">
-                    Terms of Service
-                  </MuiLink>
-                </Grid>
-              </Grid>
-            </Box>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        {/* Legal Links */}
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <div className="flex justify-center space-x-6">
+            <Link to="/privacy-policy" className="text-gray-600 hover:text-gray-900">
+              Privacy Policy
+            </Link>
+            <Link to="/terms-of-service" className="text-gray-600 hover:text-gray-900">
+              Terms of Service
+            </Link>
+          </div>
+          <div className="mt-4 text-center text-gray-600">
+            <p>&copy; 2024 Kidoova. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 };
 
