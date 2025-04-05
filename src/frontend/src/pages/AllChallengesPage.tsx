@@ -197,85 +197,64 @@ export default function AllChallengesPage() {
         throw new Error('No child selected');
       }
 
-      console.log('Attempting to complete challenge:', {
-        challengeId,
-        childId: selectedChild.id
-      });
-
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/challenge-log`,
+        `${import.meta.env.VITE_API_URL}/api/challenges/${selectedChild.id}/complete/${challengeId}`,
         {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ 
-            challenge_id: challengeId,
-            child_id: selectedChild.id
-          })
+          }
         }
       );
-
-      const data = await response.json();
 
       if (!response.ok) {
-        console.error('Challenge completion failed:', data);
-        // If the challenge is already completed, update the UI to reflect this
-        if (data.error === 'Challenge already completed') {
-          setChallenges(prevChallenges => 
-            prevChallenges.map(challenge => 
-              challenge.id === challengeId 
-                ? { ...challenge, is_completed: 1 }
-                : challenge
-            )
-          );
-          return;
-        }
-        throw new Error(data.error || 'Failed to mark challenge as complete');
+        throw new Error('Failed to complete challenge');
       }
 
-      console.log('Challenge completed successfully:', data);
-
-      // Refetch challenges to get updated data
-      const challengesResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/challenges/all?child_id=${selectedChild.id}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
+      // Refresh challenges after successful completion
+      const fetchChallenges = async () => {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/challenges/all?child_id=${selectedChild.id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
           }
-        }
-      );
-
-      if (!challengesResponse.ok) {
-        throw new Error('Failed to fetch updated challenges');
-      }
-
-      const updatedChallenges = await challengesResponse.json();
-      setChallenges(updatedChallenges);
-
-      // Update challenge groups with the new data
-      const groups = updatedChallenges.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
-        const existingGroup = acc.find(
-          group => group.pillar_id === challenge.pillar_id && group.difficulty_level === challenge.difficulty_level
         );
 
-        if (existingGroup) {
-          if (!existingGroup.titles.includes(challenge.title)) {
-            existingGroup.titles.push(challenge.title);
-          }
-        } else {
-          acc.push({
-            pillar_id: challenge.pillar_id,
-            difficulty_level: challenge.difficulty_level,
-            titles: [challenge.title]
-          });
+        if (!response.ok) {
+          throw new Error('Failed to fetch challenges');
         }
 
-        return acc;
-      }, []);
+        const data = await response.json();
+        setChallenges(data);
 
-      setChallengeGroups(groups);
+        // Group challenges by pillar and difficulty
+        const groups = data.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
+          const existingGroup = acc.find(
+            group => group.pillar_id === challenge.pillar_id && group.difficulty_level === challenge.difficulty_level
+          );
+
+          if (existingGroup) {
+            if (!existingGroup.titles.includes(challenge.title)) {
+              existingGroup.titles.push(challenge.title);
+            }
+          } else {
+            acc.push({
+              pillar_id: challenge.pillar_id,
+              difficulty_level: challenge.difficulty_level,
+              titles: [challenge.title]
+            });
+          }
+
+          return acc;
+        }, []);
+
+        setChallengeGroups(groups);
+      };
+
+      await fetchChallenges();
     } catch (err) {
       console.error('Error completing challenge:', err);
       throw err;
@@ -301,6 +280,7 @@ export default function AllChallengesPage() {
     );
   }
 
+  // Render challenges
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -311,7 +291,7 @@ export default function AllChallengesPage() {
         {selectedChild ? (
           <>
             {/* Filter Options */}
-            <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <div className="bg-white rounded-xl shadow-xl p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Pillar Filter */}
                 <div>
@@ -319,18 +299,18 @@ export default function AllChallengesPage() {
                     Pillar
                   </label>
                   <select
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
                     value={filters.pillarId || ''}
                     onChange={(e) => setFilters(prev => ({
                       ...prev,
                       pillarId: e.target.value ? Number(e.target.value) : null,
                       title: null // Reset title when pillar changes
                     }))}
+                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
                   >
                     <option value="">All Pillars</option>
                     {pillarIds.map((id) => (
                       <option key={id} value={id}>
-                        {PILLAR_NAMES[id]}
+                        {PILLAR_NAMES[id as keyof typeof PILLAR_NAMES]}
                       </option>
                     ))}
                   </select>
@@ -342,35 +322,36 @@ export default function AllChallengesPage() {
                     Difficulty
                   </label>
                   <select
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
                     value={filters.difficulty || ''}
                     onChange={(e) => setFilters(prev => ({
                       ...prev,
                       difficulty: e.target.value ? Number(e.target.value) : null,
                       title: null // Reset title when difficulty changes
                     }))}
+                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
                   >
                     <option value="">All Difficulties</option>
                     {difficulties.map((level) => (
                       <option key={level} value={level}>
-                        Level {level}
+                        {level === 1 ? 'Easy' : level === 2 ? 'Medium' : 'Hard'}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Title Filter */}
+                {/* Challenge Type Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Challenge Type
                   </label>
                   <select
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
                     value={filters.title || ''}
                     onChange={(e) => setFilters(prev => ({
                       ...prev,
                       title: e.target.value || null
                     }))}
+                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    disabled={!filters.pillarId || !filters.difficulty}
                   >
                     <option value="">All Types</option>
                     {availableTitles.map((title) => (
@@ -381,19 +362,20 @@ export default function AllChallengesPage() {
                   </select>
                 </div>
 
-                {/* Show Completed Filter */}
-                <div className="flex items-end">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-kidoova-accent focus:ring-kidoova-accent"
-                      checked={filters.showCompleted}
-                      onChange={(e) => setFilters(prev => ({
-                        ...prev,
-                        showCompleted: e.target.checked
-                      }))}
-                    />
-                    <span className="text-sm text-gray-700">Show Completed</span>
+                {/* Show Completed Toggle */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="showCompleted"
+                    checked={filters.showCompleted}
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      showCompleted: e.target.checked
+                    }))}
+                    className="h-4 w-4 text-kidoova-accent focus:ring-kidoova-accent border-gray-300 rounded"
+                  />
+                  <label htmlFor="showCompleted" className="ml-2 block text-sm text-gray-700">
+                    Show Completed
                   </label>
                 </div>
               </div>
@@ -411,14 +393,40 @@ export default function AllChallengesPage() {
 
             {/* Challenges Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredChallenges.map((challenge) => (
-                <ChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  childId={selectedChild.id}
-                />
-              ))}
+              {filteredChallenges
+                .slice((currentPage - 1) * challengesPerPage, currentPage * challengesPerPage)
+                .map((challenge) => (
+                  <ChallengeCard
+                    key={challenge.id}
+                    challenge={challenge}
+                    onComplete={handleChallengeComplete}
+                  />
+                ))}
             </div>
+
+            {/* Pagination */}
+            {filteredChallenges.length > challengesPerPage && (
+              <div className="flex justify-center mt-8">
+                <div className="flex space-x-2">
+                  {Array.from(
+                    { length: Math.ceil(filteredChallenges.length / challengesPerPage) },
+                    (_, i) => i + 1
+                  ).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 rounded-lg ${
+                        currentPage === page
+                          ? 'bg-kidoova-accent text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="text-center py-8">
