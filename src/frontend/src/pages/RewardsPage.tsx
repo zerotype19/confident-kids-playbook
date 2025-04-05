@@ -5,7 +5,9 @@ import { Reward, ProgressSummary } from '../types';
 import RewardsOverview from '../components/rewards/RewardsOverview';
 import { TrophyCase } from '../components/rewards/TrophyCase';
 import ProgressTracker from '../components/rewards/ProgressTracker';
-import ChildSelector from '../components/dashboard/ChildSelector';
+import CustomButton from '../components/CustomButton';
+import RewardCard from '../components/rewards/RewardCard';
+import { useNavigate } from 'react-router-dom';
 
 export default function RewardsPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -14,6 +16,7 @@ export default function RewardsPage() {
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Fetch children on component mount
   useEffect(() => {
@@ -128,27 +131,31 @@ export default function RewardsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-heading text-gray-900">Your Rewards</h1>
-        <ChildSelector children={children} />
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-3xl font-heading text-gray-900">Rewards</h1>
+        </div>
 
-      {selectedChild ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-12rem)]">
-          <div className="space-y-8">
-            <RewardsOverview progress={progress} />
-            <ProgressTracker progress={progress} childId={selectedChild.id} />
+        {selectedChild ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rewards.map((reward) => (
+              <RewardCard
+                key={reward.id}
+                reward={reward}
+                onRedeem={handleRewardRedeem}
+              />
+            ))}
           </div>
-          <div className="h-full w-full">
-            <TrophyCase rewards={rewards} />
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">Please select a child to view their rewards</p>
+            <CustomButton onClick={() => navigate('/manage-children')}>
+              Manage Children
+            </CustomButton>
           </div>
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">Please select a child to view their rewards</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 } 

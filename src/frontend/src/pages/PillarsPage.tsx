@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Pillar } from '../types';
-import ChildSelector from '../components/dashboard/ChildSelector';
-import { Child } from '../types';
-import ExpandedPillar from '../components/pillars/ExpandedPillar';
+import CustomButton from '../components/CustomButton';
+import PillarCard from '../components/pillars/PillarCard';
 
 export default function PillarsPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -11,6 +12,7 @@ export default function PillarsPage() {
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Fetch children on component mount
   useEffect(() => {
@@ -112,31 +114,31 @@ export default function PillarsPage() {
     );
   }
 
-  if (!selectedChild) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">Please select a child to view their pillars</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-heading text-gray-900">Pillars of Growth</h1>
-        <ChildSelector children={children} />
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-3xl font-heading text-gray-900">Pillars</h1>
+        </div>
 
-      <div className="space-y-8">
-        {pillars.map((pillar) => (
-          <ExpandedPillar
-            key={pillar.id}
-            pillar={pillar}
-            childId={selectedChild.id}
-          />
-        ))}
+        {selectedChild ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pillars.map((pillar) => (
+              <PillarCard
+                key={pillar.id}
+                pillar={pillar}
+                onSelect={handlePillarSelect}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">Please select a child to view their pillars</p>
+            <CustomButton onClick={() => navigate('/manage-children')}>
+              Manage Children
+            </CustomButton>
+          </div>
+        )}
       </div>
     </div>
   );
