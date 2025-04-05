@@ -401,27 +401,89 @@ export default function AllChallengesPage() {
               {displayedChallenges.map((challenge) => (
                 <div
                   key={challenge.id}
-                  className="bg-white rounded-xl shadow-xl p-6 flex items-center justify-between"
+                  className="bg-white rounded-xl shadow-xl overflow-hidden"
                 >
-                  <div className="flex items-center gap-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      challenge.difficulty_level === 1 
-                        ? 'bg-green-100 text-green-800'
-                        : challenge.difficulty_level === 2
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {challenge.difficulty_level === 1 ? 'Easy' : challenge.difficulty_level === 2 ? 'Medium' : 'Hard'}
-                    </span>
-                    <h2 className="text-xl font-heading text-kidoova-green">{challenge.title}</h2>
+                  {/* Challenge Header */}
+                  <div 
+                    className="p-6 flex items-center justify-between cursor-pointer"
+                    onClick={() => {
+                      setDisplayedChallenges(prev => prev.map(c => 
+                        c.id === challenge.id ? { ...c, isExpanded: !c.isExpanded } : c
+                      ));
+                    }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        challenge.difficulty_level === 1 
+                          ? 'bg-green-100 text-green-800'
+                          : challenge.difficulty_level === 2
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {challenge.difficulty_level === 1 ? 'Easy' : challenge.difficulty_level === 2 ? 'Medium' : 'Hard'}
+                      </span>
+                      <h2 className="text-xl font-heading text-kidoova-green">{challenge.title}</h2>
+                    </div>
+                    <Icon 
+                      name={challenge.isExpanded ? "chevron-up" : "chevron-down"} 
+                      className="w-5 h-5 text-gray-400"
+                    />
                   </div>
-                  {!challenge.is_completed && (
-                    <button
-                      onClick={() => handleChallengeComplete(challenge.id)}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200"
-                    >
-                      Mark Complete
-                    </button>
+
+                  {/* Expanded Content */}
+                  {challenge.isExpanded && (
+                    <div className="px-6 pb-6 space-y-6">
+                      {/* Goals */}
+                      {challenge.goals && challenge.goals.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Goals</h3>
+                          <ul className="list-disc list-inside space-y-1 text-gray-600">
+                            {challenge.goals.map((goal, index) => (
+                              <li key={index}>{goal}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Steps */}
+                      {challenge.steps && challenge.steps.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
+                          <ol className="list-decimal list-inside space-y-1 text-gray-600">
+                            {challenge.steps.map((step, index) => (
+                              <li key={index}>{step}</li>
+                            ))}
+                          </ol>
+                        </div>
+                      )}
+
+                      {/* Tips */}
+                      {challenge.tips && challenge.tips.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Tips</h3>
+                          <ul className="list-disc list-inside space-y-1 text-gray-600">
+                            {challenge.tips.map((tip, index) => (
+                              <li key={index}>{tip}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Complete Button */}
+                      {!challenge.is_completed && (
+                        <div className="pt-4 border-t border-gray-200">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleChallengeComplete(challenge.id);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200"
+                          >
+                            Mark Complete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
