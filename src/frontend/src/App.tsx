@@ -21,6 +21,7 @@ import SupportPage from "./pages/Support"
 import FeedbackPage from "./pages/Feedback"
 import { PrivateRoute } from "./components/PrivateRoute"
 import PageWrapper from "./components/PageWrapper"
+import AuthenticatedPageWrapper from "./components/AuthenticatedPageWrapper"
 
 export default function App(): JSX.Element {
   console.log("✅ App.tsx render")
@@ -59,63 +60,64 @@ export default function App(): JSX.Element {
               path="/dashboard" 
               element={
                 <PrivateRoute>
-                  <PageWrapper />
+                  <AuthenticatedPageWrapper>
+                    <DashboardPage />
+                  </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
-            >
-              <Route index element={<DashboardPage />} />
-            </Route>
+            />
             <Route 
               path="/pillars" 
               element={
                 <PrivateRoute>
-                  <PageWrapper />
+                  <AuthenticatedPageWrapper>
+                    <PillarsPage />
+                  </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
             >
-              <Route index element={<PillarsPage />} />
               <Route path=":pillarId" element={<PillarDetailPage />} />
             </Route>
             <Route 
               path="/all-challenges" 
               element={
                 <PrivateRoute>
-                  <PageWrapper />
+                  <AuthenticatedPageWrapper>
+                    <AllChallengesPage />
+                  </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
-            >
-              <Route index element={<AllChallengesPage />} />
-            </Route>
+            />
             <Route 
               path="/rewards" 
               element={
                 <PrivateRoute>
-                  <PageWrapper />
+                  <AuthenticatedPageWrapper>
+                    <RewardsPage />
+                  </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
-            >
-              <Route index element={<RewardsPage />} />
-            </Route>
+            />
             <Route 
               path="/manage-children" 
               element={
                 <PrivateRoute>
-                  <PageWrapper />
+                  <AuthenticatedPageWrapper>
+                    <ManageChildrenPage />
+                  </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
-            >
-              <Route index element={<ManageChildrenPage />} />
-            </Route>
+            />
             <Route 
               path="/manage-profile" 
               element={
                 <PrivateRoute>
-                  <PageWrapper />
+                  <AuthenticatedPageWrapper>
+                    <ManageProfilePage />
+                  </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
-            >
-              <Route index element={<ManageProfilePage />} />
-            </Route>
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
