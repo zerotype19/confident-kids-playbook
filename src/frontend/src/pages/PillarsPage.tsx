@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Pillar } from '../types';
+import { Pillar, Child } from '../types';
 import CustomButton from '../components/CustomButton';
 import PillarCard from '../components/pillars/PillarCard';
 
@@ -13,6 +13,10 @@ export default function PillarsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const handlePillarSelect = (pillarId: string) => {
+    navigate(`/pillars/${pillarId}`);
+  };
 
   // Fetch children on component mount
   useEffect(() => {
@@ -127,7 +131,8 @@ export default function PillarsPage() {
               <PillarCard
                 key={pillar.id}
                 pillar={pillar}
-                onSelect={handlePillarSelect}
+                childId={selectedChild.id}
+                onClick={() => handlePillarSelect(pillar.id)}
               />
             ))}
           </div>
