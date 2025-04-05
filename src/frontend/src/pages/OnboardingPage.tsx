@@ -1,83 +1,99 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { OnboardingProvider, useOnboarding } from '../components/onboarding/OnboardingState';
 import WelcomeStep from '../components/onboarding/WelcomeStep';
-import FamilyProfileStep from '../components/onboarding/FamilyProfileStep';
-import ChildProfileStep from '../components/onboarding/ChildProfileStep';
+import ParentDetailsStep from '../components/onboarding/ParentDetailsStep';
+import FamilyChildStep from '../components/onboarding/FamilyChildStep';
 import CompletionStep from '../components/onboarding/CompletionStep';
-import { useUser } from '../contexts/UserContext';
 
-export default function OnboardingPage() {
-  const { user } = useAuth();
-  const { userData, refreshUserData } = useUser();
+function OnboardingContent() {
+  const { currentStep, setCurrentStep } = useOnboarding();
+  const { user, isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
 
-  // If user is not logged in, redirect to login
-  if (!user) {
-    navigate('/login');
-    return null;
-  }
+  console.log('🎯 OnboardingContent render:', { user, currentStep, isAuthenticated, token });
 
-  // If user has already completed onboarding, redirect to dashboard
-  if (userData?.has_completed_onboarding) {
-    navigate('/dashboard');
-    return null;
-  }
-
-  const handleNext = () => {
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
+  useEffect(() => {
+    console.log('🔄 OnboardingContent useEffect:', { user, isAuthenticated, token });
+    
+    // If we have a token but user data isn't loaded yet, wait
+    if (token && !user) {
+      console.log('⏳ Token exists but user data not loaded yet');
+      return;
     }
-  };
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+    // If not authenticated and no token, redirect to home
+    if (!isAuthenticated && !token) {
+      console.log('❌ Not authenticated and no token, redirecting to home');
+      navigate('/');
+      return;
     }
-  };
 
-  const handleComplete = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/onboarding/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to complete onboarding');
-      }
-
-      await refreshUserData();
+    // If user has completed onboarding, redirect to dashboard
+    if (user?.hasCompletedOnboarding) {
+      console.log('✅ User completed onboarding, redirecting to dashboard');
       navigate('/dashboard');
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
     }
-  };
+  }, [user, isAuthenticated, token, navigate]);
+
+  // Show loading state while initializing
+  if (token && !user) {
+    console.log('⏳ Waiting for user data to load');
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900">Loading...</h2>
+          <p className="mt-2 text-gray-600">Please wait while we set up your account.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while not authenticated
+  if (!isAuthenticated && !token) {
+    console.log('⏳ Waiting for authentication');
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900">Loading...</h2>
+          <p className="mt-2 text-gray-600">Please wait while we set up your account.</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderStep = () => {
+    console.log('🎨 Rendering step:', currentStep);
     switch (currentStep) {
-      case 0:
-        return <WelcomeStep onNext={handleNext} />;
       case 1:
-        return <FamilyProfileStep onNext={handleNext} onBack={handleBack} />;
+        return <WelcomeStep onNext={() => setCurrentStep(2)} />;
       case 2:
-        return <ChildProfileStep onNext={handleNext} onBack={handleBack} />;
+        return <ParentDetailsStep onNext={() => setCurrentStep(3)} onBack={() => setCurrentStep(1)} />;
       case 3:
-        return <CompletionStep onComplete={handleComplete} onBack={handleBack} />;
+        return <FamilyChildStep onNext={() => setCurrentStep(4)} onBack={() => setCurrentStep(2)} />;
+      case 4:
+        return <CompletionStep onComplete={() => navigate('/dashboard')} />;
       default:
-        return null;
+        return <WelcomeStep onNext={() => setCurrentStep(2)} />;
     }
   };
 
+  console.log('🎨 OnboardingContent: Rendering content');
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {renderStep()}
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  console.log('🚀 OnboardingPage render');
+  return (
+    <OnboardingProvider>
+      <OnboardingContent />
+    </OnboardingProvider>
   );
 } 
