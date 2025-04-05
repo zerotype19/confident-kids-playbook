@@ -114,7 +114,28 @@ export default function HomePage(): JSX.Element {
       await login(jwt);
       // Clear the temporary credential after successful login
       localStorage.removeItem('google_credential');
-      navigate('/dashboard');
+      
+      // Fetch user data to check onboarding status
+      const userResponse = await fetch(`${apiUrl}/api/user/profile`, {
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+      
+      const userData = await userResponse.json();
+      
+      // Redirect based on onboarding status
+      if (userData.has_completed_onboarding) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
     } catch (error) {
       console.error('Login error:', error);
       // Clear the temporary credential on error
