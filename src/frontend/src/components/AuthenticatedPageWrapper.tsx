@@ -1,5 +1,6 @@
 import React from 'react';
 import AuthenticatedHeader from './AuthenticatedHeader';
+import AuthenticatedNav from './AuthenticatedNav';
 
 interface AuthenticatedPageWrapperProps {
   children: React.ReactNode;
@@ -9,7 +10,8 @@ const AuthenticatedPageWrapper: React.FC<AuthenticatedPageWrapperProps> = ({ chi
   return (
     <div className="min-h-screen bg-gray-50">
       <AuthenticatedHeader />
-      <main className="pt-16">
+      <AuthenticatedNav />
+      <main className="ml-64 pt-16">
         {children}
       </main>
     </div>
