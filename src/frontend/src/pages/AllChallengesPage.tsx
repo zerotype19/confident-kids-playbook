@@ -163,9 +163,9 @@ export default function AllChallengesPage() {
       return true;
     });
 
-    // Shuffle array and take first 10
+    // Shuffle array and take first 9
     const shuffled = [...filtered].sort(() => 0.5 - Math.random());
-    setDisplayedChallenges(shuffled.slice(0, 10));
+    setDisplayedChallenges(shuffled.slice(0, 9));
   }, [allChallenges, filters]);
 
   // Get unique difficulties from challenge groups
@@ -397,13 +397,33 @@ export default function AllChallengesPage() {
             </div>
 
             {/* Challenges Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {displayedChallenges.map((challenge) => (
-                <ChallengeCard
+                <div
                   key={challenge.id}
-                  challenge={challenge}
-                  onComplete={handleChallengeComplete}
-                />
+                  className="bg-white rounded-xl shadow-xl p-6 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      challenge.difficulty_level === 1 
+                        ? 'bg-green-100 text-green-800'
+                        : challenge.difficulty_level === 2
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {challenge.difficulty_level === 1 ? 'Easy' : challenge.difficulty_level === 2 ? 'Medium' : 'Hard'}
+                    </span>
+                    <h2 className="text-xl font-heading text-kidoova-green">{challenge.title}</h2>
+                  </div>
+                  {!challenge.is_completed && (
+                    <button
+                      onClick={() => handleChallengeComplete(challenge.id)}
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200"
+                    >
+                      Mark Complete
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           </>
