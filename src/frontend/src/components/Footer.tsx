@@ -64,12 +64,12 @@ const Footer: React.FC = () => {
             <Box sx={{ borderTop: 1, borderColor: 'divider', pt: 2, mt: 2 }}>
               <Grid container spacing={2} justifyContent="center">
                 <Grid item>
-                  <MuiLink component={Link} to="/privacy" color="text.secondary">
+                  <MuiLink component={Link} to="/privacy-policy" color="text.secondary">
                     Privacy Policy
                   </MuiLink>
                 </Grid>
                 <Grid item>
-                  <MuiLink component={Link} to="/terms" color="text.secondary">
+                  <MuiLink component={Link} to="/terms-of-service" color="text.secondary">
                     Terms of Service
                   </MuiLink>
                 </Grid>
