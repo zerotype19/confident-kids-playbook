@@ -7,13 +7,6 @@ interface WelcomeStepProps {
 export default function WelcomeStep({ onNext }: WelcomeStepProps) {
   return (
     <div>
-      <div className="text-center">
-        <h3 className="text-lg font-medium text-gray-900">Welcome to Kidoova</h3>
-        <p className="mt-2 text-sm text-gray-500">
-          Let's get started by setting up your family profile
-        </p>
-      </div>
-
       <div className="mt-8">
         <button
           onClick={onNext}
