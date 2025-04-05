@@ -51,7 +51,7 @@ export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-gray-700">Add Children</h4>
+            <h4 className="text-sm font-medium text-gray-700">Add Child</h4>
             <div className="mt-4 space-y-4">
               {children.map((child, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
@@ -71,44 +71,48 @@ export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps
                 </div>
               ))}
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Child's Name"
-                    value={childName}
-                    onChange={(e) => setChildName(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
+              {children.length === 0 && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Child's Name"
+                      value={childName}
+                      onChange={(e) => setChildName(e.target.value)}
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="date"
+                      value={childBirthdate}
+                      onChange={(e) => setChildBirthdate(e.target.value)}
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-datetime-edit]:text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <select
+                      value={childGender}
+                      onChange={(e) => setChildGender(e.target.value)}
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <input
-                    type="date"
-                    value={childBirthdate}
-                    onChange={(e) => setChildBirthdate(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
-                <div>
-                  <select
-                    value={childGender}
-                    onChange={(e) => setChildGender(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleAddChild}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Add Child
-              </button>
+              )}
+              {children.length === 0 && (
+                <button
+                  type="button"
+                  onClick={handleAddChild}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Add Child
+                </button>
+              )}
             </div>
           </div>
 
