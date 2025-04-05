@@ -8,7 +8,7 @@ export default function WelcomeScreen(): JSX.Element {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Welcome to Confidant!
+          Welcome to Kidoova
         </h1>
         <p className="text-lg text-gray-600 mb-8">
           Let's set up your family so we can personalize your experience.
