@@ -444,7 +444,7 @@ export default function AllChallengesPage() {
                     <div className="px-6 pb-6 space-y-6">
                       {/* Description */}
                       {challenge.description && (
-                        <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Description</h3>
                           <p className="text-gray-600 leading-relaxed">{challenge.description}</p>
                         </div>
@@ -452,7 +452,7 @@ export default function AllChallengesPage() {
 
                       {/* Goal */}
                       {challenge.goal && (
-                        <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Goal</h3>
                           <p className="text-gray-600 leading-relaxed">{challenge.goal}</p>
                         </div>
@@ -460,7 +460,7 @@ export default function AllChallengesPage() {
 
                       {/* Steps */}
                       {challenge.steps && (
-                        <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
                           {(() => {
                             try {
@@ -505,9 +505,9 @@ export default function AllChallengesPage() {
 
                       {/* Example Dialogue */}
                       {challenge.example_dialogue && (
-                        <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Example Dialogue</h3>
-                          <div className="bg-white rounded-md p-4 border border-gray-200">
+                          <div className="bg-gray-50 rounded-md p-4">
                             <pre className="text-gray-600 whitespace-pre-wrap font-sans">
                               {challenge.example_dialogue.split('\n').map((line, i) => (
                                 <div key={i} className="mb-1">{line}</div>
@@ -519,7 +519,7 @@ export default function AllChallengesPage() {
 
                       {/* Tip */}
                       {challenge.tip && (
-                        <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Tip</h3>
                           <p className="text-gray-600 leading-relaxed">{challenge.tip}</p>
                         </div>
@@ -533,8 +533,9 @@ export default function AllChallengesPage() {
                               e.stopPropagation();
                               handleChallengeComplete(challenge.id);
                             }}
-                            className="w-full px-4 py-3 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200"
+                            className="w-full px-4 py-3 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200 flex items-center justify-center gap-2"
                           >
+                            <Icon name="check-circle" className="w-5 h-5" />
                             Mark Complete
                           </button>
                         </div>
