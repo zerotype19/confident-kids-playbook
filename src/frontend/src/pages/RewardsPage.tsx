@@ -188,15 +188,31 @@ export default function RewardsPage() {
         </div>
 
         {selectedChild ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rewards.map((reward) => (
-              <RewardCard
-                key={reward.id}
-                reward={reward}
-                onRedeem={handleRewardRedeem}
+          <>
+            <RewardsOverview 
+              progress={progress}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TrophyCase 
+                rewards={rewards}
               />
-            ))}
-          </div>
+              <ProgressTracker 
+                progress={progress}
+                childId={selectedChild.id}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {rewards.map((reward) => (
+                <RewardCard
+                  key={reward.id}
+                  reward={reward}
+                  onRedeem={handleRewardRedeem}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">Please select a child to view their rewards</p>
