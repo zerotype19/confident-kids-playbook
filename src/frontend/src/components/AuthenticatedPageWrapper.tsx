@@ -1,4 +1,5 @@
 import React from 'react';
+import AuthenticatedHeader from './AuthenticatedHeader';
 
 interface AuthenticatedPageWrapperProps {
   children: React.ReactNode;
@@ -7,7 +8,10 @@ interface AuthenticatedPageWrapperProps {
 const AuthenticatedPageWrapper: React.FC<AuthenticatedPageWrapperProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      {children}
+      <AuthenticatedHeader />
+      <main className="pt-16">
+        {children}
+      </main>
     </div>
   );
 };
