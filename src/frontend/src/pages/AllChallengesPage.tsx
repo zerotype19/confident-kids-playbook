@@ -457,24 +457,44 @@ export default function AllChallengesPage() {
                       {challenge.steps && (
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
-                          {Array.isArray(challenge.steps) ? (
-                            <ol className="list-decimal list-inside space-y-2 text-gray-600">
-                              {challenge.steps.map((step, index) => (
-                                <li key={index} className="pl-2">{step}</li>
-                              ))}
-                            </ol>
-                          ) : (
-                            <div className="bg-white rounded-md p-4 border border-gray-200">
-                              <pre className="text-gray-600 whitespace-pre-wrap font-sans">
-                                {typeof challenge.steps === 'string' 
-                                  ? challenge.steps.split('\n').map((line, i) => (
-                                      <div key={i} className="mb-1">{line}</div>
-                                    ))
-                                  : JSON.stringify(challenge.steps, null, 2)
-                                }
-                              </pre>
-                            </div>
-                          )}
+                          {(() => {
+                            try {
+                              // Parse steps if it's a string
+                              const stepsArray = typeof challenge.steps === 'string' 
+                                ? JSON.parse(challenge.steps)
+                                : challenge.steps;
+
+                              // Ensure we have an array
+                              const steps = Array.isArray(stepsArray) ? stepsArray : [stepsArray];
+
+                              return (
+                                <div className="space-y-3">
+                                  {steps.map((step, index) => (
+                                    <div key={index} className="flex items-start gap-3">
+                                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-kidoova-green flex items-center justify-center">
+                                        <span className="text-white font-medium">{index + 1}</span>
+                                      </div>
+                                      <p className="text-gray-600 leading-relaxed">{step}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            } catch (error) {
+                              // Fallback if JSON parsing fails
+                              return (
+                                <div className="bg-white rounded-md p-4 border border-gray-200">
+                                  <pre className="text-gray-600 whitespace-pre-wrap font-sans">
+                                    {typeof challenge.steps === 'string' 
+                                      ? challenge.steps.split('\n').map((line, i) => (
+                                          <div key={i} className="mb-1">{line}</div>
+                                        ))
+                                      : JSON.stringify(challenge.steps, null, 2)
+                                    }
+                                  </pre>
+                                </div>
+                              );
+                            }
+                          })()}
                         </div>
                       )}
 
