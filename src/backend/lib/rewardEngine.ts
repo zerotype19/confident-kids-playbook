@@ -45,36 +45,29 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
     // 2. Check streak rewards
     const streakResult = await env.DB.prepare(`
       WITH RECURSIVE dates AS (
-        SELECT 
-          date(datetime(completed_at, 'localtime', 'America/New_York')) as date,
-          ROW_NUMBER() OVER (ORDER BY date(datetime(completed_at, 'localtime', 'America/New_York')) DESC) as row_num
+        SELECT DISTINCT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
         FROM challenge_logs
         WHERE child_id = ?
         AND completed_at IS NOT NULL
-        GROUP BY date(datetime(completed_at, 'localtime', 'America/New_York'))
+        ORDER BY date DESC
       ),
       consecutive_days AS (
-        SELECT 
-          date,
-          row_num,
-          1 as streak,
-          1 as group_id
+        SELECT date, 1 as streak, 1 as group_id
         FROM dates
-        WHERE row_num = 1
+        WHERE date = (SELECT MAX(date) FROM dates)
         UNION ALL
-        SELECT 
-          d.date,
-          d.row_num,
+        SELECT d.date, 
           CASE 
-            WHEN date(d.date, '-1 day') = cd.date THEN cd.streak + 1
+            WHEN date(d.date, '+1 day') = cd.date THEN cd.streak + 1
             ELSE 1
           END as streak,
           CASE 
-            WHEN date(d.date, '-1 day') = cd.date THEN cd.group_id
+            WHEN date(d.date, '+1 day') = cd.date THEN cd.group_id
             ELSE cd.group_id + 1
           END as group_id
         FROM dates d
-        JOIN consecutive_days cd ON d.row_num = cd.row_num + 1
+        JOIN consecutive_days cd ON d.date < cd.date
+        WHERE d.date = (SELECT MAX(date) FROM dates WHERE date < cd.date)
       )
       SELECT 
         MAX(CASE WHEN group_id = 1 THEN streak ELSE 0 END) as current_streak,
@@ -216,36 +209,29 @@ export async function getChildProgress(childId: string, env: Env) {
   // Get current streak
   const streakResult = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
-      SELECT 
-        date(datetime(completed_at, 'localtime', 'America/New_York')) as date,
-        ROW_NUMBER() OVER (ORDER BY date(datetime(completed_at, 'localtime', 'America/New_York')) DESC) as row_num
+      SELECT DISTINCT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
       FROM challenge_logs
       WHERE child_id = ?
       AND completed_at IS NOT NULL
-      GROUP BY date(datetime(completed_at, 'localtime', 'America/New_York'))
+      ORDER BY date DESC
     ),
     consecutive_days AS (
-      SELECT 
-        date,
-        row_num,
-        1 as streak,
-        1 as group_id
+      SELECT date, 1 as streak, 1 as group_id
       FROM dates
-      WHERE row_num = 1
+      WHERE date = (SELECT MAX(date) FROM dates)
       UNION ALL
-      SELECT 
-        d.date,
-        d.row_num,
+      SELECT d.date, 
         CASE 
-          WHEN date(d.date, '-1 day') = cd.date THEN cd.streak + 1
+          WHEN date(d.date, '+1 day') = cd.date THEN cd.streak + 1
           ELSE 1
         END as streak,
         CASE 
-          WHEN date(d.date, '-1 day') = cd.date THEN cd.group_id
+          WHEN date(d.date, '+1 day') = cd.date THEN cd.group_id
           ELSE cd.group_id + 1
         END as group_id
       FROM dates d
-      JOIN consecutive_days cd ON d.row_num = cd.row_num + 1
+      JOIN consecutive_days cd ON d.date < cd.date
+      WHERE d.date = (SELECT MAX(date) FROM dates WHERE date < cd.date)
     )
     SELECT 
       MAX(CASE WHEN group_id = 1 THEN streak ELSE 0 END) as current_streak,
