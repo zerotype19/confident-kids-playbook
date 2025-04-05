@@ -208,18 +208,23 @@ export default function AllChallengesPage() {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/challenges/${selectedChild.id}/complete/${challengeId}`,
+        `${import.meta.env.VITE_API_URL}/api/challenge-log`,
         {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          body: JSON.stringify({
+            child_id: selectedChild.id,
+            challenge_id: challengeId
+          })
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to complete challenge');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to complete challenge');
       }
 
       // Refresh challenges after successful completion
