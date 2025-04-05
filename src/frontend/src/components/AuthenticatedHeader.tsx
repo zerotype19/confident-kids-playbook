@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import ChildSelector from './dashboard/ChildSelector';
 
 interface AuthenticatedHeaderProps {
   isMenuOpen: boolean;
@@ -8,7 +9,7 @@ interface AuthenticatedHeaderProps {
 }
 
 const AuthenticatedHeader: React.FC<AuthenticatedHeaderProps> = ({ isMenuOpen, onToggleMenu }) => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white shadow-sm z-50">
@@ -45,12 +46,7 @@ const AuthenticatedHeader: React.FC<AuthenticatedHeaderProps> = ({ isMenuOpen, o
             <img src="/logo.png" alt="Kidoova" className="h-8" />
           </Link>
         </div>
-        <button
-          onClick={logout}
-          className="px-4 py-2 text-sm text-white bg-kidoova-accent rounded-md hover:bg-kidoova-accent-dark"
-        >
-          Sign Out
-        </button>
+        <ChildSelector />
       </div>
     </header>
   );
