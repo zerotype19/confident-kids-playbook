@@ -13,7 +13,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
           alt="Kidoova Logo" 
           className="h-16 mx-auto mb-6"
         />
-        <h3 className="text-lg font-medium text-gray-900">Welcome to Kidoova</h3>
+        <h3 className="text-lg font-medium text-[#00A67E]">Welcome to Kidoova!</h3>
         <p className="mt-2 text-sm text-gray-500">
           Let's get your family set up
         </p>
