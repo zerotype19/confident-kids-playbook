@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import Modal from "../components/Modal"
+import Header from "../components/Header"
 import Footer from "../components/Footer"
 
 interface GoogleCredentialResponse {
@@ -241,18 +242,12 @@ export default function HomePage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
+      <Header />
+      
       {/* Main content */}
-      <div className="flex-grow">
-        {/* Header */}
-        <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <img src="/logo.png" alt="Kidoova Logo" className="h-8 md:h-10" />
-            <div id="google-login-button"></div>
-          </div>
-        </header>
-
+      <div className="flex-grow pt-16">
         {/* Hero Section */}
-        <section className="pt-32 pb-16 px-4 bg-gradient-to-b from-green-50 to-white">
+        <section className="pt-16 pb-16 px-4 bg-gradient-to-b from-green-50 to-white">
           <div className="container mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
               Empowering children to build confidence through play and practice
@@ -260,11 +255,11 @@ export default function HomePage(): JSX.Element {
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Kidoova helps kids build self-esteem with fun daily challenges and progress tracking!
             </p>
-            <div className="flex justify-center"><center>
+            <div className="flex justify-center">
               <div 
                 id="google-login-button-hero" 
                 className="w-full max-w-md transform scale-125 md:scale-150"
-              ></div></center>
+              ></div>
             </div>
           </div>
         </section>
@@ -334,9 +329,8 @@ export default function HomePage(): JSX.Element {
         </section>
       </div>
       
-      {/* Footer */}
       <Footer />
-
+      
       {/* Modals */}
       <Modal 
         isOpen={activeModal === 'daily-challenges'} 

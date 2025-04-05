@@ -39,15 +39,21 @@ const Footer: React.FC = () => {
             </Link>
           </div>
 
-          {/* Feedback */}
+          {/* Resources */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Feedback</h3>
-            <p className="text-gray-600 mb-4">
-              Help us improve Kidoova.
-            </p>
-            <Link to="/feedback" className="text-gray-600 hover:text-gray-900">
-              Share Feedback
-            </Link>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Resources</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/playbook" className="text-gray-600 hover:text-gray-900">
+                  Confident Kids Playbook
+                </Link>
+              </li>
+              <li>
+                <Link to="/feedback" className="text-gray-600 hover:text-gray-900">
+                  Share Feedback
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
