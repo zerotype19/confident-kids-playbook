@@ -6,7 +6,18 @@ interface WelcomeStepProps {
 
 export default function WelcomeStep({ onNext }: WelcomeStepProps) {
   return (
-    <div>
+    <div className="bg-white rounded-lg shadow-xl p-8">
+      <div className="text-center">
+        <img 
+          src="/logo.png" 
+          alt="Kidoova Logo" 
+          className="h-16 mx-auto mb-6"
+        />
+        <h3 className="text-lg font-medium text-gray-900">Welcome to Kidoova</h3>
+        <p className="mt-2 text-sm text-gray-500">
+          Let's get your family set up
+        </p>
+      </div>
       <div className="mt-8">
         <button
           onClick={onNext}
