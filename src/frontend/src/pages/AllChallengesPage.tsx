@@ -434,7 +434,7 @@ export default function AllChallengesPage() {
                   {challenge.isExpanded && (
                     <div className="px-6 pb-6 space-y-6">
                       {/* Goals */}
-                      {challenge.goals && challenge.goals.length > 0 && (
+                      {Array.isArray(challenge.goals) && challenge.goals.length > 0 && (
                         <div>
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Goals</h3>
                           <ul className="list-disc list-inside space-y-1 text-gray-600">
@@ -446,7 +446,7 @@ export default function AllChallengesPage() {
                       )}
 
                       {/* Steps */}
-                      {challenge.steps && challenge.steps.length > 0 && (
+                      {Array.isArray(challenge.steps) && challenge.steps.length > 0 && (
                         <div>
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
                           <ol className="list-decimal list-inside space-y-1 text-gray-600">
@@ -458,7 +458,7 @@ export default function AllChallengesPage() {
                       )}
 
                       {/* Tips */}
-                      {challenge.tips && challenge.tips.length > 0 && (
+                      {Array.isArray(challenge.tips) && challenge.tips.length > 0 && (
                         <div>
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Tips</h3>
                           <ul className="list-disc list-inside space-y-1 text-gray-600">
