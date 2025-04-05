@@ -1,66 +1,67 @@
-import React from "react"
+import React, { useState } from "react"
 import { useAuth } from "../contexts/AuthContext"
+import PageWrapper from "../components/PageWrapper"
 
 export default function Feedback(): JSX.Element {
   const { isAuthenticated } = useAuth()
+  const [feedback, setFeedback] = useState("")
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // TODO: Implement feedback submission
+    setSubmitted(true)
+    setFeedback("")
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <img src="/logo.png" alt="Kidoova Logo" className="h-8 md:h-10" />
-          {!isAuthenticated && <div id="google-login-button"></div>}
-        </div>
-      </header>
-
-      {/* Main Content */}
+    <PageWrapper>
       <main className="pt-32 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-4xl font-bold text-gray-900 mb-8">Feedback</h1>
           
           <div className="prose prose-lg max-w-none">
             <p className="text-gray-600 mb-6">
-              Kidoova is built with input from real parents, every step of the way.
+              We'd love to hear your thoughts about Kidoova! Your feedback helps us improve the experience for all families.
             </p>
 
-            <p className="text-gray-600 mb-6">
-              We'd love your feedback—what's working, what's missing, what your family needs next.
-            </p>
-
-            <div className="space-y-4 mt-8">
-              <div className="flex items-start">
-                <span className="text-2xl mr-3">💬</span>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Got a feature idea?</h3>
-                </div>
+            {submitted ? (
+              <div className="bg-green-50 p-6 rounded-lg">
+                <h2 className="text-2xl font-bold text-green-900 mb-4">Thank You!</h2>
+                <p className="text-green-700">
+                  Your feedback has been submitted. We appreciate you taking the time to help us improve Kidoova.
+                </p>
               </div>
-
-              <div className="flex items-start">
-                <span className="text-2xl mr-3">🧒</span>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-gray-900">Want more content for a specific age?</h3>
+                  <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Feedback
+                  </label>
+                  <textarea
+                    id="feedback"
+                    name="feedback"
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    required
+                  />
                 </div>
-              </div>
 
-              <div className="flex items-start">
-                <span className="text-2xl mr-3">📣</span>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Have a story to share?</h3>
+                  <button
+                    type="submit"
+                    className="w-full md:w-auto px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    Submit Feedback
+                  </button>
                 </div>
-              </div>
-            </div>
-
-            <p className="text-gray-600 mt-8">
-              Send us a message at feedback@kidoova.com. Every response is read. Your voice shapes how we grow.
-            </p>
-
-            <p className="text-gray-600 mt-4">
-              Together, we're building something better—for our kids, and for ourselves.
-            </p>
+              </form>
+            )}
           </div>
         </div>
       </main>
-    </div>
+    </PageWrapper>
   )
 } 

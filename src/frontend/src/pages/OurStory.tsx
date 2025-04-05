@@ -1,47 +1,47 @@
 import React from "react"
 import { useAuth } from "../contexts/AuthContext"
+import PageWrapper from "../components/PageWrapper"
 
 export default function OurStory(): JSX.Element {
   const { isAuthenticated } = useAuth()
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <img src="/logo.png" alt="Kidoova Logo" className="h-8 md:h-10" />
-          {!isAuthenticated && <div id="google-login-button"></div>}
-        </div>
-      </header>
-
-      {/* Main Content */}
+    <PageWrapper>
       <main className="pt-32 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-4xl font-bold text-gray-900 mb-8">Our Story</h1>
           
           <div className="prose prose-lg max-w-none">
             <p className="text-gray-600 mb-6">
-              It started with two kids—and two parents who wanted to do better.
+              Kidoova was born from a simple observation: children today face unprecedented challenges in developing confidence and social skills.
             </p>
 
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">The Beginning</h2>
             <p className="text-gray-600 mb-6">
-              When Emmy started doubting herself at just seven years old, and Jack became afraid to speak up in class, we knew something had to change. As parents, we wanted to raise confident kids—not just ones who followed rules or got good grades, but kids who truly believed in themselves.
+              Our journey started when our founder, a child psychologist, noticed that traditional methods of building confidence weren't resonating with today's digital-native children.
             </p>
 
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">The Mission</h2>
             <p className="text-gray-600 mb-6">
-              We dove into research, parenting books, expert interviews, and developmental psychology. We took notes, tested scripts, created role-play games—and slowly, something powerful emerged: a simple, daily approach to raising confident, resilient, purpose-driven kids.
+              We set out to create a platform that would make confidence-building fun, engaging, and accessible to all children, regardless of their background or circumstances.
             </p>
 
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">The Approach</h2>
             <p className="text-gray-600 mb-6">
-              That approach became the foundation of Kidoova.
+              Kidoova combines evidence-based psychology with gamification and technology to create an experience that children love and parents trust.
             </p>
 
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">The Impact</h2>
             <p className="text-gray-600 mb-6">
-              We're not perfect parents. We're practicing parents—just like you. And we built Kidoova for families like ours: busy, thoughtful, and determined to raise kids who feel strong from the inside out.
+              Today, thousands of children across the world are building their confidence through Kidoova's daily challenges and activities.
+            </p>
+
+            <p className="text-gray-600">
+              Join us in our mission to help every child develop the confidence they need to thrive in today's world.
             </p>
           </div>
         </div>
       </main>
-    </div>
+    </PageWrapper>
   )
 } 

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import Modal from "../components/Modal"
-import UnauthenticatedHeader from '../components/UnauthenticatedHeader'
-import UnauthenticatedFooter from '../components/UnauthenticatedFooter'
+import PageWrapper from "../components/PageWrapper"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -241,11 +240,9 @@ export default function HomePage(): JSX.Element {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <UnauthenticatedHeader />
-      
+    <PageWrapper>
       {/* Main content */}
-      <div className="flex-grow pt-16">
+      <div className="flex-grow">
         {/* Hero Section */}
         <section className="pt-16 pb-16 px-4 bg-gradient-to-b from-green-50 to-white">
           <div className="container mx-auto text-center">
@@ -327,10 +324,18 @@ export default function HomePage(): JSX.Element {
             </div>
           </div>
         </section>
+
+        {/* Testimonials Section */}
+        <section className="py-16 px-4 bg-gray-50">
+          {/* Testimonials content */}
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-16 px-4">
+          {/* CTA content */}
+        </section>
       </div>
-      
-      <UnauthenticatedFooter />
-      
+
       {/* Modals */}
       <Modal 
         isOpen={activeModal === 'daily-challenges'} 
@@ -418,6 +423,6 @@ export default function HomePage(): JSX.Element {
           </div>
         </div>
       </Modal>
-    </div>
+    </PageWrapper>
   )
 } 

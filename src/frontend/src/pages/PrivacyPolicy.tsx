@@ -1,20 +1,12 @@
 import React from "react"
 import { useAuth } from "../contexts/AuthContext"
+import PageWrapper from "../components/PageWrapper"
 
 export default function PrivacyPolicy(): JSX.Element {
   const { isAuthenticated } = useAuth()
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <img src="/logo.png" alt="Kidoova Logo" className="h-8 md:h-10" />
-          {!isAuthenticated && <div id="google-login-button"></div>}
-        </div>
-      </header>
-
-      {/* Main Content */}
+    <PageWrapper>
       <main className="pt-32 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-4xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
@@ -48,6 +40,6 @@ export default function PrivacyPolicy(): JSX.Element {
           </div>
         </div>
       </main>
-    </div>
+    </PageWrapper>
   )
 } 
