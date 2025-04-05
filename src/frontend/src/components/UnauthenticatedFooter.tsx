@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Footer: React.FC = () => {
+const UnauthenticatedFooter: React.FC = () => {
   return (
     <footer className="bg-white py-12">
       <div className="container mx-auto px-4">
@@ -76,4 +76,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export default UnauthenticatedFooter; 

@@ -1,21 +1,24 @@
 // src/components/PageWrapper.tsx
 
 import React from 'react';
-import Header from './Header';
-import Footer from './Footer';
+import { useAuth } from '../contexts/AuthContext';
+import UnauthenticatedHeader from './UnauthenticatedHeader';
+import UnauthenticatedFooter from './UnauthenticatedFooter';
 
 interface PageWrapperProps {
   children: React.ReactNode;
 }
 
 const PageWrapper: React.FC<PageWrapperProps> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <Header />
-      <main className="flex-grow pt-16">
+      {!isAuthenticated && <UnauthenticatedHeader />}
+      <main className={`flex-grow ${!isAuthenticated ? 'pt-16' : ''}`}>
         {children}
       </main>
-      <Footer />
+      {!isAuthenticated && <UnauthenticatedFooter />}
     </div>
   );
 };

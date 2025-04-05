@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import Modal from "../components/Modal"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
+import UnauthenticatedHeader from '../components/UnauthenticatedHeader'
+import UnauthenticatedFooter from '../components/UnauthenticatedFooter'
 
 interface GoogleCredentialResponse {
   credential: string
@@ -242,7 +242,7 @@ export default function HomePage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <Header />
+      <UnauthenticatedHeader />
       
       {/* Main content */}
       <div className="flex-grow pt-16">
@@ -329,7 +329,7 @@ export default function HomePage(): JSX.Element {
         </section>
       </div>
       
-      <Footer />
+      <UnauthenticatedFooter />
       
       {/* Modals */}
       <Modal 

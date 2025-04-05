@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const Header: React.FC = () => {
+const UnauthenticatedHeader: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
   return (
@@ -17,4 +17,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header; 
+export default UnauthenticatedHeader; 
