@@ -4,7 +4,7 @@ import { useChildContext } from '../contexts/ChildContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Pillar, Child } from '../types';
 import CustomButton from '../components/CustomButton';
-import PillarCard from '../components/pillars/PillarCard';
+import ExpandedPillar from '../components/pillars/ExpandedPillar';
 
 export default function PillarsPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -126,13 +126,12 @@ export default function PillarsPage() {
         </div>
 
         {selectedChild ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-6">
             {pillars.map((pillar) => (
-              <PillarCard
+              <ExpandedPillar
                 key={pillar.id}
                 pillar={pillar}
                 childId={selectedChild.id}
-                onClick={() => handlePillarSelect(pillar.id)}
               />
             ))}
           </div>

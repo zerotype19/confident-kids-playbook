@@ -309,15 +309,117 @@ export default function AllChallengesPage() {
         </div>
 
         {selectedChild ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {challenges.map((challenge) => (
-              <ChallengeCard
-                key={challenge.id}
-                challenge={challenge}
-                onComplete={handleChallengeComplete}
-              />
-            ))}
-          </div>
+          <>
+            {/* Filter Options */}
+            <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Pillar Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pillar
+                  </label>
+                  <select
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    value={filters.pillarId || ''}
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      pillarId: e.target.value ? Number(e.target.value) : null,
+                      title: null // Reset title when pillar changes
+                    }))}
+                  >
+                    <option value="">All Pillars</option>
+                    {pillarIds.map((id) => (
+                      <option key={id} value={id}>
+                        {PILLAR_NAMES[id]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Difficulty Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Difficulty
+                  </label>
+                  <select
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    value={filters.difficulty || ''}
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      difficulty: e.target.value ? Number(e.target.value) : null,
+                      title: null // Reset title when difficulty changes
+                    }))}
+                  >
+                    <option value="">All Difficulties</option>
+                    {difficulties.map((level) => (
+                      <option key={level} value={level}>
+                        Level {level}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Title Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Challenge Type
+                  </label>
+                  <select
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    value={filters.title || ''}
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      title: e.target.value || null
+                    }))}
+                  >
+                    <option value="">All Types</option>
+                    {availableTitles.map((title) => (
+                      <option key={title} value={title}>
+                        {title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Show Completed Filter */}
+                <div className="flex items-end">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-kidoova-accent focus:ring-kidoova-accent"
+                      checked={filters.showCompleted}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        showCompleted: e.target.checked
+                      }))}
+                    />
+                    <span className="text-sm text-gray-700">Show Completed</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Clear Filters Button */}
+              <div className="flex justify-end">
+                <button
+                  onClick={handleClearFilters}
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            </div>
+
+            {/* Challenges Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredChallenges.map((challenge) => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  childId={selectedChild.id}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">Please select a child to view their challenges</p>
