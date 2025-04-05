@@ -43,30 +43,47 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
     }
 
     // 2. Check streak rewards
-    const { current_streak } = await env.DB.prepare(`
+    const streakResult = await env.DB.prepare(`
       WITH RECURSIVE dates AS (
-        SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
+        SELECT 
+          date(datetime(completed_at, 'localtime', 'America/New_York')) as date,
+          ROW_NUMBER() OVER (ORDER BY date(datetime(completed_at, 'localtime', 'America/New_York')) DESC) as row_num
         FROM challenge_logs
         WHERE child_id = ?
         AND completed_at IS NOT NULL
-        ORDER BY completed_at DESC
-        LIMIT 1
+        GROUP BY date(datetime(completed_at, 'localtime', 'America/New_York'))
       ),
       consecutive_days AS (
-        SELECT date, 1 as streak
+        SELECT 
+          date,
+          row_num,
+          1 as streak,
+          1 as group_id
         FROM dates
+        WHERE row_num = 1
         UNION ALL
-        SELECT date(datetime(cl.completed_at, 'localtime', 'America/New_York')), cd.streak + 1
-        FROM challenge_logs cl
-        JOIN consecutive_days cd ON date(datetime(cl.completed_at, 'localtime', 'America/New_York')) = date(datetime(cd.date, 'localtime', 'America/New_York'), '-1 day')
-        WHERE cl.child_id = ?
-        AND cl.completed_at IS NOT NULL
+        SELECT 
+          d.date,
+          d.row_num,
+          CASE 
+            WHEN date(d.date, '-1 day') = cd.date THEN cd.streak + 1
+            ELSE 1
+          END as streak,
+          CASE 
+            WHEN date(d.date, '-1 day') = cd.date THEN cd.group_id
+            ELSE cd.group_id + 1
+          END as group_id
+        FROM dates d
+        JOIN consecutive_days cd ON d.row_num = cd.row_num + 1
       )
-      SELECT MAX(streak) as current_streak
+      SELECT 
+        MAX(CASE WHEN group_id = 1 THEN streak ELSE 0 END) as current_streak,
+        MAX(streak) as longest_streak
       FROM consecutive_days
-    `).bind(childId, childId).first<{ current_streak: number }>();
+    `).bind(childId).first<{ current_streak: number; longest_streak: number }>();
     
-    console.log('Reward Engine: Current streak:', current_streak);
+    const current_streak = streakResult?.current_streak || 0;
+    const longest_streak = streakResult?.longest_streak || 0;
     
     const streaks = [3, 5, 10, 15, 20, 30];
     for (const value of streaks) {
@@ -199,53 +216,45 @@ export async function getChildProgress(childId: string, env: Env) {
   // Get current streak
   const streakResult = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
-      SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
+      SELECT 
+        date(datetime(completed_at, 'localtime', 'America/New_York')) as date,
+        ROW_NUMBER() OVER (ORDER BY date(datetime(completed_at, 'localtime', 'America/New_York')) DESC) as row_num
       FROM challenge_logs
       WHERE child_id = ?
       AND completed_at IS NOT NULL
-      ORDER BY completed_at DESC
-      LIMIT 1
+      GROUP BY date(datetime(completed_at, 'localtime', 'America/New_York'))
     ),
     consecutive_days AS (
-      SELECT date, 1 as streak
+      SELECT 
+        date,
+        row_num,
+        1 as streak,
+        1 as group_id
       FROM dates
+      WHERE row_num = 1
       UNION ALL
-      SELECT date(datetime(cl.completed_at, 'localtime', 'America/New_York')), cd.streak + 1
-      FROM challenge_logs cl
-      JOIN consecutive_days cd ON date(datetime(cl.completed_at, 'localtime', 'America/New_York')) = date(datetime(cd.date, 'localtime', 'America/New_York'), '-1 day')
-      WHERE cl.child_id = ?
-      AND cl.completed_at IS NOT NULL
+      SELECT 
+        d.date,
+        d.row_num,
+        CASE 
+          WHEN date(d.date, '-1 day') = cd.date THEN cd.streak + 1
+          ELSE 1
+        END as streak,
+        CASE 
+          WHEN date(d.date, '-1 day') = cd.date THEN cd.group_id
+          ELSE cd.group_id + 1
+        END as group_id
+      FROM dates d
+      JOIN consecutive_days cd ON d.row_num = cd.row_num + 1
     )
-    SELECT MAX(streak) as current_streak
+    SELECT 
+      MAX(CASE WHEN group_id = 1 THEN streak ELSE 0 END) as current_streak,
+      MAX(streak) as longest_streak
     FROM consecutive_days
-  `).bind(childId, childId).first<{ current_streak: number }>();
+  `).bind(childId).first<{ current_streak: number; longest_streak: number }>();
   
   const current_streak = streakResult?.current_streak || 0;
-
-  // Get longest streak
-  const longestStreakResult = await env.DB.prepare(`
-    WITH RECURSIVE dates AS (
-      SELECT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
-      FROM challenge_logs
-      WHERE child_id = ?
-      AND completed_at IS NOT NULL
-      ORDER BY completed_at DESC
-    ),
-    consecutive_days AS (
-      SELECT date, 1 as streak
-      FROM dates
-      UNION ALL
-      SELECT date(datetime(cl.completed_at, 'localtime', 'America/New_York')), cd.streak + 1
-      FROM challenge_logs cl
-      JOIN consecutive_days cd ON date(datetime(cl.completed_at, 'localtime', 'America/New_York')) = date(datetime(cd.date, 'localtime', 'America/New_York'), '-1 day')
-      WHERE cl.child_id = ?
-      AND cl.completed_at IS NOT NULL
-    )
-    SELECT MAX(streak) as longest_streak
-    FROM consecutive_days
-  `).bind(childId, childId).first<{ longest_streak: number }>();
-  
-  const longest_streak = longestStreakResult?.longest_streak || 0;
+  const longest_streak = streakResult?.longest_streak || 0;
 
   // Debug query to see all completed challenges
   const debugQuery = await env.DB.prepare(`
