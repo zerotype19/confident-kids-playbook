@@ -7,15 +7,24 @@ import { Child, ProgressSummary } from '../types';
 import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function DashboardPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
+  const { isAuthenticated } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
   const [challenge, setChallenge] = useState<any>(null);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/');
+      return;
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     const fetchChildren = async () => {
@@ -167,7 +176,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kidoova-accent"></div>
       </div>
     );
@@ -175,7 +184,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-red-500 text-center">
           <p className="text-lg font-medium">Error loading dashboard</p>
           <p className="text-sm mt-2">{error}</p>
@@ -185,34 +194,36 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-heading text-gray-900">Dashboard</h1>
-        <ChildSelector children={children} />
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-3xl font-heading text-gray-900">Dashboard</h1>
+          <ChildSelector children={children} />
+        </div>
 
-      {selectedChild ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-8">
-            <RewardsOverview progress={progress} />
-            <ProgressTracker progress={progress} childId={selectedChild.id} />
+        {selectedChild ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-8">
+              <RewardsOverview progress={progress} />
+              <ProgressTracker progress={progress} childId={selectedChild.id} />
+            </div>
+            <div className="space-y-8">
+              <TodayChallengeCard 
+                childId={selectedChild.id} 
+                challenge={challenge}
+                onComplete={handleChallengeComplete}
+              />
+            </div>
           </div>
-          <div className="space-y-8">
-            <TodayChallengeCard 
-              childId={selectedChild.id} 
-              challenge={challenge}
-              onComplete={handleChallengeComplete}
-            />
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
+            <CustomButton onClick={() => navigate('/manage-children')}>
+              Manage Children
+            </CustomButton>
           </div>
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
-          <CustomButton onClick={() => navigate('/manage-children')}>
-            Manage Children
-          </CustomButton>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 } 
