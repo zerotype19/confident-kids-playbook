@@ -439,49 +439,64 @@ export default function AllChallengesPage() {
                     <div className="px-6 pb-6 space-y-6">
                       {/* Description */}
                       {challenge.description && (
-                        <div>
+                        <div className="bg-gray-50 rounded-lg p-4">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Description</h3>
-                          <p className="text-gray-600">{challenge.description}</p>
+                          <p className="text-gray-600 leading-relaxed">{challenge.description}</p>
                         </div>
                       )}
 
                       {/* Goal */}
                       {challenge.goal && (
-                        <div>
+                        <div className="bg-gray-50 rounded-lg p-4">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Goal</h3>
-                          <p className="text-gray-600">{challenge.goal}</p>
+                          <p className="text-gray-600 leading-relaxed">{challenge.goal}</p>
                         </div>
                       )}
 
                       {/* Steps */}
                       {challenge.steps && (
-                        <div>
+                        <div className="bg-gray-50 rounded-lg p-4">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
                           {Array.isArray(challenge.steps) ? (
-                            <ol className="list-decimal list-inside space-y-1 text-gray-600">
+                            <ol className="list-decimal list-inside space-y-2 text-gray-600">
                               {challenge.steps.map((step, index) => (
-                                <li key={index}>{step}</li>
+                                <li key={index} className="pl-2">{step}</li>
                               ))}
                             </ol>
                           ) : (
-                            <p className="text-gray-600 whitespace-pre-line">{challenge.steps}</p>
+                            <div className="bg-white rounded-md p-4 border border-gray-200">
+                              <pre className="text-gray-600 whitespace-pre-wrap font-sans">
+                                {typeof challenge.steps === 'string' 
+                                  ? challenge.steps.split('\n').map((line, i) => (
+                                      <div key={i} className="mb-1">{line}</div>
+                                    ))
+                                  : JSON.stringify(challenge.steps, null, 2)
+                                }
+                              </pre>
+                            </div>
                           )}
                         </div>
                       )}
 
                       {/* Example Dialogue */}
                       {challenge.example_dialogue && (
-                        <div>
+                        <div className="bg-gray-50 rounded-lg p-4">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Example Dialogue</h3>
-                          <p className="text-gray-600 whitespace-pre-line">{challenge.example_dialogue}</p>
+                          <div className="bg-white rounded-md p-4 border border-gray-200">
+                            <pre className="text-gray-600 whitespace-pre-wrap font-sans">
+                              {challenge.example_dialogue.split('\n').map((line, i) => (
+                                <div key={i} className="mb-1">{line}</div>
+                              ))}
+                            </pre>
+                          </div>
                         </div>
                       )}
 
                       {/* Tip */}
                       {challenge.tip && (
-                        <div>
+                        <div className="bg-gray-50 rounded-lg p-4">
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Tip</h3>
-                          <p className="text-gray-600">{challenge.tip}</p>
+                          <p className="text-gray-600 leading-relaxed">{challenge.tip}</p>
                         </div>
                       )}
 
@@ -493,7 +508,7 @@ export default function AllChallengesPage() {
                               e.stopPropagation();
                               handleChallengeComplete(challenge.id);
                             }}
-                            className="w-full px-4 py-2 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200"
+                            className="w-full px-4 py-3 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200"
                           >
                             Mark Complete
                           </button>
