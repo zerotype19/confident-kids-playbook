@@ -13,7 +13,6 @@ import { ManageProfilePage } from "./pages/ManageProfilePage"
 import PlaybookPage from "./pages/PlaybookPage"
 import SuccessPage from "./pages/SuccessPage"
 import CancelPage from "./pages/CancelPage"
-import AboutPage from "./pages/AboutPage"
 import PrivacyPolicyPage from "./pages/PrivacyPolicy"
 import TermsOfServicePage from "./pages/TermsOfService"
 import OurStoryPage from "./pages/OurStory"
@@ -34,7 +33,6 @@ export default function App(): JSX.Element {
             <Route path="/playbook" element={<PlaybookPage />} />
             <Route path="/success" element={<SuccessPage />} />
             <Route path="/cancel" element={<CancelPage />} />
-            <Route path="/about" element={<AboutPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/our-story" element={<OurStoryPage />} />
