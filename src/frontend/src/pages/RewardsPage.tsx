@@ -6,7 +6,6 @@ import RewardsOverview from '../components/rewards/RewardsOverview';
 import { TrophyCase } from '../components/rewards/TrophyCase';
 import ProgressTracker from '../components/rewards/ProgressTracker';
 import CustomButton from '../components/CustomButton';
-import RewardCard from '../components/rewards/RewardCard';
 import { useNavigate } from 'react-router-dom';
 
 export default function RewardsPage() {
@@ -17,56 +16,6 @@ export default function RewardsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const handleRewardRedeem = async (rewardId: string) => {
-    if (!selectedChild) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/rewards/${selectedChild.id}/redeem/${rewardId}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to redeem reward');
-      }
-
-      // Refresh rewards after successful redemption
-      const fetchRewardsAndProgress = async () => {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/rewards/${selectedChild.id}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch rewards and progress');
-        }
-
-        const data = await response.json();
-        setRewards(data.rewards || []);
-      };
-
-      await fetchRewardsAndProgress();
-    } catch (err) {
-      console.error('Error redeeming reward:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    }
-  };
 
   // Fetch children on component mount
   useEffect(() => {
@@ -201,16 +150,6 @@ export default function RewardsPage() {
                 progress={progress}
                 childId={selectedChild.id}
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rewards.map((reward) => (
-                <RewardCard
-                  key={reward.id}
-                  reward={reward}
-                  onRedeem={handleRewardRedeem}
-                />
-              ))}
             </div>
           </>
         ) : (
