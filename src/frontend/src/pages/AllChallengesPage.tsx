@@ -19,11 +19,15 @@ interface ChallengeFilters {
   showCompleted: boolean;
 }
 
+interface DisplayedChallenge extends Challenge {
+  isExpanded?: boolean;
+}
+
 export default function AllChallengesPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
   const [allChallenges, setAllChallenges] = useState<Challenge[]>([]);
-  const [displayedChallenges, setDisplayedChallenges] = useState<Challenge[]>([]);
+  const [displayedChallenges, setDisplayedChallenges] = useState<DisplayedChallenge[]>([]);
   const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -433,39 +437,51 @@ export default function AllChallengesPage() {
                   {/* Expanded Content */}
                   {challenge.isExpanded && (
                     <div className="px-6 pb-6 space-y-6">
-                      {/* Goals */}
-                      {Array.isArray(challenge.goals) && challenge.goals.length > 0 && (
+                      {/* Description */}
+                      {challenge.description && (
                         <div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Goals</h3>
-                          <ul className="list-disc list-inside space-y-1 text-gray-600">
-                            {challenge.goals.map((goal, index) => (
-                              <li key={index}>{goal}</li>
-                            ))}
-                          </ul>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Description</h3>
+                          <p className="text-gray-600">{challenge.description}</p>
+                        </div>
+                      )}
+
+                      {/* Goal */}
+                      {challenge.goal && (
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Goal</h3>
+                          <p className="text-gray-600">{challenge.goal}</p>
                         </div>
                       )}
 
                       {/* Steps */}
-                      {Array.isArray(challenge.steps) && challenge.steps.length > 0 && (
+                      {challenge.steps && (
                         <div>
                           <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
-                          <ol className="list-decimal list-inside space-y-1 text-gray-600">
-                            {challenge.steps.map((step, index) => (
-                              <li key={index}>{step}</li>
-                            ))}
-                          </ol>
+                          {Array.isArray(challenge.steps) ? (
+                            <ol className="list-decimal list-inside space-y-1 text-gray-600">
+                              {challenge.steps.map((step, index) => (
+                                <li key={index}>{step}</li>
+                              ))}
+                            </ol>
+                          ) : (
+                            <p className="text-gray-600 whitespace-pre-line">{challenge.steps}</p>
+                          )}
                         </div>
                       )}
 
-                      {/* Tips */}
-                      {Array.isArray(challenge.tips) && challenge.tips.length > 0 && (
+                      {/* Example Dialogue */}
+                      {challenge.example_dialogue && (
                         <div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Tips</h3>
-                          <ul className="list-disc list-inside space-y-1 text-gray-600">
-                            {challenge.tips.map((tip, index) => (
-                              <li key={index}>{tip}</li>
-                            ))}
-                          </ul>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Example Dialogue</h3>
+                          <p className="text-gray-600 whitespace-pre-line">{challenge.example_dialogue}</p>
+                        </div>
+                      )}
+
+                      {/* Tip */}
+                      {challenge.tip && (
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">Tip</h3>
+                          <p className="text-gray-600">{challenge.tip}</p>
                         </div>
                       )}
 
