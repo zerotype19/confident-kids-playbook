@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const AuthenticatedHeader: React.FC = () => {
-  const { user, signOut } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+interface AuthenticatedHeaderProps {
+  isMenuOpen: boolean;
+  onToggleMenu: () => void;
+}
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+const AuthenticatedHeader: React.FC<AuthenticatedHeaderProps> = ({ isMenuOpen, onToggleMenu }) => {
+  const { user, logout } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
         <div className="flex items-center">
           <button
-            onClick={toggleMenu}
+            onClick={onToggleMenu}
             className="md:hidden mr-4 text-gray-600 hover:text-gray-900"
           >
             <svg
@@ -46,9 +46,9 @@ const AuthenticatedHeader: React.FC = () => {
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">{user?.name || user?.email}</span>
+          <span className="text-sm text-gray-600">{user?.displayName || user?.email}</span>
           <button
-            onClick={signOut}
+            onClick={logout}
             className="px-4 py-2 text-sm text-white bg-kidoova-accent rounded-md hover:bg-kidoova-accent-dark"
           >
             Sign Out

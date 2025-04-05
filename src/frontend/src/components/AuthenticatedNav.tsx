@@ -28,7 +28,7 @@ const AuthenticatedNav: React.FC<AuthenticatedNavProps> = ({ isMenuOpen, onClose
       
       {/* Navigation */}
       <nav
-        className={`fixed left-0 top-16 bottom-0 w-64 bg-white shadow-sm transform transition-transform duration-200 ease-in-out z-50
+        className={`fixed left-0 top-16 bottom-0 w-64 bg-white shadow-sm transform transition-transform duration-300 ease-in-out z-50
           ${isMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         <div className="h-full flex flex-col">
