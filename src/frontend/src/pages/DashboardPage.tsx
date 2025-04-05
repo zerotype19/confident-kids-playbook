@@ -11,7 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function DashboardPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
   const [challenge, setChallenge] = useState<any>(null);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
@@ -19,8 +19,11 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  console.log('DashboardPage render:', { isAuthenticated, token, selectedChild, isLoading, error });
+
   useEffect(() => {
     if (!isAuthenticated) {
+      console.log('Not authenticated, redirecting to home');
       navigate('/');
       return;
     }
@@ -29,7 +32,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchChildren = async () => {
       try {
-        const token = localStorage.getItem('token');
+        console.log('Fetching children...');
         if (!token) {
           throw new Error('No authentication token found');
         }
@@ -40,11 +43,15 @@ export default function DashboardPage() {
           }
         });
 
+        console.log('Children response status:', response.status);
+
         if (!response.ok) {
-          throw new Error('Failed to fetch children');
+          throw new Error(`Failed to fetch children: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log('Children data:', data);
+
         if (!data.success) {
           throw new Error('API response indicated failure');
         }
@@ -55,26 +62,32 @@ export default function DashboardPage() {
         
         // Auto-select first child if only one exists
         if (data.children.length === 1 && !selectedChild) {
+          console.log('Auto-selecting first child:', data.children[0]);
           setSelectedChild(data.children[0]);
         }
       } catch (err) {
         console.error('Error fetching children:', err);
-        setError('Failed to load children');
+        setError(err instanceof Error ? err.message : 'Failed to load children');
+        setIsLoading(false);
       }
     };
 
     fetchChildren();
-  }, [setSelectedChild, selectedChild]);
+  }, [setSelectedChild, selectedChild, token]);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!selectedChild) return;
+      if (!selectedChild) {
+        console.log('No selected child, skipping data fetch');
+        setIsLoading(false);
+        return;
+      }
 
+      console.log('Fetching dashboard data for child:', selectedChild.id);
       setIsLoading(true);
       setError(null);
 
       try {
-        const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('No authentication token found');
         }
@@ -89,11 +102,14 @@ export default function DashboardPage() {
           }
         );
 
+        console.log('Challenge response status:', challengeResponse.status);
+
         if (!challengeResponse.ok) {
-          throw new Error('Failed to fetch challenge');
+          throw new Error(`Failed to fetch challenge: ${challengeResponse.status} ${challengeResponse.statusText}`);
         }
 
         const challengeData = await challengeResponse.json();
+        console.log('Challenge data:', challengeData);
         setChallenge(challengeData.challenge);
 
         // Fetch rewards and progress
@@ -106,11 +122,14 @@ export default function DashboardPage() {
           }
         );
 
+        console.log('Rewards response status:', rewardsResponse.status);
+
         if (!rewardsResponse.ok) {
-          throw new Error('Failed to fetch rewards and progress');
+          throw new Error(`Failed to fetch rewards: ${rewardsResponse.status} ${rewardsResponse.statusText}`);
         }
 
         const rewardsData = await rewardsResponse.json();
+        console.log('Rewards data:', rewardsData);
         
         // Ensure pillar_progress is an object
         const pillarProgress = rewardsData.progress.pillar_progress || {};
@@ -124,22 +143,22 @@ export default function DashboardPage() {
           milestone_progress: rewardsData.progress.milestone_progress
         });
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load dashboard data');
+        console.error('Error fetching dashboard data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
       } finally {
+        console.log('Setting isLoading to false');
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [selectedChild]);
+  }, [selectedChild, token]);
 
   const handleChallengeComplete = () => {
     // Refresh the data after challenge completion
     if (selectedChild) {
       const fetchData = async () => {
         try {
-          const token = localStorage.getItem('token');
           if (!token) return;
 
           // Fetch updated rewards and progress
@@ -174,10 +193,15 @@ export default function DashboardPage() {
     }
   };
 
+  console.log('DashboardPage render state:', { isLoading, error, selectedChild, children });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kidoova-accent"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kidoova-accent mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -188,6 +212,12 @@ export default function DashboardPage() {
         <div className="text-red-500 text-center">
           <p className="text-lg font-medium">Error loading dashboard</p>
           <p className="text-sm mt-2">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
