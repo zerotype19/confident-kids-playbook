@@ -35,6 +35,9 @@ export default function CompletionStep({ onComplete }: CompletionStepProps) {
         throw new Error(errorData.message || 'Failed to create family');
       }
 
+      // Wait a moment to ensure family creation is complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Create children
       for (const child of children) {
         const childResponse = await fetch(`${apiUrl}/api/children/create`, {
