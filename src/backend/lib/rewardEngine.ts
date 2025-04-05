@@ -45,7 +45,7 @@ export async function evaluateAndGrantRewards(childId: string, env: Env) {
     // 2. Check streak rewards
     const streakResult = await env.DB.prepare(`
       WITH RECURSIVE dates AS (
-        SELECT DISTINCT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
+        SELECT DISTINCT date(completed_at) as date
         FROM challenge_logs
         WHERE child_id = ?
         AND completed_at IS NOT NULL
@@ -209,7 +209,7 @@ export async function getChildProgress(childId: string, env: Env) {
   // Get current streak
   const streakResult = await env.DB.prepare(`
     WITH RECURSIVE dates AS (
-      SELECT DISTINCT date(datetime(completed_at, 'localtime', 'America/New_York')) as date
+      SELECT DISTINCT date(completed_at) as date
       FROM challenge_logs
       WHERE child_id = ?
       AND completed_at IS NOT NULL
