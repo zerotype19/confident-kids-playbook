@@ -22,7 +22,8 @@ interface ChallengeFilters {
 export default function AllChallengesPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [allChallenges, setAllChallenges] = useState<Challenge[]>([]);
+  const [displayedChallenges, setDisplayedChallenges] = useState<Challenge[]>([]);
   const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +33,6 @@ export default function AllChallengesPage() {
     title: null,
     showCompleted: false
   });
-  const [currentPage, setCurrentPage] = useState(1);
-  const challengesPerPage = 12;
   const navigate = useNavigate();
 
   // Get pillar from URL query parameter
@@ -117,7 +116,7 @@ export default function AllChallengesPage() {
         }
 
         const data = await response.json();
-        setChallenges(data);
+        setAllChallenges(data);
 
         // Group challenges by pillar and difficulty
         const groups = data.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
@@ -152,14 +151,22 @@ export default function AllChallengesPage() {
     fetchChallenges();
   }, [selectedChild]);
 
-  // Filter challenges based on selected filters
-  const filteredChallenges = challenges.filter(challenge => {
-    if (filters.pillarId && challenge.pillar_id !== filters.pillarId) return false;
-    if (filters.difficulty && challenge.difficulty_level !== filters.difficulty) return false;
-    if (filters.title && challenge.title !== filters.title) return false;
-    if (!filters.showCompleted && challenge.is_completed) return false;
-    return true;
-  });
+  // Filter challenges based on selected filters and select random ones
+  useEffect(() => {
+    if (allChallenges.length === 0) return;
+
+    const filtered = allChallenges.filter(challenge => {
+      if (filters.pillarId && challenge.pillar_id !== filters.pillarId) return false;
+      if (filters.difficulty && challenge.difficulty_level !== filters.difficulty) return false;
+      if (filters.title && challenge.title !== filters.title) return false;
+      if (!filters.showCompleted && challenge.is_completed) return false;
+      return true;
+    });
+
+    // Shuffle array and take first 10
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+    setDisplayedChallenges(shuffled.slice(0, 10));
+  }, [allChallenges, filters]);
 
   // Get unique difficulties from challenge groups
   const difficulties = Array.from(new Set(challengeGroups.map(group => group.difficulty_level))).sort();
@@ -182,7 +189,6 @@ export default function AllChallengesPage() {
       title: null,
       showCompleted: false
     });
-    setCurrentPage(1);
   };
 
   // Handle challenge completion
@@ -228,7 +234,7 @@ export default function AllChallengesPage() {
         }
 
         const data = await response.json();
-        setChallenges(data);
+        setAllChallenges(data);
 
         // Group challenges by pillar and difficulty
         const groups = data.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
@@ -280,7 +286,6 @@ export default function AllChallengesPage() {
     );
   }
 
-  // Render challenges
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -393,40 +398,14 @@ export default function AllChallengesPage() {
 
             {/* Challenges Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredChallenges
-                .slice((currentPage - 1) * challengesPerPage, currentPage * challengesPerPage)
-                .map((challenge) => (
-                  <ChallengeCard
-                    key={challenge.id}
-                    challenge={challenge}
-                    onComplete={handleChallengeComplete}
-                  />
-                ))}
+              {displayedChallenges.map((challenge) => (
+                <ChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  onComplete={handleChallengeComplete}
+                />
+              ))}
             </div>
-
-            {/* Pagination */}
-            {filteredChallenges.length > challengesPerPage && (
-              <div className="flex justify-center mt-8">
-                <div className="flex space-x-2">
-                  {Array.from(
-                    { length: Math.ceil(filteredChallenges.length / challengesPerPage) },
-                    (_, i) => i + 1
-                  ).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-lg ${
-                        currentPage === page
-                          ? 'bg-kidoova-accent text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </>
         ) : (
           <div className="text-center py-8">
