@@ -1,38 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const AuthenticatedHeader: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/dashboard" className="flex items-center">
-          <img src="/logo.png" alt="Kidoova Logo" className="h-8 md:h-10" />
-        </Link>
-        <div className="flex items-center space-x-4">
-          {user && (
-            <div className="flex items-center space-x-2">
-              {user.photoURL ? (
-                <img 
-                  src={user.photoURL} 
-                  alt={user.displayName || 'User'} 
-                  className="w-8 h-8 rounded-full"
+    <header className="fixed top-0 left-0 right-0 h-16 bg-white shadow-sm z-50">
+      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+        <div className="flex items-center">
+          <button
+            onClick={toggleMenu}
+            className="md:hidden mr-4 text-gray-600 hover:text-gray-900"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              {isMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-600 text-sm">
-                    {user.displayName?.charAt(0) || user.email?.charAt(0)}
-                  </span>
-                </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               )}
-              <span className="text-gray-700">{user.displayName || user.email}</span>
-            </div>
-          )}
+            </svg>
+          </button>
+          <Link to="/dashboard" className="flex items-center">
+            <img src="/logo.png" alt="Kidoova" className="h-8" />
+          </Link>
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-600">{user?.name || user?.email}</span>
           <button
-            onClick={() => logout()}
-            className="text-gray-600 hover:text-gray-900"
+            onClick={signOut}
+            className="px-4 py-2 text-sm text-white bg-kidoova-accent rounded-md hover:bg-kidoova-accent-dark"
           >
             Sign Out
           </button>
