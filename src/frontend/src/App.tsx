@@ -75,9 +75,17 @@ export default function App(): JSX.Element {
                   </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
-            >
-              <Route path=":pillarId" element={<PillarDetailPage />} />
-            </Route>
+            />
+            <Route 
+              path="/pillars/:pillarId" 
+              element={
+                <PrivateRoute>
+                  <AuthenticatedPageWrapper>
+                    <PillarDetailPage />
+                  </AuthenticatedPageWrapper>
+                </PrivateRoute>
+              } 
+            />
             <Route 
               path="/all-challenges" 
               element={
