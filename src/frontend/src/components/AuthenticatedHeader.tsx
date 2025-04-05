@@ -12,7 +12,7 @@ const AuthenticatedHeader: React.FC<AuthenticatedHeaderProps> = ({ isMenuOpen, o
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white shadow-sm z-50">
-      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+      <div className="h-full flex items-center justify-between px-4">
         <div className="flex items-center">
           <button
             onClick={onToggleMenu}
@@ -45,15 +45,12 @@ const AuthenticatedHeader: React.FC<AuthenticatedHeaderProps> = ({ isMenuOpen, o
             <img src="/logo.png" alt="Kidoova" className="h-8" />
           </Link>
         </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">{user?.displayName || user?.email}</span>
-          <button
-            onClick={logout}
-            className="px-4 py-2 text-sm text-white bg-kidoova-accent rounded-md hover:bg-kidoova-accent-dark"
-          >
-            Sign Out
-          </button>
-        </div>
+        <button
+          onClick={logout}
+          className="px-4 py-2 text-sm text-white bg-kidoova-accent rounded-md hover:bg-kidoova-accent-dark"
+        >
+          Sign Out
+        </button>
       </div>
     </header>
   );
