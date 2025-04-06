@@ -7,7 +7,7 @@ interface PrivateRouteProps {
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -34,8 +34,8 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  // Check if user has completed onboarding
-  const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
+  // Check if user has completed onboarding using the value from the backend
+  const hasCompletedOnboarding = user?.hasCompletedOnboarding;
   
   if (!hasCompletedOnboarding && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
