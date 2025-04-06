@@ -190,7 +190,7 @@ export default function HomePage(): JSX.Element {
 
         // Initialize Google Identity Services
         window.google.accounts.id.initialize({
-          client_id: '1095002022011-0q0q0q0q0q0q0q0q0q0q0q0q0q0q0q0.apps.googleusercontent.com',
+          client_id: googleClientId,
           callback: handleGoogleLogin,
           ux_mode: 'popup',
           prompt_parent_id: 'google-login-button-hero',
@@ -233,7 +233,7 @@ export default function HomePage(): JSX.Element {
         }
       }
     };
-  }, []);
+  }, [googleClientId]);
 
   const openModal = (modalName: string) => {
     setActiveModal(modalName)
