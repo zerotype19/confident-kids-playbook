@@ -34,7 +34,7 @@ export const handleOptions = (request: Request) => {
   const origin = request.headers.get('Origin') || '';
   console.log('🔄 CORS preflight request:', {
     origin,
-    allowed: ALLOWED_ORIGINS.includes(origin),
+    allowed: allowedOrigins.includes(origin),
     method: request.method,
     url: request.url
   });
