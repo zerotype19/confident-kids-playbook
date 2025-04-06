@@ -57,6 +57,7 @@ interface GoogleIdentityServices {
   disableAutoSelect: () => Promise<void>;
   revoke: () => Promise<void>;
   prompt: () => void;
+  cancel: () => void;
 }
 
 // Declare Google Identity Services types
@@ -197,30 +198,23 @@ export default function HomePage(): JSX.Element {
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           callback: handleGoogleLogin,
-          ux_mode: "redirect",
-          prompt_parent_id: "google-login-button-hero",
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          context: "signin"
+          auto_select: false
         });
 
         // Render the sign-in button
         const button = document.getElementById('google-login-button-hero');
         if (button) {
           window.google.accounts.id.renderButton(button, {
-            type: 'standard',
             theme: 'outline',
             size: 'large',
-            width: '300',
-            logo_alignment: 'left',
-            text: 'signin_with'
+            shape: 'rectangular',
+            width: '300'
           });
           
           // Add a click handler to the button container
           button.addEventListener('click', (e) => {
             console.log('Google button clicked');
             e.preventDefault();
-            window.google.accounts.id.prompt();
           });
         } else {
           console.error('Google sign-in button element not found');
