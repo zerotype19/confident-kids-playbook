@@ -197,11 +197,11 @@ export default function HomePage(): JSX.Element {
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           callback: handleGoogleLogin,
-          ux_mode: 'popup',
-          prompt_parent_id: 'google-login-button-hero',
+          ux_mode: "redirect",
+          prompt_parent_id: "google-login-button-hero",
           auto_select: false,
           cancel_on_tap_outside: true,
-          context: 'signin'
+          context: "signin"
         });
 
         // Render the sign-in button
