@@ -6,12 +6,15 @@ const ALLOWED_ORIGINS = [
 ];
 
 export const corsHeaders = (origin?: string) => {
+  console.log('🔄 corsHeaders called with origin:', origin);
+  
   // If no origin is provided or it's not in the allowed list, use the first allowed origin
   const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   
   console.log('🔄 Setting CORS headers:', {
     requestOrigin: origin,
-    allowedOrigin
+    allowedOrigin,
+    isAllowed: ALLOWED_ORIGINS.includes(origin || '')
   });
   
   const headers = new Headers();
@@ -29,7 +32,9 @@ export const handleOptions = (request: Request) => {
   const origin = request.headers.get('Origin') || '';
   console.log('🔄 CORS preflight request:', {
     origin,
-    allowed: ALLOWED_ORIGINS.includes(origin)
+    allowed: ALLOWED_ORIGINS.includes(origin),
+    method: request.method,
+    url: request.url
   });
   
   const headers = corsHeaders(origin);
