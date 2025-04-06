@@ -1,32 +1,34 @@
 import { Env } from '../types';
 
-const ALLOWED_ORIGINS = [
-  'https://kidoova.com',
-  'https://www.kidoova.com'
-];
+export function corsHeaders(origin?: string | null): Headers {
+  const headers = new Headers();
+  
+  // Define allowed origins
+  const allowedOrigins = [
+    'https://kidoova.com',
+    'https://www.kidoova.com'
+  ];
 
-export const corsHeaders = (origin?: string) => {
-  console.log('🔄 corsHeaders called with origin:', origin);
-  
-  // If no origin is provided or it's not in the allowed list, use the first allowed origin
-  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  
+  // If no origin is provided or origin is not in allowed list, use the first allowed origin
+  const allowedOrigin = origin && allowedOrigins.includes(origin) 
+    ? origin 
+    : allowedOrigins[0];
+
   console.log('🔄 Setting CORS headers:', {
     requestOrigin: origin,
     allowedOrigin,
-    isAllowed: ALLOWED_ORIGINS.includes(origin || '')
+    isAllowed: allowedOrigins.includes(origin || '')
   });
-  
-  const headers = new Headers();
+
   headers.set('Access-Control-Allow-Origin', allowedOrigin);
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   headers.set('Access-Control-Allow-Credentials', 'true');
   headers.set('Access-Control-Max-Age', '86400');
   headers.set('Vary', 'Origin');
-  
+
   return headers;
-};
+}
 
 export const handleOptions = (request: Request) => {
   const origin = request.headers.get('Origin') || '';
