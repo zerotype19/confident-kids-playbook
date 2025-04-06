@@ -39,6 +39,8 @@ interface GoogleIdentityServices {
     auto_select?: boolean;
     cancel_on_tap_outside?: boolean;
     context?: string;
+    ux_mode?: "popup" | "redirect";
+    prompt_parent_id?: string;
   }) => void;
   renderButton: (
     element: HTMLElement | null,
@@ -48,6 +50,8 @@ interface GoogleIdentityServices {
       shape: "rectangular" | "pill" | "circle";
       width?: string;
       text?: string;
+      type?: "standard" | "icon";
+      logo_alignment?: "left" | "center";
     }
   ) => void;
   disableAutoSelect: () => Promise<void>;
@@ -167,7 +171,9 @@ export default function HomePage(): JSX.Element {
             callback: handleGoogleLogin,
             auto_select: false,
             cancel_on_tap_outside: false,
-            context: "signin"
+            context: "signin",
+            ux_mode: "popup",
+            prompt_parent_id: "google-login-button-hero"
           })
           
           // Render the hero button
@@ -180,7 +186,9 @@ export default function HomePage(): JSX.Element {
                 size: "large", 
                 shape: "pill",
                 width: "300",
-                text: "signin_with"
+                text: "signin_with",
+                type: "standard",
+                logo_alignment: "left"
               }
             )
             console.log("✅ Google sign-in button rendered in hero section")
