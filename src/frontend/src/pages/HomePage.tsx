@@ -154,99 +154,86 @@ export default function HomePage(): JSX.Element {
   }
 
   useEffect(() => {
-    const scriptId = "google-oauth-script"
-    let scriptLoadAttempts = 0
-    const maxAttempts = 3
+    const loadGoogleScript = async () => {
+      try {
+        // Check if script is already loaded
+        if (window.google) {
+          console.log('Google script already loaded');
+          initializeGoogleSignIn();
+          return;
+        }
 
-    const initializeGoogle = () => {
-      if (
-        window.google &&
-        window.google.accounts &&
-        window.google.accounts.id
-      ) {
-        console.log("✅ Google Identity Services loaded")
-        try {
-          window.google.accounts.id.initialize({
-            client_id: googleClientId,
-            callback: handleGoogleLogin,
-            auto_select: false,
-            cancel_on_tap_outside: false,
-            context: "signin",
-            ux_mode: "popup",
-            prompt_parent_id: "google-login-button-hero"
-          })
-          
-          // Render the hero button
-          const heroButton = document.getElementById("google-login-button-hero")
-          if (heroButton) {
-            window.google.accounts.id.renderButton(
-              heroButton,
-              { 
-                theme: "filled", 
-                size: "large", 
-                shape: "pill",
-                width: "300",
-                text: "signin_with",
-                type: "standard",
-                logo_alignment: "left"
-              }
-            )
-            console.log("✅ Google sign-in button rendered in hero section")
-          } else {
-            console.error("❌ Hero button element not found")
-          }
-        } catch (error) {
-          console.error("❌ Error initializing Google sign-in:", error)
-        }
-      } else {
-        console.error("❌ Google Identity Services not available")
-        if (scriptLoadAttempts < maxAttempts) {
-          scriptLoadAttempts++
-          console.log(`🔄 Retrying Google script load (attempt ${scriptLoadAttempts}/${maxAttempts})`)
-          setTimeout(loadGoogleScript, 1000)
-        }
+        // Load the Google Identity Services script
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          console.log('Google script loaded successfully');
+          initializeGoogleSignIn();
+        };
+        script.onerror = (error) => {
+          console.error('Failed to load Google script:', error);
+        };
+        document.body.appendChild(script);
+      } catch (error) {
+        console.error('Error loading Google script:', error);
       }
-    }
+    };
 
-    const loadGoogleScript = () => {
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement("script")
-        script.src = "https://accounts.google.com/gsi/client"
-        script.async = true
-        script.defer = true
-        script.id = scriptId
-        script.onload = initializeGoogle
-        script.onerror = () => {
-          console.error("❌ Failed to load Google Identity Services script")
-          if (scriptLoadAttempts < maxAttempts) {
-            scriptLoadAttempts++
-            console.log(`🔄 Retrying Google script load (attempt ${scriptLoadAttempts}/${maxAttempts})`)
-            setTimeout(loadGoogleScript, 1000)
-          }
+    const initializeGoogleSignIn = () => {
+      try {
+        if (!window.google) {
+          console.error('Google Identity Services not available');
+          return;
         }
-        document.head.appendChild(script)
-      } else {
-        initializeGoogle()
+
+        // Initialize Google Identity Services
+        window.google.accounts.id.initialize({
+          client_id: '1095002022011-0q0q0q0q0q0q0q0q0q0q0q0q0q0q0q0.apps.googleusercontent.com',
+          callback: handleGoogleLogin,
+          ux_mode: 'popup',
+          prompt_parent_id: 'google-login-button-hero',
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+
+        // Render the sign-in button
+        const button = document.getElementById('google-login-button-hero');
+        if (button) {
+          window.google.accounts.id.renderButton(button, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            width: '300',
+            logo_alignment: 'left',
+            text: 'signin_with'
+          });
+        } else {
+          console.error('Google sign-in button element not found');
+        }
+      } catch (error) {
+        console.error('Error initializing Google sign-in:', error);
       }
-    }
+    };
 
-    loadGoogleScript()
+    loadGoogleScript();
 
-    // Cleanup function
     return () => {
-      const script = document.getElementById(scriptId)
+      // Cleanup function
+      const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
       if (script) {
-        script.remove()
+        script.remove();
       }
       if (window.google?.accounts?.id) {
         try {
-          window.google.accounts.id.disableAutoSelect()
+          window.google.accounts.id.cancel();
         } catch (error) {
-          console.error('Error disabling Google auto-select:', error)
+          console.error('Error canceling Google sign-in:', error);
         }
       }
-    }
-  }, [googleClientId])
+    };
+  }, []);
 
   const openModal = (modalName: string) => {
     setActiveModal(modalName)
