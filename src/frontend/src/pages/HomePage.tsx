@@ -36,6 +36,9 @@ interface GoogleIdentityServices {
   initialize: (config: {
     client_id: string;
     callback: (response: GoogleCredentialResponse) => Promise<void>;
+    auto_select?: boolean;
+    cancel_on_tap_outside?: boolean;
+    context?: string;
   }) => void;
   renderButton: (
     element: HTMLElement | null,
@@ -43,6 +46,8 @@ interface GoogleIdentityServices {
       theme: "outline" | "filled";
       size: "large" | "medium" | "small";
       shape: "rectangular" | "pill" | "circle";
+      width?: string;
+      text?: string;
     }
   ) => void;
   disableAutoSelect: () => Promise<void>;
@@ -146,6 +151,8 @@ export default function HomePage(): JSX.Element {
 
   useEffect(() => {
     const scriptId = "google-oauth-script"
+    let scriptLoadAttempts = 0
+    const maxAttempts = 3
 
     const initializeGoogle = () => {
       if (
@@ -154,42 +161,68 @@ export default function HomePage(): JSX.Element {
         window.google.accounts.id
       ) {
         console.log("✅ Google Identity Services loaded")
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleLogin,
-          auto_select: false,
-          cancel_on_tap_outside: false
-        })
-        
-        // Render the hero button
-        const heroButton = document.getElementById("google-login-button-hero")
-        if (heroButton) {
-          window.google.accounts.id.renderButton(
-            heroButton,
-            { 
-              theme: "filled", 
-              size: "large", 
-              shape: "pill",
-              width: "300"
-            }
-          )
-          console.log("✅ Google sign-in button rendered in hero section")
+        try {
+          window.google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: handleGoogleLogin,
+            auto_select: false,
+            cancel_on_tap_outside: false,
+            context: "signin"
+          })
+          
+          // Render the hero button
+          const heroButton = document.getElementById("google-login-button-hero")
+          if (heroButton) {
+            window.google.accounts.id.renderButton(
+              heroButton,
+              { 
+                theme: "filled", 
+                size: "large", 
+                shape: "pill",
+                width: "300",
+                text: "signin_with"
+              }
+            )
+            console.log("✅ Google sign-in button rendered in hero section")
+          } else {
+            console.error("❌ Hero button element not found")
+          }
+        } catch (error) {
+          console.error("❌ Error initializing Google sign-in:", error)
+        }
+      } else {
+        console.error("❌ Google Identity Services not available")
+        if (scriptLoadAttempts < maxAttempts) {
+          scriptLoadAttempts++
+          console.log(`🔄 Retrying Google script load (attempt ${scriptLoadAttempts}/${maxAttempts})`)
+          setTimeout(loadGoogleScript, 1000)
         }
       }
     }
 
-    // Load Google Identity Services script
-    if (!document.getElementById(scriptId)) {
-      const script = document.createElement("script")
-      script.src = "https://accounts.google.com/gsi/client"
-      script.async = true
-      script.defer = true
-      script.id = scriptId
-      script.onload = initializeGoogle
-      document.head.appendChild(script)
-    } else {
-      initializeGoogle()
+    const loadGoogleScript = () => {
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script")
+        script.src = "https://accounts.google.com/gsi/client"
+        script.async = true
+        script.defer = true
+        script.id = scriptId
+        script.onload = initializeGoogle
+        script.onerror = () => {
+          console.error("❌ Failed to load Google Identity Services script")
+          if (scriptLoadAttempts < maxAttempts) {
+            scriptLoadAttempts++
+            console.log(`🔄 Retrying Google script load (attempt ${scriptLoadAttempts}/${maxAttempts})`)
+            setTimeout(loadGoogleScript, 1000)
+          }
+        }
+        document.head.appendChild(script)
+      } else {
+        initializeGoogle()
+      }
     }
+
+    loadGoogleScript()
 
     // Cleanup function
     return () => {
