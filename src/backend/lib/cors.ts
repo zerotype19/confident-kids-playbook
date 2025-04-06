@@ -23,6 +23,7 @@ export function corsHeaders(origin?: string | null): Headers {
     isAllowed: allowedOrigins.includes(requestOrigin)
   });
 
+  // Set the CORS headers
   headers.set('Access-Control-Allow-Origin', allowedOrigin);
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -42,6 +43,7 @@ export const handleOptions = (request: Request) => {
     url: request.url
   });
   
+  // Only set CORS headers once
   const headers = corsHeaders(origin);
   
   return new Response(null, {
