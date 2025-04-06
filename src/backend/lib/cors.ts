@@ -9,6 +9,11 @@ export const corsHeaders = (origin?: string) => {
   // If no origin is provided or it's not in the allowed list, use the first allowed origin
   const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   
+  console.log('🔄 Setting CORS headers:', {
+    requestOrigin: origin,
+    allowedOrigin
+  });
+  
   const headers = new Headers();
   headers.set('Access-Control-Allow-Origin', allowedOrigin);
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
