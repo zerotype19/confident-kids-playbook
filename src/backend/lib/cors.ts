@@ -1,14 +1,14 @@
 import { Env } from '../types';
 
+// Define allowed origins at module scope
+const allowedOrigins = [
+  'https://kidoova.com',
+  'https://www.kidoova.com'
+];
+
 export function corsHeaders(origin?: string | null): Headers {
   const headers = new Headers();
   
-  // Define allowed origins
-  const allowedOrigins = [
-    'https://kidoova.com',
-    'https://www.kidoova.com'
-  ];
-
   // If no origin is provided or origin is not in allowed list, use the first allowed origin
   const allowedOrigin = origin && allowedOrigins.includes(origin) 
     ? origin 
