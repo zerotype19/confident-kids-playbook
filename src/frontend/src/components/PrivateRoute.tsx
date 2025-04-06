@@ -6,7 +6,7 @@ interface PrivateRouteProps {
   children: React.ReactNode;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -46,6 +46,4 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   }
 
   return <>{children}</>;
-};
-
-export default PrivateRoute; 
+}; 
