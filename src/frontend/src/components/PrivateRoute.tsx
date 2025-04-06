@@ -6,15 +6,13 @@ interface PrivateRouteProps {
   children: React.ReactNode;
 }
 
-export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated, user, token } = useAuth();
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  console.log('🔒 PrivateRoute render:', { isAuthenticated, user, token, location: location.pathname, isInitialized });
-
   useEffect(() => {
-    // Wait a short moment to allow token to be loaded from localStorage
+    // Add a small delay to ensure auth state is properly initialized
     const timer = setTimeout(() => {
       setIsInitialized(true);
     }, 100);
@@ -22,52 +20,32 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Show loading state while initializing
-  if (!isInitialized) {
-    console.log('⏳ Waiting for initialization');
+  if (isLoading || !isInitialized) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900">Loading...</h2>
-          <p className="mt-2 text-gray-600">Please wait while we set up your account.</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
-  // If not authenticated, redirect to home page
-  if (!isAuthenticated || !token) {
-    console.log('❌ Not authenticated, redirecting to home');
+  if (!isAuthenticated) {
+    // Store the attempted URL for redirect after login
+    localStorage.setItem('redirectAfterLogin', location.pathname);
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  // If we have a token but user data isn't loaded yet, show loading state
-  if (token && !user) {
-    console.log('⏳ Token exists but user data not loaded yet');
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900">Loading...</h2>
-          <p className="mt-2 text-gray-600">Please wait while we set up your account.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If user has completed onboarding and tries to access onboarding pages
-  if (user?.hasCompletedOnboarding && location.pathname.startsWith('/onboarding')) {
-    console.log('✅ User completed onboarding, redirecting to dashboard');
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  // If user hasn't completed onboarding and tries to access dashboard
-  if (user && !user.hasCompletedOnboarding && 
-      (location.pathname === '/dashboard')) {
-    console.log('🔄 User not completed onboarding, redirecting to onboarding');
+  // Check if user has completed onboarding
+  const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
+  
+  if (!hasCompletedOnboarding && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If authenticated and user data is loaded, render children
-  console.log('✅ Authenticated, rendering protected content');
+  if (hasCompletedOnboarding && location.pathname === '/onboarding') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
-}; 
+};
+
+export default PrivateRoute; 

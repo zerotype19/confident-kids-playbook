@@ -14,6 +14,7 @@ export interface User {
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isLoading: boolean;
   user: User | null;
   token: string | null;
   selectedChildId: string | null;
@@ -68,6 +69,7 @@ declare global {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [selectedChildId, setSelectedChildIdState] = useState<string | null>(null);
@@ -133,6 +135,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(false);
       setUser(null);
       throw error; // Re-throw to handle in the login function
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -215,6 +219,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={{ 
       isAuthenticated, 
+      isLoading, 
       user, 
       token, 
       selectedChildId,

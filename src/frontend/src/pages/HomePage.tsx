@@ -87,12 +87,12 @@ export default function HomePage(): JSX.Element {
 
   const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
     try {
-      console.log("🔑 Received Google credential");
+      console.log("🔑 Received Google credential")
       // Store credential temporarily for cleanup
-      localStorage.setItem('google_credential', response.credential);
+      localStorage.setItem('google_credential', response.credential)
       
       // Exchange Google credential for JWT
-      const apiUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = import.meta.env.VITE_API_URL
       const authResponse = await fetch(`${apiUrl}/api/auth/google`, {
         method: 'POST',
         headers: {
@@ -102,19 +102,19 @@ export default function HomePage(): JSX.Element {
         body: JSON.stringify({ 
           credential: response.credential 
         })
-      });
+      })
 
       if (!authResponse.ok) {
-        const errorData = await authResponse.json();
-        console.error("❌ Auth response error:", errorData);
-        throw new Error('Failed to exchange Google credential for JWT');
+        const errorData = await authResponse.json()
+        console.error("❌ Auth response error:", errorData)
+        throw new Error('Failed to exchange Google credential for JWT')
       }
 
-      const { jwt } = await authResponse.json();
-      console.log("✅ Received JWT, logging in");
-      await login(jwt);
+      const { jwt } = await authResponse.json()
+      console.log("✅ Received JWT, logging in")
+      await login(jwt)
       // Clear the temporary credential after successful login
-      localStorage.removeItem('google_credential');
+      localStorage.removeItem('google_credential')
       
       // Fetch user data to check onboarding status
       const userResponse = await fetch(`${apiUrl}/api/user/profile`, {
@@ -123,24 +123,24 @@ export default function HomePage(): JSX.Element {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
-      });
+      })
       
       if (!userResponse.ok) {
-        throw new Error('Failed to fetch user profile');
+        throw new Error('Failed to fetch user profile')
       }
       
-      const userData = await userResponse.json();
+      const userData = await userResponse.json()
       
       // Redirect based on onboarding status
       if (userData.has_completed_onboarding) {
-        navigate('/dashboard');
+        window.location.href = '/dashboard'
       } else {
-        navigate('/onboarding');
+        window.location.href = '/onboarding'
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error:', error)
       // Clear the temporary credential on error
-      localStorage.removeItem('google_credential');
+      localStorage.removeItem('google_credential')
     }
   }
 
@@ -156,18 +156,25 @@ export default function HomePage(): JSX.Element {
         console.log("✅ Google Identity Services loaded")
         window.google.accounts.id.initialize({
           client_id: googleClientId,
-          callback: handleGoogleLogin
+          callback: handleGoogleLogin,
+          auto_select: false,
+          cancel_on_tap_outside: false
         })
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-login-button"),
-          { theme: "filled", size: "large", shape: "pill" }
-        )
-        // Also render the hero button with extra large size
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-login-button-hero"),
-          { theme: "filled", size: "large", shape: "pill" }
-        )
-        console.log("✅ Google sign-in buttons rendered")
+        
+        // Render the hero button
+        const heroButton = document.getElementById("google-login-button-hero")
+        if (heroButton) {
+          window.google.accounts.id.renderButton(
+            heroButton,
+            { 
+              theme: "filled", 
+              size: "large", 
+              shape: "pill",
+              width: "300"
+            }
+          )
+          console.log("✅ Google sign-in button rendered in hero section")
+        }
       }
     }
 
@@ -190,13 +197,11 @@ export default function HomePage(): JSX.Element {
       if (script) {
         script.remove()
       }
-      // Clear Google auth state
       if (window.google?.accounts?.id) {
         try {
-          // Disable auto-select to prevent automatic sign-in
-          window.google.accounts.id.disableAutoSelect();
+          window.google.accounts.id.disableAutoSelect()
         } catch (error) {
-          console.error('Error disabling Google auto-select:', error);
+          console.error('Error disabling Google auto-select:', error)
         }
       }
     }
