@@ -174,6 +174,11 @@ export default function HomePage(): JSX.Element {
         };
         script.onerror = (error) => {
           console.error('Failed to load Google script:', error);
+          // Retry loading the script after a delay
+          setTimeout(() => {
+            console.log('Retrying Google script load...');
+            loadGoogleScript();
+          }, 2000);
         };
         document.body.appendChild(script);
       } catch (error) {
@@ -195,7 +200,8 @@ export default function HomePage(): JSX.Element {
           ux_mode: 'popup',
           prompt_parent_id: 'google-login-button-hero',
           auto_select: false,
-          cancel_on_tap_outside: true
+          cancel_on_tap_outside: true,
+          context: 'signin'
         });
 
         // Render the sign-in button
@@ -208,6 +214,13 @@ export default function HomePage(): JSX.Element {
             width: '300',
             logo_alignment: 'left',
             text: 'signin_with'
+          });
+          
+          // Add a click handler to the button container
+          button.addEventListener('click', (e) => {
+            console.log('Google button clicked');
+            e.preventDefault();
+            window.google.accounts.id.prompt();
           });
         } else {
           console.error('Google sign-in button element not found');
