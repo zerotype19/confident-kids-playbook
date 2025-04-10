@@ -15,6 +15,13 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
   const [isExpanded, setIsExpanded] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // Function to truncate text to 15-20 words
+  const truncateDescription = (text: string) => {
+    const words = text.split(' ');
+    if (words.length <= 20) return text;
+    return words.slice(0, 20).join(' ') + '...';
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -118,7 +125,9 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
               {isExpanded ? '−' : '+'}
             </span>
           </div>
-          <p className="text-gray-600 mt-1">{pillar.description}</p>
+          <p className="text-gray-600 mt-1">
+            {isExpanded ? pillar.description : truncateDescription(pillar.description)}
+          </p>
           
           <div className="mt-4">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
