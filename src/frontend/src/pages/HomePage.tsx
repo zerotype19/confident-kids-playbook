@@ -292,11 +292,11 @@ export default function HomePage(): JSX.Element {
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Kidoova helps kids build self-esteem with fun daily challenges and progress tracking!
             </p>
-            <div className="flex justify-center">
+            <div className="flex justify-center"><center>
               <div 
                 id="google-login-button-hero" 
                 className="w-full max-w-md transform scale-125 md:scale-150"
-              ></div>
+              ></div></center>
             </div>
           </div>
         </section>
