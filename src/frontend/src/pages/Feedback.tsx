@@ -13,10 +13,12 @@ export default function Feedback(): JSX.Element {
     setError(null)
     
     try {
-      const response = await fetch('/api/feedback', {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           feedback,
@@ -25,7 +27,9 @@ export default function Feedback(): JSX.Element {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to submit feedback')
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Feedback submission error:', errorData);
+        throw new Error(errorData.message || 'Failed to submit feedback');
       }
 
       setSubmitted(true)
