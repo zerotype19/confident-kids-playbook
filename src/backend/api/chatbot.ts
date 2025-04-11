@@ -1,6 +1,7 @@
 import { Env } from '../types';
 import OpenAI from 'openai';
 import { verifyToken } from '../lib/auth';
+import { corsHeaders } from '../lib/cors';
 
 interface ChatbotRequest {
   message: string;
@@ -38,12 +39,22 @@ function formatChallenges(challenges: any[]): string {
 
 export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   try {
+    // Handle OPTIONS request for CORS
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: corsHeaders('*')
+      });
+    }
+
     // Verify JWT token
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders('*')
+        }
       });
     }
 
@@ -132,13 +143,19 @@ Keep responses short, supportive, and actionable. Use a warm tone and offer one 
     const response = completion.choices[0].message.content;
 
     return new Response(JSON.stringify({ response }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders('*')
+      }
     });
   } catch (error) {
     console.error('Chatbot error:', error);
     return new Response(JSON.stringify({ error: 'Failed to process chat message' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders('*')
+      }
     });
   }
 } 
