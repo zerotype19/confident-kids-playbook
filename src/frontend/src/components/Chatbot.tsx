@@ -14,6 +14,7 @@ export default function Chatbot() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,7 +34,12 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chatbot', {
+      console.log('📤 Sending message to chatbot:', {
+        url: `${apiUrl}/api/chatbot`,
+        message: userMessage
+      });
+
+      const response = await fetch(`${apiUrl}/api/chatbot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,13 +49,17 @@ export default function Chatbot() {
       });
 
       if (!response.ok) {
+        console.error('❌ Chatbot response not ok:', {
+          status: response.status,
+          statusText: response.statusText
+        });
         throw new Error('Failed to get response from chatbot');
       }
 
       const data = await response.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
     } catch (error) {
-      console.error('Chatbot error:', error);
+      console.error('❌ Chatbot error:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: 'Sorry, I encountered an error. Please try again.' 
