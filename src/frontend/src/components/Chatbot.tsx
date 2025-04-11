@@ -272,10 +272,6 @@ export default function Chatbot() {
         {selectedChallenge && (
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold">Description:</h3>
-              <p>{selectedChallenge.description}</p>
-            </div>
-            <div>
               <h3 className="font-semibold">Goal:</h3>
               <p>{selectedChallenge.goal}</p>
             </div>
