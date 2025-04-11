@@ -166,6 +166,8 @@ Here are some challenge ideas from the Raising Confident Kids playbook, aligned 
 ${formattedChallenges}
 
 Keep responses short, supportive, and actionable. Use a warm tone and offer one idea at a time.
+
+When recommending a challenge, include a link in this format: [challenge:CHALLENGE_ID] where CHALLENGE_ID is the ID of the challenge you're recommending. For example: "Try this challenge: [challenge:123]"
 `;
 
     console.log('🤖 Sending request to OpenAI:', {
@@ -189,8 +191,14 @@ Keep responses short, supportive, and actionable. Use a warm tone and offer one 
       usage: completion.usage
     });
 
+    // Extract challenge IDs from the response
+    const responseText = completion.choices[0].message.content || '';
+    const challengeMatches = responseText.match(/\[challenge:(\d+)\]/g) || [];
+    const challengeIds = challengeMatches.map(match => match.match(/\d+/)?.[0]);
+
     return new Response(JSON.stringify({
-      response: completion.choices[0].message.content
+      response: responseText,
+      challengeIds: challengeIds
     }), {
       status: 200,
       headers: {
