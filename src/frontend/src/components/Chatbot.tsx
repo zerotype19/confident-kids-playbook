@@ -157,9 +157,9 @@ export default function Chatbot() {
 
   const renderMessage = (message: Message) => {
     const content = message.content.replace(
-      /\[challenge:(\d+)\]/g,
+      /\[Challenge ([a-f0-9-]+)\]/g,
       (match, challengeId) => {
-        return `<a href="#" class="text-blue-500 hover:underline" onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('openChallenge', { detail: '${challengeId}' }));">View Challenge</a>`;
+        return `<a href="#" onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('openChallenge', { detail: '${challengeId}' }));" class="text-blue-500 hover:underline">View Challenge</a>`;
       }
     );
 
