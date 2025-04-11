@@ -174,40 +174,74 @@ Keep responses short, supportive, and actionable. Use a warm tone and offer one 
       systemPromptLength: systemPrompt.length
     });
 
-    // Get response from OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-3.5-turbo',
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message }
       ],
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 500
     });
 
-    const response = completion.choices[0].message.content;
+    console.log('✅ OpenAI response received:', {
+      status: 'success',
+      usage: completion.usage
+    });
 
-    console.log('📤 Response:', {
+    return new Response(JSON.stringify({
+      response: completion.choices[0].message.content
+    }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        ...corsHeaders('*')
+        'Access-Control-Allow-Origin': 'https://kidoova.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400',
+        'Vary': 'Origin'
       }
+    });
+  } catch (error: any) {
+    console.error('❌ OpenAI API error:', {
+      error: error.message,
+      status: error.status,
+      type: error.type,
+      code: error.code
     });
 
-    return new Response(JSON.stringify({ response }), {
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders('*')
-      }
-    });
-  } catch (error) {
-    console.error('❌ Chatbot error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to process chat message' }), {
+    // Handle specific OpenAI errors
+    if (error.status === 429) {
+      return new Response(JSON.stringify({
+        error: 'The AI service is currently unavailable. Please try again later.'
+      }), {
+        status: 503,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': 'https://kidoova.com',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Credentials': 'true',
+          'Access-Control-Max-Age': '86400',
+          'Vary': 'Origin'
+        }
+      });
+    }
+
+    // Handle other errors
+    return new Response(JSON.stringify({
+      error: 'An error occurred while processing your request. Please try again later.'
+    }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        ...corsHeaders('*')
+        'Access-Control-Allow-Origin': 'https://kidoova.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400',
+        'Vary': 'Origin'
       }
     });
   }

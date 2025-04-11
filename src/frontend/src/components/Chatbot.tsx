@@ -49,11 +49,19 @@ export default function Chatbot() {
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
         console.error('❌ Chatbot response not ok:', {
           status: response.status,
-          statusText: response.statusText
+          statusText: response.statusText,
+          error: errorData.error
         });
-        throw new Error('Failed to get response from chatbot');
+        
+        let errorMessage = 'Sorry, I encountered an error. Please try again.';
+        if (response.status === 503) {
+          errorMessage = 'The AI service is currently unavailable. Please try again later.';
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -62,7 +70,7 @@ export default function Chatbot() {
       console.error('❌ Chatbot error:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.' 
+        content: error instanceof Error ? error.message : 'Sorry, I encountered an error. Please try again.' 
       }]);
     } finally {
       setIsLoading(false);
