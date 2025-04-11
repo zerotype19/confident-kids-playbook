@@ -15,6 +15,7 @@ import { onRequest as challengeLog } from './api/challenge_log'
 import { onRequestGet as progress } from './api/progress'
 import { onRequestGet as rewards } from './api/rewards/[childId]'
 import { onRequestGet as allChallenges } from './api/challenges/all'
+import { onRequestGet as getChallenge } from './api/challenges'
 import { onRequestGet as pillars } from './api/pillars/index'
 import { onRequestGet as pillarProgress } from './api/pillars/[id]/progress'
 import { onRequestGet as pillar } from './api/pillars/[id]'
@@ -52,7 +53,7 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
       statusText: response.statusText,
       headers: {
         ...Object.fromEntries(response.headers.entries()),
-        ...Object.fromEntries(corsHeaders({}).entries())
+        ...Object.fromEntries(corsHeaders().entries())
       }
     })
     
@@ -76,7 +77,7 @@ const withLogging = async (request: Request, env: Env, ctx: ExecutionContext) =>
       details: error instanceof Error ? error.message : 'Unknown error'
     }), {
       status: 500,
-      headers: corsHeaders({})
+      headers: corsHeaders()
     })
   }
 }
@@ -109,6 +110,12 @@ router.get('/api/children', (request, context) => children({ request, env: conte
 router.put('/api/children/:id', (request, context) => {
   const url = new URL(request.url);
   const id = url.pathname.split('/').pop();
+  if (!id) {
+    return new Response(JSON.stringify({ error: 'Missing child ID' }), {
+      status: 400,
+      headers: corsHeaders()
+    });
+  }
   return childrenUpdate({ request, env: context.env, id });
 })
 
@@ -124,6 +131,17 @@ router.post('/api/notes', (request, context) => createNote({ request, env: conte
 
 // All challenges route
 router.get('/api/challenges/all', (request, context) => allChallenges({ request, env: context.env }))
+router.get('/api/challenges/:id', (request, context) => {
+  const url = new URL(request.url);
+  const id = url.pathname.split('/').pop();
+  if (!id) {
+    return new Response(JSON.stringify({ error: 'Missing challenge ID' }), {
+      status: 400,
+      headers: corsHeaders()
+    });
+  }
+  return getChallenge({ request, env: context.env, params: { id } });
+})
 
 // Pillars route
 router.get('/api/pillars', (request, context) => pillars({ request, env: context.env }))
@@ -131,25 +149,12 @@ router.get('/api/pillars/:id', (request, context) => pillar({ request, env: cont
 router.get('/api/pillars/:id/progress', (request, context) => pillarProgress({ request, env: context.env }))
 router.get('/api/pillars/:id/challenges', (request, context) => pillarChallenges({ request, env: context.env }))
 
-// Handle OPTIONS requests for CORS
-router.options('*', () => {
-  console.log('🔄 Handling OPTIONS request');
-  return new Response(null, {
-    headers: {
-      ...corsHeaders('*'),
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    }
-  });
-});
-
 // Chatbot route
 console.log('🔧 Registering chatbot route: POST /api/chatbot');
 router.post('/api/chatbot', (request, context) => {
   console.log('📥 Chatbot route handler called:', {
     method: request.method,
-    url: request.url,
-    headers: Object.fromEntries(request.headers.entries())
+    url: request.url
   });
   return chatbot({ request, env: context.env });
 });
