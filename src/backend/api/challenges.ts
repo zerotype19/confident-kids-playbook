@@ -18,7 +18,7 @@ export async function onRequestGet({ request, env, params }: { request: Request;
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          ...corsHeaders('*')
+          ...corsHeaders()
         }
       });
     }
@@ -40,7 +40,7 @@ export async function onRequestGet({ request, env, params }: { request: Request;
         status: 404,
         headers: {
           'Content-Type': 'application/json',
-          ...corsHeaders('*')
+          ...corsHeaders()
         }
       });
     }
@@ -55,7 +55,7 @@ export async function onRequestGet({ request, env, params }: { request: Request;
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        ...corsHeaders('*')
+        ...corsHeaders()
       }
     });
   } catch (error) {
@@ -64,7 +64,7 @@ export async function onRequestGet({ request, env, params }: { request: Request;
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        ...corsHeaders('*')
+        ...corsHeaders()
       }
     });
   }
