@@ -1,7 +1,6 @@
 import { Env } from '../types';
 import OpenAI from 'openai';
 import { verifyToken } from '../lib/auth';
-import { corsHeaders } from '../lib/cors';
 
 interface ChatbotRequest {
   message: string;
@@ -37,6 +36,15 @@ function formatChallenges(challenges: any[]): string {
   ).join('\n');
 }
 
+const corsHeaders = (origin: string) => ({
+  'Access-Control-Allow-Origin': origin,
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Max-Age': '86400',
+  'Vary': 'Origin'
+});
+
 export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   console.log('🧭 Chatbot request:', {
     method: request.method,
@@ -53,7 +61,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         status: 401,
         headers: {
           'Content-Type': 'application/json',
-          ...corsHeaders('*')
+          ...corsHeaders('https://kidoova.com')
         }
       });
     }
@@ -74,7 +82,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          ...corsHeaders('*')
+          ...corsHeaders('https://kidoova.com')
         }
       });
     }
@@ -95,7 +103,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         status: 400,
         headers: {
           'Content-Type': 'application/json',
-          ...corsHeaders('*')
+          ...corsHeaders('https://kidoova.com')
         }
       });
     }
@@ -167,7 +175,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        ...corsHeaders('*')
+        ...corsHeaders('https://kidoova.com')
       }
     });
   } catch (error) {
@@ -179,7 +187,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         status: 503,
         headers: {
           'Content-Type': 'application/json',
-          ...corsHeaders('*')
+          ...corsHeaders('https://kidoova.com')
         }
       });
     }
@@ -189,8 +197,18 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        ...corsHeaders('*')
+        ...corsHeaders('https://kidoova.com')
       }
     });
   }
+}
+
+// Add OPTIONS handler for CORS preflight requests
+export async function onRequestOptions({ request }: { request: Request }) {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...corsHeaders('https://kidoova.com')
+    }
+  });
 } 

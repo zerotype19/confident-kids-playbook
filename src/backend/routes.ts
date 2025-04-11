@@ -1,17 +1,18 @@
 import { Router } from 'itty-router';
 import { onRequestGet as getChallenge, onRequestPost as completeChallenge } from './api/challenges';
-import { onRequestPost as chatbot } from './api/chatbot';
+import { onRequestPost as chatbot, onRequestOptions as chatbotOptions } from './api/chatbot';
 
 const router = Router();
 
-// Chatbot route
+// Chatbot routes
 router.post('/api/chatbot', chatbot);
+router.options('/api/chatbot', chatbotOptions);
 
 // Challenge routes
 router.get('/api/challenges/:id', getChallenge);
 router.post('/api/challenges/:id/complete', completeChallenge);
 
-// Handle OPTIONS requests
+// Handle other OPTIONS requests
 router.options('*', (request: Request) => {
   return new Response(null, {
     status: 204,
