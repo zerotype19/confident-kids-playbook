@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Modal from './Modal';
 import { useAuth } from '../contexts/AuthContext';
+import { useChildContext } from '../contexts/ChildContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -20,6 +21,7 @@ interface Challenge {
 
 export default function Chatbot() {
   const { token } = useAuth();
+  const { selectedChild } = useChildContext();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -114,45 +116,36 @@ export default function Chatbot() {
 
   const markChallengeComplete = async (challengeId: string) => {
     try {
-      const response = await fetch(`${apiUrl}/api/challenge-log/${challengeId}`, {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          challenge_id: challengeId,
+          child_id: selectedChild?.id
+        })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to mark challenge as complete');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to mark challenge as complete');
       }
-
-      // Show success message
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Great job completing the challenge! 🎉 Would you like to try another one?'
-      }]);
 
       // Close the challenge modal
       setSelectedChallenge(null);
 
-      // Refresh the chat to get new challenges
-      const refreshResponse = await fetch(`${apiUrl}/api/chatbot`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ message: 'What other challenges do you recommend?' }),
-      });
-
-      if (refreshResponse.ok) {
-        const data = await refreshResponse.json();
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: data.response,
-          challengeIds: data.challengeIds
-        }]);
-      }
+      // Add a success message to the chat
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Great job completing the challenge! 🎉 Would you like to try another one?'
+      }]);
     } catch (error) {
       console.error('Error marking challenge complete:', error);
       setMessages(prev => [...prev, {
