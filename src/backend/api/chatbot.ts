@@ -17,6 +17,14 @@ function detectPillarId(message: string): number {
   return 2; // Default to Growth Mindset & Resilience
 }
 
+// Helper function to get age range from child's age
+function getAgeRange(age: number): string {
+  if (age >= 3 && age <= 5) return "3-5";
+  if (age >= 6 && age <= 9) return "6-9";
+  if (age >= 10 && age <= 13) return "10-13";
+  return "6-9"; // fallback default
+}
+
 // Helper function to get pillar name
 function getPillarName(pillarId: number): string {
   const pillarMap = {
@@ -24,7 +32,7 @@ function getPillarName(pillarId: number): string {
     2: "Growth Mindset & Resilience",
     3: "Social Confidence & Communication",
     4: "Purpose & Strength Discovery",
-    5: "Managing Fear & Anxiety",
+    5: "Managing Fear & Anxiety"
   };
   return pillarMap[pillarId as keyof typeof pillarMap] || "Growth Mindset & Resilience";
 }
@@ -87,6 +95,23 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       });
     }
 
+    // Get child's details
+    const { results: childData } = await env.DB.prepare(`
+      SELECT id, name, age FROM children WHERE id = ?
+    `).bind(selectedChildId).all();
+
+    const selectedChild = childData[0];
+    if (!selectedChild) {
+      console.log('❌ Child not found:', selectedChildId);
+      return new Response(JSON.stringify({ error: 'Child not found' }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders('https://kidoova.com')
+        }
+      });
+    }
+
     // Get completed challenges for the selected child
     const { results: completedChallenges } = await env.DB.prepare(`
       SELECT challenge_id FROM challenge_logs 
@@ -108,18 +133,25 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       });
     }
 
-    // Get available challenges that haven't been completed
+    // Detect pillar from message
+    const pillarId = detectPillarId(message);
+    const pillarName = getPillarName(pillarId);
+    const ageRange = getAgeRange(selectedChild.age);
+
+    // Get available challenges that match the pillar and age range
     const { results: availableChallenges } = await env.DB.prepare(`
       SELECT id, title, description, tip, difficulty_level, age_range, pillar_id
       FROM challenges
-      WHERE id NOT IN (${completedChallengeIds.map(() => '?').join(',')})
-      ORDER BY RANDOM()
-      LIMIT 5
-    `).bind(...completedChallengeIds).all();
+      WHERE pillar_id = ? 
+        AND age_range = ?
+        AND id NOT IN (${completedChallengeIds.map(() => '?').join(',')})
+      ORDER BY difficulty_level ASC
+      LIMIT 3
+    `).bind(pillarId, ageRange, ...completedChallengeIds).all();
 
     // Format challenges for the prompt
     const challengeList = availableChallenges.map(challenge => 
-      `[Challenge ${challenge.id}]: ${challenge.title} - ${challenge.description}`
+      `• [Challenge ${challenge.id}]: ${challenge.title} - ${challenge.description} Tip: ${challenge.tip}`
     ).join('\n');
 
     // Create OpenAI client
@@ -131,7 +163,9 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     console.log('🤖 Sending request to OpenAI:', {
       model: 'gpt-3.5-turbo',
       messageLength: message.length,
-      availableChallenges: availableChallenges.length
+      availableChallenges: availableChallenges.length,
+      pillar: pillarName,
+      ageRange
     });
 
     // Get response from OpenAI
@@ -140,13 +174,17 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       messages: [
         {
           role: 'system',
-          content: `You are a friendly and encouraging parenting coach. Your goal is to help parents build their child's confidence through daily challenges. 
-          You have access to the following challenges that haven't been completed yet:
-          ${challengeList}
-          
-          When suggesting challenges, use the format [challenge:ID] to reference them. For example: "Try this challenge: [challenge:1]"
-          Always be positive and encouraging. If a parent shares a success, celebrate it! If they're struggling, offer support and suggest a challenge that might help.
-          At the end of your response, always include a link to the challenge using the format: "Click here to check out the challenge details: [challenge:ID]"`
+          content: `You are a kind parenting coach helping parents raise confident, resilient children.
+
+The selected child is ${selectedChild.name}, age ${selectedChild.age}, and you're helping their parent.
+
+Here are challenge ideas from the Raising Confident Kids playbook, aligned to the "${pillarName}" pillar and appropriate for a ${ageRange}-year-old:
+
+${challengeList}
+
+Give short, actionable suggestions with warmth and encouragement. You may reference the child's name if helpful.
+When suggesting challenges, use the format [challenge:ID] to reference them.
+At the end of your response, always include a link to the challenge using the format: "Click here to check out the challenge details: [challenge:ID]"`
         },
         {
           role: 'user',
