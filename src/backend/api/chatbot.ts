@@ -1,5 +1,6 @@
 import { Env } from '../types';
 import OpenAI from 'openai';
+import { verifyToken } from '../lib/auth';
 
 interface ChatbotRequest {
   message: string;
@@ -37,6 +38,19 @@ function formatChallenges(challenges: any[]): string {
 
 export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   try {
+    // Verify JWT token
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decodedToken = await verifyToken(token, env.JWT_SECRET);
+    const userId = decodedToken.sub;
+
     // Parse request body
     const body = await request.json() as ChatbotRequest;
     const { message } = body;
@@ -48,17 +62,10 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       });
     }
 
-    if (!env.user?.id) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
     // Get user's selected child from the database
     const { results: userData } = await env.DB.prepare(`
       SELECT selected_child_id FROM users WHERE id = ?
-    `).bind(env.user.id).all();
+    `).bind(userId).all();
 
     const selectedChildId = userData[0]?.selected_child_id;
 
