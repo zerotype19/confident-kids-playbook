@@ -37,11 +37,18 @@ function formatChallenges(challenges: any[]): string {
   ).join('\n');
 }
 
-export async function onRequest({ request, env }: { request: Request; env: Env }) {
+export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
+  console.log('🚀 Chatbot endpoint called:', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  });
+
   try {
     // Verify JWT token
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
+      console.log('❌ No authorization header found');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: {
@@ -51,15 +58,33 @@ export async function onRequest({ request, env }: { request: Request; env: Env }
       });
     }
 
+    console.log('🔑 Starting JWT verification:', {
+      tokenLength: authHeader.length,
+      tokenPrefix: authHeader.substring(0, 20) + '...',
+      hasJwtSecret: !!env.JWT_SECRET,
+      jwtSecretLength: env.JWT_SECRET?.length,
+      jwtSecretPreview: env.JWT_SECRET ? env.JWT_SECRET.substring(0, 4) + '...' : undefined,
+      currentTime: Math.floor(Date.now() / 1000)
+    });
+
     const token = authHeader.split(' ')[1];
     const decodedToken = await verifyToken(token, env.JWT_SECRET);
     const userId = decodedToken.sub;
+
+    console.log('✅ JWT verification result:', {
+      hasPayload: true,
+      hasSub: true,
+      sub: userId,
+      name: decodedToken.name,
+      email: decodedToken.email
+    });
 
     // Parse request body
     const body = await request.json() as ChatbotRequest;
     const { message } = body;
 
     if (!message) {
+      console.log('❌ No message provided');
       return new Response(JSON.stringify({ error: 'Message is required' }), {
         status: 400,
         headers: {
@@ -141,6 +166,14 @@ Keep responses short, supportive, and actionable. Use a warm tone and offer one 
 
     const response = completion.choices[0].message.content;
 
+    console.log('📤 Response:', {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders('*')
+      }
+    });
+
     return new Response(JSON.stringify({ response }), {
       headers: {
         'Content-Type': 'application/json',
@@ -148,7 +181,7 @@ Keep responses short, supportive, and actionable. Use a warm tone and offer one 
       }
     });
   } catch (error) {
-    console.error('Chatbot error:', error);
+    console.error('❌ Chatbot error:', error);
     return new Response(JSON.stringify({ error: 'Failed to process chat message' }), {
       status: 500,
       headers: {
