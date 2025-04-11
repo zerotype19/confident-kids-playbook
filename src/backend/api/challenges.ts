@@ -2,6 +2,19 @@ import { Env } from '../types';
 import { verifyToken } from '../lib/auth';
 import { corsHeaders } from '../lib/cors';
 
+interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  goal: string;
+  steps: string[];
+  example_dialogue: string;
+  tip: string;
+  pillar_id: string;
+  age_range: string;
+  difficulty_level: string;
+}
+
 export async function onRequestGet({ request, env, params }: { request: Request; env: Env; params: { id: string } }) {
   console.log('🧭 Challenge details request:', {
     method: request.method,
@@ -11,47 +24,52 @@ export async function onRequestGet({ request, env, params }: { request: Request;
 
   try {
     // Verify JWT token
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.log('❌ No authorization header found');
+    const token = request.headers.get('Authorization')?.split(' ')[1];
+    if (!token) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders()
-        }
+        headers: corsHeaders()
       });
     }
 
-    const token = authHeader.split(' ')[1];
-    const decodedToken = await verifyToken(token, env.JWT_SECRET);
-    const userId = decodedToken.sub;
+    const decoded = await verifyToken(token, env.JWT_SECRET);
+    if (!decoded) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: corsHeaders()
+      });
+    }
 
-    // Get challenge details from D1
-    const { results } = await env.DB.prepare(`
-      SELECT id, title, description, tip, difficulty_level, age_range, pillar_id
+    // Get challenge details
+    const result = await env.DB.prepare(`
+      SELECT 
+        id,
+        title,
+        description,
+        goal,
+        steps,
+        example_dialogue,
+        tip,
+        pillar_id,
+        age_range,
+        difficulty_level
       FROM challenges
       WHERE id = ?
-    `).bind(params.id).all();
+    `).bind(params.id).first<Challenge>();
 
-    if (!results || results.length === 0) {
-      console.log('❌ Challenge not found:', params.id);
+    if (!result) {
       return new Response(JSON.stringify({ error: 'Challenge not found' }), {
         status: 404,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders()
-        }
+        headers: corsHeaders()
       });
     }
 
-    const challenge = results[0];
-    console.log('✅ Found challenge:', {
-      id: challenge.id,
-      title: challenge.title
-    });
+    // Parse steps if it's a string
+    if (typeof result.steps === 'string') {
+      result.steps = JSON.parse(result.steps);
+    }
 
-    return new Response(JSON.stringify(challenge), {
+    return new Response(JSON.stringify(result), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
@@ -59,13 +77,10 @@ export async function onRequestGet({ request, env, params }: { request: Request;
       }
     });
   } catch (error) {
-    console.error('❌ Error fetching challenge:', error);
+    console.error('Error in getChallenge:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders()
-      }
+      headers: corsHeaders()
     });
   }
 }
