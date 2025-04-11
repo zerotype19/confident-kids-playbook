@@ -209,7 +209,7 @@ Format your response with natural line breaks between paragraphs and ideas.`
     const responseWithLinks = response
       .replace(
         /Click here to check out the challenge details: \[challenge:([^\]]+)\]/g,
-        (match, id) => `<a href="https://kidoova.com/challenges/${id}" class="text-blue-600 hover:text-blue-800 underline">Click here to check out the challenge details</a>`
+        (match, id) => `<a href="#" class="text-blue-600 hover:text-blue-800 underline" onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('openChallenge', { detail: '${id}' }));">Click here to check out the challenge details</a>`
       )
       .replace(/\n/g, '<br>'); // Convert newlines to HTML line breaks
 
