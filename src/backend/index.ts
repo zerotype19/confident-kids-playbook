@@ -131,6 +131,18 @@ router.get('/api/pillars/:id', (request, context) => pillar({ request, env: cont
 router.get('/api/pillars/:id/progress', (request, context) => pillarProgress({ request, env: context.env }))
 router.get('/api/pillars/:id/challenges', (request, context) => pillarChallenges({ request, env: context.env }))
 
+// Handle OPTIONS requests for CORS
+router.options('*', () => {
+  console.log('🔄 Handling OPTIONS request');
+  return new Response(null, {
+    headers: {
+      ...corsHeaders('*'),
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
+  });
+});
+
 // Chatbot route
 console.log('🔧 Registering chatbot route: POST /api/chatbot');
 router.post('/api/chatbot', (request, context) => {
@@ -142,25 +154,25 @@ router.post('/api/chatbot', (request, context) => {
   return chatbot({ request, env: context.env });
 });
 
-// Handle other routes
-router.get('/api/hello', async () => {
-  return new Response(JSON.stringify({ message: 'hello world!!!' }), {
-    headers: corsHeaders()
-  })
-})
-
-// Catch-all handler for unmatched routes
-router.all('*', (req) => {
-  console.warn('⚠️ Unmatched request:', {
-    method: req.method,
-    url: req.url,
-    pathname: new URL(req.url).pathname
-  })
-  return new Response(JSON.stringify({ error: 'Not found' }), {
+// Add catch-all route for debugging
+router.all('*', (request) => {
+  console.log('⚠️ Unmatched route:', {
+    method: request.method,
+    url: request.url,
+    pathname: new URL(request.url).pathname
+  });
+  return new Response(JSON.stringify({ 
+    error: 'Not found',
+    method: request.method,
+    path: new URL(request.url).pathname
+  }), { 
     status: 404,
-    headers: corsHeaders()
-  })
-})
+    headers: {
+      'Content-Type': 'application/json',
+      ...corsHeaders('*')
+    }
+  });
+});
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
