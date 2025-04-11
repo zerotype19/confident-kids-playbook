@@ -13,6 +13,9 @@ interface Challenge {
   title: string;
   description: string;
   tip: string;
+  goal: string;
+  steps?: string[];
+  example_dialogue?: string;
 }
 
 export default function Chatbot() {
@@ -272,6 +275,24 @@ export default function Chatbot() {
               <h3 className="font-semibold">Description:</h3>
               <p>{selectedChallenge.description}</p>
             </div>
+            <div>
+              <h3 className="font-semibold">Goal:</h3>
+              <p>{selectedChallenge.goal}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">Steps:</h3>
+              <ol className="list-decimal list-inside space-y-2">
+                {selectedChallenge.steps?.map((step: string, index: number) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ol>
+            </div>
+            {selectedChallenge.example_dialogue && (
+              <div>
+                <h3 className="font-semibold">Example Dialogue:</h3>
+                <p className="italic">{selectedChallenge.example_dialogue}</p>
+              </div>
+            )}
             <div>
               <h3 className="font-semibold">Tip:</h3>
               <p>{selectedChallenge.tip}</p>
