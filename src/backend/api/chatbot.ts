@@ -102,6 +102,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     const selectedChildId = userData[0]?.selected_child_id;
 
     if (!selectedChildId) {
+      console.log('❌ No child selected for user:', userId);
       return new Response(JSON.stringify({ error: 'No child selected' }), {
         status: 400,
         headers: {
@@ -123,6 +124,14 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     const pillarId = detectPillarId(message);
     const pillarName = getPillarName(pillarId);
 
+    console.log('👶 Child details:', {
+      selectedChildId,
+      childName: child?.name,
+      ageRange,
+      pillarId,
+      pillarName
+    });
+
     // Query challenges from D1
     const { results: challenges } = await env.DB.prepare(`
       SELECT title, description, tip
@@ -131,6 +140,12 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       ORDER BY difficulty_level ASC
       LIMIT 3
     `).bind(pillarId, ageRange).all();
+
+    console.log('🎯 Found challenges:', {
+      count: challenges?.length || 0,
+      pillarId,
+      ageRange
+    });
 
     // Format challenges for the prompt
     const formattedChallenges = formatChallenges(challenges);
@@ -152,6 +167,12 @@ ${formattedChallenges}
 
 Keep responses short, supportive, and actionable. Use a warm tone and offer one idea at a time.
 `;
+
+    console.log('🤖 Sending request to OpenAI:', {
+      model: 'gpt-3.5-turbo',
+      messageLength: message.length,
+      systemPromptLength: systemPrompt.length
+    });
 
     // Get response from OpenAI
     const completion = await openai.chat.completions.create({

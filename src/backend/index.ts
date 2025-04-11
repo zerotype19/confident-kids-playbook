@@ -132,7 +132,15 @@ router.get('/api/pillars/:id/progress', (request, context) => pillarProgress({ r
 router.get('/api/pillars/:id/challenges', (request, context) => pillarChallenges({ request, env: context.env }))
 
 // Chatbot route
-router.post('/api/chatbot', (request, context) => chatbot({ request, env: context.env }))
+console.log('🔧 Registering chatbot route: POST /api/chatbot');
+router.post('/api/chatbot', (request, context) => {
+  console.log('📥 Chatbot route handler called:', {
+    method: request.method,
+    url: request.url,
+    headers: Object.fromEntries(request.headers.entries())
+  });
+  return chatbot({ request, env: context.env });
+});
 
 // Handle other routes
 router.get('/api/hello', async () => {
