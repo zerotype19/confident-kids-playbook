@@ -1,0 +1,29 @@
+import { Router } from 'itty-router';
+import { onRequestGet as getChallenge, onRequestPost as completeChallenge } from './api/challenges';
+import { onRequestPost as chatbot } from './api/chatbot';
+
+const router = Router();
+
+// Chatbot route
+router.post('/api/chatbot', chatbot);
+
+// Challenge routes
+router.get('/api/challenges/:id', getChallenge);
+router.post('/api/challenges/:id/complete', completeChallenge);
+
+// Handle OPTIONS requests
+router.options('*', (request: Request) => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://kidoova.com',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400',
+      'Vary': 'Origin'
+    }
+  });
+});
+
+export default router; 
