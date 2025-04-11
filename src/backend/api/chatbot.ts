@@ -37,15 +37,8 @@ function formatChallenges(challenges: any[]): string {
   ).join('\n');
 }
 
-export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
+export async function onRequest({ request, env }: { request: Request; env: Env }) {
   try {
-    // Handle OPTIONS request for CORS
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: corsHeaders('*')
-      });
-    }
-
     // Verify JWT token
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -69,7 +62,10 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     if (!message) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders('*')
+        }
       });
     }
 
@@ -83,7 +79,10 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     if (!selectedChildId) {
       return new Response(JSON.stringify({ error: 'No child selected' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders('*')
+        }
       });
     }
 

@@ -26,7 +26,7 @@ import { onRequestPost as billingCreatePortal } from './api/billing_create_porta
 import { onRequestPost as billingWebhook } from './api/billing_webhook'
 import { onRequestPost as billingCreateCheckout } from './api/billing_create_checkout'
 import { onRequestGet as billingPrices } from './api/billing_prices'
-import { onRequestPost as chatbot } from './api/chatbot'
+import { onRequest as chatbot } from './api/chatbot'
 
 const router = Router()
 
