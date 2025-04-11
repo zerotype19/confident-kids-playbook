@@ -145,7 +145,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
           ${challengeList}
           
           When suggesting challenges, use the format [challenge:ID] to reference them. For example: "Try this challenge: [challenge:1]"
-          Always be positive and encouraging. If a parent shares a success, celebrate it! If they're struggling, offer support and suggest a challenge that might help.`
+          Always be positive and encouraging. If a parent shares a success, celebrate it! If they're struggling, offer support and suggest a challenge that might help.
+          At the end of your response, always include a link to the challenge using the format: "Click here to check out the challenge details: [challenge:ID]"`
         },
         {
           role: 'user',
