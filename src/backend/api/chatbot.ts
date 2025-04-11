@@ -184,7 +184,7 @@ ${challengeList}
 
 Give short, actionable suggestions with warmth and encouragement. You may reference the child's name if helpful.
 When suggesting challenges, use the format [challenge:ID] to reference them.
-At the end of your response, always include a link to the challenge using the format: "Click here to check out the challenge details: [challenge:ID]"`
+At the end of your response, always include a link to the challenge using the format: "Click here to check out the challenge details: https://kidoova.com/challenges/[challenge:ID]"`
         },
         {
           role: 'user',
@@ -203,13 +203,15 @@ At the end of your response, always include a link to the challenge using the fo
 
     const response = completion.choices[0].message.content;
 
-    // Extract challenge IDs from the response
-    const challengeIds = [...response.matchAll(/\[challenge:(\d+)\]/g)]
-      .map(match => match[1]);
+    // Extract challenge IDs from the response and create proper links
+    const responseWithLinks = response.replace(
+      /\[challenge:([^\]]+)\]/g,
+      (match, id) => `https://kidoova.com/challenges/${id}`
+    );
 
     return new Response(JSON.stringify({ 
-      response,
-      challengeIds
+      response: responseWithLinks,
+      challengeIds: [...response.matchAll(/\[challenge:([^\]]+)\]/g)].map(match => match[1])
     }), {
       status: 200,
       headers: {
