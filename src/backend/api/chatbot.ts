@@ -89,7 +89,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 
     // Get completed challenges for the selected child
     const { results: completedChallenges } = await env.DB.prepare(`
-      SELECT challenge_id FROM challenge_log 
+      SELECT challenge_id FROM challenge_logs 
       WHERE child_id = ?
     `).bind(selectedChildId).all();
 
