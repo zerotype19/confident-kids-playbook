@@ -184,7 +184,9 @@ ${challengeList}
 
 Give short, actionable suggestions with warmth and encouragement. You may reference the child's name if helpful.
 When suggesting challenges, use the format [challenge:ID] to reference them.
-At the end of your response, always include a link to the challenge using the format: "Click here to check out the challenge details: https://kidoova.com/challenges/[challenge:ID]"`
+At the end of your response, always include a link to the challenge using the format: "Click here to check out the challenge details: [challenge:ID]"
+
+Format your response with natural line breaks between paragraphs and ideas.`
         },
         {
           role: 'user',
@@ -204,10 +206,12 @@ At the end of your response, always include a link to the challenge using the fo
     const response = completion.choices[0].message.content;
 
     // Extract challenge IDs from the response and create proper links
-    const responseWithLinks = response.replace(
-      /\[challenge:([^\]]+)\]/g,
-      (match, id) => `https://kidoova.com/challenges/${id}`
-    );
+    const responseWithLinks = response
+      .replace(
+        /Click here to check out the challenge details: \[challenge:([^\]]+)\]/g,
+        (match, id) => `<a href="https://kidoova.com/challenges/${id}" class="text-blue-600 hover:text-blue-800 underline">Click here to check out the challenge details</a>`
+      )
+      .replace(/\n/g, '<br>'); // Convert newlines to HTML line breaks
 
     return new Response(JSON.stringify({ 
       response: responseWithLinks,
