@@ -97,7 +97,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 
     // Get child's details
     const { results: childData } = await env.DB.prepare(`
-      SELECT id, name, age FROM children WHERE id = ?
+      SELECT id, name, age_range FROM children WHERE id = ?
     `).bind(selectedChildId).all();
 
     const selectedChild = childData[0];
@@ -136,7 +136,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     // Detect pillar from message
     const pillarId = detectPillarId(message);
     const pillarName = getPillarName(pillarId);
-    const ageRange = getAgeRange(selectedChild.age);
+    const ageRange = selectedChild.age_range;
 
     // Get available challenges that match the pillar and age range
     const { results: availableChallenges } = await env.DB.prepare(`
@@ -176,7 +176,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
           role: 'system',
           content: `You are a kind parenting coach helping parents raise confident, resilient children.
 
-The selected child is ${selectedChild.name}, age ${selectedChild.age}, and you're helping their parent.
+The selected child is ${selectedChild.name}, age ${selectedChild.age_range}, and you're helping their parent.
 
 Here are challenge ideas from the Raising Confident Kids playbook, aligned to the "${pillarName}" pillar and appropriate for a ${ageRange}-year-old:
 
