@@ -33,6 +33,7 @@
     "dependencies": {
         "@tsndr/cloudflare-worker-jwt": "^2.0.6",
         "itty-router": "^4.1.2",
-        "jose": "^6.0.10"
+        "jose": "^6.0.10",
+        "openai": "^4.28.0"
     }
 }

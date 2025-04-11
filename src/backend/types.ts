@@ -20,6 +20,11 @@ export interface Env {
   R2_SECRET_ACCESS_KEY: string;
   R2_BUCKET_NAME: string;
   R2_BUCKET: R2Bucket;
+  OPENAI_API_KEY: string;
+  user?: {
+    id: string;
+    selected_child_id?: string;
+  };
 }
 
 export interface Subscription {

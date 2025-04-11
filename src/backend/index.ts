@@ -26,6 +26,7 @@ import { onRequestPost as billingCreatePortal } from './api/billing_create_porta
 import { onRequestPost as billingWebhook } from './api/billing_webhook'
 import { onRequestPost as billingCreateCheckout } from './api/billing_create_checkout'
 import { onRequestGet as billingPrices } from './api/billing_prices'
+import { onRequestPost as chatbot } from './api/chatbot'
 
 const router = Router()
 
@@ -129,6 +130,9 @@ router.get('/api/pillars', (request, context) => pillars({ request, env: context
 router.get('/api/pillars/:id', (request, context) => pillar({ request, env: context.env }))
 router.get('/api/pillars/:id/progress', (request, context) => pillarProgress({ request, env: context.env }))
 router.get('/api/pillars/:id/challenges', (request, context) => pillarChallenges({ request, env: context.env }))
+
+// Chatbot route
+router.post('/api/chatbot', (request, context) => chatbot({ request, env: context.env }))
 
 // Handle other routes
 router.get('/api/hello', async () => {

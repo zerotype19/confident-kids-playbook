@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AuthenticatedHeader from './AuthenticatedHeader';
 import AuthenticatedNav from './AuthenticatedNav';
+import Chatbot from './Chatbot';
 
 interface AuthenticatedPageWrapperProps {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ const AuthenticatedPageWrapper: React.FC<AuthenticatedPageWrapperProps> = ({ chi
       <main className="md:ml-64 pt-16">
         {children}
       </main>
+      <Chatbot />
     </div>
   );
 };
