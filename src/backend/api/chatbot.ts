@@ -38,7 +38,7 @@ function formatChallenges(challenges: any[]): string {
 }
 
 export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
-  console.log('🚀 Chatbot endpoint called:', {
+  console.log('🧭 Chatbot request:', {
     method: request.method,
     url: request.url,
     headers: Object.fromEntries(request.headers.entries())
@@ -58,49 +58,16 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       });
     }
 
-    console.log('🔑 Starting JWT verification:', {
-      tokenLength: authHeader.length,
-      tokenPrefix: authHeader.substring(0, 20) + '...',
-      hasJwtSecret: !!env.JWT_SECRET,
-      jwtSecretLength: env.JWT_SECRET?.length,
-      jwtSecretPreview: env.JWT_SECRET ? env.JWT_SECRET.substring(0, 4) + '...' : undefined,
-      currentTime: Math.floor(Date.now() / 1000)
-    });
-
     const token = authHeader.split(' ')[1];
     const decodedToken = await verifyToken(token, env.JWT_SECRET);
     const userId = decodedToken.sub;
 
-    console.log('✅ JWT verification result:', {
-      hasPayload: true,
-      hasSub: true,
-      sub: userId,
-      name: decodedToken.name,
-      email: decodedToken.email
-    });
-
-    // Parse request body
-    const body = await request.json() as ChatbotRequest;
-    const { message } = body;
-
-    if (!message) {
-      console.log('❌ No message provided');
-      return new Response(JSON.stringify({ error: 'Message is required' }), {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders('*')
-        }
-      });
-    }
-
-    // Get user's selected child from the database
+    // Get user's selected child
     const { results: userData } = await env.DB.prepare(`
       SELECT selected_child_id FROM users WHERE id = ?
     `).bind(userId).all();
 
     const selectedChildId = userData[0]?.selected_child_id;
-
     if (!selectedChildId) {
       console.log('❌ No child selected for user:', userId);
       return new Response(JSON.stringify({ error: 'No child selected' }), {
@@ -112,144 +79,117 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       });
     }
 
-    // Get child's details
-    const { results: childData } = await env.DB.prepare(`
-      SELECT name, age_range FROM children WHERE id = ?
+    // Get completed challenges for the selected child
+    const { results: completedChallenges } = await env.DB.prepare(`
+      SELECT challenge_id FROM challenge_log 
+      WHERE child_id = ?
     `).bind(selectedChildId).all();
 
-    const child = childData[0];
-    const ageRange = child?.age_range || '6-9'; // Default to middle range if not set
+    const completedChallengeIds = completedChallenges.map(c => c.challenge_id);
 
-    // Detect pillar from message
-    const pillarId = detectPillarId(message);
-    const pillarName = getPillarName(pillarId);
+    // Get request body
+    const { message } = await request.json();
+    if (!message) {
+      console.log('❌ No message provided');
+      return new Response(JSON.stringify({ error: 'Message is required' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders('*')
+        }
+      });
+    }
 
-    console.log('👶 Child details:', {
-      selectedChildId,
-      childName: child?.name,
-      ageRange,
-      pillarId,
-      pillarName
-    });
-
-    // Query challenges from D1
-    const { results: challenges } = await env.DB.prepare(`
-      SELECT title, description, tip
+    // Get available challenges that haven't been completed
+    const { results: availableChallenges } = await env.DB.prepare(`
+      SELECT id, title, description, tip, difficulty_level, age_range, pillar_id
       FROM challenges
-      WHERE pillar_id = ? AND age_range = ?
-      ORDER BY difficulty_level ASC
-      LIMIT 3
-    `).bind(pillarId, ageRange).all();
-
-    console.log('🎯 Found challenges:', {
-      count: challenges?.length || 0,
-      pillarId,
-      ageRange
-    });
+      WHERE id NOT IN (${completedChallengeIds.map(() => '?').join(',')})
+      ORDER BY RANDOM()
+      LIMIT 5
+    `).bind(...completedChallengeIds).all();
 
     // Format challenges for the prompt
-    const formattedChallenges = formatChallenges(challenges);
+    const challengeList = availableChallenges.map(challenge => 
+      `[Challenge ${challenge.id}]: ${challenge.title} - ${challenge.description}`
+    ).join('\n');
 
-    // Initialize OpenAI
+    // Create OpenAI client
     const openai = new OpenAI({
       apiKey: env.OPENAI_API_KEY,
     });
 
-    // Create the system prompt
-    const systemPrompt = `
-You are a kind parenting coach helping parents raise confident, resilient children.
-
-The selected child is ${child?.name || 'your child'}, and you're helping their parent.
-
-Here are some challenge ideas from the Raising Confident Kids playbook, aligned to the "${pillarName}" pillar and appropriate for a ${ageRange}-year-old:
-
-${formattedChallenges}
-
-Keep responses short, supportive, and actionable. Use a warm tone and offer one idea at a time.
-
-When recommending a challenge, include a link in this format: [challenge:CHALLENGE_ID] where CHALLENGE_ID is the ID of the challenge you're recommending. For example: "Try this challenge: [challenge:123]"
-`;
-
+    // Log the request to OpenAI
     console.log('🤖 Sending request to OpenAI:', {
       model: 'gpt-3.5-turbo',
       messageLength: message.length,
-      systemPromptLength: systemPrompt.length
+      availableChallenges: availableChallenges.length
     });
 
+    // Get response from OpenAI
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: message }
+        {
+          role: 'system',
+          content: `You are a friendly and encouraging parenting coach. Your goal is to help parents build their child's confidence through daily challenges. 
+          You have access to the following challenges that haven't been completed yet:
+          ${challengeList}
+          
+          When suggesting challenges, use the format [challenge:ID] to reference them. For example: "Try this challenge: [challenge:1]"
+          Always be positive and encouraging. If a parent shares a success, celebrate it! If they're struggling, offer support and suggest a challenge that might help.`
+        },
+        {
+          role: 'user',
+          content: message
+        }
       ],
       temperature: 0.7,
       max_tokens: 500
     });
 
-    console.log('✅ OpenAI response received:', {
+    // Log the response from OpenAI
+    console.log('🤖 Received response from OpenAI:', {
       status: 'success',
       usage: completion.usage
     });
 
-    // Extract challenge IDs from the response
-    const responseText = completion.choices[0].message.content || '';
-    const challengeMatches = responseText.match(/\[challenge:(\d+)\]/g) || [];
-    const challengeIds = challengeMatches.map(match => match.match(/\d+/)?.[0]);
+    const response = completion.choices[0].message.content;
 
-    return new Response(JSON.stringify({
-      response: responseText,
-      challengeIds: challengeIds
+    // Extract challenge IDs from the response
+    const challengeIds = [...response.matchAll(/\[challenge:(\d+)\]/g)]
+      .map(match => match[1]);
+
+    return new Response(JSON.stringify({ 
+      response,
+      challengeIds
     }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://kidoova.com',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Max-Age': '86400',
-        'Vary': 'Origin'
+        ...corsHeaders('*')
       }
     });
-  } catch (error: any) {
-    console.error('❌ OpenAI API error:', {
-      error: error.message,
-      status: error.status,
-      type: error.type,
-      code: error.code
-    });
-
-    // Handle specific OpenAI errors
-    if (error.status === 429) {
-      return new Response(JSON.stringify({
-        error: 'The AI service is currently unavailable. Please try again later.'
+  } catch (error) {
+    console.error('❌ Error in chatbot:', error);
+    if (error instanceof OpenAI.APIError && error.status === 429) {
+      return new Response(JSON.stringify({ 
+        error: 'The AI service is currently busy. Please try again in a moment.' 
       }), {
         status: 503,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': 'https://kidoova.com',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Credentials': 'true',
-          'Access-Control-Max-Age': '86400',
-          'Vary': 'Origin'
+          ...corsHeaders('*')
         }
       });
     }
-
-    // Handle other errors
-    return new Response(JSON.stringify({
-      error: 'An error occurred while processing your request. Please try again later.'
+    return new Response(JSON.stringify({ 
+      error: 'An error occurred while processing your request.' 
     }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://kidoova.com',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Max-Age': '86400',
-        'Vary': 'Origin'
+        ...corsHeaders('*')
       }
     });
   }

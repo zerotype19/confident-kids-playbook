@@ -109,14 +109,13 @@ export default function Chatbot() {
     }
   };
 
-  const handleMarkComplete = async () => {
-    if (!selectedChallenge) return;
-
+  const markChallengeComplete = async (challengeId: string) => {
     try {
-      const response = await fetch(`${apiUrl}/api/challenges/${selectedChallenge.id}/complete`, {
+      const response = await fetch(`${apiUrl}/api/challenge-log/${challengeId}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
@@ -124,13 +123,39 @@ export default function Chatbot() {
         throw new Error('Failed to mark challenge as complete');
       }
 
-      setSelectedChallenge(null);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `Great job completing the "${selectedChallenge.title}" challenge! Would you like to try another one?` 
+      // Show success message
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Great job completing the challenge! 🎉 Would you like to try another one?'
       }]);
+
+      // Close the challenge modal
+      setSelectedChallenge(null);
+
+      // Refresh the chat to get new challenges
+      const refreshResponse = await fetch(`${apiUrl}/api/chatbot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: 'What other challenges do you recommend?' }),
+      });
+
+      if (refreshResponse.ok) {
+        const data = await refreshResponse.json();
+        setMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: data.response,
+          challengeIds: data.challengeIds
+        }]);
+      }
     } catch (error) {
       console.error('Error marking challenge complete:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I had trouble marking that challenge as complete. Please try again later.'
+      }]);
     }
   };
 
@@ -253,7 +278,7 @@ export default function Chatbot() {
             </div>
             <div className="flex justify-end space-x-2">
               <button
-                onClick={handleMarkComplete}
+                onClick={() => markChallengeComplete(selectedChallenge.id)}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
               >
                 Mark Complete

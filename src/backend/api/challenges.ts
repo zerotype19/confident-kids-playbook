@@ -112,9 +112,9 @@ export async function onRequestPost({ request, env, params }: { request: Request
       });
     }
 
-    // Mark challenge as complete for the selected child
+    // Mark challenge as complete in challenge_log
     const { success } = await env.DB.prepare(`
-      INSERT INTO completed_challenges (child_id, challenge_id, completed_at)
+      INSERT INTO challenge_log (child_id, challenge_id, completed_at)
       VALUES (?, ?, ?)
       ON CONFLICT (child_id, challenge_id) DO UPDATE SET completed_at = ?
     `).bind(selectedChildId, params.id, new Date().toISOString(), new Date().toISOString()).run();
