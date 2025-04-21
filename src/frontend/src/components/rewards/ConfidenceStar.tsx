@@ -26,15 +26,16 @@ const PILLAR_NAMES = {
 const createStarPoint = (index: number, outerRadius: number, innerRadius: number) => {
   const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
   const nextAngle = ((index + 1) / 5) * 2 * Math.PI - Math.PI / 2;
+  const midAngle = (angle + nextAngle) / 2;
   
   const outerX1 = 100 + Math.cos(angle) * outerRadius;
   const outerY1 = 100 + Math.sin(angle) * outerRadius;
-  const innerX = 100 + Math.cos(angle + Math.PI / 5) * innerRadius;
-  const innerY = 100 + Math.sin(angle + Math.PI / 5) * innerRadius;
+  const innerX = 100 + Math.cos(midAngle) * innerRadius;
+  const innerY = 100 + Math.sin(midAngle) * innerRadius;
   const outerX2 = 100 + Math.cos(nextAngle) * outerRadius;
   const outerY2 = 100 + Math.sin(nextAngle) * outerRadius;
   
-  return `M ${outerX1} ${outerY1} L ${innerX} ${innerY} L ${outerX2} ${outerY2}`;
+  return `M ${outerX1} ${outerY1} L ${innerX} ${innerY} L ${outerX2} ${outerY2} Z`;
 };
 
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
@@ -46,7 +47,7 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
   };
 
   const outerRadius = 80;
-  const innerRadius = 40;
+  const innerRadius = 30;
 
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
@@ -57,6 +58,7 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const progress = getPillarProgress(pillarId);
+            const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
 
             return (
               <g key={pillarId} className="group relative">
@@ -82,13 +84,15 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
                 {/* Tooltip */}
                 <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <foreignObject
-                    x={100 + Math.cos((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 10)}
-                    y={100 + Math.sin((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 10)}
+                    x={100 + Math.cos(angle) * (outerRadius + 20)}
+                    y={100 + Math.sin(angle) * (outerRadius + 20)}
                     width="200"
                     height="60"
-                    className="overflow-visible pointer-events-none"
+                    style={{
+                      transform: `translate(-50%, -50%)`
+                    }}
                   >
-                    <div className="absolute bg-gray-800 text-white px-2 py-1 rounded text-[10px] whitespace-nowrap transform -translate-x-1/2 -translate-y-full">
+                    <div className="absolute bg-gray-800 text-white px-2 py-1 rounded text-[10px] whitespace-nowrap">
                       <p>{PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES]}</p>
                       <p className="font-bold text-[11px]">{Math.round(progress)}% complete</p>
                     </div>
