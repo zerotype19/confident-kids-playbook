@@ -105,6 +105,32 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             stroke="black"
             strokeWidth="2"
           />
+
+          {/* Tooltips */}
+          {[0, 1, 2, 3, 4].map(index => {
+            const pillarId = index + 1;
+            const angle = (Math.PI * 2 * index) / 5 - Math.PI / 2;
+            const labelX = cx + Math.cos(angle) * 85;
+            const labelY = cy + Math.sin(angle) * 85;
+            const completed = progress.pillar_progress[pillarId]?.completed || 0;
+            const fillRatio = Math.min(completed / MAX_CHALLENGES, 1);
+
+            return (
+              <g
+                key={`tooltip-${pillarId}`}
+                transform={`translate(${labelX}, ${labelY})`}
+                className="group hover:opacity-100 opacity-0 transition-opacity duration-300 pointer-events-auto"
+              >
+                <rect x={-38} y={-13} width={76} height={26} rx={4} fill="#1F2937" />
+                <text x={0} y={-1} textAnchor="middle" fill="white" fontSize="6px">
+                  {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split('&')[0]}
+                </text>
+                <text x={0} y={8} textAnchor="middle" fill="white" fontSize="7px" fontWeight="bold">
+                  {Math.round(fillRatio * 100)}% ({completed})
+                </text>
+              </g>
+            );
+          })}
         </svg>
       </div>
     </div>
