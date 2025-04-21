@@ -44,24 +44,22 @@ const createStarPath = (cx: number, cy: number, spikes: number, outerRadius: num
   return path;
 };
 
-const createStarPointShape = (cx: number, cy: number, outerRadius: number, innerRadius: number, index: number, percent: number): string => {
+const createSegmentedPentagon = (cx: number, cy: number, radius: number, index: number, percent: number): string => {
   const angleStep = (Math.PI * 2) / 5;
-  const angleOffset = -Math.PI / 2; // start at top
-  const outerAngle = angleOffset + angleStep * index;
-  const left = outerAngle - angleStep / 3;
-  const right = outerAngle + angleStep / 3;
-  const fillOuterRadius = innerRadius + (outerRadius - innerRadius) * percent;
+  const angle = -Math.PI / 2 + index * angleStep;
+  const nextAngle = angle + angleStep;
+  const outerAngle = angle + angleStep / 2;
 
-  const x0 = cx;
-  const y0 = cy;
-  const x1 = cx + Math.cos(left) * innerRadius;
-  const y1 = cy + Math.sin(left) * innerRadius;
-  const x2 = cx + Math.cos(outerAngle) * fillOuterRadius;
-  const y2 = cy + Math.sin(outerAngle) * fillOuterRadius;
-  const x3 = cx + Math.cos(right) * innerRadius;
-  const y3 = cy + Math.sin(right) * innerRadius;
+  const x1 = cx;
+  const y1 = cy;
+  const x2 = cx + Math.cos(angle) * radius;
+  const y2 = cy + Math.sin(angle) * radius;
+  const x3 = cx + Math.cos(outerAngle) * (radius + (80 - radius) * percent);
+  const y3 = cy + Math.sin(outerAngle) * (radius + (80 - radius) * percent);
+  const x4 = cx + Math.cos(nextAngle) * radius;
+  const y4 = cy + Math.sin(nextAngle) * radius;
 
-  return `M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
+  return `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} L ${x4} ${y4} Z`;
 };
 
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
@@ -78,6 +76,7 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
       <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
         <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
+          {/* Pillar segment fills behind green star */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const data = progress.pillar_progress[pillarId];
@@ -86,17 +85,19 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             return (
               <path
                 key={`fill-${pillarId}`}
-                d={createStarPointShape(cx, cy, outerRadius, innerRadius, index, percent)}
+                d={createSegmentedPentagon(cx, cy, innerRadius, index, percent)}
                 fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
               />
             );
           })}
 
+          {/* Center green star */}
           <path
             d={createStarPath(cx, cy, 5, 40, 20)}
             fill="#10B981"
           />
 
+          {/* Star outline */}
           <path
             d={createStarPath(cx, cy, 5, outerRadius, innerRadius)}
             fill="none"
@@ -104,6 +105,7 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             strokeWidth="2"
           />
 
+          {/* Tooltips */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const data = progress.pillar_progress[pillarId];
