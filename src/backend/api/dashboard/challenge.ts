@@ -63,6 +63,11 @@ export async function challenge({ request, env }: { request: Request; env: Env }
 
     // Get a random age-appropriate challenge that hasn't been completed today
     const result = await env.DB.prepare(`
+      WITH current_theme AS (
+        SELECT pillar_id 
+        FROM theme_weeks 
+        WHERE week_number = CAST(strftime('%W', 'now') AS INTEGER) + 1
+      )
       SELECT 
         id,
         title,
@@ -76,6 +81,7 @@ export async function challenge({ request, env }: { request: Request; env: Env }
         difficulty_level
       FROM challenges
       WHERE REPLACE(age_range, '–', '-') = REPLACE(?, '–', '-')
+      AND pillar_id = (SELECT pillar_id FROM current_theme)
       AND NOT EXISTS (
         SELECT 1 
         FROM challenge_logs cl 
