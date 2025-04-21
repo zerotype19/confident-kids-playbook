@@ -79,12 +79,14 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
       <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
         {/* Title Section */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-kidoova-green mb-2">
-            {challenge.title}
-          </h2>
-          <p className="text-lg text-text-base">
-            {challenge.description}
-          </p>
+          <div className="group relative inline-block">
+            <h2 className="text-2xl font-bold text-kidoova-green mb-2 cursor-help">
+              {challenge.title}
+            </h2>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64">
+              {challenge.description}
+            </div>
+          </div>
         </div>
 
         {/* Goal Section */}
