@@ -9,6 +9,7 @@ interface Challenge {
   steps: string[];
   tip: string;
   example_dialogue: string;
+  pillar_id: number;
 }
 
 interface TodayChallengeCardProps {
@@ -86,6 +87,25 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64">
               {challenge.description}
             </div>
+          </div>
+          <div className="mt-2">
+            <span 
+              className="text-xs font-medium px-2 py-1 rounded-full"
+              style={{
+                backgroundColor: challenge.pillar_id === 1 ? '#F7B801' :
+                               challenge.pillar_id === 2 ? '#38A169' :
+                               challenge.pillar_id === 3 ? '#4299E1' :
+                               challenge.pillar_id === 4 ? '#805AD5' :
+                               '#E53E3E',
+                color: 'white'
+              }}
+            >
+              {challenge.pillar_id === 1 ? 'Independence & Problem-Solving' :
+               challenge.pillar_id === 2 ? 'Growth Mindset & Resilience' :
+               challenge.pillar_id === 3 ? 'Social Confidence & Communication' :
+               challenge.pillar_id === 4 ? 'Purpose & Strength Discovery' :
+               'Managing Fear & Anxiety'}
+            </span>
           </div>
         </div>
 
