@@ -60,14 +60,23 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
 
             return (
               <g key={pillarId} className="group relative">
+                {/* Star point with fill */}
                 <path
                   d={createStarPoint(index, outerRadius, innerRadius)}
                   className="transition-all duration-500"
                   style={{
                     fill: PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS],
-                    fillOpacity: progress / 100,
                     stroke: 'black',
                     strokeWidth: '1'
+                  }}
+                />
+                {/* White overlay for incomplete portion */}
+                <path
+                  d={createStarPoint(index, outerRadius, innerRadius)}
+                  className="transition-all duration-500"
+                  style={{
+                    fill: 'white',
+                    fillOpacity: 1 - (progress / 100)
                   }}
                 />
                 {/* Tooltip */}
@@ -75,38 +84,19 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
                   <foreignObject
                     x={100 + Math.cos((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 10)}
                     y={100 + Math.sin((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 10)}
-                    width="120"
-                    height="40"
-                    className="overflow-visible"
+                    width="200"
+                    height="60"
+                    className="overflow-visible pointer-events-none"
                   >
-                    <div className="absolute bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap transform -translate-x-1/2 -translate-y-full">
+                    <div className="absolute bg-gray-800 text-white px-2 py-1 rounded text-[10px] whitespace-nowrap transform -translate-x-1/2 -translate-y-full">
                       <p>{PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES]}</p>
-                      <p className="font-bold">{Math.round(progress)}% complete</p>
+                      <p className="font-bold text-[11px]">{Math.round(progress)}% complete</p>
                     </div>
                   </foreignObject>
                 </g>
               </g>
             );
           })}
-
-          {/* Center circle */}
-          <circle 
-            cx={100} 
-            cy={100} 
-            r={innerRadius - 10} 
-            className="fill-kidoova-accent stroke-white stroke-[4px]"
-          />
-          <text 
-            x={100} 
-            y={105} 
-            textAnchor="middle" 
-            className="text-sm fill-white font-bold"
-          >
-            {Math.round(
-              Object.values(progress.pillar_progress)
-                .reduce((sum, pillar) => sum + pillar.percentage, 0) / 5
-            )}%
-          </text>
         </svg>
       </div>
     </div>
