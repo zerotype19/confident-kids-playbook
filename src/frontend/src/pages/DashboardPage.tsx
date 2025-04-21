@@ -7,6 +7,7 @@ import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { useAuth } from '../contexts/AuthContext';
+import WeeklyTheme from '../components/WeeklyTheme';
 
 export default function DashboardPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -230,19 +231,22 @@ export default function DashboardPage() {
         </div>
 
         {selectedChild ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-8">
-              <RewardsOverview progress={progress} />
-              <ProgressTracker progress={progress} childId={selectedChild.id} />
+          <>
+            <WeeklyTheme />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8">
+                <RewardsOverview progress={progress} />
+                <ProgressTracker progress={progress} childId={selectedChild.id} />
+              </div>
+              <div className="space-y-8">
+                <TodayChallengeCard 
+                  childId={selectedChild.id} 
+                  challenge={challenge}
+                  onComplete={handleChallengeComplete}
+                />
+              </div>
             </div>
-            <div className="space-y-8">
-              <TodayChallengeCard 
-                childId={selectedChild.id} 
-                challenge={challenge}
-                onComplete={handleChallengeComplete}
-              />
-            </div>
-          </div>
+          </>
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
