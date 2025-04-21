@@ -42,13 +42,21 @@ const createStarPoint = (index: number, outerRadius: number, innerRadius: number
 
 // Function to create the inner pentagon path
 const createInnerPentagon = (radius: number) => {
-  const points = Array.from({ length: 5 }, (_, i) => {
-    const angle = (i / 5) * 2 * Math.PI - Math.PI / 2;
+  let points = Array.from({ length: 5 }, (_, i) => {
+    const angle = ((i + 0.5) / 5) * 2 * Math.PI - Math.PI / 2; // Offset by 0.5 to align with star points
     const x = 100 + Math.cos(angle) * radius;
     const y = 100 + Math.sin(angle) * radius;
     return `${x},${y}`;
   });
   return `M ${points[0]} L ${points.slice(1).join(' L ')} Z`;
+};
+
+// Function to get tooltip position
+const getTooltipPosition = (index: number, radius: number) => {
+  const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
+  const x = 100 + Math.cos(angle) * radius;
+  const y = 100 + Math.sin(angle) * radius;
+  return { x, y };
 };
 
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
@@ -67,31 +75,18 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
       <div className="relative w-[480px] h-[480px] mx-auto">
         <svg viewBox="0 0 200 200" className="w-full h-full">
-          {/* Green center */}
-          <path
-            d={createInnerPentagon(innerRadius)}
-            fill="#10B981"
-            stroke="none"
-          />
-          
           {/* Star points with hover areas */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const progress = getPillarProgress(pillarId);
-            const pointAngle = (index / 5) * 2 * Math.PI - Math.PI / 2;
+            const tooltipPos = getTooltipPosition(index, outerRadius + 20);
 
             return (
               <g key={pillarId} className="group">
-                {/* Invisible hover area (full star point) */}
+                {/* Star point with fill */}
                 <path
                   d={createStarPoint(index, outerRadius, innerRadius)}
-                  className="opacity-0 cursor-pointer"
-                  stroke="none"
-                />
-                
-                {/* Visible star point with fill */}
-                <path
-                  d={createStarPoint(index, outerRadius, innerRadius)}
+                  className="transition-all duration-500 cursor-pointer"
                   fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
                   fillOpacity={progress / 100}
                   stroke="black"
@@ -99,15 +94,17 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
                 />
                 
                 {/* Tooltip */}
-                <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <g 
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    transform: `translate(${tooltipPos.x}px, ${tooltipPos.y}px)`
+                  }}
+                >
                   <foreignObject
-                    x={100 + Math.cos(pointAngle) * (outerRadius + 15)}
-                    y={100 + Math.sin(pointAngle) * (outerRadius + 15)}
+                    x="-60"
+                    y="-30"
                     width="120"
                     height="35"
-                    style={{
-                      transform: `translate(-50%, -50%)`
-                    }}
                   >
                     <div className="absolute bg-gray-800 text-white px-1.5 py-0.5 rounded text-[7px] leading-tight whitespace-nowrap">
                       <p>{PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES]}</p>
@@ -118,6 +115,13 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
               </g>
             );
           })}
+
+          {/* Green center */}
+          <path
+            d={createInnerPentagon(innerRadius)}
+            fill="#10B981"
+            stroke="none"
+          />
         </svg>
       </div>
     </div>
