@@ -22,6 +22,21 @@ const PILLAR_NAMES = {
   5: 'Managing Fear & Anxiety'
 };
 
+// Function to create star point path
+const createStarPoint = (index: number, outerRadius: number, innerRadius: number) => {
+  const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
+  const nextAngle = ((index + 1) / 5) * 2 * Math.PI - Math.PI / 2;
+  
+  const outerX1 = 100 + Math.cos(angle) * outerRadius;
+  const outerY1 = 100 + Math.sin(angle) * outerRadius;
+  const innerX = 100 + Math.cos(angle + Math.PI / 5) * innerRadius;
+  const innerY = 100 + Math.sin(angle + Math.PI / 5) * innerRadius;
+  const outerX2 = 100 + Math.cos(nextAngle) * outerRadius;
+  const outerY2 = 100 + Math.sin(nextAngle) * outerRadius;
+  
+  return `M ${outerX1} ${outerY1} L ${innerX} ${innerY} L ${outerX2} ${outerY2} Z`;
+};
+
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
   if (!progress) return null;
 
@@ -30,58 +45,57 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
     return pillarProgress ? pillarProgress.percentage : 0;
   };
 
+  const outerRadius = 80;
+  const innerRadius = 40;
+
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
       <div className="relative w-[320px] h-[320px] mx-auto">
         <svg viewBox="0 0 200 200" className="w-full h-full">
-          {[1, 2, 3, 4, 5].map((pillarId, index) => {
-            const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-            const x = 100 + Math.cos(angle) * 80;
-            const y = 100 + Math.sin(angle) * 80;
+          {/* Star outline */}
+          <path
+            d={[0, 1, 2, 3, 4].map(i => createStarPoint(i, outerRadius, innerRadius)).join(' ')}
+            className="stroke-black stroke-2 fill-none"
+          />
+
+          {/* Pillar progress fills */}
+          {[0, 1, 2, 3, 4].map((index) => {
+            const pillarId = index + 1;
             const progress = getPillarProgress(pillarId);
+            const fillHeight = (outerRadius - innerRadius) * (progress / 100);
 
             return (
-              <g key={pillarId} className="cursor-pointer group">
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={24}
-                  className="transition-all duration-500 stroke-white stroke-[3px]"
+              <g key={pillarId} className="group">
+                <path
+                  d={createStarPoint(index, outerRadius, innerRadius)}
+                  className="transition-all duration-500"
                   style={{
                     fill: PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS],
                     fillOpacity: progress / 100
                   }}
-                  onClick={() => {
-                    // TODO: Add navigation to pillar details
-                    console.log(`View details for ${PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES]}`);
-                  }}
                 />
+                {/* Hidden text that appears on hover */}
                 <text
-                  x={x}
-                  y={y + 35}
+                  x={100 + Math.cos((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 20)}
+                  y={100 + Math.sin((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 20)}
                   textAnchor="middle"
-                  className="text-xs fill-gray-800 font-medium group-hover:fill-kidoova-green transition-colors"
+                  className="text-xs font-medium fill-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 >
                   {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split(' & ')[0]}
-                </text>
-                <text
-                  x={x}
-                  y={y + 45}
-                  textAnchor="middle"
-                  className="text-xs fill-gray-600 group-hover:fill-kidoova-green transition-colors"
-                >
-                  {Math.round(progress)}%
+                  <tspan x={100 + Math.cos((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 20)} dy="1.2em">
+                    {Math.round(progress)}%
+                  </tspan>
                 </text>
               </g>
             );
           })}
 
-          {/* Center star for total completion */}
+          {/* Center circle */}
           <circle 
             cx={100} 
             cy={100} 
-            r={32} 
+            r={innerRadius - 10} 
             className="fill-kidoova-accent stroke-white stroke-[4px]"
           />
           <text 
