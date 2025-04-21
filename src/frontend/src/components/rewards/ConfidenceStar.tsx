@@ -37,7 +37,7 @@ const createStarPoint = (index: number, outerRadius: number, innerRadius: number
   const endX = 100 + Math.cos(endAngle) * innerRadius;
   const endY = 100 + Math.sin(endAngle) * innerRadius;
   
-  return `M ${startX} ${startY} L ${pointX} ${pointY} L ${endX} ${endY}`;
+  return `M ${startX} ${startY} L ${pointX} ${pointY} L ${endX} ${endY} Z`;
 };
 
 // Function to create the inner pentagon path
@@ -49,14 +49,6 @@ const createInnerPentagon = (radius: number) => {
     return `${x},${y}`;
   });
   return `M ${points[0]} L ${points.slice(1).join(' L ')} Z`;
-};
-
-// Function to get tooltip position
-const getTooltipPosition = (index: number, radius: number) => {
-  const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-  const x = 100 + Math.cos(angle) * radius;
-  const y = 100 + Math.sin(angle) * radius;
-  return { x, y };
 };
 
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
@@ -73,38 +65,52 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
-      <div className="relative w-[480px] h-[480px] mx-auto">
+      <div className="relative w-[600px] h-[600px] mx-auto">
         <svg viewBox="0 0 200 200" className="w-full h-full">
           {/* Star points with hover areas */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const progress = getPillarProgress(pillarId);
-            const tooltipPos = getTooltipPosition(index, outerRadius + 20);
+            const pointAngle = (index / 5) * 2 * Math.PI - Math.PI / 2;
+            const tooltipX = 100 + Math.cos(pointAngle) * (outerRadius - 10);
+            const tooltipY = 100 + Math.sin(pointAngle) * (outerRadius - 10);
 
             return (
               <g key={pillarId} className="group">
-                {/* Star point with fill */}
+                {/* Base white star point */}
                 <path
                   d={createStarPoint(index, outerRadius, innerRadius)}
-                  className="transition-all duration-500 cursor-pointer"
-                  fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
-                  fillOpacity={progress / 100}
+                  fill="white"
                   stroke="black"
                   strokeWidth="1"
+                  className="cursor-pointer"
+                />
+                
+                {/* Colored fill based on progress */}
+                <clipPath id={`clip-${pillarId}`}>
+                  <path
+                    d={createStarPoint(index, outerRadius * (progress / 100), innerRadius)}
+                  />
+                </clipPath>
+                
+                <path
+                  d={createStarPoint(index, outerRadius, innerRadius)}
+                  fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
+                  clipPath={`url(#clip-${pillarId})`}
                 />
                 
                 {/* Tooltip */}
                 <g 
                   className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   style={{
-                    transform: `translate(${tooltipPos.x}px, ${tooltipPos.y}px)`
+                    transform: `translate(${tooltipX}px, ${tooltipY}px)`
                   }}
                 >
                   <foreignObject
                     x="-60"
-                    y="-30"
+                    y="-20"
                     width="120"
-                    height="35"
+                    height="40"
                   >
                     <div className="absolute bg-gray-800 text-white px-1.5 py-0.5 rounded text-[7px] leading-tight whitespace-nowrap">
                       <p>{PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES]}</p>
