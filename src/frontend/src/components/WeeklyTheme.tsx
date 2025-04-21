@@ -92,13 +92,12 @@ export default function WeeklyTheme() {
         </div>
         <div>
           <h2 className="text-3xl font-heading mb-1">{theme.title}</h2>
-          <p className="text-lg text-gray-600">Week {theme.week_number}</p>
         </div>
       </div>
       
       <div className="space-y-3">
         <p className="text-lg text-gray-600">
-          {theme.description}
+          {theme.description} - Week {theme.week_number}
         </p>
       </div>
     </div>
