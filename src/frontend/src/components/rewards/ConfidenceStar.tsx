@@ -52,8 +52,8 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
-      <div className="relative w-full max-w-[400px] mx-auto aspect-square">
-        <svg viewBox="0 0 200 200" className="w-full h-full">
+      <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
+        <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
           {/* Full-sized background star outline */}
           <path
             d={createStarPath(100, 100, 5, 80, 35)}
@@ -75,9 +75,9 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             return (
               <path
                 key={`pillar-${pillarId}`}
-                d={`M 100 100 L ${100 + Math.cos(angle - 0.3) * fillRadius} ${100 + Math.sin(angle - 0.3) * fillRadius} 
+                d={`M 100 100 L ${100 + Math.cos(angle - 0.2) * fillRadius} ${100 + Math.sin(angle - 0.2) * fillRadius} 
                    L ${100 + Math.cos(angle) * fillRadius} ${100 + Math.sin(angle) * fillRadius} 
-                   L ${100 + Math.cos(angle + 0.3) * fillRadius} ${100 + Math.sin(angle + 0.3) * fillRadius} Z`}
+                   L ${100 + Math.cos(angle + 0.2) * fillRadius} ${100 + Math.sin(angle + 0.2) * fillRadius} Z`}
                 fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
               />
             );
@@ -96,20 +96,20 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             const completed = data?.completed || 0;
             const percent = Math.min(completed / MAX_CHALLENGES, 1);
             const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-            const labelX = 100 + Math.cos(angle) * 70;
-            const labelY = 100 + Math.sin(angle) * 70;
+            const labelX = 100 + Math.cos(angle) * 85;
+            const labelY = 100 + Math.sin(angle) * 85;
 
             return (
               <g
                 key={`tooltip-${pillarId}`}
                 transform={`translate(${labelX}, ${labelY})`}
-                className="group hover:opacity-100 opacity-0 transition-opacity duration-300"
+                className="group hover:opacity-100 opacity-0 transition-opacity duration-300 pointer-events-auto"
               >
-                <rect x={-40} y={-15} width={80} height={28} rx={4} fill="#1F2937" />
-                <text x={0} y={-2} textAnchor="middle" fill="white" fontSize="6px">
+                <rect x={-38} y={-13} width={76} height={26} rx={4} fill="#1F2937" />
+                <text x={0} y={-1} textAnchor="middle" fill="white" fontSize="6px">
                   {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split('&')[0]}
                 </text>
-                <text x={0} y={9} textAnchor="middle" fill="white" fontSize="7px" fontWeight="bold">
+                <text x={0} y={8} textAnchor="middle" fill="white" fontSize="7px" fontWeight="bold">
                   {Math.round(percent * 100)}% ({completed})
                 </text>
               </g>
@@ -119,4 +119,4 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
       </div>
     </div>
   );
-} 
+}
