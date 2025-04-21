@@ -12,10 +12,8 @@ interface ThemeWeek {
   pillar_color: string;
 }
 
-export async function theme(request: Request, env: Env): Promise<Response> {
-  if (request.method !== 'GET') {
-    return new Response('Method not allowed', { status: 405, headers: { ...corsHeaders() } });
-  }
+export const onRequestGet: PagesFunction<Env> = async (context) => {
+  const { request, env } = context;
 
   try {
     const db = env.DB;
@@ -60,4 +58,4 @@ export async function theme(request: Request, env: Env): Promise<Response> {
       { status: 500, headers: { ...corsHeaders() } }
     );
   }
-} 
+}; 
