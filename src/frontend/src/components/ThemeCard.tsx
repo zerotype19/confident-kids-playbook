@@ -47,35 +47,40 @@ export const ThemeCard: React.FC = () => {
   }
 
   return (
-    <Card sx={{ mb: 2 }}>
+    <Card sx={{ mb: 2, backgroundColor: 'rgba(255, 255, 255, 0.95)' }}>
       <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Box
             component="span"
             sx={{
-              width: 40,
-              height: 40,
+              width: 48,
+              height: 48,
               borderRadius: '50%',
               backgroundColor: theme.pillar_color,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              mr: 2,
+              mr: 3,
+              fontSize: '1.5rem'
             }}
           >
             {theme.pillar_icon}
           </Box>
-          <Typography variant="h6" component="div">
+          <Typography variant="h4" component="div" sx={{ fontWeight: 600 }}>
             This Week's Theme
           </Typography>
         </Box>
-        <Typography variant="h5" component="div" gutterBottom>
+        <Typography variant="h3" component="div" gutterBottom sx={{ 
+          fontWeight: 700,
+          mb: 3,
+          color: 'text.primary'
+        }}>
           {theme.title}
         </Typography>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span>{theme.description}</span>
-          <span>|</span>
-          <span>Week {theme.week_number}</span>
+        <div className="flex items-center gap-3 text-lg text-gray-600">
+          <span className="font-medium">{theme.description}</span>
+          <span className="text-gray-400">|</span>
+          <span className="font-semibold">Week {theme.week_number}</span>
         </div>
       </CardContent>
     </Card>
