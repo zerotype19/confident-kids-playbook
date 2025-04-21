@@ -44,34 +44,40 @@ const createStarPath = (cx: number, cy: number, spikes: number, outerRadius: num
   return path;
 };
 
-const createFilledStarPoint = (index: number, fillPercent: number, radius: number): string => {
-  const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-  const startAngle = angle - Math.PI / 5;
-  const endAngle = angle + Math.PI / 5;
-  const baseRadius = 35;
-  const fillRadius = baseRadius + ((radius - baseRadius) * fillPercent);
+const createStarPointShape = (cx: number, cy: number, outerRadius: number, innerRadius: number, index: number, percent: number): string => {
+  const angleStep = (Math.PI * 2) / 5;
+  const angleOffset = -Math.PI / 2; // start at top
+  const outerAngle = angleOffset + angleStep * index;
+  const left = outerAngle - angleStep / 3;
+  const right = outerAngle + angleStep / 3;
+  const fillOuterRadius = innerRadius + (outerRadius - innerRadius) * percent;
 
-  const x1 = 100 + Math.cos(startAngle) * fillRadius;
-  const y1 = 100 + Math.sin(startAngle) * fillRadius;
-  const x2 = 100 + Math.cos(angle) * fillRadius;
-  const y2 = 100 + Math.sin(angle) * fillRadius;
-  const x3 = 100 + Math.cos(endAngle) * fillRadius;
-  const y3 = 100 + Math.sin(endAngle) * fillRadius;
+  const x0 = cx;
+  const y0 = cy;
+  const x1 = cx + Math.cos(left) * innerRadius;
+  const y1 = cy + Math.sin(left) * innerRadius;
+  const x2 = cx + Math.cos(outerAngle) * fillOuterRadius;
+  const y2 = cy + Math.sin(outerAngle) * fillOuterRadius;
+  const x3 = cx + Math.cos(right) * innerRadius;
+  const y3 = cy + Math.sin(right) * innerRadius;
 
-  return `M 100 100 L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
+  return `M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
 };
 
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
   if (!progress) return null;
 
   const MAX_CHALLENGES = 100;
+  const cx = 100;
+  const cy = 100;
+  const outerRadius = 80;
+  const innerRadius = 35;
 
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
       <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
         <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
-          {/* Colored star point fills behind the green center star */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const data = progress.pillar_progress[pillarId];
@@ -80,35 +86,32 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             return (
               <path
                 key={`fill-${pillarId}`}
-                d={createFilledStarPoint(index, percent, 80)}
+                d={createStarPointShape(cx, cy, outerRadius, innerRadius, index, percent)}
                 fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
               />
             );
           })}
 
-          {/* Center green star on top */}
           <path
-            d={createStarPath(100, 100, 5, 40, 20)}
+            d={createStarPath(cx, cy, 5, 40, 20)}
             fill="#10B981"
           />
 
-          {/* Star outline on top of everything */}
           <path
-            d={createStarPath(100, 100, 5, 80, 35)}
+            d={createStarPath(cx, cy, 5, outerRadius, innerRadius)}
             fill="none"
             stroke="black"
             strokeWidth="2"
           />
 
-          {/* Tooltips */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const data = progress.pillar_progress[pillarId];
             const completed = data?.completed || 0;
             const percent = Math.min(completed / MAX_CHALLENGES, 1);
             const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-            const labelX = 100 + Math.cos(angle) * 85;
-            const labelY = 100 + Math.sin(angle) * 85;
+            const labelX = cx + Math.cos(angle) * 85;
+            const labelY = cy + Math.sin(angle) * 85;
 
             return (
               <g
