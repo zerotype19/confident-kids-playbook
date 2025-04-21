@@ -5,6 +5,7 @@ import { Reward, ProgressSummary } from '../types';
 import RewardsOverview from '../components/rewards/RewardsOverview';
 import { TrophyCase } from '../components/rewards/TrophyCase';
 import ProgressTracker from '../components/rewards/ProgressTracker';
+import ConfidenceStar from '../components/rewards/ConfidenceStar';
 import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
 
@@ -146,10 +147,16 @@ export default function RewardsPage() {
               <TrophyCase 
                 rewards={rewards}
               />
-              <ProgressTracker 
-                progress={progress}
-                childId={selectedChild.id}
-              />
+              <div className="space-y-6">
+                <ConfidenceStar 
+                  progress={progress}
+                  childId={selectedChild.id}
+                />
+                <ProgressTracker 
+                  progress={progress}
+                  childId={selectedChild.id}
+                />
+              </div>
             </div>
           </>
         ) : (
