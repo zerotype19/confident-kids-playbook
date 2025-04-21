@@ -44,6 +44,24 @@ const createStarPath = (cx: number, cy: number, spikes: number, outerRadius: num
   return path;
 };
 
+const createStarPointClipPath = (index: number, percent: number): string => {
+  const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
+  const startAngle = angle - Math.PI / 5;
+  const endAngle = angle + Math.PI / 5;
+  const baseRadius = 35;
+  const fullRadius = 80;
+  const fillRadius = baseRadius + ((fullRadius - baseRadius) * percent);
+
+  const x1 = 100 + Math.cos(startAngle) * baseRadius;
+  const y1 = 100 + Math.sin(startAngle) * baseRadius;
+  const x2 = 100 + Math.cos(angle) * fillRadius;
+  const y2 = 100 + Math.sin(angle) * fillRadius;
+  const x3 = 100 + Math.cos(endAngle) * baseRadius;
+  const y3 = 100 + Math.sin(endAngle) * baseRadius;
+
+  return `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
+};
+
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
   if (!progress) return null;
 
@@ -54,7 +72,21 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
       <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
         <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
-          {/* Full-sized background star outline */}
+          <defs>
+            {[0, 1, 2, 3, 4].map(index => {
+              const pillarId = index + 1;
+              const data = progress.pillar_progress[pillarId];
+              const completed = data?.completed || 0;
+              const percent = Math.min(completed / MAX_CHALLENGES, 1);
+              return (
+                <clipPath id={`clip-${pillarId}`} key={`clip-${pillarId}`}>
+                  <path d={createStarPointClipPath(index, percent)} />
+                </clipPath>
+              );
+            })}
+          </defs>
+
+          {/* Full background star outline */}
           <path
             d={createStarPath(100, 100, 5, 80, 35)}
             fill="none"
@@ -65,20 +97,12 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
           {/* Color-fill behind center star */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
-            const data = progress.pillar_progress[pillarId];
-            const completed = data?.completed || 0;
-            const percent = Math.min(completed / MAX_CHALLENGES, 1);
-            const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-            const baseRadius = 35;
-            const fillRadius = baseRadius + ((80 - baseRadius) * percent);
-
             return (
               <path
-                key={`pillar-${pillarId}`}
-                d={`M 100 100 L ${100 + Math.cos(angle - 0.2) * fillRadius} ${100 + Math.sin(angle - 0.2) * fillRadius} 
-                   L ${100 + Math.cos(angle) * fillRadius} ${100 + Math.sin(angle) * fillRadius} 
-                   L ${100 + Math.cos(angle + 0.2) * fillRadius} ${100 + Math.sin(angle + 0.2) * fillRadius} Z`}
+                key={`fill-${pillarId}`}
+                d={createStarPath(100, 100, 5, 80, 35)}
                 fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
+                clipPath={`url(#clip-${pillarId})`}
               />
             );
           })}
