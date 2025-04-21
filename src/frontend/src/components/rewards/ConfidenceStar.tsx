@@ -22,25 +22,29 @@ const PILLAR_NAMES = {
   5: 'Managing Fear & Anxiety'
 };
 
-const createFullStarPointPath = (
+const createPartialStarPointPath = (
   cx: number,
   cy: number,
   innerRadius: number,
   outerRadius: number,
-  index: number
+  index: number,
+  fillRatio: number
 ): string => {
   const angle = (Math.PI * 2 * index) / 5 - Math.PI / 2;
   const angleLeft = angle - Math.PI / 5;
   const angleRight = angle + Math.PI / 5;
+  const currentRadius = innerRadius + (outerRadius - innerRadius) * fillRatio;
 
+  const x0 = cx;
+  const y0 = cy;
   const x1 = cx + Math.cos(angleLeft) * innerRadius;
   const y1 = cy + Math.sin(angleLeft) * innerRadius;
-  const x2 = cx + Math.cos(angle) * outerRadius;
-  const y2 = cy + Math.sin(angle) * outerRadius;
+  const x2 = cx + Math.cos(angle) * currentRadius;
+  const y2 = cy + Math.sin(angle) * currentRadius;
   const x3 = cx + Math.cos(angleRight) * innerRadius;
   const y3 = cy + Math.sin(angleRight) * innerRadius;
 
-  return `M ${cx} ${cy} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
+  return `M ${x0} ${y0} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
 };
 
 const createCenterStarPath = (cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number): string => {
@@ -86,29 +90,12 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
 
             if (fillRatio === 0) return null;
 
-            const clipPathId = `clip-${pillarId}`;
-
             return (
-              <g key={`point-${pillarId}`}>
-                <defs>
-                  <clipPath id={clipPathId}>
-                    <path d={createFullStarPointPath(cx, cy, innerRadius, outerRadius, index)} />
-                  </clipPath>
-                </defs>
-                <path
-                  d={createFullStarPointPath(cx, cy, innerRadius, outerRadius, index)}
-                  fill="#eee"
-                />
-                <rect
-                  x="0"
-                  y="0"
-                  width="200"
-                  height={200 * fillRatio}
-                  fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
-                  clipPath={`url(#${clipPathId})`}
-                  transform={`translate(0, ${200 * (1 - fillRatio)})`}
-                />
-              </g>
+              <path
+                key={`point-${pillarId}`}
+                d={createPartialStarPointPath(cx, cy, innerRadius, outerRadius, index, fillRatio)}
+                fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
+              />
             );
           })}
 
