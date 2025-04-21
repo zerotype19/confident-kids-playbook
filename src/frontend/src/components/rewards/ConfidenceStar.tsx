@@ -46,20 +46,21 @@ const createStarPath = (cx: number, cy: number, spikes: number, outerRadius: num
 
 const createStarPointClipPath = (index: number, percent: number): string => {
   const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-  const startAngle = angle - Math.PI / 5;
-  const endAngle = angle + Math.PI / 5;
-  const baseRadius = 35;
-  const fullRadius = 80;
-  const fillRadius = baseRadius + ((fullRadius - baseRadius) * percent);
+  const angleOffset = Math.PI / 5;
+  const baseRadius = 0; // start from center
+  const fillRadius = 80 * percent; // fill from center to outer point
 
-  const x1 = 100 + Math.cos(startAngle) * baseRadius;
-  const y1 = 100 + Math.sin(startAngle) * baseRadius;
+  const startAngle = angle - angleOffset;
+  const endAngle = angle + angleOffset;
+
+  const x1 = 100 + Math.cos(startAngle) * fillRadius;
+  const y1 = 100 + Math.sin(startAngle) * fillRadius;
   const x2 = 100 + Math.cos(angle) * fillRadius;
   const y2 = 100 + Math.sin(angle) * fillRadius;
-  const x3 = 100 + Math.cos(endAngle) * baseRadius;
-  const y3 = 100 + Math.sin(endAngle) * baseRadius;
+  const x3 = 100 + Math.cos(endAngle) * fillRadius;
+  const y3 = 100 + Math.sin(endAngle) * fillRadius;
 
-  return `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
+  return `M 100 100 L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
 };
 
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
@@ -86,14 +87,6 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             })}
           </defs>
 
-          {/* Full background star outline */}
-          <path
-            d={createStarPath(100, 100, 5, 80, 35)}
-            fill="none"
-            stroke="black"
-            strokeWidth="2"
-          />
-
           {/* Color-fill behind center star */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
@@ -107,10 +100,18 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             );
           })}
 
-          {/* Center green star */}
+          {/* Center green star — drawn AFTER to sit on top */}
           <path
             d={createStarPath(100, 100, 5, 40, 20)}
             fill="#10B981"
+          />
+
+          {/* Star outline on top of all elements */}
+          <path
+            d={createStarPath(100, 100, 5, 80, 35)}
+            fill="none"
+            stroke="black"
+            strokeWidth="2"
           />
 
           {/* Hover tooltip areas */}
