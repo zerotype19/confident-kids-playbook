@@ -122,7 +122,7 @@ router.put('/api/children/:id', (request, context) => {
 
 // Dashboard routes
 router.get('/api/dashboard/challenge', (request, context) => challenge({ request, env: context.env }))
-router.get('/api/dashboard/theme', (request, context) => theme(request, context.env))
+router.get('/api/dashboard/theme', (request, context) => theme({ request, env: context.env }))
 router.post('/api/challenge-log', (request, context) => challengeLog({ request, env: context.env }))
 router.get('/api/progress', (request, context) => progress({ request, env: context.env }))
 router.get('/api/rewards/:childId', (request, context) => rewards({ request, env: context.env }))
