@@ -76,16 +76,6 @@ export const ThemeCard: React.FC = () => {
           <span>{theme.description}</span>
           <span>|</span>
           <span>Week {theme.week_number}</span>
-          <span>|</span>
-          <span 
-            className="text-xs font-medium px-2 py-1 rounded-full"
-            style={{
-              backgroundColor: theme.pillar_color + '20',
-              color: theme.pillar_color
-            }}
-          >
-            {theme.pillar_name}
-          </span>
         </div>
       </CardContent>
     </Card>

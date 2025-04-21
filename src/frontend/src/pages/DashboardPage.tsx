@@ -233,17 +233,15 @@ export default function DashboardPage() {
         {selectedChild ? (
           <>
             <WeeklyTheme />
+            <TodayChallengeCard 
+              childId={selectedChild.id} 
+              challenge={challenge}
+              onComplete={handleChallengeComplete}
+            />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-8">
                 <RewardsOverview progress={progress} />
                 <ProgressTracker progress={progress} childId={selectedChild.id} />
-              </div>
-              <div className="space-y-8">
-                <TodayChallengeCard 
-                  childId={selectedChild.id} 
-                  challenge={challenge}
-                  onComplete={handleChallengeComplete}
-                />
               </div>
             </div>
           </>
