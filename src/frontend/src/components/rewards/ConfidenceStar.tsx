@@ -22,27 +22,25 @@ const PILLAR_NAMES = {
   5: 'Managing Fear & Anxiety'
 };
 
-const createStarPoint = (
+const createFullStarPointPath = (
   cx: number,
   cy: number,
   innerRadius: number,
   outerRadius: number,
-  index: number,
-  fillRatio: number
+  index: number
 ): string => {
   const angle = (Math.PI * 2 * index) / 5 - Math.PI / 2;
   const angleLeft = angle - Math.PI / 5;
   const angleRight = angle + Math.PI / 5;
-  const radius = innerRadius + (outerRadius - innerRadius) * fillRatio;
 
   const x1 = cx + Math.cos(angleLeft) * innerRadius;
   const y1 = cy + Math.sin(angleLeft) * innerRadius;
-  const x2 = cx + Math.cos(angle) * radius;
-  const y2 = cy + Math.sin(angle) * radius;
+  const x2 = cx + Math.cos(angle) * outerRadius;
+  const y2 = cy + Math.sin(angle) * outerRadius;
   const x3 = cx + Math.cos(angleRight) * innerRadius;
   const y3 = cy + Math.sin(angleRight) * innerRadius;
 
-  return `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
+  return `M ${cx} ${cy} L ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} Z`;
 };
 
 const createCenterStarPath = (cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number): string => {
@@ -85,12 +83,32 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             const pillarId = index + 1;
             const completed = progress.pillar_progress[pillarId]?.completed || 0;
             const fillRatio = Math.min(completed / MAX_CHALLENGES, 1);
+
+            if (fillRatio === 0) return null;
+
+            const clipPathId = `clip-${pillarId}`;
+
             return (
-              <path
-                key={`point-${pillarId}`}
-                d={createStarPoint(cx, cy, innerRadius, outerRadius, index, fillRatio)}
-                fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
-              />
+              <g key={`point-${pillarId}`}>
+                <defs>
+                  <clipPath id={clipPathId}>
+                    <path d={createFullStarPointPath(cx, cy, innerRadius, outerRadius, index)} />
+                  </clipPath>
+                </defs>
+                <path
+                  d={createFullStarPointPath(cx, cy, innerRadius, outerRadius, index)}
+                  fill="#eee"
+                />
+                <rect
+                  x="0"
+                  y="0"
+                  width="200"
+                  height={200 * fillRatio}
+                  fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
+                  clipPath={`url(#${clipPathId})`}
+                  transform={`translate(0, ${200 * (1 - fillRatio)})`}
+                />
+              </g>
             );
           })}
 
@@ -106,7 +124,6 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             strokeWidth="2"
           />
 
-          {/* Tooltips */}
           {[0, 1, 2, 3, 4].map(index => {
             const pillarId = index + 1;
             const angle = (Math.PI * 2 * index) / 5 - Math.PI / 2;
