@@ -29,17 +29,23 @@ export async function theme(request: Request, env: Env): Promise<Response> {
         p.color as pillar_color
       FROM theme_weeks tw
       JOIN pillars p ON tw.pillar_id = p.id
-      WHERE tw.week_number = CAST(strftime('%W', 'now') AS INTEGER) + 1
+      WHERE tw.week_number = (
+        CAST(strftime('%W', 'now', 'localtime') AS INTEGER) + 1
+      )
     `;
 
+    console.log('Fetching theme for current week');
     const result = await db.prepare(query).first<ThemeWeek>();
 
     if (!result) {
+      console.log('No theme found for current week');
       return new Response(
         JSON.stringify({ error: 'No theme found for current week' }),
         { status: 404, headers: { ...corsHeaders() } }
       );
     }
+
+    console.log('Theme found:', result);
 
     return new Response(JSON.stringify(result), {
       headers: {

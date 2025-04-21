@@ -24,6 +24,7 @@ export default function WeeklyTheme() {
           throw new Error('No authentication token found');
         }
 
+        console.log('Fetching theme from:', `${import.meta.env.VITE_API_URL}/api/dashboard/theme`);
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/dashboard/theme`,
           {
@@ -33,11 +34,15 @@ export default function WeeklyTheme() {
           }
         );
 
+        console.log('Theme response status:', response.status);
         if (!response.ok) {
-          throw new Error('Failed to fetch theme');
+          const errorData = await response.json();
+          console.error('Theme fetch error:', errorData);
+          throw new Error(errorData.error || 'Failed to fetch theme');
         }
 
         const data = await response.json();
+        console.log('Theme data received:', data);
         setTheme(data);
       } catch (err) {
         console.error('Error fetching theme:', err);
@@ -59,7 +64,20 @@ export default function WeeklyTheme() {
     );
   }
 
-  if (error || !theme) {
+  if (error) {
+    console.error('Theme error state:', error);
+    return (
+      <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
+        <div className="text-red-500">
+          <p>Unable to load this week's theme.</p>
+          <p className="text-sm mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!theme) {
+    console.log('No theme data available');
     return null;
   }
 
