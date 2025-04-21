@@ -40,17 +40,6 @@ const createStarPoint = (index: number, outerRadius: number, innerRadius: number
   return `M ${startX} ${startY} L ${pointX} ${pointY} L ${endX} ${endY} Z`;
 };
 
-// Function to create the inner pentagon path
-const createInnerPentagon = (radius: number) => {
-  let points = Array.from({ length: 5 }, (_, i) => {
-    const angle = ((i + 0.5) / 5) * 2 * Math.PI - Math.PI / 2; // Offset by 0.5 to align with star points
-    const x = 100 + Math.cos(angle) * radius;
-    const y = 100 + Math.sin(angle) * radius;
-    return `${x},${y}`;
-  });
-  return `M ${points[0]} L ${points.slice(1).join(' L ')} Z`;
-};
-
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
   if (!progress) return null;
 
@@ -61,12 +50,23 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
 
   const outerRadius = 80;
   const innerRadius = 35;
+  const centerStarRadius = 25;
 
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
       <div className="relative w-[600px] h-[600px] mx-auto">
         <svg viewBox="0 0 200 200" className="w-full h-full">
+          {/* Center star */}
+          {[0, 1, 2, 3, 4].map((index) => (
+            <path
+              key={`center-${index}`}
+              d={createStarPoint(index, centerStarRadius, centerStarRadius * 0.4)}
+              fill="#10B981"
+              stroke="none"
+            />
+          ))}
+
           {/* Star points with hover areas */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
@@ -75,11 +75,14 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
             const tooltipX = 100 + Math.cos(pointAngle) * (outerRadius - 10);
             const tooltipY = 100 + Math.sin(pointAngle) * (outerRadius - 10);
 
+            // Calculate the fill path based on progress
+            const fillRadius = centerStarRadius + ((outerRadius - centerStarRadius) * (progress / 100));
+
             return (
               <g key={pillarId} className="group">
                 {/* Base white star point */}
                 <path
-                  d={createStarPoint(index, outerRadius, innerRadius)}
+                  d={createStarPoint(index, outerRadius, centerStarRadius)}
                   fill="white"
                   stroke="black"
                   strokeWidth="1"
@@ -87,16 +90,10 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
                 />
                 
                 {/* Colored fill based on progress */}
-                <clipPath id={`clip-${pillarId}`}>
-                  <path
-                    d={createStarPoint(index, outerRadius * (progress / 100), innerRadius)}
-                  />
-                </clipPath>
-                
                 <path
-                  d={createStarPoint(index, outerRadius, innerRadius)}
+                  d={createStarPoint(index, fillRadius, centerStarRadius)}
                   fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
-                  clipPath={`url(#clip-${pillarId})`}
+                  stroke="none"
                 />
                 
                 {/* Tooltip */}
@@ -121,13 +118,6 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
               </g>
             );
           })}
-
-          {/* Green center */}
-          <path
-            d={createInnerPentagon(innerRadius)}
-            fill="#10B981"
-            stroke="none"
-          />
         </svg>
       </div>
     </div>
