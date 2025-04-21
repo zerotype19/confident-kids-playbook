@@ -83,7 +83,10 @@ export default function WeeklyTheme() {
 
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
-      <div className="flex items-start gap-4">
+      <div 
+        className="flex items-start gap-4 p-4 rounded-lg"
+        style={{ backgroundColor: theme.pillar_color + '20' }}
+      >
         <div 
           className="w-16 h-16 rounded-full flex items-center justify-center text-4xl"
           style={{ backgroundColor: theme.pillar_color + '20' }}
