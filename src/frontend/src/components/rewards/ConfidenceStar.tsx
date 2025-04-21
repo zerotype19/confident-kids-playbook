@@ -34,7 +34,7 @@ const createStarPoint = (index: number, outerRadius: number, innerRadius: number
   const outerX2 = 100 + Math.cos(nextAngle) * outerRadius;
   const outerY2 = 100 + Math.sin(nextAngle) * outerRadius;
   
-  return `M ${outerX1} ${outerY1} L ${innerX} ${innerY} L ${outerX2} ${outerY2} Z`;
+  return `M ${outerX1} ${outerY1} L ${innerX} ${innerY} L ${outerX2} ${outerY2}`;
 };
 
 export default function ConfidenceStar({ progress, childId }: ConfidenceStarProps) {
@@ -51,42 +51,40 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
-      <div className="relative w-[320px] h-[320px] mx-auto">
+      <div className="relative w-[480px] h-[480px] mx-auto">
         <svg viewBox="0 0 200 200" className="w-full h-full">
-          {/* Star outline */}
-          <path
-            d={[0, 1, 2, 3, 4].map(i => createStarPoint(i, outerRadius, innerRadius)).join(' ')}
-            className="stroke-black stroke-2 fill-none"
-          />
-
-          {/* Pillar progress fills */}
+          {/* Star points */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const progress = getPillarProgress(pillarId);
-            const fillHeight = (outerRadius - innerRadius) * (progress / 100);
 
             return (
-              <g key={pillarId} className="group">
+              <g key={pillarId} className="group relative">
                 <path
                   d={createStarPoint(index, outerRadius, innerRadius)}
                   className="transition-all duration-500"
                   style={{
                     fill: PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS],
-                    fillOpacity: progress / 100
+                    fillOpacity: progress / 100,
+                    stroke: 'black',
+                    strokeWidth: '1'
                   }}
                 />
-                {/* Hidden text that appears on hover */}
-                <text
-                  x={100 + Math.cos((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 20)}
-                  y={100 + Math.sin((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 20)}
-                  textAnchor="middle"
-                  className="text-xs font-medium fill-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                >
-                  {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split(' & ')[0]}
-                  <tspan x={100 + Math.cos((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 20)} dy="1.2em">
-                    {Math.round(progress)}%
-                  </tspan>
-                </text>
+                {/* Tooltip */}
+                <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <foreignObject
+                    x={100 + Math.cos((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 10)}
+                    y={100 + Math.sin((index / 5) * 2 * Math.PI - Math.PI / 2) * (outerRadius + 10)}
+                    width="120"
+                    height="40"
+                    className="overflow-visible"
+                  >
+                    <div className="absolute bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap transform -translate-x-1/2 -translate-y-full">
+                      <p>{PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES]}</p>
+                      <p className="font-bold">{Math.round(progress)}% complete</p>
+                    </div>
+                  </foreignObject>
+                </g>
               </g>
             );
           })}
