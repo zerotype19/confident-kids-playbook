@@ -72,12 +72,21 @@ export const ThemeCard: React.FC = () => {
         <Typography variant="h5" component="div" gutterBottom>
           {theme.title}
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {theme.description}
-        </Typography>
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2 }}>
-          Week {theme.week_number} • {theme.pillar_name}
-        </Typography>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>{theme.description}</span>
+          <span>|</span>
+          <span>Week {theme.week_number}</span>
+          <span>|</span>
+          <span 
+            className="text-xs font-medium px-2 py-1 rounded-full"
+            style={{
+              backgroundColor: theme.pillar_color + '20',
+              color: theme.pillar_color
+            }}
+          >
+            {theme.pillar_name}
+          </span>
+        </div>
       </CardContent>
     </Card>
   );

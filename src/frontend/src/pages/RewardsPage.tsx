@@ -143,15 +143,16 @@ export default function RewardsPage() {
               progress={progress}
             />
 
+            <ConfidenceStar 
+              progress={progress}
+              childId={selectedChild.id}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <TrophyCase 
                 rewards={rewards}
               />
               <div className="space-y-6">
-                <ConfidenceStar 
-                  progress={progress}
-                  childId={selectedChild.id}
-                />
                 <ProgressTracker 
                   progress={progress}
                   childId={selectedChild.id}
