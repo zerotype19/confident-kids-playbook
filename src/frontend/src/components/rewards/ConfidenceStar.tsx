@@ -22,6 +22,7 @@ const PILLAR_NAMES = {
   5: 'Managing Fear & Anxiety'
 };
 
+// Create the outer star point shape
 const createStarPointPath = (
   index: number,
   outerRadius: number,
@@ -46,75 +47,66 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
   const MAX_CHALLENGES = 100;
   const outerRadius = 80;
   const innerRadius = 35;
+  const centerRadius = 35;
 
   return (
     <div className="bg-white rounded-2xl shadow-kidoova p-6">
       <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confidence Star</h3>
       <div className="relative w-[600px] h-[600px] mx-auto">
         <svg viewBox="0 0 200 200" className="w-full h-full">
-          <defs>
-            {/* Define clip paths for each star point */}
-            {[0, 1, 2, 3, 4].map((index) => {
-              const pillarId = index + 1;
-              return (
-                <clipPath key={`clip-${pillarId}`} id={`clip-${pillarId}`}>
-                  <path d={createStarPointPath(index, outerRadius, innerRadius)} />
-                </clipPath>
-              );
-            })}
-            {/* Drop shadow filter for center star */}
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          {/* Center green star */}
+          {/* Center star — filled polygon */}
           <polygon
-            points="100,75 108,90 125,92 112,102 116,120 100,110 84,120 88,102 75,92 92,90"
+            points="100,50 117,85 155,90 127,115 135,155 100,135 65,155 73,115 45,90 83,85"
             fill="#10B981"
-            filter="url(#glow)"
-            className="drop-shadow-lg"
           />
 
-          {/* Outer points */}
+          {/* Outer star points */}
           {[0, 1, 2, 3, 4].map((index) => {
             const pillarId = index + 1;
             const data = progress.pillar_progress[pillarId];
-
             const completed = data?.completed || 0;
-            const cappedPercent = Math.min((completed / MAX_CHALLENGES) * 100, 100);
-            const isOverachieved = completed > MAX_CHALLENGES;
+            const percent = Math.min((completed / MAX_CHALLENGES) * 100, 100);
+            const isOver = completed > MAX_CHALLENGES;
 
             const angle = (index / 5) * 2 * Math.PI - Math.PI / 2;
-            const tooltipX = 100 + Math.cos(angle) * (outerRadius + 10);
-            const tooltipY = 100 + Math.sin(angle) * (outerRadius + 10);
+            const tooltipX = 100 + Math.cos(angle) * (outerRadius + 12);
+            const tooltipY = 100 + Math.sin(angle) * (outerRadius + 12);
+
+            const pathId = `clip-${pillarId}`;
+            const fullPath = createStarPointPath(index, outerRadius, innerRadius);
 
             return (
               <g key={`pillar-${pillarId}`} className="group">
-                {/* Outline base shape */}
+                {/* Define clipping mask */}
+                <defs>
+                  <clipPath id={pathId}>
+                    <path d={fullPath} />
+                  </clipPath>
+                </defs>
+
+                {/* Outline */}
                 <path
-                  d={createStarPointPath(index, outerRadius, innerRadius)}
+                  d={fullPath}
                   fill="white"
                   stroke="black"
                   strokeWidth="1.5"
                 />
 
-                {/* Fill using clip path */}
+                {/* Fill using rect + clip */}
                 <rect
                   x="0"
-                  y={200 - (200 * cappedPercent) / 100}
+                  y={200 - 200 * (percent / 100)}
                   width="200"
-                  height={(200 * cappedPercent) / 100}
+                  height={200 * (percent / 100)}
                   fill={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
-                  clipPath={`url(#clip-${pillarId})`}
+                  clipPath={`url(#${pathId})`}
                   className="transition-all duration-300 ease-in-out"
                 />
 
-                {/* Glow effect for >100 completions */}
-                {isOverachieved && (
+                {/* Glow if over 100 */}
+                {isOver && (
                   <path
-                    d={createStarPointPath(index, outerRadius, innerRadius)}
+                    d={fullPath}
                     fill="none"
                     stroke={PILLAR_COLORS[pillarId as keyof typeof PILLAR_COLORS]}
                     strokeWidth="4"
@@ -126,14 +118,20 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
                 <g
                   transform={`translate(${tooltipX}, ${tooltipY})`}
                   className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ zIndex: 10 }}
                 >
-                  <rect x={-50} y={-16} width={100} height={32} rx={4} fill="#1F2937" />
-                  <text x={0} y={-3} textAnchor="middle" fill="white" fontSize="6px">
-                    {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split('&')[0].trim()}
+                  <rect x={-45} y={-15} width={90} height={28} rx={4} fill="#1F2937" />
+                  <text x={0} y={-2} textAnchor="middle" fill="white" fontSize="6px">
+                    {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split('&')[0]}
                   </text>
-                  <text x={0} y={9} textAnchor="middle" fill="white" fontSize="7px" fontWeight="bold">
-                    {Math.round(cappedPercent)}% ({completed})
+                  <text
+                    x={0}
+                    y={9}
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="7px"
+                    fontWeight="bold"
+                  >
+                    {Math.round(percent)}% ({completed})
                   </text>
                 </g>
               </g>
