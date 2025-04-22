@@ -80,7 +80,7 @@ export default function ConfidenceStar({ progress, childId }: ConfidenceStarProp
 
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
-      <h2 className="text-3xl font-heading text-kidoova-green mb-4">Your Confidence Star</h2>
+      <h2 className="text-2xl font-heading text-kidoova-green mb-4 text-center">Your Confidence Star</h2>
       <p className="text-sm text-gray-600 mb-6 text-center">Complete 75 Challenges in each pillar to complete your star!</p>
       <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
         <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
