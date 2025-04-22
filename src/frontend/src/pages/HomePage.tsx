@@ -392,7 +392,7 @@ export default function HomePage(): JSX.Element {
         <p className="text-lg mb-6">Join thousands of parents helping kids build confidence through practice, tracking, and rewards.</p>
         <center>
               <div 
-                id="google-login-button-hero" 
+                id="google-login-button-hero2" 
                 className="w-full max-w-md transform scale-125 md:scale-150"
               ></div></center>
       </section>
