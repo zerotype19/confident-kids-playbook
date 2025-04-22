@@ -76,12 +76,12 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-heading text-gray-900">Daily Challenge</h2>
       <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
         {/* Title Section */}
         <div className="text-center">
+          <h2 className="text-2xl font-heading text-gray-900 mb-4">Daily Challenge</h2>
           <div className="group relative inline-block">
-            <h2 className="text-2xl font-bold text-kidoova-green mb-2 cursor-help">
+            <h2 className="text-3xl font-bold text-kidoova-green mb-2 cursor-help">
               {challenge.title}
             </h2>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64">
