@@ -290,12 +290,11 @@ export default function HomePage(): JSX.Element {
         <p className="text-lg md:text-xl mb-6 max-w-2xl mx-auto">
           A research-backed app that helps parents build independence, resilience, and purpose—one daily challenge at a time.
         </p>
-        <Link
-          to="/onboarding"
-          className="inline-block bg-blue-600 text-white text-lg font-semibold py-3 px-6 rounded-xl shadow hover:bg-blue-700 transition"
-        >
-          Get Started Free
-        </Link>
+        <center>
+              <div 
+                id="google-login-button-hero" 
+                className="w-full max-w-md transform scale-125 md:scale-150"
+              ></div></center>
       </section>
 
       {/* Value Props */}
@@ -382,12 +381,11 @@ export default function HomePage(): JSX.Element {
       <section className="py-16 text-center">
         <h2 className="text-3xl font-bold mb-4">Try the 30-Day Confidence Challenge</h2>
         <p className="text-lg mb-6">Join thousands of parents building lifelong confidence one day at a time.</p>
-        <Link
-          to="/onboarding"
-          className="inline-block bg-green-600 text-white text-lg font-semibold py-3 px-6 rounded-xl shadow hover:bg-green-700 transition"
-        >
-          Start Your Free Trial
-        </Link>
+       <center>
+              <div 
+                id="google-login-button-hero" 
+                className="w-full max-w-md transform scale-125 md:scale-150"
+              ></div></center>
       </section>
     </div>
     </PageWrapper>
