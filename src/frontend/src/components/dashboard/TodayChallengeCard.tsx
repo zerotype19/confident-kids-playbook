@@ -136,24 +136,31 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
           </ul>
         </div>
 
-        {/* Tip Section */}
-        <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-          <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-            Helpful Tip
-          </h3>
-          <p className="text-text-base">
-            {challenge.tip}
-          </p>
-        </div>
+        {/* Tip and Example Icons */}
+        <div className="flex justify-center gap-6 mt-4">
+          {/* Helpful Tip Icon */}
+          <div className="group relative">
+            <div className="w-10 h-10 rounded-full bg-kidoova-background flex items-center justify-center cursor-help">
+              <svg className="w-6 h-6 text-kidoova-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64">
+              {challenge.tip}
+            </div>
+          </div>
 
-        {/* Example Dialogue */}
-        <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
-          <h3 className="text-lg font-semibold text-kidoova-green mb-2">
-            Try Saying This
-          </h3>
-          <p className="text-text-base italic">
-            "{challenge.example_dialogue}"
-          </p>
+          {/* Try Saying This Icon */}
+          <div className="group relative">
+            <div className="w-10 h-10 rounded-full bg-kidoova-background flex items-center justify-center cursor-help">
+              <svg className="w-6 h-6 text-kidoova-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64">
+              "{challenge.example_dialogue}"
+            </div>
+          </div>
         </div>
 
         {/* Mark Complete Button or Explore More Button */}
