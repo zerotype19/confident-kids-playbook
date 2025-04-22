@@ -283,109 +283,75 @@ export default function HomePage(): JSX.Element {
   return (
     <PageWrapper>
       {/* Main content */}
-      <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8">
+     <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8">
       {/* Hero Section */}
       <section className="text-center py-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Raising Confident Kids Starts Here</h1>
         <p className="text-lg md:text-xl mb-6 max-w-2xl mx-auto">
-          A research-backed app that helps parents build independence, resilience, and purpose—one daily challenge at a time.
+          A research-backed app that helps your child build independence, resilience, and purpose—one rewarding day at a time.
         </p>
-        <center>
+         <center>
               <div 
                 id="google-login-button-hero" 
                 className="w-full max-w-md transform scale-125 md:scale-150"
               ></div></center>
       </section>
 
-      {/* Value Props */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div>
-            <h3 className="text-xl font-semibold mb-2">Built on Science</h3>
-            <p>Proven techniques from child psychology to help kids grow strong inside and out.</p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">Easy for Parents</h3>
-            <p>Daily, snackable challenges that fit into real life—no parenting perfection required.</p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">Real Growth for Kids</h3>
-            <p>Boost independence, social skills, and self-belief in just a few minutes a day.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-16">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h4 className="text-lg font-semibold mb-2">1. Choose a Pillar</h4>
-              <p>Select one of five proven confidence-building areas tailored by age.</p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-2">2. Get a Daily Challenge</h4>
-              <p>Simple, actionable exercises to practice with your child—no prep required.</p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-2">3. Celebrate Growth</h4>
-              <p>Track your child’s progress and reinforce their wins with encouragement and reflection.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-8">What Parents Are Saying</h2>
-          <div className="space-y-8">
-            <blockquote className="text-lg italic">“I saw my daughter speak up for herself at school after just one week. This works.”<br /><span className="block mt-2 font-semibold">– Emily, Parent of 7-year-old</span></blockquote>
-            <blockquote className="text-lg italic">“We finally have a tool that’s both fun and meaningful. The daily challenges are a game-changer.”<br /><span className="block mt-2 font-semibold">– Jason, Dad of 2</span></blockquote>
-          </div>
-        </div>
-      </section>
-
-      {/* Scientific Credibility */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Why It Works</h2>
-          <p className="text-lg mb-6">
-            Based on research by child psychologists like Carol Dweck (Growth Mindset), Albert Bandura (Self-Efficacy), and studies from Harvard's SEL framework.
-          </p>
-          <p className="text-md text-gray-600">View sources and references in our parent guide.</p>
-        </div>
-      </section>
-
-      {/* Email Lead Capture */}
+      {/* App Preview Section */}
       <section className="py-16 bg-gray-100 text-center">
-        <h2 className="text-3xl font-bold mb-4">Download Our Free 30-Day Confidence Challenge</h2>
-        <p className="text-lg mb-6">Get a daily calendar of confidence-building prompts to start using today.</p>
-        <form className="max-w-md mx-auto flex flex-col md:flex-row gap-4">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="flex-grow p-3 rounded-lg border border-gray-300"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition"
-          >
-            Send Me the Calendar
-          </button>
-        </form>
+        <h2 className="text-3xl font-bold mb-4">See Kidoova In Action</h2>
+        <p className="text-lg mb-6">Scroll through a real walkthrough of how your child tracks progress, earns rewards, and builds confidence.</p>
+        <div className="flex justify-center">
+          <div className="w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
+            {/* Placeholder for demo video */}
+            <video
+              controls
+              autoPlay
+              muted
+              loop
+              className="w-full h-full object-cover"
+            >
+              <source src="/demo.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
       </section>
 
-      {/* Final Call to Action */}
+      {/* Rewards & Tracking */}
+      <section className="py-16 px-4">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-8">Track Growth. Celebrate Wins. Earn Rewards.</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition-shadow">
+              <div className="text-green-500 mb-4 text-4xl">🎯</div>
+              <h3 className="text-xl font-semibold mb-2">Daily Progress</h3>
+              <p>See how your child improves every day across five key areas of confidence.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition-shadow">
+              <div className="text-yellow-500 mb-4 text-4xl">🏆</div>
+              <h3 className="text-xl font-semibold mb-2">Confidence Rewards</h3>
+              <p>Earn points and unlock milestone badges as your child completes challenges and hits streaks.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition-shadow">
+              <div className="text-blue-500 mb-4 text-4xl">📊</div>
+              <h3 className="text-xl font-semibold mb-2">Visual Trackers</h3>
+              <p>Motivate your child with visual charts that highlight progress, consistency, and streaks.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
       <section className="py-16 text-center">
-        <h2 className="text-3xl font-bold mb-4">Try the 30-Day Confidence Challenge</h2>
-        <p className="text-lg mb-6">Join thousands of parents building lifelong confidence one day at a time.</p>
-       <center>
-              <div 
-                id="google-login-button-hero" 
-                className="w-full max-w-md transform scale-125 md:scale-150"
-              ></div></center>
+        <h2 className="text-3xl font-bold mb-4">Your Journey Starts Today</h2>
+        <p className="text-lg mb-6">Join thousands of parents helping kids build confidence through practice, tracking, and rewards.</p>
+        <Link
+          to="/onboarding"
+          className="inline-block bg-green-600 text-white text-lg font-semibold py-3 px-6 rounded-xl shadow hover:bg-green-700 transition"
+        >
+          Try the Confidence Challenge
+        </Link>
       </section>
     </div>
     </PageWrapper>
