@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import Modal from "../components/Modal"
 import PageWrapper from "../components/PageWrapper"
