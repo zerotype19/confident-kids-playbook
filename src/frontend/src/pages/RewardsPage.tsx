@@ -139,13 +139,13 @@ export default function RewardsPage() {
 
         {selectedChild ? (
           <>
-            <RewardsOverview 
-              progress={progress}
-            />
-
             <ConfidenceStar 
               progress={progress}
               childId={selectedChild.id}
+            />
+
+            <RewardsOverview 
+              progress={progress}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
