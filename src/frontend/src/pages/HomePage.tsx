@@ -282,187 +282,113 @@ export default function HomePage(): JSX.Element {
   return (
     <PageWrapper>
       {/* Main content */}
-      <div className="flex-grow">
-        {/* Hero Section */}
-        <section className="pt-16 pb-16 px-4 bg-gradient-to-b from-green-50 to-white">
-          <div className="container mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Empowering children to build confidence through play and practice
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Kidoova helps kids build self-esteem with fun daily challenges and progress tracking!
-            </p>
-            <div className="flex justify-center"><center>
-              <div 
-                id="google-login-button-hero" 
-                className="w-full max-w-md transform scale-125 md:scale-150"
-              ></div></center>
+      <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8">
+      {/* Hero Section */}
+      <section className="text-center py-16">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">Raising Confident Kids Starts Here</h1>
+        <p className="text-lg md:text-xl mb-6 max-w-2xl mx-auto">
+          A research-backed app that helps parents build independence, resilience, and purpose—one daily challenge at a time.
+        </p>
+        <Link
+          to="/onboarding"
+          className="inline-block bg-blue-600 text-white text-lg font-semibold py-3 px-6 rounded-xl shadow hover:bg-blue-700 transition"
+        >
+          Get Started Free
+        </Link>
+      </section>
+
+      {/* Value Props */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Built on Science</h3>
+            <p>Proven techniques from child psychology to help kids grow strong inside and out.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Easy for Parents</h3>
+            <p>Daily, snackable challenges that fit into real life—no parenting perfection required.</p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Real Growth for Kids</h3>
+            <p>Boost independence, social skills, and self-belief in just a few minutes a day.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-6">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="text-lg font-semibold mb-2">1. Choose a Pillar</h4>
+              <p>Select one of five proven confidence-building areas tailored by age.</p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-2">2. Get a Daily Challenge</h4>
+              <p>Simple, actionable exercises to practice with your child—no prep required.</p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-2">3. Celebrate Growth</h4>
+              <p>Track your child’s progress and reinforce their wins with encouragement and reflection.</p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features Section */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Daily Challenges Card */}
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-                <div className="text-green-500 mb-4">
-                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold mb-4">Daily Challenges</h2>
-                <p className="text-gray-600 mb-6">
-                  Help your child build confidence with bite-sized, daily tasks designed to improve problem-solving, social skills, and emotional growth.
-                </p>
-                <button 
-                  onClick={() => openModal('daily-challenges')}
-                  className="text-green-500 font-semibold hover:text-green-600 transition-colors"
-                >
-                  Learn More →
-                </button>
-              </div>
-
-              {/* Progress Tracking Card */}
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-                <div className="text-blue-500 mb-4">
-                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold mb-4">Progress Tracking</h2>
-                <p className="text-gray-600 mb-6">
-                  Stay motivated by seeing your child's progress and achievements in real-time!
-                </p>
-                <button 
-                  onClick={() => openModal('progress-tracking')}
-                  className="text-blue-500 font-semibold hover:text-blue-600 transition-colors"
-                >
-                  Learn More →
-                </button>
-              </div>
-
-              {/* Parent Resources Card */}
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-                <div className="text-yellow-500 mb-4">
-                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold mb-4">Parent Resources</h2>
-                <p className="text-gray-600 mb-6">
-                  Get expert tips, activities, and resources to make parenting easier while building your child's confidence.
-                </p>
-                <button 
-                  onClick={() => openModal('parent-resources')}
-                  className="text-yellow-500 font-semibold hover:text-yellow-600 transition-colors"
-                >
-                  Learn More →
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="py-16 px-4 bg-gray-50">
-          {/* Testimonials content */}
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 px-4">
-          {/* CTA content */}
-        </section>
-      </div>
-
-      {/* Modals */}
-      <Modal 
-        isOpen={activeModal === 'daily-challenges'} 
-        onClose={closeModal} 
-        title="Daily Challenges"
-      >
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Purpose</h3>
-            <p>Help your child grow their confidence through bite-sized, interactive tasks.</p>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Benefits</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Focus on problem-solving, social skills, and emotional growth.</li>
-              <li>Challenges are designed to be engaging and fun, keeping your child excited to learn every day.</li>
-              <li>Simple, actionable steps to build skills and self-esteem, one task at a time.</li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Example Challenge</h3>
-            <p className="italic">"Lead a group discussion and encourage others to participate."</p>
+      {/* Testimonials */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-8">What Parents Are Saying</h2>
+          <div className="space-y-8">
+            <blockquote className="text-lg italic">“I saw my daughter speak up for herself at school after just one week. This works.”<br /><span className="block mt-2 font-semibold">– Emily, Parent of 7-year-old</span></blockquote>
+            <blockquote className="text-lg italic">“We finally have a tool that’s both fun and meaningful. The daily challenges are a game-changer.”<br /><span className="block mt-2 font-semibold">– Jason, Dad of 2</span></blockquote>
           </div>
         </div>
-      </Modal>
+      </section>
 
-      <Modal 
-        isOpen={activeModal === 'progress-tracking'} 
-        onClose={closeModal} 
-        title="Progress Tracking"
-      >
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Purpose</h3>
-            <p>Keep track of your child's growth and development.</p>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Features</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>See real-time updates on your child's achievements and completed challenges.</li>
-              <li>Track streaks to encourage consistent progress.</li>
-              <li>Visual progress bars and milestones to make learning feel rewarding and fun.</li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Benefits</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Helps you stay motivated with clear visual tracking of your child's improvement.</li>
-              <li>Celebrate small wins and reward progress as your child moves toward their goals.</li>
-            </ul>
-          </div>
+      {/* Scientific Credibility */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">Why It Works</h2>
+          <p className="text-lg mb-6">
+            Based on research by child psychologists like Carol Dweck (Growth Mindset), Albert Bandura (Self-Efficacy), and studies from Harvard's SEL framework.
+          </p>
+          <p className="text-md text-gray-600">View sources and references in our parent guide.</p>
         </div>
-      </Modal>
+      </section>
 
-      <Modal 
-        isOpen={activeModal === 'parent-resources'} 
-        onClose={closeModal} 
-        title="Parent Resources"
-      >
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Purpose</h3>
-            <p>Access helpful tools, tips, and expert advice to support your child's journey.</p>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">What You'll Find</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Guides and articles on positive reinforcement, growth mindset, and confidence-building.</li>
-              <li>Expert parenting tips to help manage challenging situations and nurture a confident child.</li>
-              <li>Fun, interactive activities to enhance your parenting experience.</li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Benefits</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Get actionable tips you can start using today.</li>
-              <li>Learn how to build a strong emotional connection with your child while fostering independence and self-esteem.</li>
-            </ul>
-          </div>
-        </div>
-      </Modal>
+      {/* Email Lead Capture */}
+      <section className="py-16 bg-gray-100 text-center">
+        <h2 className="text-3xl font-bold mb-4">Download Our Free 30-Day Confidence Challenge</h2>
+        <p className="text-lg mb-6">Get a daily calendar of confidence-building prompts to start using today.</p>
+        <form className="max-w-md mx-auto flex flex-col md:flex-row gap-4">
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="flex-grow p-3 rounded-lg border border-gray-300"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Send Me the Calendar
+          </button>
+        </form>
+      </section>
+
+      {/* Final Call to Action */}
+      <section className="py-16 text-center">
+        <h2 className="text-3xl font-bold mb-4">Try the 30-Day Confidence Challenge</h2>
+        <p className="text-lg mb-6">Join thousands of parents building lifelong confidence one day at a time.</p>
+        <Link
+          to="/onboarding"
+          className="inline-block bg-green-600 text-white text-lg font-semibold py-3 px-6 rounded-xl shadow hover:bg-green-700 transition"
+        >
+          Start Your Free Trial
+        </Link>
+      </section>
+    </div>
     </PageWrapper>
   )
 } 
