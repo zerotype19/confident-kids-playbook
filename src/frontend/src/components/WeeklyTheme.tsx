@@ -89,7 +89,6 @@ export default function WeeklyTheme() {
       >
         <div 
           className="w-16 h-16 rounded-full flex items-center justify-center text-4xl"
-          style={{ backgroundColor: theme.pillar_color + '20' }}
         >
           {theme.pillar_icon}
         </div>
