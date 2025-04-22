@@ -390,12 +390,11 @@ export default function HomePage(): JSX.Element {
       <section className="py-16 text-center">
         <h2 className="text-3xl font-bold mb-4">Your Journey Starts Today</h2>
         <p className="text-lg mb-6">Join thousands of parents helping kids build confidence through practice, tracking, and rewards.</p>
-        <Link
-          to="/onboarding"
-          className="inline-block bg-green-600 text-white text-lg font-semibold py-3 px-6 rounded-xl shadow hover:bg-green-700 transition"
-        >
-          Try the Confidence Challenge
-        </Link>
+        <center>
+              <div 
+                id="google-login-button-hero" 
+                className="w-full max-w-md transform scale-125 md:scale-150"
+              ></div></center>
       </section>
     </div>
     </PageWrapper>
