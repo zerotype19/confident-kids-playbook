@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Reward, PILLAR_NAMES } from '../../types';
 
 interface TrophyCaseProps {
@@ -6,6 +6,8 @@ interface TrophyCaseProps {
 }
 
 export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
+  const [selectedPillar, setSelectedPillar] = useState<number>(1); // Default to pillar 1
+
   if (!rewards || rewards.length === 0) {
     return (
       <div className="h-full flex items-center justify-center p-8 bg-white rounded-lg shadow-xl">
@@ -23,8 +25,8 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
     .sort((a, b) => a.criteria_value - b.criteria_value);
 
   const pillarRewards = rewards
-    .filter(r => r.type === 'pillar')
-    .sort((a, b) => (a.pillar_id || 0) - (b.pillar_id || 0));
+    .filter(r => r.type === 'pillar' && r.pillar_id === selectedPillar)
+    .sort((a, b) => a.criteria_value - b.criteria_value);
 
   return (
     <div className="h-full bg-white rounded-lg shadow-xl p-6 overflow-y-auto">
@@ -68,9 +70,22 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
         )}
 
         {/* Pillar Trophies */}
-        {pillarRewards.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Pillar Trophies</h3>
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Pillar Trophies</h3>
+            <select
+              value={selectedPillar}
+              onChange={(e) => setSelectedPillar(Number(e.target.value))}
+              className="rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+            >
+              {Object.entries(PILLAR_NAMES).map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {pillarRewards.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
               {pillarRewards.map((reward) => (
                 <div
@@ -85,8 +100,12 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-gray-500 text-center py-4">
+              No rewards earned for {PILLAR_NAMES[selectedPillar as keyof typeof PILLAR_NAMES]} yet.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
