@@ -71,35 +71,37 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
 
         {/* Pillar Trophies */}
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold whitespace-nowrap">Pillar Trophies</h3>
-            <select
-              value={selectedPillar}
-              onChange={(e) => setSelectedPillar(Number(e.target.value))}
-              className="rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent w-60"
-            >
-              {Object.entries(PILLAR_NAMES).map(([id, name]) => (
-                <option key={id} value={id}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <h3 className="text-lg font-semibold mb-4">Pillar Trophies</h3>
           {pillarRewards.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-              {pillarRewards.map((reward) => (
-                <div
-                  key={reward.id}
-                  className="bg-gray-50 p-6 rounded-lg hover:shadow-md transition-shadow flex flex-col items-center text-center"
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-4">
+                {pillarRewards.map((reward) => (
+                  <div
+                    key={reward.id}
+                    className="bg-gray-50 p-6 rounded-lg hover:shadow-md transition-shadow flex flex-col items-center text-center"
+                  >
+                    <div className="text-5xl mb-3">{reward.icon}</div>
+                    <h4 className="font-medium text-lg mb-2">{reward.title}</h4>
+                    <p className="text-xs text-gray-500 italic">
+                      {reward.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-center">
+                <select
+                  value={selectedPillar}
+                  onChange={(e) => setSelectedPillar(Number(e.target.value))}
+                  className="rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent w-fit"
                 >
-                  <div className="text-5xl mb-3">{reward.icon}</div>
-                  <h4 className="font-medium text-lg mb-2">{reward.title}</h4>
-                  <p className="text-xs text-gray-500 italic">
-                    {reward.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+                  {Object.entries(PILLAR_NAMES).map(([id, name]) => (
+                    <option key={id} value={id}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
           ) : (
             <p className="text-gray-500 text-center py-4">
               No rewards earned for {PILLAR_NAMES[selectedPillar as keyof typeof PILLAR_NAMES]} yet.
