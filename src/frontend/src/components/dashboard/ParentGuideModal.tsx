@@ -11,7 +11,7 @@ export default function ParentGuideModal({ onClose }: ParentGuideModalProps) {
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          className="absolute top-6 right-6 text-gray-500 hover:text-gray-700"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -22,7 +22,7 @@ export default function ParentGuideModal({ onClose }: ParentGuideModalProps) {
         <div className="space-y-6">
           <h2 className="text-2xl font-heading text-kidoova-green flex items-center gap-2">
             <span>🧭</span>
-            How to Use Daily Challenges (Parent Guide)
+            How to Use Daily Challenges as Parents
           </h2>
 
           <p className="text-gray-700">

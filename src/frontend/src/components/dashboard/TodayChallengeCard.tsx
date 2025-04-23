@@ -113,7 +113,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
                 onClick={() => setShowGuide(true)}
                 className="absolute top-0 right-0 text-xs text-gray-500 hover:text-kidoova-green transition-colors"
               >
-                guide for parents
+                For Parents
               </button>
               <h2 className="text-2xl font-heading text-gray-900 mb-4">
                 {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
