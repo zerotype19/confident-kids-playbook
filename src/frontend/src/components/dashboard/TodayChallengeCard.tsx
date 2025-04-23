@@ -11,6 +11,7 @@ interface Challenge {
   tip: string;
   example_dialogue: string;
   pillar_id: number;
+  is_completed: boolean;
 }
 
 interface TodayChallengeCardProps {
@@ -22,7 +23,7 @@ interface TodayChallengeCardProps {
 export default function TodayChallengeCard({ challenge, childId, onComplete }: TodayChallengeCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(challenge?.is_completed || false);
   const [showReflection, setShowReflection] = useState(false);
   const navigate = useNavigate();
 

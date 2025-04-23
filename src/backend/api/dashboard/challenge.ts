@@ -69,24 +69,27 @@ export async function challenge({ request, env }: { request: Request; env: Env }
         WHERE week_number = CAST(strftime('%W', 'now') AS INTEGER) + 1
       )
       SELECT 
-        id,
-        title,
-        description,
-        goal,
-        steps,
-        example_dialogue,
-        tip,
-        pillar_id,
-        age_range,
-        difficulty_level
-      FROM challenges
-      WHERE REPLACE(age_range, '–', '-') = REPLACE(?, '–', '-')
-      AND pillar_id = (SELECT pillar_id FROM current_theme)
+        c.id,
+        c.title,
+        c.description,
+        c.goal,
+        c.steps,
+        c.example_dialogue,
+        c.tip,
+        c.pillar_id,
+        c.age_range,
+        c.difficulty_level,
+        CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
+      FROM challenges c
+      LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
+        AND cl.child_id = ?
+      WHERE REPLACE(c.age_range, '–', '-') = REPLACE(?, '–', '-')
+      AND c.pillar_id = (SELECT pillar_id FROM current_theme)
       AND NOT EXISTS (
         SELECT 1 
         FROM challenge_logs cl 
         WHERE cl.child_id = ? 
-        AND cl.challenge_id = challenges.id 
+        AND cl.challenge_id = c.id 
         AND date(cl.completed_at) = date('now')
       )
       ORDER BY RANDOM()
