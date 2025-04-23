@@ -24,10 +24,6 @@ export default function PostChallengeReflectionModal({
   const [reflection, setReflection] = useState('');
 
   const handleSubmit = async () => {
-    if (!reflection.trim()) {
-      alert('Please share your thoughts about the challenge');
-      return;
-    }
     await onSubmit({ feeling, reflection });
   };
 
@@ -68,7 +64,7 @@ export default function PostChallengeReflectionModal({
         </div>
 
         <label className="block text-sm font-medium mb-1 text-gray-700">
-          What made you feel that way?
+          What made you feel that way? (optional)
         </label>
         <textarea
           rows={3}
@@ -78,17 +74,10 @@ export default function PostChallengeReflectionModal({
           placeholder="Write a few words about your experience..."
         />
 
-        <div className="flex gap-4">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl hover:bg-gray-300 transition"
-            disabled={isSubmitting}
-          >
-            Skip
-          </button>
+        <div className="flex justify-end">
           <button
             onClick={handleSubmit}
-            className="flex-1 bg-kidoova-green text-white py-2 px-4 rounded-xl hover:bg-kidoova-green-dark transition disabled:opacity-50"
+            className="bg-kidoova-green text-white py-2 px-6 rounded-xl hover:bg-kidoova-green-dark transition disabled:opacity-50"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Saving...' : 'Save Reflection'}
