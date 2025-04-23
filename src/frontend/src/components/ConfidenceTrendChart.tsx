@@ -36,20 +36,25 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
   }));
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6">
       <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">Confidence Trend</h3>
-      <div className="relative w-full max-w-[600px] mx-auto aspect-square">
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 20 }}>
+      <div className="relative w-full max-w-[600px] mx-auto">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart 
+            data={chartData} 
+            margin={{ top: 10, right: 30, bottom: 10, left: 30 }}
+          >
             <XAxis 
               dataKey="date" 
               stroke="#6B7280"
               tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              tick={{ fontSize: 12 }}
             />
             <YAxis
               domain={[1, 5]}
               tickFormatter={(val) => emojiMap[val - 1]}
               stroke="#6B7280"
+              tick={{ fontSize: 16 }}
             />
             <Tooltip 
               formatter={(val) => labelMap[val as number - 1]}
@@ -67,7 +72,7 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
         </ResponsiveContainer>
       </div>
       {summary && (
-        <p className="mt-2 text-center text-sm text-gray-700 italic">{summary}</p>
+        <p className="mt-1 text-center text-sm text-gray-700 italic">{summary}</p>
       )}
     </div>
   );
