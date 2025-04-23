@@ -27,7 +27,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     
     // Insert the reflection
     const result = await db.prepare(
-      `INSERT INTO reflections (child_id, challenge_id, feeling, reflection, created_at)
+      `INSERT INTO challenge_reflections (child_id, challenge_id, feeling, reflection, timestamp)
        VALUES (?, ?, ?, ?, datetime('now'))`
     ).bind(data.child_id, data.challenge_id, data.feeling, data.reflection).run()
 
