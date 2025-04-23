@@ -20,9 +20,9 @@ export default function ParentGuideModal({ onClose }: ParentGuideModalProps) {
 
         {/* Content */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-heading text-kidoova-green flex items-center gap-2">
+          <h2 className="text-2xl font-heading text-kidoova-green flex items-center gap-2 pr-12">
             <span>🧭</span>
-            How to Use Daily Challenges as Parents
+            <span className="break-words">How to Use Daily Challenges as Parents</span>
           </h2>
 
           <p className="text-gray-700">

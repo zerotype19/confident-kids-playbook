@@ -111,7 +111,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
             <div className="text-center relative">
               <button
                 onClick={() => setShowGuide(true)}
-                className="absolute top-0 right-0 text-xs text-gray-500 hover:text-kidoova-green transition-colors"
+                className="absolute top-0 right-0 text-xs text-gray-500 hover:text-kidoova-accent transition-colors"
               >
                 For Parents
               </button>
