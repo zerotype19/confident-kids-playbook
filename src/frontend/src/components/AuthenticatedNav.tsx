@@ -59,6 +59,16 @@ const AuthenticatedNav: React.FC<AuthenticatedNavProps> = ({ isMenuOpen, onClose
               <span>Manage Children</span>
             </Link>
             <Link
+              to="/parent-guide"
+              onClick={onCloseMenu}
+              className={`flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 ${
+                location.pathname === '/parent-guide' ? 'bg-gray-50 border-l-4 border-kidoova-accent' : ''
+              }`}
+            >
+              <span className="mr-3 text-xl">📚</span>
+              <span>Parent Guide</span>
+            </Link>
+            <Link
               to="/manage-profile"
               onClick={onCloseMenu}
               className={`flex items-center px-6 py-3 text-gray-700 hover:bg-gray-50 ${

@@ -10,6 +10,7 @@ import PillarDetailPage from "./pages/PillarDetailPage"
 import RewardsPage from "./pages/RewardsPage"
 import ManageChildrenPage from "./pages/ManageChildrenPage"
 import { ManageProfilePage } from "./pages/ManageProfilePage"
+import ParentGuidePage from "./pages/ParentGuidePage"
 import PlaybookPage from "./pages/PlaybookPage"
 import SuccessPage from "./pages/SuccessPage"
 import CancelPage from "./pages/CancelPage"
@@ -112,6 +113,16 @@ export default function App(): JSX.Element {
                 <PrivateRoute>
                   <AuthenticatedPageWrapper>
                     <ManageChildrenPage />
+                  </AuthenticatedPageWrapper>
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/parent-guide" 
+              element={
+                <PrivateRoute>
+                  <AuthenticatedPageWrapper>
+                    <ParentGuidePage />
                   </AuthenticatedPageWrapper>
                 </PrivateRoute>
               } 
