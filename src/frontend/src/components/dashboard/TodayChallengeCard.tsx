@@ -112,12 +112,15 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
               <h2 className="text-2xl font-heading text-gray-900 mb-2">
                 {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
               </h2>
-              <button
-                onClick={() => setShowGuide(true)}
-                className="text-sm text-gray-500 hover:text-kidoova-accent transition-colors mb-4 block w-full"
-              >
-                Click for Parent's Guide
-              </button>
+              <div className="flex flex-col items-center mb-4">
+                <button
+                  onClick={() => setShowGuide(true)}
+                  className="text-sm text-gray-500 hover:text-kidoova-accent transition-colors px-4 py-1 rounded-full border border-gray-200 hover:border-kidoova-accent"
+                >
+                  Click for Parent's Guide
+                </button>
+                <div className="w-24 h-px bg-gray-200 mt-4"></div>
+              </div>
               <div className="group relative inline-block">
                 <h2 className="text-3xl font-bold text-kidoova-green mb-2 cursor-help">
                   {challenge.title}
