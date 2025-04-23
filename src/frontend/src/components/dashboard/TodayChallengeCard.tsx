@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
 
 interface Challenge {
   id: string;
@@ -22,7 +23,68 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
   const [isCompleting, setIsCompleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showReflection, setShowReflection] = useState(false);
   const navigate = useNavigate();
+
+  const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // First, save the reflection
+      const reflectionResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/reflection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          child_id: childId,
+          challenge_id: challenge?.id,
+          feeling,
+          reflection
+        })
+      });
+
+      if (!reflectionResponse.ok) {
+        throw new Error('Failed to save reflection');
+      }
+
+      // Then mark the challenge as complete
+      const challengeResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          child_id: childId,
+          challenge_id: challenge?.id
+        })
+      });
+
+      if (!challengeResponse.ok) {
+        throw new Error('Failed to mark challenge as complete');
+      }
+
+      setIsCompleted(true);
+      if (onComplete) {
+        onComplete();
+      }
+    } catch (err) {
+      console.error('Error completing challenge:', err);
+      setError(err instanceof Error ? err.message : 'Failed to complete challenge');
+    } finally {
+      setIsCompleting(false);
+      setShowReflection(false);
+    }
+  };
+
+  const handleMarkComplete = () => {
+    setShowReflection(true);
+  };
 
   if (!challenge) {
     return (
@@ -34,45 +96,6 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
       </div>
     );
   }
-
-  const handleMarkComplete = async () => {
-    setIsCompleting(true);
-    setError(null);
-
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          child_id: childId,
-          challenge_id: challenge.id
-        })
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to mark challenge as complete');
-      }
-
-      setIsCompleted(true);
-      if (onComplete) {
-        onComplete();
-      }
-    } catch (err) {
-      console.error('Error marking challenge complete:', err);
-      setError(err instanceof Error ? err.message : 'Failed to mark challenge as complete');
-    } finally {
-      setIsCompleting(false);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -204,6 +227,18 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
           </div>
         )}
       </div>
+
+      {/* Reflection Modal */}
+      {showReflection && (
+        <PostChallengeReflectionModal
+          onClose={() => {
+            setShowReflection(false);
+            setIsCompleting(false);
+          }}
+          onSubmit={handleReflectionSubmit}
+          isSubmitting={isCompleting}
+        />
+      )}
     </div>
   );
 } 
