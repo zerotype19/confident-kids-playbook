@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
 import { useChildContext } from '../../contexts/ChildContext';
+import ParentGuideModal from './ParentGuideModal';
 
 interface Challenge {
   id: string;
@@ -26,6 +27,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
   const [error, setError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(challenge?.is_completed || false);
   const [showReflection, setShowReflection] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const navigate = useNavigate();
   const { selectedChild } = useChildContext();
 
@@ -106,7 +108,13 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         {!isCompleted ? (
           <>
             {/* Title Section */}
-            <div className="text-center">
+            <div className="text-center relative">
+              <button
+                onClick={() => setShowGuide(true)}
+                className="absolute top-0 right-0 text-xs text-gray-500 hover:text-kidoova-green transition-colors"
+              >
+                guide for parents
+              </button>
               <h2 className="text-2xl font-heading text-gray-900 mb-4">
                 {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
               </h2>
@@ -245,6 +253,11 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
           onSubmit={handleReflectionSubmit}
           isSubmitting={isCompleting}
         />
+      )}
+
+      {/* Parent Guide Modal */}
+      {showGuide && (
+        <ParentGuideModal onClose={() => setShowGuide(false)} />
       )}
     </div>
   );
