@@ -1,6 +1,7 @@
 import { Router } from 'itty-router';
 import { onRequestGet as getChallenge, onRequestPost as completeChallenge } from './api/challenges';
 import { onRequestPost as chatbot, onRequestOptions as chatbotOptions } from './api/chatbot';
+import { onRequestPost as reflection } from './api/reflection';
 
 const router = Router();
 
@@ -11,6 +12,9 @@ router.options('/api/chatbot', chatbotOptions);
 // Challenge routes
 router.get('/api/challenges/:id', getChallenge);
 router.post('/api/challenges/:id/complete', completeChallenge);
+
+// Reflection routes
+router.post('/api/reflection', reflection);
 
 // Handle other OPTIONS requests
 router.options('*', (request: Request) => {

@@ -32,8 +32,8 @@ export default function PostChallengeReflectionModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
         <h2 className="text-xl font-bold mb-6 text-center text-kidoova-green">How confident did you feel?</h2>
 
         <div className="mb-6">
