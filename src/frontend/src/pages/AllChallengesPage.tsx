@@ -17,7 +17,6 @@ interface ChallengeFilters {
   pillarId: number | null;
   difficulty: number | null;
   title: string | null;
-  showCompleted: boolean;
 }
 
 interface DisplayedChallenge extends Challenge {
@@ -35,8 +34,7 @@ export default function AllChallengesPage() {
   const [filters, setFilters] = useState<ChallengeFilters>({
     pillarId: null,
     difficulty: null,
-    title: null,
-    showCompleted: false
+    title: null
   });
   const [showReflection, setShowReflection] = useState(false);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
@@ -167,7 +165,6 @@ export default function AllChallengesPage() {
       if (filters.pillarId && challenge.pillar_id !== filters.pillarId) return false;
       if (filters.difficulty && challenge.difficulty_level !== filters.difficulty) return false;
       if (filters.title && challenge.title !== filters.title) return false;
-      if (!filters.showCompleted && challenge.is_completed) return false;
       return true;
     });
 
@@ -194,8 +191,7 @@ export default function AllChallengesPage() {
     setFilters({
       pillarId: null,
       difficulty: null,
-      title: null,
-      showCompleted: false
+      title: null
     });
   };
 
@@ -402,23 +398,6 @@ export default function AllChallengesPage() {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                {/* Show Completed Toggle */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showCompleted"
-                    checked={filters.showCompleted}
-                    onChange={(e) => setFilters(prev => ({
-                      ...prev,
-                      showCompleted: e.target.checked
-                    }))}
-                    className="h-4 w-4 text-kidoova-accent focus:ring-kidoova-accent border-gray-300 rounded"
-                  />
-                  <label htmlFor="showCompleted" className="ml-2 block text-sm text-gray-700">
-                    Show Completed
-                  </label>
                 </div>
               </div>
 
