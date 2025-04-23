@@ -95,7 +95,7 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
                   <div className="text-5xl mb-3">{reward.icon}</div>
                   <h4 className="font-medium text-lg mb-2">{reward.title}</h4>
                   <p className="text-gray-600">
-                    {reward.pillar_id ? PILLAR_NAMES[reward.pillar_id as keyof typeof PILLAR_NAMES] : ''}
+                    {reward.pillar_id ? `${reward.criteria_value}` : ''}
                   </p>
                 </div>
               ))}
