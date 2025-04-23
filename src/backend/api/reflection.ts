@@ -8,7 +8,7 @@ interface ReflectionData {
   reflection: string
 }
 
-export async function onRequest(request: Request, env: Env) {
+export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
   if (request.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
   }
