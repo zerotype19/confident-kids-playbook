@@ -276,7 +276,7 @@ export default function DashboardPage() {
             {trendData.length > 0 && (
               <ConfidenceTrendChart data={trendData} summary={trendSummary} />
             )}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8">
               <div className="space-y-8">
                 <RewardsOverview progress={progress} />
                 <ProgressTracker progress={progress} childId={selectedChild.id} />
