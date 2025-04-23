@@ -15,13 +15,14 @@ const labelMap = ['Not Confident', 'A Little Unsure', 'Feeling Okay', 'Pretty Co
 interface ConfidenceTrendChartProps {
   data: ConfidenceData[];
   summary: string;
+  childName: string;
 }
 
-export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendChartProps) {
+export default function ConfidenceTrendChart({ data, summary, childName }: ConfidenceTrendChartProps) {
   if (data.length < 7) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">Confidence Trend</h3>
+        <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">{childName}'s Confidence Trend</h3>
         <p className="text-center text-gray-600">
           Complete 7 challenges to see your confidence trend
         </p>
@@ -37,7 +38,7 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6">
-      <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">Confidence Trend</h3>
+      <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">{childName}'s Confidence Trend</h3>
       <div className="relative w-full max-w-[600px] mx-auto">
         <div className="w-full h-[300px] sm:h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
