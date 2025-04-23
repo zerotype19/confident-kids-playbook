@@ -18,6 +18,17 @@ interface ConfidenceTrendChartProps {
 }
 
 export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendChartProps) {
+  if (data.length < 7) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">Confidence Trend</h3>
+        <p className="text-center text-gray-600">
+          Complete 7 challenges to see your confidence trend
+        </p>
+      </div>
+    );
+  }
+
   const chartData = [...data].reverse().map(d => ({
     ...d,
     emoji: emojiMap[d.feeling - 1],
