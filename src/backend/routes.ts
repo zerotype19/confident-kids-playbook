@@ -2,6 +2,7 @@ import { Router } from 'itty-router';
 import { onRequestGet as getChallenge, onRequestPost as completeChallenge } from './api/challenges';
 import { onRequestPost as chatbot, onRequestOptions as chatbotOptions } from './api/chatbot';
 import { saveReflection } from './api/reflection';
+import { onRequestGet as getConfidenceTrend } from './api/confidence-trend';
 
 const router = Router();
 
@@ -15,6 +16,9 @@ router.post('/api/challenges/:id/complete', completeChallenge);
 
 // Reflection routes
 router.post('/api/reflection', saveReflection);
+
+// Confidence trend route
+router.get('/api/confidence-trend', getConfidenceTrend);
 
 // Handle other OPTIONS requests
 router.options('*', (request: Request) => {

@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
 import { useAuth } from '../contexts/AuthContext';
 import WeeklyTheme from '../components/WeeklyTheme';
+import ConfidenceTrendChart from '../components/ConfidenceTrendChart';
+import { ConfidenceData } from '../utils/confidenceTrend';
 
 export default function DashboardPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -15,6 +17,8 @@ export default function DashboardPage() {
   const [children, setChildren] = useState<Child[]>([]);
   const [challenge, setChallenge] = useState<any>(null);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
+  const [trendData, setTrendData] = useState<ConfidenceData[]>([]);
+  const [trendSummary, setTrendSummary] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -154,6 +158,35 @@ export default function DashboardPage() {
     fetchData();
   }, [selectedChild, token]);
 
+  useEffect(() => {
+    const fetchConfidenceTrend = async () => {
+      if (!selectedChild?.id || !token) return;
+
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/confidence-trend?childId=${selectedChild.id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch confidence trend');
+        }
+
+        const { data, summary } = await response.json();
+        setTrendData(data);
+        setTrendSummary(summary);
+      } catch (error) {
+        console.error('Error fetching confidence trend:', error);
+      }
+    };
+
+    fetchConfidenceTrend();
+  }, [selectedChild?.id, token]);
+
   const handleChallengeComplete = () => {
     // Refresh the data after challenge completion
     if (selectedChild) {
@@ -240,6 +273,9 @@ export default function DashboardPage() {
               challenge={challenge}
               onComplete={handleChallengeComplete}
             />
+            {trendData.length > 0 && (
+              <ConfidenceTrendChart data={trendData} summary={trendSummary} />
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-8">
                 <RewardsOverview progress={progress} />
