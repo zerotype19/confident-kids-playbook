@@ -1,5 +1,6 @@
 import { Env } from '../types'
 import { D1Database } from '@cloudflare/workers-types'
+import { PagesFunction } from '@cloudflare/workers-types'
 
 interface ReflectionData {
   child_id: string
@@ -8,7 +9,9 @@ interface ReflectionData {
   reflection: string
 }
 
-export async function onRequestPost({ request, env }: { request: Request; env: Env }) {
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const { request, env } = context
+  
   if (request.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 })
   }
