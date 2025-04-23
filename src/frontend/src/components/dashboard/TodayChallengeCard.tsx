@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
 import { useChildContext } from '../../contexts/ChildContext';
-import ParentGuideModal from './ParentGuideModal';
+import ParentGuideDrawer from './ParentGuideDrawer';
 
 interface Challenge {
   id: string;
@@ -108,16 +108,16 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         {!isCompleted ? (
           <>
             {/* Title Section */}
-            <div className="text-center relative">
+            <div className="text-center">
+              <h2 className="text-2xl font-heading text-gray-900 mb-2">
+                {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
+              </h2>
               <button
                 onClick={() => setShowGuide(true)}
-                className="absolute top-0 right-0 text-xs text-gray-500 hover:text-kidoova-accent transition-colors"
+                className="text-xs text-gray-500 hover:text-kidoova-accent transition-colors mb-4"
               >
                 For Parents
               </button>
-              <h2 className="text-2xl font-heading text-gray-900 mb-4">
-                {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
-              </h2>
               <div className="group relative inline-block">
                 <h2 className="text-3xl font-bold text-kidoova-green mb-2 cursor-help">
                   {challenge.title}
@@ -255,10 +255,8 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         />
       )}
 
-      {/* Parent Guide Modal */}
-      {showGuide && (
-        <ParentGuideModal onClose={() => setShowGuide(false)} />
-      )}
+      {/* Parent Guide Drawer */}
+      <ParentGuideDrawer isOpen={showGuide} onClose={() => setShowGuide(false)} />
     </div>
   );
 } 
