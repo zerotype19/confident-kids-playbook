@@ -1,43 +1,43 @@
-import { nanoid } from 'nanoid';
-import { Env } from '../types';
-import { corsHeaders } from '../lib/cors';
-import { PagesFunction } from '@cloudflare/workers-types';
+import { Env } from '../types'
+import { D1Database } from '@cloudflare/workers-types'
 
-interface ReflectionRequest {
-  childId: string;
-  challengeId: string;
-  feeling: number;
-  reflection: string;
+interface ReflectionData {
+  child_id: string
+  challenge_id: string
+  feeling: number
+  reflection: string
 }
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context;
-  
-  try {
-    const { childId, challengeId, feeling, reflection } = await request.json() as ReflectionRequest;
+export async function onRequest(request: Request, env: Env) {
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 })
+  }
 
+  try {
+    const data = await request.json<ReflectionData>()
+    
     // Validate feeling is between 1 and 5
-    if (feeling < 1 || feeling > 5) {
-      return new Response(JSON.stringify({ error: 'Feeling must be between 1 and 5' }), {
-        status: 400,
-        headers: corsHeaders()
-      });
+    if (data.feeling < 1 || data.feeling > 5) {
+      return new Response('Feeling must be between 1 and 5', { status: 400 })
     }
 
+    const db = env.DB as D1Database
+    
     // Insert the reflection
-    await env.DB.prepare(
-      `INSERT INTO challenge_reflections (id, child_id, challenge_id, feeling, reflection) 
-       VALUES (?, ?, ?, ?, ?)`
-    ).bind(nanoid(), childId, challengeId, feeling, reflection).run();
+    const result = await db.prepare(
+      `INSERT INTO reflections (child_id, challenge_id, feeling, reflection, created_at)
+       VALUES (?, ?, ?, ?, datetime('now'))`
+    ).bind(data.child_id, data.challenge_id, data.feeling, data.reflection).run()
 
-    return new Response(JSON.stringify({ status: 'ok' }), {
-      headers: corsHeaders()
-    });
+    if (!result.success) {
+      throw new Error('Failed to insert reflection')
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' }
+    })
   } catch (error) {
-    console.error('Error saving reflection:', error);
-    return new Response(JSON.stringify({ error: 'Failed to save reflection' }), {
-      status: 500,
-      headers: corsHeaders()
-    });
+    console.error('Error saving reflection:', error)
+    return new Response('Failed to save reflection', { status: 500 })
   }
 } 
