@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Reward, PILLAR_NAMES } from '../../types';
 
 interface TrophyCaseProps {
   rewards: Reward[];
-  selectedPillar?: number;
 }
 
-export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards, selectedPillar = 1 }) => {
+export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
+  const [selectedPillar, setSelectedPillar] = useState<number>(1);
+
   if (!rewards || rewards.length === 0) {
     return (
       <div className="h-full flex items-center justify-center p-8 bg-white rounded-lg shadow-xl">
@@ -70,6 +71,19 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards, selectedPillar 
 
         {/* Pillar Trophies */}
         <div>
+          <div className="flex justify-end mb-2">
+            <select
+              value={selectedPillar}
+              onChange={(e) => setSelectedPillar(Number(e.target.value))}
+              className="w-60 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-kidoova-accent"
+            >
+              {Object.entries(PILLAR_NAMES).map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
           <h3 className="text-lg font-semibold mb-4">Pillar Trophies</h3>
           {pillarRewards.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
