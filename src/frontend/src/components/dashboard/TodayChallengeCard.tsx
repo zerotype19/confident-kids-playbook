@@ -111,11 +111,11 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
             <div className="relative">
               <span
                 onClick={() => setShowGuide(true)}
-                className="absolute top-0 right-0 text-xs text-gray-400 hover:text-kidoova-accent transition-colors cursor-pointer"
+                className="absolute -top-1 right-0 text-xs text-gray-400 hover:text-kidoova-accent transition-colors cursor-pointer mb-2"
               >
                 Click for Parent's Guide
               </span>
-              <div className="text-center">
+              <div className="text-center pt-4">
                 <h2 className="text-2xl font-heading text-gray-900 mb-2">
                   {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
                 </h2>
