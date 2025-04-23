@@ -94,7 +94,7 @@ export async function challenge({ request, env }: { request: Request; env: Env }
       )
       ORDER BY RANDOM()
       LIMIT 1
-    `).bind(child.age_range, childId).first<ChallengeResult>();
+    `).bind(childId, child.age_range, childId).first<ChallengeResult>();
 
     if (!result) {
       console.log('No challenges found for age range:', child.age_range);
