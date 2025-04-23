@@ -104,48 +104,48 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
 
   return (
     <div className="space-y-6">
-      <div className="text-right">
-        <span
-          onClick={() => setShowGuide(true)}
-          className="text-xs text-gray-400 hover:text-kidoova-accent transition-colors cursor-pointer"
-        >
-          Click for Parent's Guide
-        </span>
-      </div>
       <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
         {!isCompleted ? (
           <>
             {/* Title Section */}
-            <div className="text-center">
-              <h2 className="text-2xl font-heading text-gray-900 mb-2">
-                {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
-              </h2>
-              <div className="group relative inline-block">
-                <h2 className="text-3xl font-bold text-kidoova-green mb-2 cursor-help">
-                  {challenge.title}
+            <div className="relative">
+              <span
+                onClick={() => setShowGuide(true)}
+                className="absolute top-0 right-0 text-xs text-gray-400 hover:text-kidoova-accent transition-colors cursor-pointer"
+              >
+                Click for Parent's Guide
+              </span>
+              <div className="text-center">
+                <h2 className="text-2xl font-heading text-gray-900 mb-2">
+                  {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
                 </h2>
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64">
-                  {challenge.description}
+                <div className="group relative inline-block">
+                  <h2 className="text-3xl font-bold text-kidoova-green mb-2 cursor-help">
+                    {challenge.title}
+                  </h2>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64">
+                    {challenge.description}
+                  </div>
                 </div>
-              </div>
-              <div className="mt-2">
-                <span 
-                  className="text-xs font-medium px-2 py-1 rounded-full"
-                  style={{
-                    backgroundColor: challenge.pillar_id === 1 ? '#F7B801' :
-                                   challenge.pillar_id === 2 ? '#38A169' :
-                                   challenge.pillar_id === 3 ? '#4299E1' :
-                                   challenge.pillar_id === 4 ? '#805AD5' :
-                                   '#E53E3E',
-                    color: 'white'
-                  }}
-                >
-                  {challenge.pillar_id === 1 ? 'Independence & Problem-Solving' :
-                   challenge.pillar_id === 2 ? 'Growth Mindset & Resilience' :
-                   challenge.pillar_id === 3 ? 'Social Confidence & Communication' :
-                   challenge.pillar_id === 4 ? 'Purpose & Strength Discovery' :
-                   'Managing Fear & Anxiety'}
-                </span>
+                <div className="mt-2">
+                  <span 
+                    className="text-xs font-medium px-2 py-1 rounded-full"
+                    style={{
+                      backgroundColor: challenge.pillar_id === 1 ? '#F7B801' :
+                                     challenge.pillar_id === 2 ? '#38A169' :
+                                     challenge.pillar_id === 3 ? '#4299E1' :
+                                     challenge.pillar_id === 4 ? '#805AD5' :
+                                     '#E53E3E',
+                      color: 'white'
+                    }}
+                  >
+                    {challenge.pillar_id === 1 ? 'Independence & Problem-Solving' :
+                     challenge.pillar_id === 2 ? 'Growth Mindset & Resilience' :
+                     challenge.pillar_id === 3 ? 'Social Confidence & Communication' :
+                     challenge.pillar_id === 4 ? 'Purpose & Strength Discovery' :
+                     'Managing Fear & Anxiety'}
+                  </span>
+                </div>
               </div>
             </div>
 
