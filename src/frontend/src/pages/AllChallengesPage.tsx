@@ -5,6 +5,7 @@ import { Child, Challenge, PILLAR_NAMES } from '../types';
 import { useChildContext } from '../contexts/ChildContext';
 import Icon from '../components/common/Icon';
 import CustomButton from '../components/CustomButton';
+import PostChallengeReflectionModal from '../components/challenges/PostChallengeReflectionModal';
 
 interface ChallengeGroup {
   pillar_id: number;
@@ -37,6 +38,9 @@ export default function AllChallengesPage() {
     title: null,
     showCompleted: false
   });
+  const [showReflection, setShowReflection] = useState(false);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
   const navigate = useNavigate();
 
   // Get pillar from URL query parameter
@@ -195,36 +199,49 @@ export default function AllChallengesPage() {
     });
   };
 
-  // Handle challenge completion
-  const handleChallengeComplete = async (challengeId: string) => {
+  const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
+    if (!selectedChild || !selectedChallengeId) return;
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      if (!selectedChild?.id) {
-        throw new Error('No child selected');
+      // First, save the reflection
+      const reflectionResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/reflection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          child_id: selectedChild.id,
+          challenge_id: selectedChallengeId,
+          feeling,
+          reflection
+        })
+      });
+
+      if (!reflectionResponse.ok) {
+        throw new Error('Failed to save reflection');
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/challenge-log`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            child_id: selectedChild.id,
-            challenge_id: challengeId
-          })
-        }
-      );
+      // Then mark the challenge as complete
+      const challengeResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          child_id: selectedChild.id,
+          challenge_id: selectedChallengeId
+        })
+      });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to complete challenge');
+      if (!challengeResponse.ok) {
+        throw new Error('Failed to mark challenge as complete');
       }
 
       // Refresh challenges after successful completion
@@ -273,7 +290,16 @@ export default function AllChallengesPage() {
     } catch (err) {
       console.error('Error completing challenge:', err);
       throw err;
+    } finally {
+      setIsCompleting(false);
+      setShowReflection(false);
+      setSelectedChallengeId(null);
     }
+  };
+
+  const handleChallengeComplete = (challengeId: string) => {
+    setSelectedChallengeId(challengeId);
+    setShowReflection(true);
   };
 
   if (isLoading) {
@@ -557,6 +583,19 @@ export default function AllChallengesPage() {
           </div>
         )}
       </div>
+
+      {/* Add the reflection modal */}
+      {showReflection && (
+        <PostChallengeReflectionModal
+          onClose={() => {
+            setShowReflection(false);
+            setSelectedChallengeId(null);
+            setIsCompleting(false);
+          }}
+          onSubmit={handleReflectionSubmit}
+          isSubmitting={isCompleting}
+        />
+      )}
     </div>
   );
 } 
