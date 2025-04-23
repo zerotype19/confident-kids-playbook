@@ -83,18 +83,20 @@ export default function WeeklyTheme() {
 
   return (
     <div className="mb-6">
-      <div className="flex items-start gap-4">
-        <div 
-          className="w-20 h-20 rounded-full flex items-center justify-center text-5xl"
-        >
-          {theme.pillar_icon}
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">This week's theme:</p>
-          <h2 className="text-3xl font-heading">{theme.title}</h2>
-          <p className="text-lg text-gray-600 -mt-1">
-            {theme.description} - Week {theme.week_number}
-          </p>
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="flex items-start gap-4">
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center text-5xl"
+          >
+            {theme.pillar_icon}
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">This week's theme:</p>
+            <h2 className="text-3xl font-heading">{theme.title}</h2>
+            <p className="text-lg text-gray-600 -mt-1">
+              {theme.description} - Week {theme.week_number}
+            </p>
+          </div>
         </div>
       </div>
     </div>
