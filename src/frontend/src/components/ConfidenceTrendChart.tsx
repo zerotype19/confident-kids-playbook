@@ -43,14 +43,14 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
           <ResponsiveContainer width="100%" height="100%">
             <LineChart 
               data={chartData} 
-              margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
+              margin={{ top: 10, right: 20, bottom: 10, left: 10 }}
             >
               <XAxis 
                 dataKey="date" 
                 stroke="#6B7280"
                 tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 tick={{ fontSize: 12 }}
-                padding={{ left: 10, right: 10 }}
+                padding={{ left: 5, right: 10 }}
               />
               <YAxis
                 domain={[1, 5]}
@@ -58,6 +58,7 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
                 stroke="#6B7280"
                 tick={{ fontSize: 16 }}
                 padding={{ top: 10, bottom: 10 }}
+                width={40}
               />
               <Tooltip 
                 formatter={(val) => labelMap[val as number - 1]}
