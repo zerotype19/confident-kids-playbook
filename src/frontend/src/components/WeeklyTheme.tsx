@@ -57,7 +57,7 @@ export default function WeeklyTheme() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-xl p-6 animate-pulse">
+      <div className="animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
         <div className="h-4 bg-gray-200 rounded w-2/3"></div>
       </div>
@@ -67,7 +67,7 @@ export default function WeeklyTheme() {
   if (error) {
     console.error('Theme error state:', error);
     return (
-      <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
+      <div className="mb-6">
         <div className="text-red-500">
           <p>Unable to load this week's theme.</p>
           <p className="text-sm mt-1">{error}</p>
@@ -82,11 +82,8 @@ export default function WeeklyTheme() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
-      <div 
-        className="flex items-start gap-4 p-4 rounded-lg"
-        style={{ backgroundColor: theme.pillar_color + '20' }}
-      >
+    <div className="mb-6">
+      <div className="flex items-start gap-4">
         <div 
           className="w-20 h-20 rounded-full flex items-center justify-center text-5xl"
         >

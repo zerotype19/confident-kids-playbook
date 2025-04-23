@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
+import { useChildContext } from '../../contexts/ChildContext';
 
 interface Challenge {
   id: string;
@@ -26,6 +27,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
   const [isCompleted, setIsCompleted] = useState(challenge?.is_completed || false);
   const [showReflection, setShowReflection] = useState(false);
   const navigate = useNavigate();
+  const { selectedChild } = useChildContext();
 
   const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
     try {
@@ -105,7 +107,9 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
           <>
             {/* Title Section */}
             <div className="text-center">
-              <h2 className="text-2xl font-heading text-gray-900 mb-4">Daily Challenge</h2>
+              <h2 className="text-2xl font-heading text-gray-900 mb-4">
+                {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
+              </h2>
               <div className="group relative inline-block">
                 <h2 className="text-3xl font-bold text-kidoova-green mb-2 cursor-help">
                   {challenge.title}
@@ -212,7 +216,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="font-semibold">Challenge Completed!</span>
+              <span className="font-semibold">Daily Challenge Completed</span>
             </div>
             <button
               onClick={() => navigate('/all-challenges')}

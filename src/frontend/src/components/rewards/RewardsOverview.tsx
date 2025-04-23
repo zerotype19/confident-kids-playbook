@@ -23,7 +23,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Total Challenges Completed */}
-        <div className="bg-kidoova-yellow/10 rounded-lg p-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Challenges Completed</h3>
           <div className="flex items-center gap-4">
             <div className="text-3xl">🎯</div>
@@ -37,7 +37,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
         </div>
 
         {/* Weekly Challenges */}
-        <div className="bg-kidoova-yellow/10 rounded-lg p-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-2">This Week's Progress</h3>
           <div className="flex items-center gap-4">
             <div className="text-3xl">📅</div>
