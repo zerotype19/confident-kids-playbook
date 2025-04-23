@@ -29,6 +29,7 @@ import { onRequestPost as billingCreateCheckout } from './api/billing_create_che
 import { onRequestGet as billingPrices } from './api/billing_prices'
 import { onRequestPost as chatbot } from './api/chatbot'
 import { onRequestGet as theme } from './api/dashboard/theme'
+import { onRequestPost as reflection } from './api/reflection'
 
 const router = Router()
 
@@ -160,6 +161,9 @@ router.post('/api/chatbot', (request, context) => {
   });
   return chatbot({ request, env: context.env });
 });
+
+// Reflection route
+router.post('/api/reflection', reflection)
 
 // Add catch-all route for debugging
 router.all('*', (request) => {
