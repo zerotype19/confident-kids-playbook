@@ -25,11 +25,17 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
     const db = env.DB as D1Database
     
-    // Insert the reflection
+    // Insert the reflection with a UUID
     const result = await db.prepare(
-      `INSERT INTO challenge_reflections (child_id, challenge_id, feeling, reflection, timestamp)
-       VALUES (?, ?, ?, ?, datetime('now'))`
-    ).bind(data.child_id, data.challenge_id, data.feeling, data.reflection).run()
+      `INSERT INTO challenge_reflections (id, child_id, challenge_id, feeling, reflection, timestamp)
+       VALUES (?, ?, ?, ?, ?, datetime('now'))`
+    ).bind(
+      crypto.randomUUID(),
+      data.child_id,
+      data.challenge_id,
+      data.feeling,
+      data.reflection || null
+    ).run()
 
     if (!result.success) {
       throw new Error('Failed to insert reflection')
