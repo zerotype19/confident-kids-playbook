@@ -40,7 +40,7 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
       <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">Confidence Trend</h3>
       <div className="relative w-full max-w-[600px] mx-auto aspect-square">
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={chartData}>
+          <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 20 }}>
             <XAxis 
               dataKey="date" 
               stroke="#6B7280"
@@ -67,7 +67,7 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
         </ResponsiveContainer>
       </div>
       {summary && (
-        <p className="mt-4 text-center text-sm text-gray-700 italic">{summary}</p>
+        <p className="mt-2 text-center text-sm text-gray-700 italic">{summary}</p>
       )}
     </div>
   );
