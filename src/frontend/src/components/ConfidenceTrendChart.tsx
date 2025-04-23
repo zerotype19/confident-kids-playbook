@@ -39,37 +39,41 @@ export default function ConfidenceTrendChart({ data, summary }: ConfidenceTrendC
     <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6">
       <h3 className="text-2xl font-heading text-kidoova-green mb-4 text-center">Confidence Trend</h3>
       <div className="relative w-full max-w-[600px] mx-auto">
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart 
-            data={chartData} 
-            margin={{ top: 10, right: 30, bottom: 10, left: 30 }}
-          >
-            <XAxis 
-              dataKey="date" 
-              stroke="#6B7280"
-              tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              tick={{ fontSize: 12 }}
-            />
-            <YAxis
-              domain={[1, 5]}
-              tickFormatter={(val) => emojiMap[val - 1]}
-              stroke="#6B7280"
-              tick={{ fontSize: 16 }}
-            />
-            <Tooltip 
-              formatter={(val) => labelMap[val as number - 1]}
-              labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-            />
-            <Line
-              type="monotone"
-              dataKey="feeling"
-              stroke="#10B981"
-              strokeWidth={3}
-              dot={{ r: 6 }}
-              activeDot={{ r: 8 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="w-full h-[300px] sm:h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart 
+              data={chartData} 
+              margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
+            >
+              <XAxis 
+                dataKey="date" 
+                stroke="#6B7280"
+                tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                tick={{ fontSize: 12 }}
+                padding={{ left: 10, right: 10 }}
+              />
+              <YAxis
+                domain={[1, 5]}
+                tickFormatter={(val) => emojiMap[val - 1]}
+                stroke="#6B7280"
+                tick={{ fontSize: 16 }}
+                padding={{ top: 10, bottom: 10 }}
+              />
+              <Tooltip 
+                formatter={(val) => labelMap[val as number - 1]}
+                labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              />
+              <Line
+                type="monotone"
+                dataKey="feeling"
+                stroke="#10B981"
+                strokeWidth={3}
+                dot={{ r: 6 }}
+                activeDot={{ r: 8 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
       {summary && (
         <p className="mt-1 text-center text-sm text-gray-700 italic">{summary}</p>
