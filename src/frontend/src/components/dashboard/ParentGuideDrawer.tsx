@@ -10,19 +10,9 @@ export default function ParentGuideDrawer({ isOpen, onClose }: ParentGuideDrawer
     <div className={`fixed inset-0 flex items-end justify-center transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
       <div className="w-[95%] max-w-2xl mx-auto">
         <div className="bg-white rounded-t-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto border border-gray-200">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
           {/* Content */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-heading text-kidoova-green flex items-center gap-2 pr-12">
+            <h2 className="text-2xl font-heading text-kidoova-green flex items-center gap-2">
               <span>🧭</span>
               <span className="break-words">How to Use Daily Challenges as Parents</span>
             </h2>
@@ -84,6 +74,19 @@ export default function ParentGuideDrawer({ isOpen, onClose }: ParentGuideDrawer
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Close button at bottom */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 flex items-center gap-2"
+            >
+              <span>Close</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
