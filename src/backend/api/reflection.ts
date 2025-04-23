@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import { Env } from '../types';
 import { corsHeaders } from '../lib/cors';
+import { PagesFunction } from '@cloudflare/workers-types';
 
 interface ReflectionRequest {
   childId: string;
@@ -9,9 +10,10 @@ interface ReflectionRequest {
   reflection: string;
 }
 
-export async function onRequestPost(context: { request: Request; env: Env }) {
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const { request, env } = context;
+  
   try {
-    const { request, env } = context;
     const { childId, challengeId, feeling, reflection } = await request.json() as ReflectionRequest;
 
     // Validate feeling is between 1 and 5
