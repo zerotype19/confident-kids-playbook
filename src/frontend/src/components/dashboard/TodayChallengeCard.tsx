@@ -104,7 +104,13 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
+      <div 
+        onClick={() => setShowGuide(true)}
+        className="bg-white rounded-2xl shadow-xl p-6 space-y-6 relative group cursor-pointer hover:border-2 hover:border-kidoova-accent transition-all duration-200"
+      >
+        <div className="absolute top-4 right-4 text-xs text-gray-400 group-hover:text-kidoova-accent transition-colors">
+          Click for Parent's Guide
+        </div>
         {!isCompleted ? (
           <>
             {/* Title Section */}
@@ -112,15 +118,6 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
               <h2 className="text-2xl font-heading text-gray-900 mb-2">
                 {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
               </h2>
-              <div className="flex flex-col items-center mb-4">
-                <button
-                  onClick={() => setShowGuide(true)}
-                  className="text-sm text-gray-500 hover:text-kidoova-accent transition-colors px-4 py-1 rounded-full border border-gray-200 hover:border-kidoova-accent"
-                >
-                  Click for Parent's Guide
-                </button>
-                <div className="w-24 h-px bg-gray-200 mt-4"></div>
-              </div>
               <div className="group relative inline-block">
                 <h2 className="text-3xl font-bold text-kidoova-green mb-2 cursor-help">
                   {challenge.title}
