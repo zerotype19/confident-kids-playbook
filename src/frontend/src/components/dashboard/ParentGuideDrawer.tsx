@@ -8,7 +8,7 @@ interface ParentGuideDrawerProps {
 export default function ParentGuideDrawer({ isOpen, onClose }: ParentGuideDrawerProps) {
   return (
     <div className={`fixed inset-0 flex items-end justify-center transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
-      <div className="w-[95%] max-w-2xl mx-auto">
+      <div className="w-[95%] max-w-2xl mx-auto relative" style={{ marginLeft: 'calc(240px + 1rem)' }}>
         <div className="bg-white rounded-t-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto border border-gray-200">
           {/* Content */}
           <div className="space-y-6">
