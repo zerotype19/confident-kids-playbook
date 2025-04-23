@@ -6,10 +6,10 @@ import AuthenticatedPageWrapper from '../components/AuthenticatedPageWrapper';
 const ParentGuidePage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">🧭 Kidoova Parent Guide</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Kidoova Parent Guide</h1>
       <p className="text-xl text-gray-600 mb-12">Helping Your Child Build Confidence, One Day at a Time</p>
       
-      <div className="prose prose-lg max-w-none">
+      <div className="prose prose-lg max-w-none text-gray-900">
         <section className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">💡 What Is Kidoova?</h2>
           <p className="mb-4">
