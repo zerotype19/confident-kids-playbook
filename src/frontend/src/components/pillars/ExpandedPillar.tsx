@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pillar, Challenge } from '../../types';
+import { useChildContext } from '../../contexts/ChildContext';
+import { Challenge } from '../../types';
 
 interface ExpandedPillarProps {
-  pillar: Pillar;
+  pillar: {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    color: string;
+  };
   childId: string;
 }
 
 export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps) {
   const navigate = useNavigate();
+  const { selectedChild } = useChildContext();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -131,7 +139,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
           
           <div className="mt-4">
             <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Progress</span>
+              <span>{selectedChild?.name}'s Progress</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
