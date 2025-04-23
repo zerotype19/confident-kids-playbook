@@ -30,6 +30,7 @@ import { onRequestGet as billingPrices } from './api/billing_prices'
 import { onRequestPost as chatbot } from './api/chatbot'
 import { onRequestGet as theme } from './api/dashboard/theme'
 import { onRequestPost as reflection } from './api/reflection'
+import { onRequestGet as getConfidenceTrend } from './api/confidence-trend'
 
 const router = Router()
 
@@ -124,6 +125,7 @@ router.put('/api/children/:id', (request, context) => {
 // Dashboard routes
 router.get('/api/dashboard/challenge', (request, context) => challenge({ request, env: context.env }))
 router.get('/api/dashboard/theme', (request, context) => theme({ request, env: context.env }))
+router.get('/api/confidence-trend', (request, context) => getConfidenceTrend({ request, env: context.env }))
 router.post('/api/challenge-log', (request, context) => challengeLog({ request, env: context.env }))
 router.get('/api/progress', (request, context) => progress({ request, env: context.env }))
 router.get('/api/rewards/:childId', (request, context) => rewards({ request, env: context.env }))
