@@ -330,7 +330,7 @@ export default function AllChallengesPage() {
           <>
             {/* Filter Options */}
             <div className="bg-white rounded-xl shadow-xl p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Pillar Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
