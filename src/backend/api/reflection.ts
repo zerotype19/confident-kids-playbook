@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Env } from '../types'
 import { D1Database } from '@cloudflare/workers-types'
 
 interface ReflectionData {
@@ -8,16 +8,22 @@ interface ReflectionData {
   reflection: string
 }
 
-export async function saveReflection(req: Request, res: Response) {
+export async function onRequestPost(context: { request: Request; env: Env }) {
+  const { request, env } = context
+  
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 })
+  }
+
   try {
-    const data = req.body as ReflectionData
+    const data = await request.json<ReflectionData>()
     
     // Validate feeling is between 1 and 5
     if (data.feeling < 1 || data.feeling > 5) {
-      return res.status(400).json({ error: 'Feeling must be between 1 and 5' })
+      return new Response('Feeling must be between 1 and 5', { status: 400 })
     }
 
-    const db = req.app.locals.db as D1Database
+    const db = env.DB as D1Database
     
     // Insert the reflection
     const result = await db.prepare(
@@ -29,9 +35,11 @@ export async function saveReflection(req: Request, res: Response) {
       throw new Error('Failed to insert reflection')
     }
 
-    return res.json({ success: true })
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' }
+    })
   } catch (error) {
     console.error('Error saving reflection:', error)
-    return res.status(500).json({ error: 'Failed to save reflection' })
+    return new Response('Failed to save reflection', { status: 500 })
   }
 } 
