@@ -1,6 +1,5 @@
-import { Env } from '../types'
+import { Request, Response } from 'express'
 import { D1Database } from '@cloudflare/workers-types'
-import { PagesFunction } from '@cloudflare/workers-types'
 
 interface ReflectionData {
   child_id: string
@@ -9,22 +8,16 @@ interface ReflectionData {
   reflection: string
 }
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context
-  
-  if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
-  }
-
+export async function saveReflection(req: Request, res: Response) {
   try {
-    const data = await request.json<ReflectionData>()
+    const data = req.body as ReflectionData
     
     // Validate feeling is between 1 and 5
     if (data.feeling < 1 || data.feeling > 5) {
-      return new Response('Feeling must be between 1 and 5', { status: 400 })
+      return res.status(400).json({ error: 'Feeling must be between 1 and 5' })
     }
 
-    const db = env.DB as D1Database
+    const db = req.app.locals.db as D1Database
     
     // Insert the reflection
     const result = await db.prepare(
@@ -36,11 +29,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       throw new Error('Failed to insert reflection')
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return res.json({ success: true })
   } catch (error) {
     console.error('Error saving reflection:', error)
-    return new Response('Failed to save reflection', { status: 500 })
+    return res.status(500).json({ error: 'Failed to save reflection' })
   }
 } 

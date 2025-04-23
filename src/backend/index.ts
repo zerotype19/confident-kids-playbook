@@ -163,7 +163,14 @@ router.post('/api/chatbot', (request, context) => {
 });
 
 // Reflection route
-router.post('/api/reflection', reflection)
+console.log('🔧 Registering reflection route: POST /api/reflection');
+router.post('/api/reflection', (request, context) => {
+  console.log('📥 Reflection route handler called:', {
+    method: request.method,
+    url: request.url
+  });
+  return reflection({ request, env: context.env });
+});
 
 // Add catch-all route for debugging
 router.all('*', (request) => {
