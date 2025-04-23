@@ -76,7 +76,7 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
             <select
               value={selectedPillar}
               onChange={(e) => setSelectedPillar(Number(e.target.value))}
-              className="rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent w-48"
+              className="rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent w-56"
             >
               {Object.entries(PILLAR_NAMES).map(([id, name]) => (
                 <option key={id} value={id}>
@@ -94,9 +94,6 @@ export const TrophyCase: React.FC<TrophyCaseProps> = ({ rewards }) => {
                 >
                   <div className="text-5xl mb-3">{reward.icon}</div>
                   <h4 className="font-medium text-lg mb-2">{reward.title}</h4>
-                  <p className="text-gray-600 mb-1">
-                    {reward.pillar_id ? `${reward.criteria_value}` : ''}
-                  </p>
                   <p className="text-xs text-gray-500 italic">
                     {reward.description}
                   </p>
