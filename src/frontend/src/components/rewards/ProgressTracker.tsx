@@ -78,7 +78,7 @@ export default function ProgressTracker({ progress, childId }: ProgressTrackerPr
                   {PILLAR_NAMES[parseInt(pillarId) as keyof typeof PILLAR_NAMES]}
                 </span>
                 <span className="text-gray-600">
-                  {data.completed} of {data.total} challenges
+                  {data.completed} of {data.total}
                 </span>
               </div>
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
