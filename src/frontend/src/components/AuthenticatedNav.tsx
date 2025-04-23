@@ -47,7 +47,7 @@ const AuthenticatedNav: React.FC<AuthenticatedNavProps> = ({ isMenuOpen, onClose
               </Link>
             ))}
           </div>
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-gray-200">
             <Link
               to="/manage-children"
               onClick={onCloseMenu}
