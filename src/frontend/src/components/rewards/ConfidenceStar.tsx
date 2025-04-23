@@ -71,7 +71,7 @@ const createCenterStarPath = (cx: number, cy: number, spikes: number, outerRadiu
 export default function ConfidenceStar({ progress, childId, childName }: ConfidenceStarProps) {
   if (!progress) return null;
 
-  const MAX_CHALLENGES = 75;
+  const MAX_CHALLENGES = 35;
   const cx = 100;
   const cy = 100;
   const outerRadius = 80;
