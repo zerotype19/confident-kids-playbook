@@ -10,6 +10,38 @@ interface Family {
   updated_at: string;
 }
 
+async function sendInviteEmail(env: Env, email: string, inviteLink: string, familyName: string) {
+  if (env.EMAIL_SERVICE !== 'sendgrid') {
+    console.warn('Email service not configured or not supported');
+    return;
+  }
+
+  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.SENDGRID_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      personalizations: [{
+        to: [{ email }],
+        dynamic_template_data: {
+          inviteLink,
+          familyName,
+        },
+      }],
+      from: { email: env.FROM_EMAIL },
+      template_id: 'd-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', // Replace with your SendGrid template ID
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('Failed to send email:', error);
+    throw new Error('Failed to send invitation email');
+  }
+}
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   const authHeader = request.headers.get('Authorization');
@@ -32,7 +64,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       FROM families f
       JOIN family_members fm ON f.id = fm.family_id
       WHERE fm.user_id = ? AND fm.role = 'owner'
-    `).bind(decoded.sub).first();
+    `).bind(decoded.sub).first<Family>();
 
     if (!family) {
       return new Response(JSON.stringify({ error: 'No family found or not authorized' }), {
@@ -64,8 +96,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       expiresAt.toISOString()
     ).run();
 
-    // TODO: Send email with invite link
+    // Send email with invite link
     const inviteLink = `${env.FRONTEND_URL}/join-family?code=${inviteCode}`;
+    await sendInviteEmail(env, email, inviteLink, family.name);
 
     return new Response(JSON.stringify({
       success: true,

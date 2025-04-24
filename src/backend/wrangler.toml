@@ -13,6 +13,9 @@ database_id = "d0b2d163-3e3b-4193-a091-387e49b7fdb6"
 FRONTEND_URL = "https://kidoova.com"
 STRIPE_SECRET_KEY = "sk_test_51R55ZbPEQoD1awJQDbDTRm5vQ8ng5R8FB7RVpfrh7ZOElp3PgmiAa17ZmiPOoxksDgaKxOt13DQAJxZEmRJp0wj6003MGORtGG"
 STRIPE_WEBHOOK_SECRET = "whsec_bmIbEpc7URzKLoPSnf1LQtiRpA3piP3H"
+EMAIL_SERVICE = "sendgrid"
+SENDGRID_API_KEY = "SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+FROM_EMAIL = "noreply@kidoova.com"
 
 [build]
 command = "npm install"

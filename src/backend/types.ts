@@ -21,6 +21,9 @@ export interface Env {
   R2_BUCKET_NAME: string;
   R2_BUCKET: R2Bucket;
   OPENAI_API_KEY: string;
+  EMAIL_SERVICE: string;
+  SENDGRID_API_KEY: string;
+  FROM_EMAIL: string;
   user?: {
     id: string;
     selected_child_id?: string;
@@ -122,10 +125,11 @@ export interface RecordMediaRequest {
 }
 
 export interface FeatureFlags {
+  'premium.family_sharing': boolean;
   'premium.dashboard_insights': boolean;
   'premium.practice_modules': boolean;
   'premium.calendar_scheduling': boolean;
-  'premium.family_sharing': boolean;
+  [key: string]: boolean;
 }
 
 export interface Reward {
