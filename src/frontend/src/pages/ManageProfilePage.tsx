@@ -17,6 +17,10 @@ export const ManageProfilePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'owner' | 'member'>('member');
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
@@ -150,6 +154,37 @@ export const ManageProfilePage: React.FC = () => {
     }
   };
 
+  const handleInviteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteError(null);
+    setInviteSuccess(null);
+
+    try {
+      const response = await fetch('/api/family/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        },
+        body: JSON.stringify({
+          email: inviteEmail.trim(),
+          role: inviteRole
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send invitation');
+      }
+
+      const data = await response.json();
+      setInviteSuccess('Invitation sent successfully!');
+      setInviteEmail('');
+    } catch (err) {
+      setInviteError(err instanceof Error ? err.message : 'Failed to send invitation');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -219,6 +254,58 @@ export const ManageProfilePage: React.FC = () => {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Family Invites Section */}
+          <div className="mt-8">
+            <h3 className="text-lg font-medium text-gray-900">Invite Family Member</h3>
+            <div className="mt-4">
+              <form onSubmit={handleInviteSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="invite-email" className="block text-sm font-medium text-gray-700">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="invite-email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="invite-role" className="block text-sm font-medium text-gray-700">
+                    Role
+                  </label>
+                  <select
+                    id="invite-role"
+                    value={inviteRole}
+                    onChange={(e) => setInviteRole(e.target.value as 'owner' | 'member')}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  >
+                    <option value="member">Member</option>
+                    <option value="owner">Owner</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Send Invitation
+                </button>
+              </form>
+              {inviteSuccess && (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded">
+                  {inviteSuccess}
+                </div>
+              )}
+              {inviteError && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded">
+                  {inviteError}
+                </div>
+              )}
             </div>
           </div>
 
