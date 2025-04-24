@@ -160,11 +160,12 @@ export const ManageProfilePage: React.FC = () => {
     setInviteSuccess(null);
 
     try {
-      const response = await fetch('/api/family/invite', {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/family/invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           email: inviteEmail.trim(),
