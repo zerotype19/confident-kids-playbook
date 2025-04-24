@@ -31,6 +31,7 @@ import { onRequestPost as chatbot } from './api/chatbot'
 import { onRequestGet as theme } from './api/dashboard/theme'
 import { onRequestPost as reflection } from './api/reflection'
 import { onRequestGet as getConfidenceTrend } from './api/confidence-trend'
+import { onRequestPost as familyInvite } from './api/family_invite'
 
 const router = Router()
 
@@ -173,6 +174,9 @@ router.post('/api/reflection', (request, context) => {
   });
   return reflection({ request, env: context.env });
 });
+
+// Family routes
+router.post('/api/family/invite', (request, context) => familyInvite({ request, env: context.env }))
 
 // Add catch-all route for debugging
 router.all('*', (request) => {
