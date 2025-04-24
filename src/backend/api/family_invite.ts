@@ -23,7 +23,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   try {
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { user_id: string };
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { sub: string };
     const { email, role = 'member' } = await request.json() as FamilyInviteRequest;
 
     // Get user's family
@@ -32,7 +32,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       FROM families f
       JOIN family_members fm ON f.id = fm.family_id
       WHERE fm.user_id = ? AND fm.role = 'owner'
-    `).bind(decoded.user_id.toString()).first();
+    `).bind(decoded.sub).first();
 
     if (!family) {
       return new Response(JSON.stringify({ error: 'No family found or not authorized' }), {
