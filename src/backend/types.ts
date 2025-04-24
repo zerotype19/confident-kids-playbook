@@ -21,9 +21,8 @@ export interface Env {
   R2_BUCKET_NAME: string;
   R2_BUCKET: R2Bucket;
   OPENAI_API_KEY: string;
-  EMAIL_SERVICE: string;
-  SENDGRID_API_KEY: string;
   FROM_EMAIL: string;
+  CLOUDFLARE_API_TOKEN: string;
   user?: {
     id: string;
     selected_child_id?: string;

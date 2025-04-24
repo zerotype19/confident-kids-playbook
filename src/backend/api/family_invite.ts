@@ -11,32 +11,60 @@ interface Family {
 }
 
 async function sendInviteEmail(env: Env, email: string, inviteLink: string, familyName: string) {
-  if (env.EMAIL_SERVICE !== 'sendgrid') {
-    console.warn('Email service not configured or not supported');
-    return;
-  }
-
-  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+  const response = await fetch('https://api.cloudflare.com/client/v4/accounts/315111a87fcb293ac0efd819b6e59147/email/routing/rules', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${env.SENDGRID_API_KEY}`,
+      'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      personalizations: [{
-        to: [{ email }],
-        dynamic_template_data: {
-          inviteLink,
-          familyName,
-        },
+      name: 'Family Invite',
+      enabled: true,
+      matchers: [{
+        type: 'literal',
+        field: 'to',
+        value: email,
       }],
-      from: { email: env.FROM_EMAIL },
-      template_id: 'd-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', // Replace with your SendGrid template ID
+      actions: [{
+        type: 'forward',
+        value: [email],
+      }],
+      priority: 0,
     }),
   });
 
   if (!response.ok) {
     const error = await response.text();
+    console.error('Failed to send email:', error);
+    throw new Error('Failed to send invitation email');
+  }
+
+  // Send the actual email
+  const emailResponse = await fetch('https://api.cloudflare.com/client/v4/accounts/315111a87fcb293ac0efd819b6e59147/email/routing/rules/email', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: env.FROM_EMAIL,
+      to: email,
+      subject: `Join ${familyName}'s Family on Kidoova`,
+      text: `You've been invited to join ${familyName}'s family on Kidoova! Click the link below to accept the invitation:\n\n${inviteLink}\n\nThis invitation will expire in 7 days.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4F46E5;">Join ${familyName}'s Family on Kidoova</h2>
+          <p>You've been invited to join ${familyName}'s family on Kidoova!</p>
+          <p>Click the button below to accept the invitation:</p>
+          <a href="${inviteLink}" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">Accept Invitation</a>
+          <p style="color: #666; font-size: 14px;">This invitation will expire in 7 days.</p>
+        </div>
+      `,
+    }),
+  });
+
+  if (!emailResponse.ok) {
+    const error = await emailResponse.text();
     console.error('Failed to send email:', error);
     throw new Error('Failed to send invitation email');
   }
