@@ -1,6 +1,7 @@
 import { Env, FamilyInviteRequest } from '../types';
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'node:crypto';
+import { corsHeaders, handleOptions } from '../lib/cors';
 
 interface Family {
   id: string;
@@ -23,27 +24,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, env.JWT_SECRET) as { user_id: string };
-    const { email, role } = await request.json() as FamilyInviteRequest;
+    const { email, role = 'member' } = await request.json() as FamilyInviteRequest;
 
     // Get user's family
     const family = await env.DB.prepare(`
-      SELECT f.* 
+      SELECT f.id, f.name
       FROM families f
       JOIN family_members fm ON f.id = fm.family_id
       WHERE fm.user_id = ? AND fm.role = 'owner'
-    `).bind(decoded.user_id).first<Family>();
+    `).bind(decoded.user_id.toString()).first();
 
     if (!family) {
-      return new Response(JSON.stringify({ error: 'No family found or not owner' }), {
+      return new Response(JSON.stringify({ error: 'No family found or not authorized' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
     // Generate invite code
-    const invite_code = randomBytes(16).toString('hex');
+    const inviteCode = randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
-    // Store invite
+    // Create invite
     await env.DB.prepare(`
       INSERT INTO family_invites (
         id,
@@ -52,18 +55,27 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         role,
         created_at,
         expires_at
-      ) VALUES (?, ?, ?, ?, datetime('now'), datetime('now', '+7 days'))
-    `).bind(invite_code, family.id, email, role).run();
+      ) VALUES (?, ?, ?, ?, datetime('now'), ?)
+    `).bind(
+      inviteCode,
+      family.id,
+      email,
+      role,
+      expiresAt.toISOString()
+    ).run();
 
     // TODO: Send email with invite link
-    const invite_link = `${env.FRONTEND_URL}/join?code=${invite_code}`;
+    const inviteLink = `${import.meta.env.VITE_APP_URL}/join-family?code=${inviteCode}`;
 
-    return new Response(JSON.stringify({ invite_link }), {
+    return new Response(JSON.stringify({
+      success: true,
+      inviteLink
+    }), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Create invite error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to create invite' }), {
+    console.error('Failed to create family invite:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
