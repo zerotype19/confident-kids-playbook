@@ -65,7 +65,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     ).run();
 
     // TODO: Send email with invite link
-    const inviteLink = `${import.meta.env.VITE_APP_URL}/join-family?code=${inviteCode}`;
+    const inviteLink = `${env.FRONTEND_URL}/join-family?code=${inviteCode}`;
 
     return new Response(JSON.stringify({
       success: true,
