@@ -31,7 +31,7 @@ async function sendInviteEmail(env: Env, email: string, inviteLink: string, fami
         },
       }],
       from: { email: env.FROM_EMAIL },
-      template_id: 'd-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', // Replace with your SendGrid template ID
+      template_id: 'd-069b1bc2a34e46478a0eb996330b947e',
     }),
   });
 
