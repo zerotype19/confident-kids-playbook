@@ -46,8 +46,27 @@ export default function PostChallengeReflectionModal({
             step={1}
             value={feeling}
             onChange={(e) => setFeeling(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mb-2 accent-kidoova-green"
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mb-2 accent-kidoova-green custom-thumb-align"
+            style={{
+              '--thumb-shift':
+                feeling === 1 ? '8px' :
+                feeling === 2 ? '4px' :
+                feeling === 4 ? '-4px' :
+                feeling === 5 ? '-8px' :
+                '0px'
+            } as React.CSSProperties}
           />
+          <style>{`
+            input[type=range].custom-thumb-align::-webkit-slider-thumb {
+              transform: translateX(var(--thumb-shift, 0px));
+            }
+            input[type=range].custom-thumb-align::-moz-range-thumb {
+              transform: translateX(var(--thumb-shift, 0px));
+            }
+            input[type=range].custom-thumb-align::-ms-thumb {
+              transform: translateX(var(--thumb-shift, 0px));
+            }
+          `}</style>
 
           <div className="flex justify-between text-2xl">
             {emojiFaces.map((face, i) => (
