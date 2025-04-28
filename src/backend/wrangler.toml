@@ -15,7 +15,6 @@ STRIPE_SECRET_KEY = "sk_test_51R55ZbPEQoD1awJQDbDTRm5vQ8ng5R8FB7RVpfrh7ZOElp3Pgm
 STRIPE_WEBHOOK_SECRET = "whsec_bmIbEpc7URzKLoPSnf1LQtiRpA3piP3H"
 FROM_EMAIL = "noreply@kidoova.com"
 EMAIL_SERVICE = "sendgrid"
-SENDGRID_API_KEY = "${SENDGRID_API_KEY}"
 
 [build]
 command = "npm install"
