@@ -15,7 +15,13 @@ const app = new Hono<{ Bindings: Env }>();
 
 // Middleware
 app.use('*', logger());
-app.use('*', cors());
+app.use('*', cors({
+  origin: 'https://kidoova.com',
+  allowHeaders: ['Content-Type', 'Authorization'],
+  allowMethods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+  credentials: true,
+  maxAge: 86400,
+}));
 app.use('*', prettyJSON());
 
 // Children routes
