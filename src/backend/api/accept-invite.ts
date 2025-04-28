@@ -1,10 +1,13 @@
-import { Context } from 'hono';
 import { Env } from '../types';
 import { verifyJWT } from '../auth';
 import { corsHeaders, handleOptions } from '../lib/cors';
 
-export async function onRequestPost(c: Context<{ Bindings: Env }>) {
-  const { request, env } = c;
+interface AcceptInviteRequest {
+  code: string;
+}
+
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const { request, env } = context;
 
   // Handle CORS preflight
   if (request.method === 'OPTIONS') {
@@ -29,7 +32,7 @@ export async function onRequestPost(c: Context<{ Bindings: Env }>) {
       });
     }
 
-    const { code } = await request.json();
+    const { code } = await request.json() as AcceptInviteRequest;
     if (!code) {
       return new Response(JSON.stringify({ error: 'No invite code provided' }), {
         status: 400,
@@ -47,7 +50,7 @@ export async function onRequestPost(c: Context<{ Bindings: Env }>) {
         headers: corsHeaders()
       });
     }
-    if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+    if (invite.expires_at && new Date(invite.expires_at.toString()) < new Date()) {
       return new Response(JSON.stringify({ error: 'Invite expired' }), {
         status: 410,
         headers: corsHeaders()
@@ -78,4 +81,4 @@ export async function onRequestPost(c: Context<{ Bindings: Env }>) {
       headers: corsHeaders()
     });
   }
-} 
+}; 
