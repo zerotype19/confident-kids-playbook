@@ -9,7 +9,7 @@ import { onRequestGet as challengesTodayHandler } from './challenges_today';
 import pillars from './pillars';
 import { onRequestGet as rewardsHandler } from './rewards/[childId]';
 import { onRequest as childrenUpdate } from './children_update';
-import { onRequest as acceptInviteHandler } from './accept-invite';
+import { onRequestPost as acceptInviteHandler } from './accept-invite';
 
 const app = new Hono<{ Bindings: Env }>();
 
