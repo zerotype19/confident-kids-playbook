@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import TodayChallengeCard from '../components/dashboard/TodayChallengeCard';
+import TodayChallengeCards from '../components/dashboard/TodayChallengeCards';
 import RewardsOverview from '../components/rewards/RewardsOverview';
 import ProgressTracker from '../components/rewards/ProgressTracker';
 import { Child, ProgressSummary } from '../types';
@@ -268,7 +268,7 @@ export default function DashboardPage() {
         {selectedChild ? (
           <>
             <WeeklyTheme />
-            <TodayChallengeCard 
+            <TodayChallengeCards 
               childId={selectedChild.id} 
               challenge={challenge}
               onComplete={handleChallengeComplete}
