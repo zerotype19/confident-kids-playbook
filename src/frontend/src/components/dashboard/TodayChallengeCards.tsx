@@ -138,9 +138,9 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
   ];
 
   return (
-    <div className="relative flex flex-col items-center w-full">
+    <div className="relative flex flex-col items-center">
       <div
-        className="relative w-full flex items-end justify-center"
+        className="relative w-full max-w-4xl mx-auto flex items-end justify-center"
         style={{ height: `${360 + 24 * (cards.length - currentCard - 1)}px` }}
       >
         {isCompleted ? (
@@ -184,8 +184,8 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* First Card: Intro */}
                   {card.type === 'intro' && selectedChild && (
                     <>
-                      <div className="text-lg font-semibold text-gray-700 text-center">{selectedChild.name}'s Daily Challenge</div>
-                      <div className="flex items-center justify-center">
+                      <div className="text-lg font-semibold text-gray-700 mb-2 text-center">{selectedChild.name}'s Daily Challenge</div>
+                      <div className="flex items-center justify-center mb-2">
                         <span className="text-3xl mr-2">{card.icon}</span>
                         <span className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</span>
                       </div>
@@ -195,7 +195,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* Step Cards */}
                   {card.type === 'step' && (
                     <>
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center mb-4">
                         <span className="text-2xl mr-2">{card.icon}</span>
                         <span className="text-2xl font-bold text-kidoova-green text-center">Step {card.stepNum}</span>
                       </div>
@@ -205,7 +205,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* Dialogue Card */}
                   {card.type === 'dialogue' && (
                     <>
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center mb-4">
                         <span className="text-2xl mr-2">{card.icon}</span>
                         <span className="text-2xl font-bold text-kidoova-green text-center">Try Saying This</span>
                       </div>
@@ -214,7 +214,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   )}
                   {/* Completion Card */}
                   {card.type === 'completion' && (
-                    <div className="w-full flex flex-col items-center">
+                    <div className="space-y-6 w-full flex flex-col items-center">
                       <div className="flex items-center justify-center">
                         <span className="text-2xl mr-2">{card.icon}</span>
                         <span className="text-2xl font-bold text-kidoova-green text-center">Great Job!</span>
@@ -236,7 +236,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* Next Button */}
                   {isTop && idx !== cards.length - 1 && card.type !== 'completion' && (
                     <button
-                      className="px-6 py-2 rounded-lg bg-kidoova-accent text-white font-semibold shadow hover:bg-kidoova-green transition-colors duration-200 w-full max-w-xs"
+                      className="mt-8 px-6 py-2 rounded-lg bg-kidoova-accent text-white font-semibold shadow hover:bg-kidoova-green transition-colors duration-200 w-full max-w-xs"
                       onClick={() => setCurrentCard(currentCard + 1)}
                     >
                       Next
