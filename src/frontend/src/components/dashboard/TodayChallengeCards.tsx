@@ -137,7 +137,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
 
   return (
     <div className="relative flex flex-col items-center min-h-[500px] py-8">
-      <div className="relative w-full h-[420px] flex items-end justify-center">
+      <div className="relative w-full max-w-2xl h-[420px] flex items-end justify-center mx-auto">
         {cards.slice(currentCard).map((card, idx) => {
           const isTop = idx === 0;
           const z = cards.length - idx;
@@ -152,8 +152,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                 zIndex: z,
                 transform: `scale(${scale})`,
                 opacity: 1,
-                width: '100vw',
-                maxWidth: '100vw',
+                width: '100%',
                 height: '360px',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
               }}
