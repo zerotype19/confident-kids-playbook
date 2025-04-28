@@ -9,7 +9,6 @@ import { onRequestGet as challengesTodayHandler } from './challenges_today';
 import pillars from './pillars';
 import { onRequestGet as rewardsHandler } from './rewards/[childId]';
 import { onRequest as childrenUpdate } from './children_update';
-import { onRequest as acceptInviteHandler } from './accept-invite';
 import { onRequestPost as familyJoinHandler } from './family_join';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -31,9 +30,6 @@ app.route('/api/pillars', pillars);
 
 // Rewards routes
 app.get('/api/rewards/:childId', rewardsHandler);
-
-// Family invite routes
-app.all('/api/accept-invite', acceptInviteHandler);
 
 // Family routes
 app.post('/api/family_join', familyJoinHandler);
