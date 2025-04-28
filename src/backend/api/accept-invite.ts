@@ -6,7 +6,7 @@ interface AcceptInviteRequest {
   code: string;
 }
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+export async function onRequest(context: { request: Request; env: Env }) {
   const { request, env } = context;
 
   // Handle CORS preflight
@@ -18,6 +18,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (!authorization) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
       headers: corsHeaders()
     });
   }
@@ -81,4 +88,4 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       headers: corsHeaders()
     });
   }
-}; 
+} 
