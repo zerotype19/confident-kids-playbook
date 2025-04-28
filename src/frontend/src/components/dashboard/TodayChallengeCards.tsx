@@ -1,4 +1,4 @@
-import React, { useState, useRef, TouchEvent } from 'react';
+import React, { useState } from 'react';
 import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
 import { useChildContext } from '../../contexts/ChildContext';
 
@@ -26,6 +26,16 @@ const CARD_COLORS = [
   'bg-white',
   'bg-gray-400',
   'bg-yellow-300',
+  'bg-purple-200',
+];
+
+const CARD_ICONS = [
+  '💡', // tip
+  '👟', // step 1
+  '👟', // step 2
+  '👟', // step 3
+  '💬', // dialogue
+  '✅', // completion
 ];
 
 export default function TodayChallengeCards({ challenge, childId, onComplete }: TodayChallengeCardsProps) {
@@ -35,8 +45,6 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
   const [showReflection, setShowReflection] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
   const [swipeAnim, setSwipeAnim] = useState(false);
-  const touchStartY = useRef<number>(0);
-  const touchEndY = useRef<number>(0);
   const { selectedChild } = useChildContext();
 
   const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
@@ -92,27 +100,6 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     setShowReflection(true);
   };
 
-  const handleTouchStart = (e: TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (e: TouchEvent) => {
-    touchEndY.current = e.changedTouches[0].clientY;
-    handleSwipe();
-  };
-
-  const handleSwipe = () => {
-    const swipeDistance = touchStartY.current - touchEndY.current;
-    const minSwipeDistance = 50;
-    if (swipeDistance > minSwipeDistance && currentCard < cards.length - 1) {
-      setSwipeAnim(true);
-      setTimeout(() => {
-        setSwipeAnim(false);
-        setCurrentCard(prev => prev + 1);
-      }, 300);
-    }
-  };
-
   if (!challenge) {
     return (
       <div className="bg-white rounded-2xl shadow-kidoova p-6">
@@ -129,37 +116,43 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
       type: 'tip',
       content: challenge.tip,
       label: '0',
-      bgColor: CARD_COLORS[0]
+      bgColor: CARD_COLORS[0],
+      icon: CARD_ICONS[0],
     },
     {
       type: 'step',
       content: challenge.steps[0],
       label: '1',
-      bgColor: CARD_COLORS[1]
+      bgColor: CARD_COLORS[1],
+      icon: CARD_ICONS[1],
     },
     {
       type: 'step',
       content: challenge.steps[1],
       label: '2',
-      bgColor: CARD_COLORS[2]
+      bgColor: CARD_COLORS[2],
+      icon: CARD_ICONS[2],
     },
     {
       type: 'step',
       content: challenge.steps[2],
       label: '3',
-      bgColor: CARD_COLORS[3]
+      bgColor: CARD_COLORS[3],
+      icon: CARD_ICONS[3],
     },
     {
       type: 'dialogue',
       content: challenge.example_dialogue,
       label: '4',
-      bgColor: CARD_COLORS[4]
+      bgColor: CARD_COLORS[4],
+      icon: CARD_ICONS[4],
     },
     {
       type: 'completion',
       content: '',
       label: '5',
-      bgColor: 'bg-purple-200'
+      bgColor: CARD_COLORS[5],
+      icon: CARD_ICONS[5],
     }
   ];
 
@@ -184,10 +177,9 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                 height: '320px',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
               }}
-              onTouchStart={isTop ? handleTouchStart : undefined}
-              onTouchEnd={isTop ? handleTouchEnd : undefined}
             >
-              <div className="w-full flex justify-center pt-2">
+              <div className="w-full flex flex-col items-center pt-2">
+                <span className="text-3xl mb-1">{card.icon}</span>
                 <span className="text-black font-bold text-lg">{card.label}</span>
               </div>
               <div className="flex-1 flex flex-col items-center justify-center px-6">
@@ -216,6 +208,15 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     </h2>
                     <p className="text-gray-700 text-lg">{card.content}</p>
                   </>
+                )}
+                {/* Next Button */}
+                {isTop && idx !== cards.length - 1 && card.type !== 'completion' && (
+                  <button
+                    className="mt-8 px-6 py-2 rounded-lg bg-kidoova-accent text-white font-semibold shadow hover:bg-kidoova-green transition-colors duration-200"
+                    onClick={() => setCurrentCard(currentCard + 1)}
+                  >
+                    Next
+                  </button>
                 )}
               </div>
             </div>
