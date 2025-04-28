@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useSwipeable } from 'react-swipeable';
+import React, { useState, useRef, TouchEvent } from 'react';
 import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
 import { useChildContext } from '../../contexts/ChildContext';
 
@@ -27,6 +26,8 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
   const [isCompleted, setIsCompleted] = useState(challenge?.is_completed || false);
   const [showReflection, setShowReflection] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
   const { selectedChild } = useChildContext();
 
   const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
@@ -89,19 +90,29 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     setShowReflection(true);
   };
 
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => {
-      if (currentCard < cards.length - 1) {
-        setCurrentCard(prev => prev + 1);
-      }
-    },
-    onSwipedRight: () => {
-      if (currentCard > 0) {
-        setCurrentCard(prev => prev - 1);
-      }
-    },
-    trackMouse: true
-  });
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    handleSwipe();
+  };
+
+  const handleSwipe = () => {
+    const swipeDistance = touchEndX.current - touchStartX.current;
+    const minSwipeDistance = 50; // Minimum distance for a swipe
+
+    if (Math.abs(swipeDistance) < minSwipeDistance) return;
+
+    if (swipeDistance > 0 && currentCard > 0) {
+      // Swipe right
+      setCurrentCard(prev => prev - 1);
+    } else if (swipeDistance < 0 && currentCard < cards.length - 1) {
+      // Swipe left
+      setCurrentCard(prev => prev + 1);
+    }
+  };
 
   if (!challenge) {
     return (
@@ -157,7 +168,8 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     <div className="space-y-6">
       <div className="relative">
         <div 
-          {...swipeHandlers}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
           className="relative h-[80vh] overflow-hidden"
         >
           <div 
