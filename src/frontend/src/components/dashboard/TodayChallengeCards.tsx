@@ -20,17 +20,8 @@ interface TodayChallengeCardsProps {
   onComplete?: () => void;
 }
 
-const CARD_COLORS = [
-  'bg-red-400',
-  'bg-green-500',
-  'bg-white',
-  'bg-gray-400',
-  'bg-yellow-300',
-  'bg-purple-200',
-];
-
 const CARD_ICONS = [
-  '💡', // tip
+  '💡', // intro
   '👟', // step 1
   '👟', // step 2
   '👟', // step 3
@@ -44,7 +35,6 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
   const [isCompleted, setIsCompleted] = useState(challenge?.is_completed || false);
   const [showReflection, setShowReflection] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
-  const [swipeAnim, setSwipeAnim] = useState(false);
   const { selectedChild } = useChildContext();
 
   const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
@@ -113,52 +103,41 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
 
   const cards = [
     {
-      type: 'tip',
-      content: challenge.tip,
-      label: '0',
-      bgColor: CARD_COLORS[0],
+      type: 'intro',
       icon: CARD_ICONS[0],
     },
     {
       type: 'step',
-      content: challenge.steps[0],
-      label: '1',
-      bgColor: CARD_COLORS[1],
       icon: CARD_ICONS[1],
+      stepNum: 1,
+      content: challenge.steps[0],
     },
     {
       type: 'step',
-      content: challenge.steps[1],
-      label: '2',
-      bgColor: CARD_COLORS[2],
       icon: CARD_ICONS[2],
+      stepNum: 2,
+      content: challenge.steps[1],
     },
     {
       type: 'step',
-      content: challenge.steps[2],
-      label: '3',
-      bgColor: CARD_COLORS[3],
       icon: CARD_ICONS[3],
+      stepNum: 3,
+      content: challenge.steps[2],
     },
     {
       type: 'dialogue',
-      content: challenge.example_dialogue,
-      label: '4',
-      bgColor: CARD_COLORS[4],
       icon: CARD_ICONS[4],
+      content: challenge.example_dialogue,
     },
     {
       type: 'completion',
-      content: '',
-      label: '5',
-      bgColor: CARD_COLORS[5],
       icon: CARD_ICONS[5],
     }
   ];
 
   return (
     <div className="relative flex flex-col items-center min-h-[500px] py-8">
-      <div className="relative w-full max-w-md h-[400px] flex items-end justify-center">
+      <div className="relative w-full max-w-2xl h-[420px] flex items-end justify-center">
         {cards.slice(currentCard).map((card, idx) => {
           const isTop = idx === 0;
           const z = cards.length - idx;
@@ -166,31 +145,53 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
           const scale = 1 - idx * 0.05;
           return (
             <div
-              key={card.label}
-              className={`absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center transition-all duration-300 ${card.bgColor} ${isTop && swipeAnim ? 'translate-y-[-120%] opacity-0' : ''}`}
+              key={idx}
+              className={`absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center transition-all duration-300 bg-white ${isTop ? '' : 'pointer-events-none'}`}
               style={{
                 top: offset,
                 zIndex: z,
-                transform: `scale(${scale})` + (isTop && swipeAnim ? ' translateY(-120%)' : ''),
-                opacity: isTop && swipeAnim ? 0 : 1,
-                pointerEvents: isTop ? 'auto' : 'none',
-                height: '320px',
+                transform: `scale(${scale})`,
+                opacity: 1,
+                width: '100%',
+                height: '360px',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
               }}
             >
-              <div className="w-full flex flex-col items-center pt-2">
-                <span className="text-3xl mb-1">{card.icon}</span>
-                <span className="text-black font-bold text-lg">{card.label}</span>
+              <div className="w-full flex flex-col items-center pt-4">
+                <span className="text-4xl mb-2">{card.icon}</span>
               </div>
-              <div className="flex-1 flex flex-col items-center justify-center px-6">
-                {card.type === 'completion' ? (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Great Job!</h2>
-                    <p className="text-gray-700">You've completed all the steps for today's challenge.</p>
+              <div className="flex-1 flex flex-col items-center justify-center px-6 w-full">
+                {/* First Card: Intro */}
+                {card.type === 'intro' && selectedChild && (
+                  <>
+                    <div className="text-lg font-semibold text-gray-700 mb-2 text-center">{selectedChild.name}'s Daily Challenge</div>
+                    <div className="text-3xl font-bold text-kidoova-green mb-2 text-center">{challenge.title}</div>
+                    <div className="text-base text-gray-800 text-center">{challenge.description}</div>
+                  </>
+                )}
+                {/* Step Cards */}
+                {card.type === 'step' && (
+                  <>
+                    <div className="text-2xl font-bold text-kidoova-green mb-4 text-center">Step {card.stepNum}</div>
+                    <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                  </>
+                )}
+                {/* Dialogue Card */}
+                {card.type === 'dialogue' && (
+                  <>
+                    <div className="text-2xl font-bold text-kidoova-green mb-4 text-center">Try Saying This</div>
+                    <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                  </>
+                )}
+                {/* Completion Card */}
+                {card.type === 'completion' && (
+                  <div className="space-y-6 w-full flex flex-col items-center">
+                    <div className="text-2xl font-bold text-kidoova-green text-center">Great Job!</div>
+                    <p className="text-gray-700 text-center">You've completed all the steps for today's challenge.</p>
                     <button
                       onClick={handleMarkComplete}
                       disabled={isCompleting}
-                      className={`px-6 py-3 rounded-lg font-semibold text-white
+                      className={`px-6 py-3 rounded-lg font-semibold text-white w-full max-w-xs
                         ${isCompleting 
                           ? 'bg-gray-400 cursor-not-allowed' 
                           : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
@@ -199,20 +200,11 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                       {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
                     </button>
                   </div>
-                ) : (
-                  <>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                      {card.type === 'tip' ? 'Helpful Tip' :
-                        card.type === 'step' ? `Step` :
-                        'Try Saying This'}
-                    </h2>
-                    <p className="text-gray-700 text-lg">{card.content}</p>
-                  </>
                 )}
                 {/* Next Button */}
                 {isTop && idx !== cards.length - 1 && card.type !== 'completion' && (
                   <button
-                    className="mt-8 px-6 py-2 rounded-lg bg-kidoova-accent text-white font-semibold shadow hover:bg-kidoova-green transition-colors duration-200"
+                    className="mt-8 px-6 py-2 rounded-lg bg-kidoova-accent text-white font-semibold shadow hover:bg-kidoova-green transition-colors duration-200 w-full max-w-xs"
                     onClick={() => setCurrentCard(currentCard + 1)}
                   >
                     Next
