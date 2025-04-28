@@ -23,6 +23,7 @@ import FeedbackPage from "./pages/Feedback"
 import { PrivateRoute } from "./components/PrivateRoute"
 import PageWrapper from "./components/PageWrapper"
 import AuthenticatedPageWrapper from "./components/AuthenticatedPageWrapper"
+import JoinFamilyPage from "./pages/JoinFamilyPage"
 
 export default function App(): JSX.Element {
   console.log("✅ App.tsx render")
@@ -137,6 +138,7 @@ export default function App(): JSX.Element {
                 </PrivateRoute>
               } 
             />
+            <Route path="/join-family" element={<JoinFamilyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
