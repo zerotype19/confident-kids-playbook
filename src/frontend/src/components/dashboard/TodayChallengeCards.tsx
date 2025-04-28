@@ -138,8 +138,11 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
   ];
 
   return (
-    <div className="relative flex flex-col items-center min-h-[500px] mb-0 pb-0">
-      <div className="relative w-full max-w-3xl h-[420px] flex items-end justify-center mx-auto">
+    <div className="relative flex flex-col items-center mb-0 pb-0">
+      <div
+        className="relative w-full max-w-4xl mx-auto flex items-end justify-center"
+        style={{ height: `${360 + 24 * (cards.length - currentCard - 1)}px` }}
+      >
         {isCompleted ? (
           <div className="absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center bg-white justify-center h-[360px] w-full">
             <div className="flex flex-col items-center space-y-4">
