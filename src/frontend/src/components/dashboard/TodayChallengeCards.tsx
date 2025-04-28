@@ -137,7 +137,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
 
   return (
     <div className="relative flex flex-col items-center min-h-[500px] py-8">
-      <div className="relative w-full max-w-2xl h-[420px] flex items-end justify-center">
+      <div className="relative w-full h-[420px] flex items-end justify-center">
         {cards.slice(currentCard).map((card, idx) => {
           const isTop = idx === 0;
           const z = cards.length - idx;
@@ -152,42 +152,52 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                 zIndex: z,
                 transform: `scale(${scale})`,
                 opacity: 1,
-                width: '100%',
+                width: '100vw',
+                maxWidth: '100vw',
                 height: '360px',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
               }}
             >
-              <div className="w-full flex flex-col items-center pt-4">
-                <span className="text-4xl mb-2">{card.icon}</span>
-              </div>
               <div className="flex-1 flex flex-col items-center justify-center px-6 w-full">
                 {/* First Card: Intro */}
                 {card.type === 'intro' && selectedChild && (
                   <>
                     <div className="text-lg font-semibold text-gray-700 mb-2 text-center">{selectedChild.name}'s Daily Challenge</div>
-                    <div className="text-3xl font-bold text-kidoova-green mb-2 text-center">{challenge.title}</div>
-                    <div className="text-base text-gray-800 text-center">{challenge.description}</div>
+                    <div className="flex items-center justify-center mb-2">
+                      <span className="text-3xl mr-2">{card.icon}</span>
+                      <span className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</span>
+                    </div>
+                    <div className="text-lg text-gray-800 text-center">{challenge.description}</div>
                   </>
                 )}
                 {/* Step Cards */}
                 {card.type === 'step' && (
                   <>
-                    <div className="text-2xl font-bold text-kidoova-green mb-4 text-center">Step {card.stepNum}</div>
+                    <div className="flex items-center justify-center mb-4">
+                      <span className="text-2xl mr-2">{card.icon}</span>
+                      <span className="text-2xl font-bold text-kidoova-green text-center">Step {card.stepNum}</span>
+                    </div>
                     <div className="text-lg text-gray-800 text-center">{card.content}</div>
                   </>
                 )}
                 {/* Dialogue Card */}
                 {card.type === 'dialogue' && (
                   <>
-                    <div className="text-2xl font-bold text-kidoova-green mb-4 text-center">Try Saying This</div>
+                    <div className="flex items-center justify-center mb-4">
+                      <span className="text-2xl mr-2">{card.icon}</span>
+                      <span className="text-2xl font-bold text-kidoova-green text-center">Try Saying This</span>
+                    </div>
                     <div className="text-lg text-gray-800 text-center">{card.content}</div>
                   </>
                 )}
                 {/* Completion Card */}
                 {card.type === 'completion' && (
                   <div className="space-y-6 w-full flex flex-col items-center">
-                    <div className="text-2xl font-bold text-kidoova-green text-center">Great Job!</div>
-                    <p className="text-gray-700 text-center">You've completed all the steps for today's challenge.</p>
+                    <div className="flex items-center justify-center">
+                      <span className="text-2xl mr-2">{card.icon}</span>
+                      <span className="text-2xl font-bold text-kidoova-green text-center">Great Job!</span>
+                    </div>
+                    <p className="text-lg text-gray-700 text-center">You've completed all the steps for today's challenge.</p>
                     <button
                       onClick={handleMarkComplete}
                       disabled={isCompleting}
