@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSwipeable } from 'react-swipeable';
 import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
 import { useChildContext } from '../../contexts/ChildContext';
 
@@ -88,13 +89,19 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     setShowReflection(true);
   };
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const container = e.currentTarget;
-    const cardHeight = container.clientHeight;
-    const scrollPosition = container.scrollTop;
-    const newCard = Math.round(scrollPosition / cardHeight);
-    setCurrentCard(newCard);
-  };
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (currentCard < cards.length - 1) {
+        setCurrentCard(prev => prev + 1);
+      }
+    },
+    onSwipedRight: () => {
+      if (currentCard > 0) {
+        setCurrentCard(prev => prev - 1);
+      }
+    },
+    trackMouse: true
+  });
 
   if (!challenge) {
     return (
@@ -148,43 +155,93 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
 
   return (
     <div className="space-y-6">
-      <div className="relative h-[80vh] overflow-y-scroll snap-y snap-mandatory" onScroll={handleScroll}>
-        {cards.map((card, index) => (
-          <div
-            key={index}
-            className={`h-full snap-start flex flex-col items-center justify-center p-6 ${card.bgColor} rounded-2xl shadow-xl`}
+      <div className="relative">
+        <div 
+          {...swipeHandlers}
+          className="relative h-[80vh] overflow-hidden"
+        >
+          <div 
+            className="flex transition-transform duration-300 ease-in-out"
+            style={{ transform: `translateX(-${currentCard * 100}%)` }}
           >
-            <div className="text-6xl mb-6">{card.icon}</div>
-            <div className="text-center max-w-md">
-              {card.type === 'completion' ? (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Great Job!</h2>
-                  <p className="text-gray-700">You've completed all the steps for today's challenge.</p>
-                  <button
-                    onClick={handleMarkComplete}
-                    disabled={isCompleting}
-                    className={`px-6 py-3 rounded-lg font-semibold text-white
-                      ${isCompleting 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
-                      }`}
-                  >
-                    {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
-                  </button>
+            {cards.map((card, index) => (
+              <div
+                key={index}
+                className="w-full flex-shrink-0 h-full flex flex-col items-center justify-center p-6"
+              >
+                <div className={`w-full h-full ${card.bgColor} rounded-2xl shadow-xl flex flex-col items-center justify-center`}>
+                  <div className="text-6xl mb-6">{card.icon}</div>
+                  <div className="text-center max-w-md">
+                    {card.type === 'completion' ? (
+                      <div className="space-y-6">
+                        <h2 className="text-2xl font-bold text-gray-900">Great Job!</h2>
+                        <p className="text-gray-700">You've completed all the steps for today's challenge.</p>
+                        <button
+                          onClick={handleMarkComplete}
+                          disabled={isCompleting}
+                          className={`px-6 py-3 rounded-lg font-semibold text-white
+                            ${isCompleting 
+                              ? 'bg-gray-400 cursor-not-allowed' 
+                              : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
+                            }`}
+                        >
+                          {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                          {card.type === 'tip' ? 'Helpful Tip' :
+                           card.type === 'step' ? `Step ${index}` :
+                           'Try Saying This'}
+                        </h2>
+                        <p className="text-gray-700 text-lg">{card.content}</p>
+                      </>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    {card.type === 'tip' ? 'Helpful Tip' :
-                     card.type === 'step' ? `Step ${index}` :
-                     'Try Saying This'}
-                  </h2>
-                  <p className="text-gray-700 text-lg">{card.content}</p>
-                </>
-              )}
-            </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        {/* Swipe Indicator */}
+        {currentCard < cards.length - 1 && (
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 animate-bounce">
+            <svg
+              className="w-8 h-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </div>
+        )}
+
+        {/* Back Arrow */}
+        {currentCard > 0 && (
+          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 animate-bounce">
+            <svg
+              className="w-8 h-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </div>
+        )}
       </div>
 
       {/* Card Navigation Dots */}
@@ -192,16 +249,8 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
         {cards.map((_, index) => (
           <button
             key={index}
-            onClick={() => {
-              const container = document.querySelector('.overflow-y-scroll');
-              if (container) {
-                container.scrollTo({
-                  top: index * window.innerHeight,
-                  behavior: 'smooth'
-                });
-              }
-            }}
-            className={`w-3 h-3 rounded-full ${
+            onClick={() => setCurrentCard(index)}
+            className={`w-3 h-3 rounded-full transition-colors duration-200 ${
               currentCard === index ? 'bg-kidoova-accent' : 'bg-gray-300'
             }`}
           />
