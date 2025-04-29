@@ -106,7 +106,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         role,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+      ) VALUES (?, ?, ?, ?, COALESCE(datetime('now'), NULL), COALESCE(datetime('now'), NULL))
     `).bind(
       memberId,
       invite.family_id,
