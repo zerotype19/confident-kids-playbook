@@ -1,6 +1,10 @@
 import { Env } from '../types';
-import { corsHeaders } from '../cors';
+import { corsHeaders } from '../lib/cors';
 import { D1Database } from '@cloudflare/workers-types';
+
+interface InviteRequest {
+  invite_code: string;
+}
 
 export async function onRequestPost(context: { request: Request; env: Env }) {
   try {
@@ -10,12 +14,12 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     // Handle CORS
     if (request.method === 'OPTIONS') {
       return new Response(null, {
-        headers: corsHeaders,
+        headers: corsHeaders(),
       });
     }
 
     // Parse request body
-    const body = await request.json();
+    const body = await request.json() as InviteRequest;
     const { invite_code } = body;
 
     if (!invite_code) {
@@ -24,7 +28,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         {
           status: 400,
           headers: {
-            ...corsHeaders,
+            ...corsHeaders(),
             'Content-Type': 'application/json',
           },
         }
@@ -35,7 +39,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     const invite = await db
       .prepare('SELECT * FROM family_invites WHERE code = ?')
       .bind(invite_code)
-      .first();
+      .first<{ expires_at: string }>();
 
     if (!invite) {
       return new Response(
@@ -43,7 +47,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         {
           status: 404,
           headers: {
-            ...corsHeaders,
+            ...corsHeaders(),
             'Content-Type': 'application/json',
           },
         }
@@ -59,7 +63,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         {
           status: 400,
           headers: {
-            ...corsHeaders,
+            ...corsHeaders(),
             'Content-Type': 'application/json',
           },
         }
@@ -71,7 +75,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       {
         status: 200,
         headers: {
-          ...corsHeaders,
+          ...corsHeaders(),
           'Content-Type': 'application/json',
         },
       }
@@ -83,7 +87,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       {
         status: 500,
         headers: {
-          ...corsHeaders,
+          ...corsHeaders(),
           'Content-Type': 'application/json',
         },
       }

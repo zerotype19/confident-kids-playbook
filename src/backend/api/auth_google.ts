@@ -1,5 +1,5 @@
 import { Env } from '../types';
-import { corsHeaders, handleOptions } from '../cors';
+import { corsHeaders, handleOptions } from '../lib/cors';
 import { createJWT } from '../jwt';
 import { randomUUID } from 'crypto';
 import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
