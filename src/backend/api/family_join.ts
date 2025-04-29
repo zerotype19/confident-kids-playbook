@@ -20,7 +20,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     // Get invite
     const invite = await env.DB.prepare(`
       SELECT * FROM family_invites
-      WHERE code = ? AND expires_at > datetime('now')
+      WHERE id = ? AND expires_at > datetime('now')
     `).bind(invite_code).first();
 
     if (!invite) {
@@ -61,7 +61,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     ).run();
 
     // Delete invite
-    await env.DB.prepare('DELETE FROM family_invites WHERE code = ?')
+    await env.DB.prepare('DELETE FROM family_invites WHERE id = ?')
       .bind(invite_code).run();
 
     return new Response(JSON.stringify({ success: true }), {
