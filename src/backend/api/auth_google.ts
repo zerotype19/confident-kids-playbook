@@ -46,14 +46,6 @@ export async function authGoogle(context: { request: Request; env: Env }) {
       });
     }
 
-    // Get invite code from request body or localStorage
-    const inviteData = body.invite_code ? 
-      { invite_code: body.invite_code } : 
-      JSON.parse(localStorage.getItem('pendingInviteData') || '{}');
-    
-    const invite_code = inviteData.invite_code;
-    console.log('🔍 Checking for invite code:', { invite_code });
-
     console.log('🔗 Using API URL:', request.url);
     const result = await verifyGoogleTokenAndCreateJwt(body.credential, env.JWT_SECRET, env.GOOGLE_CLIENT_ID);
 
