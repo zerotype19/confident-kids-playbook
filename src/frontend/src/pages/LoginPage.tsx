@@ -25,12 +25,17 @@ export const LoginPage: React.FC = () => {
       let pendingInviteData = null;
       
       if (storedData) {
-        pendingInviteData = JSON.parse(storedData);
-        console.log('Found pending invite data:', pendingInviteData);
-        
-        // Verify we have all required data
-        if (!pendingInviteData.invite_code || !pendingInviteData.family_id || !pendingInviteData.role) {
-          console.error('Invalid invite data:', pendingInviteData);
+        try {
+          pendingInviteData = JSON.parse(storedData);
+          console.log('Found pending invite data:', pendingInviteData);
+          
+          // Verify we have all required data
+          if (!pendingInviteData.invite_code || !pendingInviteData.family_id || !pendingInviteData.role) {
+            console.error('Invalid invite data:', pendingInviteData);
+            throw new Error('Invalid invite data. Please try the invite link again.');
+          }
+        } catch (err) {
+          console.error('Error parsing invite data:', err);
           throw new Error('Invalid invite data. Please try the invite link again.');
         }
       } else {

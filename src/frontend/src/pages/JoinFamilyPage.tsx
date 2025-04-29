@@ -54,7 +54,7 @@ export default function JoinFamilyPage() {
 
         // Redirect to Google sign in with invite code
         setTimeout(() => {
-          window.location.href = `/login?invite_code=${code}`;
+          navigate(`/login?invite_code=${code}`);
         }, 1000);
       } catch (err) {
         setStatus('error');
