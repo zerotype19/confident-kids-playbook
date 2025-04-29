@@ -46,6 +46,14 @@ export async function authGoogle(context: { request: Request; env: Env }) {
       });
     }
 
+    // Get invite code from request body or localStorage
+    const inviteData = body.invite_code ? 
+      { invite_code: body.invite_code } : 
+      JSON.parse(localStorage.getItem('pendingInviteData') || '{}');
+    
+    const invite_code = inviteData.invite_code;
+    console.log('🔍 Checking for invite code:', { invite_code });
+
     console.log('🔗 Using API URL:', request.url);
     const result = await verifyGoogleTokenAndCreateJwt(body.credential, env.JWT_SECRET, env.GOOGLE_CLIENT_ID);
 
@@ -202,7 +210,13 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     }
 
     // Generate JWT token
-    const token = await createJWT({ sub: user_id }, env.JWT_SECRET);
+    const token = await createJWT({ 
+      sub: user_id,
+      email: email,
+      name: name,
+      picture: picture,
+      has_completed_onboarding: body.invite_code ? 1 : 0
+    }, env.JWT_SECRET);
 
     return new Response(
       JSON.stringify({
@@ -212,7 +226,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           id: user_id,
           email: email,
           name: name,
-          picture: picture
+          picture: picture,
+          has_completed_onboarding: body.invite_code ? 1 : 0
         }
       }),
       {

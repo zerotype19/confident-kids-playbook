@@ -52,9 +52,9 @@ export default function JoinFamilyPage() {
         setStatus('success');
         setMessage('Redirecting to sign in...');
 
-        // Redirect to Google sign in
+        // Redirect to Google sign in with invite code
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = `/login?invite_code=${code}`;
         }, 1000);
       } catch (err) {
         setStatus('error');

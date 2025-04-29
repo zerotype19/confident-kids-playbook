@@ -1,10 +1,17 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+
+  // Get invite code from URL
+  const getInviteCode = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get('invite_code');
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -12,18 +19,28 @@ export const LoginPage: React.FC = () => {
       const googleAuth = await window.gapi.auth2.getAuthInstance();
       const googleUser = await googleAuth.signIn();
       const token = googleUser.getAuthResponse().id_token;
+      const invite_code = getInviteCode();
 
       // Exchange token for JWT
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'google', token }),
+        body: JSON.stringify({ 
+          credential: token,
+          invite_code 
+        }),
       });
 
       if (!response.ok) throw new Error('Login failed');
 
-      const { token: jwt } = await response.json();
+      const { jwt, user } = await response.json();
       await login(jwt);
+      
+      // Clear invite data from localStorage if it exists
+      if (invite_code) {
+        localStorage.removeItem('pendingInviteData');
+      }
+      
       navigate('/dashboard');
     } catch (error) {
       console.error('Google login error:', error);
