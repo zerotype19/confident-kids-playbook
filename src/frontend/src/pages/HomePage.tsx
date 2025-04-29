@@ -102,6 +102,11 @@ export default function HomePage(): JSX.Element {
       // Store credential temporarily for cleanup
       localStorage.setItem('google_credential', response.credential)
       
+      // Get invite code from URL if present
+      const params = new URLSearchParams(window.location.search);
+      const inviteCode = params.get('invite_code');
+      console.log('Invite code from URL:', inviteCode);
+      
       // Exchange Google credential for JWT
       const apiUrl = import.meta.env.VITE_API_URL
       const authResponse = await fetch(`${apiUrl}/api/auth/google`, {
@@ -111,7 +116,8 @@ export default function HomePage(): JSX.Element {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          credential: response.credential 
+          credential: response.credential,
+          ...(inviteCode ? { invite_code: inviteCode } : {})
         })
       })
 
@@ -347,7 +353,7 @@ export default function HomePage(): JSX.Element {
   <h2 className="text-3xl font-bold mb-8">What Parents Are Saying</h2>
   <div className="max-w-4xl mx-auto space-y-12">
     <blockquote className="text-lg italic relative">
-      “My son asks for his challenge every morning. It’s become part of our rhythm.”
+      “My son asks for his challenge every morning. It's become part of our rhythm.”
       <span className="block mt-4 font-semibold text-gray-700">— Amanda R., Mom of 6-year-old</span>
     </blockquote>
     <blockquote className="text-lg italic relative">
@@ -366,7 +372,7 @@ export default function HomePage(): JSX.Element {
 <section className="py-16 bg-gray-50 text-center">
   <h2 className="text-3xl font-bold mb-6">Backed by Research. Built for Real Life.</h2>
   <p className="text-lg mb-10 max-w-3xl mx-auto">
-    Kidoova is grounded in decades of child development research, combining key principles from the world’s top developmental psychologists into a daily, approachable format for parents.
+    Kidoova is grounded in decades of child development research, combining key principles from the world's top developmental psychologists into a daily, approachable format for parents.
   </p>
   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto text-left">
     <div>
@@ -375,11 +381,11 @@ export default function HomePage(): JSX.Element {
     </div>
     <div>
       <h3 className="font-semibold text-lg mb-2">Self-Efficacy & Confidence</h3>
-      <p>Following Albert Bandura’s research, our challenges are designed to build belief in one’s own abilities through mastery and encouragement.</p>
+      <p>Following Albert Bandura's research, our challenges are designed to build belief in one's own abilities through mastery and encouragement.</p>
     </div>
     <div>
       <h3 className="font-semibold text-lg mb-2">Social & Emotional Learning</h3>
-      <p>Influenced by Harvard’s SEL framework and the Child Mind Institute, Kidoova supports emotional growth and communication skills in daily life.</p>
+      <p>Influenced by Harvard's SEL framework and the Child Mind Institute, Kidoova supports emotional growth and communication skills in daily life.</p>
     </div>
   </div>
   <p className="text-sm mt-8 text-gray-500">Sources: Dweck (2006), Bandura (1997), Denham (1998), Duckworth (2005), SEL in Schools (HGSE)</p>
