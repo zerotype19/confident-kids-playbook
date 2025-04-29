@@ -19,19 +19,17 @@ export const LoginPage: React.FC = () => {
       const googleAuth = await window.gapi.auth2.getAuthInstance();
       const googleUser = await googleAuth.signIn();
       const token = googleUser.getAuthResponse().id_token;
-      const invite_code = getInviteCode();
 
-      // Get invite data from localStorage if it exists
+      // Get invite data from localStorage
+      const storedData = localStorage.getItem('pendingInviteData');
       let pendingInviteData = null;
-      if (invite_code) {
-        const storedData = localStorage.getItem('pendingInviteData');
-        if (!storedData) {
-          throw new Error('Invite data not found. Please try the invite link again.');
-        }
+      
+      if (storedData) {
         pendingInviteData = JSON.parse(storedData);
+        console.log('Found pending invite data:', pendingInviteData);
         
         // Verify we have all required data
-        if (!pendingInviteData.family_id || !pendingInviteData.role) {
+        if (!pendingInviteData.invite_code || !pendingInviteData.family_id || !pendingInviteData.role) {
           throw new Error('Invalid invite data. Please try the invite link again.');
         }
       }
@@ -59,7 +57,7 @@ export const LoginPage: React.FC = () => {
       await login(jwt);
       
       // Clear invite data from localStorage if it exists
-      if (invite_code) {
+      if (pendingInviteData) {
         localStorage.removeItem('pendingInviteData');
       }
       
