@@ -32,6 +32,7 @@ import { onRequestGet as theme } from './api/dashboard/theme'
 import { onRequestPost as reflection } from './api/reflection'
 import { onRequestGet as getConfidenceTrend } from './api/confidence-trend'
 import { onRequestPost as familyInvite } from './api/family_invite'
+import { onRequestPost as familyJoin } from './api/family_join'
 
 const router = Router()
 
@@ -177,6 +178,7 @@ router.post('/api/reflection', (request, context) => {
 
 // Family routes
 router.post('/api/family/invite', (request, context) => familyInvite({ request, env: context.env }))
+router.post('/api/family_join', (request, context) => familyJoin({ request, env: context.env }))
 
 // Add catch-all route for debugging
 router.all('*', (request) => {

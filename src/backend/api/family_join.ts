@@ -1,19 +1,21 @@
 import { Env, FamilyJoinRequest } from '../types';
-import { Context } from 'hono';
 import jwt from 'jsonwebtoken';
+import { corsHeaders } from '../lib/cors';
 
-export const onRequestPost = async (c: Context<{ Bindings: Env }>) => {
-  const { env } = c;
-  const authHeader = c.req.header('Authorization');
+export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
+  const authHeader = request.headers.get('Authorization');
 
   if (!authHeader?.startsWith('Bearer ')) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+    });
   }
 
   try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, env.JWT_SECRET) as { user_id: string };
-    const { invite_code } = await c.req.json() as FamilyJoinRequest;
+    const { invite_code } = await request.json() as FamilyJoinRequest;
 
     // Get invite
     const invite = await env.DB.prepare(`
@@ -22,7 +24,10 @@ export const onRequestPost = async (c: Context<{ Bindings: Env }>) => {
     `).bind(invite_code).first();
 
     if (!invite) {
-      return c.json({ error: 'Invalid or expired invite' }, 400);
+      return new Response(JSON.stringify({ error: 'Invalid or expired invite' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+      });
     }
 
     // Check if user is already a member
@@ -32,7 +37,10 @@ export const onRequestPost = async (c: Context<{ Bindings: Env }>) => {
     `).bind(invite.family_id, decoded.user_id).first();
 
     if (existingMember) {
-      return c.json({ error: 'Already a member' }, 400);
+      return new Response(JSON.stringify({ error: 'Already a member' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+      });
     }
 
     // Add user to family
@@ -56,9 +64,14 @@ export const onRequestPost = async (c: Context<{ Bindings: Env }>) => {
     await env.DB.prepare('DELETE FROM family_invites WHERE code = ?')
       .bind(invite_code).run();
 
-    return c.json({ success: true });
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+    });
   } catch (error) {
     console.error('Join family error:', error);
-    return c.json({ error: 'Failed to join family' }, 500);
+    return new Response(JSON.stringify({ error: 'Failed to join family' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+    });
   }
-} 
+}; 
