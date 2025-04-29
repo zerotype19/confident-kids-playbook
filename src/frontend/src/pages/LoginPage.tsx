@@ -22,9 +22,19 @@ export const LoginPage: React.FC = () => {
       const invite_code = getInviteCode();
 
       // Get invite data from localStorage if it exists
-      const pendingInviteData = invite_code ? 
-        JSON.parse(localStorage.getItem('pendingInviteData') || '{}') : 
-        null;
+      let pendingInviteData = null;
+      if (invite_code) {
+        const storedData = localStorage.getItem('pendingInviteData');
+        if (!storedData) {
+          throw new Error('Invite data not found. Please try the invite link again.');
+        }
+        pendingInviteData = JSON.parse(storedData);
+        
+        // Verify we have all required data
+        if (!pendingInviteData.family_id || !pendingInviteData.role) {
+          throw new Error('Invalid invite data. Please try the invite link again.');
+        }
+      }
 
       // Exchange token for JWT
       const response = await fetch('/api/auth/google', {
@@ -32,13 +42,18 @@ export const LoginPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           credential: token,
-          invite_code,
-          family_id: pendingInviteData?.family_id,
-          role: pendingInviteData?.role
+          ...(pendingInviteData ? {
+            invite_code: pendingInviteData.invite_code,
+            family_id: pendingInviteData.family_id,
+            role: pendingInviteData.role
+          } : {})
         }),
       });
 
-      if (!response.ok) throw new Error('Login failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Login failed');
+      }
 
       const { jwt, user } = await response.json();
       await login(jwt);
@@ -51,6 +66,8 @@ export const LoginPage: React.FC = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Google login error:', error);
+      // Show error to user
+      alert(error instanceof Error ? error.message : 'Login failed. Please try again.');
     }
   };
 
