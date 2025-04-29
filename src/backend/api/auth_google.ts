@@ -9,6 +9,8 @@ import { D1Database } from '@cloudflare/workers-types'
 interface GoogleAuthRequest {
   credential: string
   invite_code?: string
+  family_id?: string
+  role?: string
 }
 
 export async function authGoogle(context: { request: Request; env: Env }) {
@@ -35,7 +37,9 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     console.log('✅ Received Google credential:', {
       hasCredential: !!body.credential,
       credentialLength: body.credential?.length,
-      hasInviteCode: !!body.invite_code
+      hasInviteCode: !!body.invite_code,
+      hasFamilyId: !!body.family_id,
+      hasRole: !!body.role
     });
 
     if (!body.credential) {
@@ -151,7 +155,9 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           email,
           name,
           hasInviteCode: !!body.invite_code,
-          inviteCode: body.invite_code
+          inviteCode: body.invite_code,
+          familyId: body.family_id,
+          role: body.role
         });
         try {
           // Start transaction using D1's transaction API
@@ -169,42 +175,35 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           `).bind(user_id, email, name).run();
 
           // Check if invite code exists and is valid
-          if (body.invite_code) {
-            console.log('🔍 Processing invite code:', body.invite_code);
+          if (body.invite_code && body.family_id && body.role) {
+            console.log('🔍 Processing invite:', {
+              invite_code: body.invite_code,
+              family_id: body.family_id,
+              role: body.role
+            });
             
-            const inviteResult = await env.DB.prepare(
-              'SELECT family_id, role FROM family_invites WHERE id = ? AND expires_at > datetime(\'now\')'
-            ).bind(body.invite_code).first<{ family_id: string; role: string }>();
+            const member_id = randomUUID();
+            
+            console.log('➕ Creating family member:', {
+              member_id,
+              user_id,
+              family_id: body.family_id,
+              role: body.role
+            });
 
-            console.log('📋 Invite lookup result:', inviteResult);
+            // Add user as member of the family with the role from the invite
+            const insertResult = await env.DB.prepare(
+              'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
+            ).bind(member_id, user_id, body.family_id, body.role).run();
 
-            if (inviteResult) {
-              const { family_id, role } = inviteResult;
-              const member_id = randomUUID();
-              
-              console.log('➕ Creating family member:', {
-                member_id,
-                user_id,
-                family_id,
-                role
-              });
+            console.log('✅ Family member created:', insertResult);
 
-              // Add user as member of the family with the role from the invite
-              const insertResult = await env.DB.prepare(
-                'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-              ).bind(member_id, user_id, family_id, role).run();
+            // Delete the used invite
+            const deleteResult = await env.DB.prepare(
+              'DELETE FROM family_invites WHERE id = ?'
+            ).bind(body.invite_code).run();
 
-              console.log('✅ Family member created:', insertResult);
-
-              // Delete the used invite
-              const deleteResult = await env.DB.prepare(
-                'DELETE FROM family_invites WHERE id = ?'
-              ).bind(body.invite_code).run();
-
-              console.log('🗑️ Invite deleted:', deleteResult);
-            } else {
-              console.log('❌ No valid invite found for code:', body.invite_code);
-            }
+            console.log('🗑️ Invite deleted:', deleteResult);
           } else {
             // Create a new family for the user
             const family_id = randomUUID();

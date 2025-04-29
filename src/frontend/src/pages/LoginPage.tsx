@@ -21,13 +21,20 @@ export const LoginPage: React.FC = () => {
       const token = googleUser.getAuthResponse().id_token;
       const invite_code = getInviteCode();
 
+      // Get invite data from localStorage if it exists
+      const pendingInviteData = invite_code ? 
+        JSON.parse(localStorage.getItem('pendingInviteData') || '{}') : 
+        null;
+
       // Exchange token for JWT
       const response = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           credential: token,
-          invite_code 
+          invite_code,
+          family_id: pendingInviteData?.family_id,
+          role: pendingInviteData?.role
         }),
       });
 
