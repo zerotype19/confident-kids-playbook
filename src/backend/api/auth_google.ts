@@ -77,40 +77,72 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     const picture = result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).picture : undefined;
 
     // First check if user exists by ID
+    console.log('🔍 Checking if user exists by ID:', user_id);
     let user = await env.DB.prepare(
       'SELECT id FROM users WHERE id = ?'
     ).bind(user_id).first();
+    console.log('👤 User lookup by ID result:', { user });
 
     if (!user) {
       // Then check if user exists by email
+      console.log('🔍 User not found by ID, checking by email:', email);
       user = await env.DB.prepare(
         'SELECT id FROM users WHERE email = ?'
       ).bind(email).first();
+      console.log('👤 User lookup by email result:', { user });
 
       if (user) {
         // Update existing user with Google ID and info
-        await env.DB.prepare(`
-          UPDATE users 
-          SET id = ?, 
-              name = ?,
-              auth_provider = 'google',
-              updated_at = CURRENT_TIMESTAMP
-          WHERE email = ?
-        `).bind(user_id, name, email).run();
+        console.log('✏️ Updating existing user:', {
+          newId: user_id,
+          name,
+          email,
+          currentUser: user
+        });
+        try {
+          await env.DB.prepare(`
+            UPDATE users 
+            SET id = ?, 
+                name = ?,
+                auth_provider = 'google',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE email = ?
+          `).bind(user_id, name, email).run();
+          console.log('✅ User updated successfully');
+        } catch (error: any) {
+          console.error('❌ Error updating user:', error);
+          throw error;
+        }
       } else {
         // Create new user
-        await env.DB.prepare(`
-          INSERT INTO users (
-            id, 
-            email, 
-            name, 
-            auth_provider,
-            created_at,
-            updated_at,
-            has_completed_onboarding
-          )
-          VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
-        `).bind(user_id, email, name, body.invite_code ? 1 : 0).run();
+        console.log('➕ Creating new user:', {
+          id: user_id,
+          email,
+          name,
+          hasInviteCode: !!body.invite_code
+        });
+        try {
+          await env.DB.prepare(`
+            INSERT INTO users (
+              id, 
+              email, 
+              name, 
+              auth_provider,
+              created_at,
+              updated_at,
+              has_completed_onboarding
+            )
+            VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
+          `).bind(user_id, email, name, body.invite_code ? 1 : 0).run();
+          console.log('✅ New user created successfully');
+        } catch (error: any) {
+          console.error('❌ Error creating user:', {
+            error,
+            errorMessage: error.message,
+            cause: error.cause
+          });
+          throw error;
+        }
       }
     }
 
