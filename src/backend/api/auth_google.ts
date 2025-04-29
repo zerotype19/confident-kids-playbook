@@ -150,7 +150,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           id: user_id,
           email,
           name,
-          hasInviteCode: !!body.invite_code
+          hasInviteCode: !!body.invite_code,
+          inviteCode: body.invite_code
         });
         try {
           // Start transaction using D1's transaction API
