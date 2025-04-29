@@ -185,10 +185,38 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               throw new Error('Missing family_id or role for invite code');
             }
 
+            // Verify the invite code and get the correct family_id
+            const invite = await env.DB.prepare(
+              'SELECT family_id, role FROM family_invites WHERE id = ?'
+            ).bind(body.invite_code).first<{ family_id: string; role: string }>();
+
+            if (!invite) {
+              console.error('❌ Invalid invite code:', body.invite_code);
+              throw new Error('Invalid invite code');
+            }
+
+            // Verify the family_id matches
+            if (invite.family_id !== body.family_id) {
+              console.error('❌ Family ID mismatch:', {
+                expected: invite.family_id,
+                received: body.family_id
+              });
+              throw new Error('Invalid family ID for invite code');
+            }
+
+            // Verify the role matches
+            if (invite.role !== body.role) {
+              console.error('❌ Role mismatch:', {
+                expected: invite.role,
+                received: body.role
+              });
+              throw new Error('Invalid role for invite code');
+            }
+
             console.log('🔍 Processing invite:', {
               invite_code: body.invite_code,
-              family_id: body.family_id,
-              role: body.role
+              family_id: invite.family_id,
+              role: invite.role
             });
             
             const member_id = randomUUID();
@@ -196,14 +224,14 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             console.log('➕ Creating family member:', {
               member_id,
               user_id,
-              family_id: body.family_id,
-              role: body.role
+              family_id: invite.family_id,
+              role: invite.role
             });
 
             // Add user as member of the family with the role from the invite
             const memberStmt = env.DB.prepare(
               'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-            ).bind(member_id, user_id, body.family_id, body.role);
+            ).bind(member_id, user_id, invite.family_id, invite.role);
 
             // Delete the used invite
             const deleteStmt = env.DB.prepare(
