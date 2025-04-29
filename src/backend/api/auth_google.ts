@@ -11,6 +11,7 @@ interface Env {
 
 interface GoogleAuthRequest {
   credential: string
+  invite_code?: string
 }
 
 export async function authGoogle(context: { request: Request; env: Env }) {
@@ -36,7 +37,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     const body = await request.json() as GoogleAuthRequest;
     console.log('✅ Received Google credential:', {
       hasCredential: !!body.credential,
-      credentialLength: body.credential?.length
+      credentialLength: body.credential?.length,
+      hasInviteCode: !!body.invite_code
     });
 
     if (!body.credential) {
@@ -108,8 +110,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             has_completed_onboarding,
             selected_child_id
           )
-          VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL)
-        `).bind(user_id, email, name).run();
+          VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, NULL)
+        `).bind(user_id, email, name, body.invite_code ? 1 : 0).run();
       }
     }
 
