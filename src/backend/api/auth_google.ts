@@ -167,11 +167,10 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
           `).bind(user_id, email, name).run();
 
-          // If invite code exists, add them to the family immediately
+          // Check if invite code exists and is valid
           if (body.invite_code) {
             console.log('🔍 Processing invite code:', body.invite_code);
             
-            // Check if invite code exists and is valid
             const inviteResult = await env.DB.prepare(
               'SELECT family_id, role FROM family_invites WHERE id = ? AND expires_at > datetime(\'now\')'
             ).bind(body.invite_code).first<{ family_id: string; role: string }>();
@@ -210,7 +209,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             const family_id = randomUUID();
             const member_id = randomUUID();
             
-            console.log('➕ Creating new family and adding user as admin:', {
+            console.log('➕ Creating new family and adding user as owner:', {
               family_id,
               member_id,
               user_id
@@ -222,10 +221,10 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               VALUES (?, ?, CURRENT_TIMESTAMP)
             `).bind(family_id, `${name}'s Family`).run();
 
-            // Add user as admin of the family
+            // Add user as owner of the family
             const insertResult = await env.DB.prepare(
               'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-            ).bind(member_id, user_id, family_id, 'admin').run();
+            ).bind(member_id, user_id, family_id, 'owner').run();
 
             console.log('✅ New family and member created:', insertResult);
           }
