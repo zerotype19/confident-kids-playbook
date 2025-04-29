@@ -20,48 +20,19 @@ export const LoginPage: React.FC = () => {
       const googleUser = await googleAuth.signIn();
       const token = googleUser.getAuthResponse().id_token;
 
-      console.log('Google sign-in successful, checking localStorage...');
-      
-      // Get invite data from localStorage
-      const storedData = localStorage.getItem('pendingInviteData');
-      console.log('Raw stored data:', storedData);
-      
-      let pendingInviteData = null;
-      
-      if (storedData) {
-        try {
-          pendingInviteData = JSON.parse(storedData);
-          console.log('Parsed pending invite data:', pendingInviteData);
-          
-          // Verify we have all required data
-          if (!pendingInviteData.invite_code || !pendingInviteData.family_id || !pendingInviteData.role) {
-            console.error('Invalid invite data:', pendingInviteData);
-            throw new Error('Invalid invite data. Please try the invite link again.');
-          }
-        } catch (err) {
-          console.error('Error parsing invite data:', err);
-          throw new Error('Invalid invite data. Please try the invite link again.');
-        }
-      } else {
-        console.log('No pending invite data found in localStorage');
-      }
+      // Get invite code from URL
+      const inviteCode = getInviteCode();
+      console.log('Invite code from URL:', inviteCode);
 
       // Prepare request body
       const requestBody = {
         credential: token,
-        ...(pendingInviteData ? {
-          invite_code: pendingInviteData.invite_code,
-          family_id: pendingInviteData.family_id,
-          role: pendingInviteData.role
-        } : {})
+        ...(inviteCode ? { invite_code: inviteCode } : {})
       };
 
       console.log('Prepared request body:', {
         hasCredential: !!requestBody.credential,
         hasInviteCode: !!requestBody.invite_code,
-        hasFamilyId: !!requestBody.family_id,
-        hasRole: !!requestBody.role,
-        inviteData: pendingInviteData,
         rawBody: requestBody
       });
 
@@ -79,13 +50,6 @@ export const LoginPage: React.FC = () => {
 
       const { jwt, user } = await response.json();
       await login(jwt);
-      
-      // Clear invite data from localStorage if it exists
-      if (pendingInviteData) {
-        console.log('Clearing invite data from localStorage');
-        localStorage.removeItem('pendingInviteData');
-      }
-      
       navigate('/dashboard');
     } catch (error) {
       console.error('Google login error:', error);

@@ -44,20 +44,6 @@ export default function JoinFamilyPage() {
 
         console.log('Received invite data:', data);
         
-        // Store all invite data for use after Google auth
-        const inviteData = {
-          invite_code: code,
-          family_id: data.family_id,
-          role: data.role
-        };
-        
-        console.log('Storing invite data in localStorage:', inviteData);
-        localStorage.setItem('pendingInviteData', JSON.stringify(inviteData));
-        
-        // Verify the data was stored correctly
-        const storedData = localStorage.getItem('pendingInviteData');
-        console.log('Verifying stored data:', storedData);
-        
         setStatus('success');
         setMessage('Redirecting to sign in...');
 
