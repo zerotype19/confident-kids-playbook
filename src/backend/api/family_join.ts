@@ -2,19 +2,16 @@ import { Env, FamilyJoinRequest } from '../types';
 import jwt from 'jsonwebtoken';
 import { corsHeaders } from '../lib/cors';
 
+interface UserRecord {
+  id: string;
+  email: string;
+  has_completed_onboarding: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
-  const authHeader = request.headers.get('Authorization');
-
-  if (!authHeader?.startsWith('Bearer ')) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders() },
-    });
-  }
-
   try {
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { sub: string };
     const body = await request.json();
     console.log('Request body:', body);
     const { invite_code } = body as FamilyJoinRequest;
@@ -41,26 +38,63 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       });
     }
 
+    // Check if user with this email already exists
+    const existingUser = await env.DB.prepare(`
+      SELECT * FROM users WHERE email = ?
+    `).bind(invite.email).first() as UserRecord | null;
+    console.log('Existing user:', existingUser);
+
+    let userId: string;
+
+    if (!existingUser) {
+      // Create new user with the invited email
+      userId = crypto.randomUUID();
+      await env.DB.prepare(`
+        INSERT INTO users (
+          id,
+          email,
+          has_completed_onboarding,
+          created_at,
+          updated_at
+        ) VALUES (?, ?, 1, datetime('now'), datetime('now'))
+      `).bind(
+        userId,
+        invite.email
+      ).run();
+      console.log('Created new user with ID:', userId);
+    } else {
+      userId = existingUser.id;
+      // Update existing user's onboarding status
+      await env.DB.prepare(`
+        UPDATE users 
+        SET has_completed_onboarding = 1,
+            updated_at = datetime('now')
+        WHERE id = ?
+      `).bind(userId).run();
+      console.log('Updated existing user:', userId);
+    }
+
     // Check if user is already a member
     const existingMember = await env.DB.prepare(`
       SELECT * FROM family_members
       WHERE family_id = ? AND user_id = ?
-    `).bind(invite.family_id, decoded.sub).first();
+    `).bind(invite.family_id, userId).first();
     console.log('Existing member:', existingMember);
 
     if (existingMember) {
-      return new Response(JSON.stringify({ error: 'Already a member' }), {
-        status: 400,
+      return new Response(JSON.stringify({ 
+        redirectUrl: `${env.FRONTEND_URL}/auth/google?redirect=/dashboard`
+      }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders() },
       });
     }
 
-    // Add user to family
+    // Add user to family using the invite's family_id
     const memberId = crypto.randomUUID();
     console.log('New member details:', {
       memberId,
       familyId: invite.family_id,
-      userId: decoded.sub,
+      userId: userId,
       role: invite.role
     });
 
@@ -76,7 +110,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     `).bind(
       memberId,
       invite.family_id,
-      decoded.sub,
+      userId,
       invite.role
     ).run();
 
@@ -84,10 +118,12 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     await env.DB.prepare('DELETE FROM family_invites WHERE id = ?')
       .bind(invite_code).run();
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      redirectUrl: `${env.FRONTEND_URL}/auth/google?redirect=/dashboard`
+    }), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders() },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Join family error:', error);
     console.error('Error details:', {
       name: error.name,
@@ -99,4 +135,4 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       headers: { 'Content-Type': 'application/json', ...corsHeaders() },
     });
   }
-}; 
+};
