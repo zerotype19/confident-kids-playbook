@@ -1,7 +1,7 @@
 import { Env, FamilyInviteRequest } from '../types';
-import jwt from 'jsonwebtoken';
 import { randomBytes } from 'node:crypto';
 import { corsHeaders, handleOptions } from '../lib/cors';
+import { verifyJWT } from '../auth';
 
 interface Family {
   id: string;
@@ -55,7 +55,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   try {
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { sub: string };
+    const payload = await verifyJWT(token, env);
+    
+    if (!payload?.sub) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { email, role = 'member' } = await request.json() as FamilyInviteRequest;
 
     // Get user's family
@@ -64,7 +72,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       FROM families f
       JOIN family_members fm ON f.id = fm.family_id
       WHERE fm.user_id = ? AND fm.role = 'owner'
-    `).bind(decoded.sub).first<Family>();
+    `).bind(payload.sub).first<Family>();
 
     if (!family) {
       return new Response(JSON.stringify({ error: 'No family found or not authorized' }), {
