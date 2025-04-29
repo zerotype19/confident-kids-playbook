@@ -205,6 +205,29 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             } else {
               console.log('❌ No valid invite found for code:', body.invite_code);
             }
+          } else {
+            // Create a new family for the user
+            const family_id = randomUUID();
+            const member_id = randomUUID();
+            
+            console.log('➕ Creating new family and adding user as admin:', {
+              family_id,
+              member_id,
+              user_id
+            });
+
+            // Create the family
+            await env.DB.prepare(`
+              INSERT INTO families (id, name, created_at, updated_at)
+              VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            `).bind(family_id, `${name}'s Family`).run();
+
+            // Add user as admin of the family
+            const insertResult = await env.DB.prepare(
+              'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
+            ).bind(member_id, user_id, family_id, 'admin').run();
+
+            console.log('✅ New family and member created:', insertResult);
           }
 
           console.log('✅ New user and family member created successfully');
