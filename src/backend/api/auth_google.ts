@@ -160,6 +160,26 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           role: body.role
         });
         try {
+          let family_id = null;
+          let role = null;
+
+          // If we have an invite code, verify it and get the family_id
+          if (body.invite_code) {
+            console.log('🔍 Verifying invite code:', body.invite_code);
+            const invite = await env.DB.prepare(
+              'SELECT family_id, role FROM family_invites WHERE id = ?'
+            ).bind(body.invite_code).first<{ family_id: string; role: string }>();
+
+            if (!invite) {
+              console.error('❌ Invalid invite code:', body.invite_code);
+              throw new Error('Invalid invite code');
+            }
+
+            family_id = invite.family_id;
+            role = invite.role;
+            console.log('✅ Verified invite:', { family_id, role });
+          }
+
           // Start transaction using D1's transaction API
           const stmt = env.DB.prepare(`
             INSERT INTO users (
@@ -173,23 +193,23 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               temp_family_id
             )
             VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?)
-          `).bind(user_id, email, name, body.family_id || null);
+          `).bind(user_id, email, name, family_id);
 
           const result = await stmt.run();
           console.log('✅ User created:', { result });
 
-          // If we have an invite code, create the family member record
-          if (body.invite_code && body.family_id && body.role) {
+          // If we have a family_id from the invite, create the family member record
+          if (family_id) {
             console.log('➕ Creating family member record:', {
-              familyId: body.family_id,
+              familyId: family_id,
               userId: user_id,
-              role: body.role
+              role: role
             });
 
             const familyMemberStmt = env.DB.prepare(`
               INSERT INTO family_members (id, family_id, user_id, role, created_at, updated_at)
               VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            `).bind(crypto.randomUUID(), body.family_id, user_id, body.role);
+            `).bind(crypto.randomUUID(), family_id, user_id, role);
 
             const familyMemberResult = await familyMemberStmt.run();
             console.log('✅ Family member created:', { familyMemberResult });
@@ -203,7 +223,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             console.log('✅ Invite deleted:', { deleteResult });
           } else {
             // Create a new family for the user
-            const family_id = crypto.randomUUID();
+            family_id = crypto.randomUUID();
             console.log('➕ Creating new family:', {
               familyId: family_id,
               userId: user_id
