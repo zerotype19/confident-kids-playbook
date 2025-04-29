@@ -119,7 +119,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 mb-6">
+    <div className="bg-white rounded-xl shadow-xl overflow-hidden mb-6">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-6 flex items-start gap-4 bg-white hover:bg-gray-50 transition-colors border-0 focus:outline-none focus:ring-0 appearance-none cursor-pointer"
