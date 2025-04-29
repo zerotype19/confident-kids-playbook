@@ -101,37 +101,60 @@ export async function authGoogle(context: { request: Request; env: Env }) {
         });
         try {
           console.log('🔄 Starting batch operation');
+          const tempId = crypto.randomUUID(); // Create a temporary ID
           const batch = [
-            // Update family_members table first
+            // First update the user to a temporary ID
+            env.DB.prepare(`
+              UPDATE users 
+              SET id = ?
+              WHERE id = ?
+            `).bind(tempId, user.id),
+
+            // Update references to use temporary ID
             env.DB.prepare(`
               UPDATE family_members 
               SET user_id = ?
               WHERE user_id = ?
-            `).bind(user_id, user.id),
+            `).bind(tempId, user.id),
 
-            // Update subscriptions table
             env.DB.prepare(`
               UPDATE subscriptions 
               SET user_id = ?
               WHERE user_id = ?
-            `).bind(user_id, user.id),
+            `).bind(tempId, user.id),
 
-            // Finally update users table
+            // Finally update user to Google ID
             env.DB.prepare(`
               UPDATE users 
               SET id = ?, 
                   name = ?,
                   auth_provider = 'google',
                   updated_at = CURRENT_TIMESTAMP
-              WHERE email = ?
-            `).bind(user_id, name, email)
+              WHERE id = ?
+            `).bind(user_id, name, tempId),
+
+            // Update references to final Google ID
+            env.DB.prepare(`
+              UPDATE family_members 
+              SET user_id = ?
+              WHERE user_id = ?
+            `).bind(user_id, tempId),
+
+            env.DB.prepare(`
+              UPDATE subscriptions 
+              SET user_id = ?
+              WHERE user_id = ?
+            `).bind(user_id, tempId)
           ];
 
           const results = await env.DB.batch(batch);
           console.log('✅ Batch operation completed successfully:', {
-            familyMembersResult: results[0],
-            subscriptionsResult: results[1],
-            usersResult: results[2]
+            userTempResult: results[0],
+            familyMembersTempResult: results[1],
+            subscriptionsTempResult: results[2],
+            userFinalResult: results[3],
+            familyMembersFinalResult: results[4],
+            subscriptionsFinalResult: results[5]
           });
         } catch (error: any) {
           console.error('❌ Error updating user:', {
