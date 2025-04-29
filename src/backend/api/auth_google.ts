@@ -74,17 +74,31 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     const name = result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).name : undefined;
     const picture = result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).picture : undefined;
 
-    // Check if user exists
-    const user = await env.DB.prepare(
+    // First check if user exists by ID
+    let user = await env.DB.prepare(
       'SELECT id FROM users WHERE id = ?'
     ).bind(user_id).first();
 
     if (!user) {
-      // Create new user
-      await env.DB.prepare(`
-        INSERT INTO users (id, email, name, has_completed_onboarding, created_at)
-        VALUES (?, ?, ?, false, datetime('now'))
-      `).bind(user_id, email, name).run();
+      // Then check if user exists by email
+      user = await env.DB.prepare(
+        'SELECT id FROM users WHERE email = ?'
+      ).bind(email).first();
+
+      if (user) {
+        // Update existing user with Google ID and info
+        await env.DB.prepare(`
+          UPDATE users 
+          SET id = ?, name = ?, updated_at = datetime('now')
+          WHERE email = ?
+        `).bind(user_id, name, email).run();
+      } else {
+        // Create new user
+        await env.DB.prepare(`
+          INSERT INTO users (id, email, name, has_completed_onboarding, created_at, updated_at)
+          VALUES (?, ?, ?, false, datetime('now'), datetime('now'))
+        `).bind(user_id, email, name).run();
+      }
     }
 
     return new Response(
