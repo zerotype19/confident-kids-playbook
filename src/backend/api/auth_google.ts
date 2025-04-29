@@ -169,113 +169,38 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               auth_provider,
               created_at,
               updated_at,
-              has_completed_onboarding
+              has_completed_onboarding,
+              temp_family_id
             )
-            VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
-          `).bind(user_id, email, name);
+            VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?)
+          `).bind(user_id, email, name, body.family_id);
 
-          // If we have an invite code, we MUST have a family_id and role
-          if (body.invite_code) {
-            if (!body.family_id || !body.role) {
-              console.error('❌ Missing family_id or role for invite code:', {
-                invite_code: body.invite_code,
-                family_id: body.family_id,
-                role: body.role
-              });
-              throw new Error('Missing family_id or role for invite code');
-            }
+          const result = await stmt.run();
+          console.log('✅ User created:', { result });
 
-            // Verify the invite code and get the correct family_id
-            const invite = await env.DB.prepare(
-              'SELECT family_id, role FROM family_invites WHERE id = ?'
-            ).bind(body.invite_code).first<{ family_id: string; role: string }>();
-
-            if (!invite) {
-              console.error('❌ Invalid invite code:', body.invite_code);
-              throw new Error('Invalid invite code');
-            }
-
-            // Verify the family_id matches
-            if (invite.family_id !== body.family_id) {
-              console.error('❌ Family ID mismatch:', {
-                expected: invite.family_id,
-                received: body.family_id
-              });
-              throw new Error('Invalid family ID for invite code');
-            }
-
-            // Verify the role matches
-            if (invite.role !== body.role) {
-              console.error('❌ Role mismatch:', {
-                expected: invite.role,
-                received: body.role
-              });
-              throw new Error('Invalid role for invite code');
-            }
-
-            console.log('🔍 Processing invite:', {
-              invite_code: body.invite_code,
-              family_id: invite.family_id,
-              role: invite.role
-            });
-            
-            const member_id = randomUUID();
-            
-            console.log('➕ Creating family member:', {
-              member_id,
-              user_id,
-              family_id: invite.family_id,
-              role: invite.role
+          // If we have an invite code, create the family member record
+          if (body.invite_code && body.family_id && body.role) {
+            console.log('➕ Creating family member record:', {
+              familyId: body.family_id,
+              userId: user_id,
+              role: body.role
             });
 
-            // Add user as member of the family with the role from the invite
-            const memberStmt = env.DB.prepare(
-              'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-            ).bind(member_id, user_id, invite.family_id, invite.role);
+            const familyMemberStmt = env.DB.prepare(`
+              INSERT INTO family_members (id, family_id, user_id, role, created_at, updated_at)
+              VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            `).bind(crypto.randomUUID(), body.family_id, user_id, body.role);
 
-            // Delete the used invite
-            const deleteStmt = env.DB.prepare(
-              'DELETE FROM family_invites WHERE id = ?'
-            ).bind(body.invite_code);
+            const familyMemberResult = await familyMemberStmt.run();
+            console.log('✅ Family member created:', { familyMemberResult });
 
-            // Execute all statements in a single batch
-            const results = await env.DB.batch([
-              stmt,
-              memberStmt,
-              deleteStmt
-            ]);
+            // Delete the invite
+            const deleteInviteStmt = env.DB.prepare(`
+              DELETE FROM family_invites WHERE id = ?
+            `).bind(body.invite_code);
 
-            console.log('✅ Batch results:', results);
-          } else {
-            // Create a new family for the user
-            const family_id = randomUUID();
-            const member_id = randomUUID();
-            
-            console.log('➕ Creating new family and adding user as owner:', {
-              family_id,
-              member_id,
-              user_id
-            });
-
-            // Create the family
-            const familyStmt = env.DB.prepare(`
-              INSERT INTO families (id, name, created_at)
-              VALUES (?, ?, CURRENT_TIMESTAMP)
-            `).bind(family_id, `${name}'s Family`);
-
-            // Add user as owner of the family
-            const memberStmt = env.DB.prepare(
-              'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-            ).bind(member_id, user_id, family_id, 'owner');
-
-            // Execute all statements in a single batch
-            const results = await env.DB.batch([
-              stmt,
-              familyStmt,
-              memberStmt
-            ]);
-
-            console.log('✅ Batch results:', results);
+            const deleteResult = await deleteInviteStmt.run();
+            console.log('✅ Invite deleted:', { deleteResult });
           }
 
           console.log('✅ New user and family member created successfully');

@@ -30,10 +30,24 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     const invite = await db
       .prepare('SELECT * FROM family_invites WHERE id = ?')
       .bind(invite_code)
-      .first<{ expires_at: string }>();
+      .first<{ id: string; family_id: string; role: string; expires_at: string }>();
     console.log('Found invite:', invite);
 
-    if (!invite) {
+    if (invite) {
+      console.log('✅ Valid invite found:', {
+        invite_code: body.invite_code,
+        family_id: invite.family_id,
+        role: invite.role
+      });
+
+      return new Response(JSON.stringify({
+        valid: true,
+        family_id: invite.family_id,
+        role: invite.role
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } else {
       return new Response(
         JSON.stringify({ error: 'Invalid invite code' }),
         {
@@ -42,27 +56,6 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         }
       );
     }
-
-    // Check if invite is expired
-    const now = new Date();
-    const expiresAt = new Date(invite.expires_at);
-    if (now > expiresAt) {
-      return new Response(
-        JSON.stringify({ error: 'Invite code has expired' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders() }
-        }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({ message: 'Invite code is valid' }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders() }
-      }
-    );
   } catch (err: any) {
     console.error('Error verifying invite:', err);
     console.error('Error details:', {
