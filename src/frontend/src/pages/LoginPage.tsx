@@ -30,22 +30,36 @@ export const LoginPage: React.FC = () => {
         
         // Verify we have all required data
         if (!pendingInviteData.invite_code || !pendingInviteData.family_id || !pendingInviteData.role) {
+          console.error('Invalid invite data:', pendingInviteData);
           throw new Error('Invalid invite data. Please try the invite link again.');
         }
+      } else {
+        console.log('No pending invite data found in localStorage');
       }
+
+      // Prepare request body
+      const requestBody = {
+        credential: token,
+        ...(pendingInviteData ? {
+          invite_code: pendingInviteData.invite_code,
+          family_id: pendingInviteData.family_id,
+          role: pendingInviteData.role
+        } : {})
+      };
+
+      console.log('Sending request with body:', {
+        hasCredential: !!requestBody.credential,
+        hasInviteCode: !!requestBody.invite_code,
+        hasFamilyId: !!requestBody.family_id,
+        hasRole: !!requestBody.role,
+        inviteData: pendingInviteData
+      });
 
       // Exchange token for JWT
       const response = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          credential: token,
-          ...(pendingInviteData ? {
-            invite_code: pendingInviteData.invite_code,
-            family_id: pendingInviteData.family_id,
-            role: pendingInviteData.role
-          } : {})
-        }),
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
