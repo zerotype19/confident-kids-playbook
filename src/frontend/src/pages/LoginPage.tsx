@@ -21,7 +21,8 @@ export const LoginPage: React.FC = () => {
       const token = googleUser.getAuthResponse().id_token;
 
       // Get invite code from URL
-      const inviteCode = getInviteCode();
+      const params = new URLSearchParams(window.location.search);
+      const inviteCode = params.get('invite_code');
       console.log('Invite code from URL:', inviteCode);
 
       // Prepare request body

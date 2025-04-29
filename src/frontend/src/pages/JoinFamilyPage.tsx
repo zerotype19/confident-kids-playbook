@@ -47,10 +47,10 @@ export default function JoinFamilyPage() {
         setStatus('success');
         setMessage('Redirecting to sign in...');
 
-        // Redirect to Google sign in with invite code
+        // Redirect to home page with invite code
         setTimeout(() => {
-          console.log('Navigating to login page with code:', code);
-          navigate(`/login?invite_code=${code}`);
+          console.log('Navigating to home page with code:', code);
+          navigate(`/?invite_code=${code}`);
         }, 1000);
       } catch (err) {
         setStatus('error');
