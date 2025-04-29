@@ -161,7 +161,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
         });
         try {
           // Start transaction using D1's transaction API
-          await env.DB.prepare(`
+          const stmt = env.DB.prepare(`
             INSERT INTO users (
               id, 
               email, 
@@ -172,7 +172,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               has_completed_onboarding
             )
             VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
-          `).bind(user_id, email, name).run();
+          `).bind(user_id, email, name);
 
           // If we have an invite code, we MUST have a family_id and role
           if (body.invite_code) {
@@ -201,18 +201,23 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             });
 
             // Add user as member of the family with the role from the invite
-            const insertResult = await env.DB.prepare(
+            const memberStmt = env.DB.prepare(
               'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-            ).bind(member_id, user_id, body.family_id, body.role).run();
-
-            console.log('✅ Family member created:', insertResult);
+            ).bind(member_id, user_id, body.family_id, body.role);
 
             // Delete the used invite
-            const deleteResult = await env.DB.prepare(
+            const deleteStmt = env.DB.prepare(
               'DELETE FROM family_invites WHERE id = ?'
-            ).bind(body.invite_code).run();
+            ).bind(body.invite_code);
 
-            console.log('🗑️ Invite deleted:', deleteResult);
+            // Execute all statements in a single batch
+            const results = await env.DB.batch([
+              stmt,
+              memberStmt,
+              deleteStmt
+            ]);
+
+            console.log('✅ Batch results:', results);
           } else {
             // Create a new family for the user
             const family_id = randomUUID();
@@ -225,17 +230,24 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             });
 
             // Create the family
-            await env.DB.prepare(`
+            const familyStmt = env.DB.prepare(`
               INSERT INTO families (id, name, created_at)
               VALUES (?, ?, CURRENT_TIMESTAMP)
-            `).bind(family_id, `${name}'s Family`).run();
+            `).bind(family_id, `${name}'s Family`);
 
             // Add user as owner of the family
-            const insertResult = await env.DB.prepare(
+            const memberStmt = env.DB.prepare(
               'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-            ).bind(member_id, user_id, family_id, 'owner').run();
+            ).bind(member_id, user_id, family_id, 'owner');
 
-            console.log('✅ New family and member created:', insertResult);
+            // Execute all statements in a single batch
+            const results = await env.DB.batch([
+              stmt,
+              familyStmt,
+              memberStmt
+            ]);
+
+            console.log('✅ Batch results:', results);
           }
 
           console.log('✅ New user and family member created successfully');
