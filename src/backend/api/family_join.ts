@@ -14,14 +14,25 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
   try {
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { user_id: string };
-    const { invite_code } = await request.json() as FamilyJoinRequest;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { sub: string };
+    const body = await request.json();
+    console.log('Request body:', body);
+    const { invite_code } = body as FamilyJoinRequest;
+    console.log('Invite code:', invite_code);
+
+    if (!invite_code) {
+      return new Response(JSON.stringify({ error: 'Missing invite code' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+      });
+    }
 
     // Get invite
     const invite = await env.DB.prepare(`
       SELECT * FROM family_invites
       WHERE id = ? AND expires_at > datetime('now')
     `).bind(invite_code).first();
+    console.log('Found invite:', invite);
 
     if (!invite) {
       return new Response(JSON.stringify({ error: 'Invalid or expired invite' }), {
@@ -34,7 +45,8 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     const existingMember = await env.DB.prepare(`
       SELECT * FROM family_members
       WHERE family_id = ? AND user_id = ?
-    `).bind(invite.family_id, decoded.user_id).first();
+    `).bind(invite.family_id, decoded.sub).first();
+    console.log('Existing member:', existingMember);
 
     if (existingMember) {
       return new Response(JSON.stringify({ error: 'Already a member' }), {
@@ -44,6 +56,14 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     }
 
     // Add user to family
+    const memberId = crypto.randomUUID();
+    console.log('New member details:', {
+      memberId,
+      familyId: invite.family_id,
+      userId: decoded.sub,
+      role: invite.role
+    });
+
     await env.DB.prepare(`
       INSERT INTO family_members (
         id,
@@ -54,9 +74,9 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         updated_at
       ) VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
     `).bind(
-      crypto.randomUUID(),
+      memberId,
       invite.family_id,
-      decoded.user_id,
+      decoded.sub,
       invite.role
     ).run();
 
@@ -69,6 +89,11 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     });
   } catch (error) {
     console.error('Join family error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     return new Response(JSON.stringify({ error: 'Failed to join family' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders() },
