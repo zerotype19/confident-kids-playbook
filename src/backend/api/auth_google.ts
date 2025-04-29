@@ -174,8 +174,17 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
           `).bind(user_id, email, name).run();
 
-          // Check if invite code exists and is valid
-          if (body.invite_code && body.family_id && body.role) {
+          // If we have an invite code, we MUST have a family_id and role
+          if (body.invite_code) {
+            if (!body.family_id || !body.role) {
+              console.error('❌ Missing family_id or role for invite code:', {
+                invite_code: body.invite_code,
+                family_id: body.family_id,
+                role: body.role
+              });
+              throw new Error('Missing family_id or role for invite code');
+            }
+
             console.log('🔍 Processing invite:', {
               invite_code: body.invite_code,
               family_id: body.family_id,
