@@ -1,13 +1,10 @@
-import { corsHeaders, handleOptions } from '../lib/cors'
+import { Env } from '../types';
+import { corsHeaders, handleOptions } from '../cors';
+import { createJWT } from '../jwt';
+import { randomUUID } from 'crypto';
 import { verifyGoogleTokenAndCreateJwt } from '../lib/googleAuth'
 import { OAuth2Client } from 'google-auth-library'
-
-interface Env {
-  JWT_SECRET: string
-  GOOGLE_CLIENT_ID: string
-  DB: D1Database
-  APPLE_CLIENT_ID: string
-}
+import { D1Database } from '@cloudflare/workers-types'
 
 interface GoogleAuthRequest {
   credential: string
@@ -180,15 +177,47 @@ export async function authGoogle(context: { request: Request; env: Env }) {
       }
     }
 
+    // If invite code is present, handle family join
+    if (body.invite_code) {
+      // Check if invite code exists and is valid
+      const inviteResult = await env.DB.prepare(
+        'SELECT family_id FROM family_invites WHERE code = ? AND expires_at > datetime(\'now\')'
+      ).bind(body.invite_code).first();
+
+      if (!inviteResult) {
+        return new Response(JSON.stringify({ error: 'Invalid or expired invite code' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      const familyId = inviteResult.family_id;
+
+      // Check if user is already a member of this family
+      const existingMember = await env.DB.prepare(
+        'SELECT id FROM family_members WHERE user_id = ? AND family_id = ?'
+      ).bind(user_id, familyId).first();
+
+      if (!existingMember) {
+        // Add user as member of the family
+        await env.DB.prepare(
+          'INSERT INTO family_members (id, user_id, family_id, role) VALUES (?, ?, ?, ?)'
+        ).bind(randomUUID(), user_id, familyId, 'member').run();
+      }
+    }
+
+    // Generate JWT token
+    const token = await createJWT({ sub: user_id }, env.JWT_SECRET);
+
     return new Response(
       JSON.stringify({
         status: 'ok',
-        jwt: result.jwt,
+        jwt: token,
         user: {
-          id: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).sub : undefined,
-          email: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).email : undefined,
-          name: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).name : undefined,
-          picture: result.jwt ? JSON.parse(atob(result.jwt.split('.')[1])).picture : undefined
+          id: user_id,
+          email: email,
+          name: name,
+          picture: picture
         }
       }),
       {

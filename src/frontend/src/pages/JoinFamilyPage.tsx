@@ -22,13 +22,13 @@ export default function JoinFamilyPage() {
       return;
     }
 
-    // Accept invite regardless of authentication status
-    const acceptInvite = async () => {
+    // Verify invite is valid before proceeding
+    const verifyInvite = async () => {
       setStatus('loading');
       setError(null);
       try {
         const apiUrl = import.meta.env.VITE_API_URL || '';
-        const res = await fetch(`${apiUrl}/api/family_join`, {
+        const res = await fetch(`${apiUrl}/api/verify_invite`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -39,35 +39,42 @@ export default function JoinFamilyPage() {
         const data = await res.json();
         
         if (!res.ok) {
-          throw new Error(data.error || 'Failed to accept invite');
+          throw new Error(data.error || 'Invalid invite code');
         }
 
+        // Store invite code for use after Google auth
+        localStorage.setItem('pendingInviteCode', code);
         setStatus('success');
-        setMessage(data.message);
+        setMessage('Redirecting to sign in...');
 
-        // Redirect to login page after 2 seconds
+        // Redirect to Google sign in
         setTimeout(() => {
           window.location.href = '/login';
-        }, 2000);
+        }, 1000);
       } catch (err) {
         setStatus('error');
-        setError(err instanceof Error ? err.message : 'Failed to accept invite');
+        setError(err instanceof Error ? err.message : 'Invalid invite code');
       }
     };
 
-    acceptInvite();
+    verifyInvite();
   }, [location.search, navigate]);
 
   if (status === 'loading') {
-    return <div className="min-h-screen flex items-center justify-center">Joining family...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Verifying invite...</div>;
   }
+
   if (status === 'error') {
-    return <div className="min-h-screen flex items-center justify-center text-red-600">{error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
   }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <div className="text-green-600 mb-4">{message}</div>
-      <div className="text-gray-600">Redirecting to login page...</div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-green-600">{message}</div>
     </div>
   );
 } 
