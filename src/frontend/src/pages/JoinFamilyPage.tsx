@@ -6,6 +6,7 @@ export default function JoinFamilyPage() {
   const location = useLocation();
   const [status, setStatus] = useState<'loading'|'error'|'success'>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   // Helper to get code from URL
   function getInviteCode() {
@@ -35,20 +36,19 @@ export default function JoinFamilyPage() {
           body: JSON.stringify({ invite_code: code })
         });
 
+        const data = await res.json();
+        
         if (!res.ok) {
-          const data = await res.json();
           throw new Error(data.error || 'Failed to accept invite');
         }
 
-        const data = await res.json();
         setStatus('success');
+        setMessage(data.message);
 
-        // If we got a redirect URL, use it
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        } else {
-          setTimeout(() => navigate('/dashboard', { replace: true }), 1000);
-        }
+        // Redirect to login page after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
       } catch (err) {
         setStatus('error');
         setError(err instanceof Error ? err.message : 'Failed to accept invite');
@@ -64,5 +64,10 @@ export default function JoinFamilyPage() {
   if (status === 'error') {
     return <div className="min-h-screen flex items-center justify-center text-red-600">{error}</div>;
   }
-  return <div className="min-h-screen flex items-center justify-center text-green-600">Success! Redirecting...</div>;
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center">
+      <div className="text-green-600 mb-4">{message}</div>
+      <div className="text-gray-600">Redirecting to login page...</div>
+    </div>
+  );
 } 

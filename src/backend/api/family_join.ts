@@ -91,7 +91,8 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
     if (existingMember) {
       return new Response(JSON.stringify({ 
-        redirectUrl: `${env.FRONTEND_URL}/auth/google?redirect=/dashboard`
+        success: true,
+        message: 'Already a member of this family'
       }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders() },
       });
@@ -126,13 +127,9 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     await env.DB.prepare('DELETE FROM family_invites WHERE id = ?')
       .bind(invite_code).run();
 
-    // Store the invite email in the redirect URL so we can pre-fill it in the Google auth flow
-    const redirectUrl = new URL(`${env.FRONTEND_URL}/auth/google`);
-    redirectUrl.searchParams.set('redirect', '/dashboard');
-    redirectUrl.searchParams.set('email', invite.email);
-
     return new Response(JSON.stringify({ 
-      redirectUrl: redirectUrl.toString()
+      success: true,
+      message: 'Successfully joined family'
     }), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders() },
     });
