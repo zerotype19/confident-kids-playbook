@@ -169,23 +169,41 @@ export async function authGoogle(context: { request: Request; env: Env }) {
 
           // If invite code exists, add them to the family immediately
           if (body.invite_code) {
+            console.log('🔍 Processing invite code:', body.invite_code);
+            
             // Check if invite code exists and is valid
             const inviteResult = await env.DB.prepare(
               'SELECT family_id, role FROM family_invites WHERE id = ? AND expires_at > datetime(\'now\')'
             ).bind(body.invite_code).first<{ family_id: string; role: string }>();
 
+            console.log('📋 Invite lookup result:', inviteResult);
+
             if (inviteResult) {
               const { family_id, role } = inviteResult;
+              const member_id = randomUUID();
+              
+              console.log('➕ Creating family member:', {
+                member_id,
+                user_id,
+                family_id,
+                role
+              });
 
               // Add user as member of the family with the role from the invite
-              await env.DB.prepare(
-                'INSERT INTO family_members (id, user_id, family_id, role) VALUES (?, ?, ?, ?)'
-              ).bind(randomUUID(), user_id, family_id, role).run();
+              const insertResult = await env.DB.prepare(
+                'INSERT INTO family_members (id, user_id, family_id, role, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
+              ).bind(member_id, user_id, family_id, role).run();
+
+              console.log('✅ Family member created:', insertResult);
 
               // Delete the used invite
-              await env.DB.prepare(
+              const deleteResult = await env.DB.prepare(
                 'DELETE FROM family_invites WHERE id = ?'
               ).bind(body.invite_code).run();
+
+              console.log('🗑️ Invite deleted:', deleteResult);
+            } else {
+              console.log('❌ No valid invite found for code:', body.invite_code);
             }
           }
 
