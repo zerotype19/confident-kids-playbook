@@ -153,10 +153,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           hasInviteCode: !!body.invite_code
         });
         try {
-          // Start transaction to create user and family member in one go
-          await env.DB.prepare('BEGIN TRANSACTION').run();
-
-          // Create the user first
+          // Start transaction using D1's transaction API
           await env.DB.prepare(`
             INSERT INTO users (
               id, 
@@ -192,12 +189,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             }
           }
 
-          // Commit the transaction
-          await env.DB.prepare('COMMIT').run();
           console.log('✅ New user and family member created successfully');
         } catch (error: any) {
-          // Rollback on error
-          await env.DB.prepare('ROLLBACK').run();
           console.error('❌ Error creating user:', {
             error,
             errorMessage: error.message,
