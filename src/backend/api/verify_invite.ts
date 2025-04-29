@@ -28,7 +28,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
     // Check if invite exists and is valid
     const invite = await db
-      .prepare('SELECT * FROM family_invites WHERE code = ?')
+      .prepare('SELECT * FROM family_invites WHERE id = ?')
       .bind(invite_code)
       .first<{ expires_at: string }>();
     console.log('Found invite:', invite);
