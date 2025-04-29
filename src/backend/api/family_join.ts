@@ -56,7 +56,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
           has_completed_onboarding,
           created_at,
           updated_at
-        ) VALUES (?, ?, 1, datetime('now'), datetime('now'))
+        ) VALUES (?, ?, 1, datetime('now'), COALESCE(datetime('now'), NULL))
       `).bind(
         userId,
         invite.email
@@ -68,7 +68,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       await env.DB.prepare(`
         UPDATE users 
         SET has_completed_onboarding = 1,
-            updated_at = datetime('now')
+            updated_at = COALESCE(datetime('now'), NULL)
         WHERE id = ?
       `).bind(userId).run();
       console.log('Updated existing user:', userId);
