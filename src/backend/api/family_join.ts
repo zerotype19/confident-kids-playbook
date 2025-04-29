@@ -1,5 +1,4 @@
 import { Env, FamilyJoinRequest } from '../types';
-import jwt from 'jsonwebtoken';
 import { corsHeaders } from '../lib/cors';
 
 interface UserRecord {
@@ -8,6 +7,15 @@ interface UserRecord {
   has_completed_onboarding: number;
   created_at: string;
   updated_at: string;
+}
+
+interface InviteRecord {
+  id: string;
+  family_id: string;
+  email: string;
+  role: string;
+  created_at: string;
+  expires_at: string;
 }
 
 export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
@@ -28,7 +36,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     const invite = await env.DB.prepare(`
       SELECT * FROM family_invites
       WHERE id = ? AND expires_at > datetime('now')
-    `).bind(invite_code).first();
+    `).bind(invite_code).first() as InviteRecord | null;
     console.log('Found invite:', invite);
 
     if (!invite) {
@@ -118,8 +126,13 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     await env.DB.prepare('DELETE FROM family_invites WHERE id = ?')
       .bind(invite_code).run();
 
+    // Store the invite email in the redirect URL so we can pre-fill it in the Google auth flow
+    const redirectUrl = new URL(`${env.FRONTEND_URL}/auth/google`);
+    redirectUrl.searchParams.set('redirect', '/dashboard');
+    redirectUrl.searchParams.set('email', invite.email);
+
     return new Response(JSON.stringify({ 
-      redirectUrl: `${env.FRONTEND_URL}/auth/google?redirect=/dashboard`
+      redirectUrl: redirectUrl.toString()
     }), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders() },
     });
