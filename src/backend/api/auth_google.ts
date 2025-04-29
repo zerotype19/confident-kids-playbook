@@ -173,7 +173,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               temp_family_id
             )
             VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?)
-          `).bind(user_id, email, name, body.family_id);
+          `).bind(user_id, email, name, body.family_id || null);
 
           const result = await stmt.run();
           console.log('✅ User created:', { result });
