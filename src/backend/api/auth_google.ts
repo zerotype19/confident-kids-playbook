@@ -172,8 +172,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               updated_at,
               has_completed_onboarding
             )
-            VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
-          `).bind(user_id, email, name, body.invite_code ? 1 : 0).run();
+            VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
+          `).bind(user_id, email, name).run();
 
           // If invite code exists, add them to the family immediately
           if (body.invite_code) {
