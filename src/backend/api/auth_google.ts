@@ -107,10 +107,9 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             auth_provider,
             created_at,
             updated_at,
-            has_completed_onboarding,
-            selected_child_id
+            has_completed_onboarding
           )
-          VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, NULL)
+          VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
         `).bind(user_id, email, name, body.invite_code ? 1 : 0).run();
       }
     }
