@@ -80,16 +80,16 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     // First check if user exists by ID
     console.log('🔍 Checking if user exists by ID:', user_id);
     let user = await env.DB.prepare(
-      'SELECT id FROM users WHERE id = ?'
-    ).bind(user_id).first<{ id: string }>();
+      'SELECT id, temp_family_id FROM users WHERE id = ?'
+    ).bind(user_id).first<{ id: string; temp_family_id: string | null }>();
     console.log('👤 User lookup by ID result:', { user });
 
     if (!user) {
       // Then check if user exists by email
       console.log('🔍 User not found by ID, checking by email:', email);
       user = await env.DB.prepare(
-        'SELECT id FROM users WHERE email = ?'
-      ).bind(email).first<{ id: string }>();
+        'SELECT id, temp_family_id FROM users WHERE email = ?'
+      ).bind(email).first<{ id: string; temp_family_id: string | null }>();
       console.log('👤 User lookup by email result:', { user });
 
       if (user) {
