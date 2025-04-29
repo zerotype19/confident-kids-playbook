@@ -42,18 +42,28 @@ export default function JoinFamilyPage() {
           throw new Error(data.error || 'Invalid invite code');
         }
 
+        console.log('Received invite data:', data);
+        
         // Store all invite data for use after Google auth
-        localStorage.setItem('pendingInviteData', JSON.stringify({
+        const inviteData = {
           invite_code: code,
           family_id: data.family_id,
           role: data.role
-        }));
+        };
+        
+        console.log('Storing invite data in localStorage:', inviteData);
+        localStorage.setItem('pendingInviteData', JSON.stringify(inviteData));
+        
+        // Verify the data was stored correctly
+        const storedData = localStorage.getItem('pendingInviteData');
+        console.log('Verifying stored data:', storedData);
         
         setStatus('success');
         setMessage('Redirecting to sign in...');
 
         // Redirect to Google sign in with invite code
         setTimeout(() => {
+          console.log('Navigating to login page with code:', code);
           navigate(`/login?invite_code=${code}`);
         }, 1000);
       } catch (err) {

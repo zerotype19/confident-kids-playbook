@@ -20,14 +20,18 @@ export const LoginPage: React.FC = () => {
       const googleUser = await googleAuth.signIn();
       const token = googleUser.getAuthResponse().id_token;
 
+      console.log('Google sign-in successful, checking localStorage...');
+      
       // Get invite data from localStorage
       const storedData = localStorage.getItem('pendingInviteData');
+      console.log('Raw stored data:', storedData);
+      
       let pendingInviteData = null;
       
       if (storedData) {
         try {
           pendingInviteData = JSON.parse(storedData);
-          console.log('Found pending invite data:', pendingInviteData);
+          console.log('Parsed pending invite data:', pendingInviteData);
           
           // Verify we have all required data
           if (!pendingInviteData.invite_code || !pendingInviteData.family_id || !pendingInviteData.role) {
@@ -52,12 +56,13 @@ export const LoginPage: React.FC = () => {
         } : {})
       };
 
-      console.log('Sending request with body:', {
+      console.log('Prepared request body:', {
         hasCredential: !!requestBody.credential,
         hasInviteCode: !!requestBody.invite_code,
         hasFamilyId: !!requestBody.family_id,
         hasRole: !!requestBody.role,
-        inviteData: pendingInviteData
+        inviteData: pendingInviteData,
+        rawBody: requestBody
       });
 
       // Exchange token for JWT
@@ -77,6 +82,7 @@ export const LoginPage: React.FC = () => {
       
       // Clear invite data from localStorage if it exists
       if (pendingInviteData) {
+        console.log('Clearing invite data from localStorage');
         localStorage.removeItem('pendingInviteData');
       }
       
