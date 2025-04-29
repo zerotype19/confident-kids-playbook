@@ -109,7 +109,14 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               WHERE user_id = ?
             `).bind(user_id, user.id),
 
-            // Then update users table
+            // Update subscriptions table
+            env.DB.prepare(`
+              UPDATE subscriptions 
+              SET user_id = ?
+              WHERE user_id = ?
+            `).bind(user_id, user.id),
+
+            // Finally update users table
             env.DB.prepare(`
               UPDATE users 
               SET id = ?, 
@@ -123,7 +130,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           const results = await env.DB.batch(batch);
           console.log('✅ Batch operation completed successfully:', {
             familyMembersResult: results[0],
-            usersResult: results[1]
+            subscriptionsResult: results[1],
+            usersResult: results[2]
           });
         } catch (error: any) {
           console.error('❌ Error updating user:', {
