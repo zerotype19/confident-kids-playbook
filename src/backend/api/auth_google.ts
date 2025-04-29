@@ -80,7 +80,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
     console.log('🔍 Checking if user exists by ID:', user_id);
     let user = await env.DB.prepare(
       'SELECT id FROM users WHERE id = ?'
-    ).bind(user_id).first();
+    ).bind(user_id).first<{ id: string }>();
     console.log('👤 User lookup by ID result:', { user });
 
     if (!user) {
@@ -88,7 +88,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
       console.log('🔍 User not found by ID, checking by email:', email);
       user = await env.DB.prepare(
         'SELECT id FROM users WHERE email = ?'
-      ).bind(email).first();
+      ).bind(email).first<{ id: string }>();
       console.log('👤 User lookup by email result:', { user });
 
       if (user) {
@@ -100,62 +100,45 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           currentUser: user
         });
         try {
-          console.log('🔄 Starting batch operation');
-          const tempId = crypto.randomUUID(); // Create a temporary ID
-          const batch = [
-            // First update the user to a temporary ID
-            env.DB.prepare(`
-              UPDATE users 
-              SET id = ?
-              WHERE id = ?
-            `).bind(tempId, user.id),
+          console.log('🔄 Starting user ID update process');
+          
+          // First update all references to use a temporary value (negative of current ID)
+          await env.DB.prepare(`
+            UPDATE family_members 
+            SET user_id = -user_id
+            WHERE user_id = ?
+          `).bind(user.id).run();
 
-            // Update references to use temporary ID
-            env.DB.prepare(`
-              UPDATE family_members 
-              SET user_id = ?
-              WHERE user_id = ?
-            `).bind(tempId, user.id),
+          await env.DB.prepare(`
+            UPDATE subscriptions 
+            SET user_id = -user_id
+            WHERE user_id = ?
+          `).bind(user.id).run();
 
-            env.DB.prepare(`
-              UPDATE subscriptions 
-              SET user_id = ?
-              WHERE user_id = ?
-            `).bind(tempId, user.id),
+          // Then update the user's ID to the Google ID
+          await env.DB.prepare(`
+            UPDATE users 
+            SET id = ?,
+                name = ?,
+                auth_provider = 'google',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `).bind(user_id, name, user.id).run();
 
-            // Finally update user to Google ID
-            env.DB.prepare(`
-              UPDATE users 
-              SET id = ?, 
-                  name = ?,
-                  auth_provider = 'google',
-                  updated_at = CURRENT_TIMESTAMP
-              WHERE id = ?
-            `).bind(user_id, name, tempId),
+          // Finally update references to use the new Google ID
+          await env.DB.prepare(`
+            UPDATE family_members 
+            SET user_id = ?
+            WHERE user_id = ?
+          `).bind(user_id, -user.id).run();
 
-            // Update references to final Google ID
-            env.DB.prepare(`
-              UPDATE family_members 
-              SET user_id = ?
-              WHERE user_id = ?
-            `).bind(user_id, tempId),
+          await env.DB.prepare(`
+            UPDATE subscriptions 
+            SET user_id = ?
+            WHERE user_id = ?
+          `).bind(user_id, -user.id).run();
 
-            env.DB.prepare(`
-              UPDATE subscriptions 
-              SET user_id = ?
-              WHERE user_id = ?
-            `).bind(user_id, tempId)
-          ];
-
-          const results = await env.DB.batch(batch);
-          console.log('✅ Batch operation completed successfully:', {
-            userTempResult: results[0],
-            familyMembersTempResult: results[1],
-            subscriptionsTempResult: results[2],
-            userFinalResult: results[3],
-            familyMembersFinalResult: results[4],
-            subscriptionsFinalResult: results[5]
-          });
+          console.log('✅ User ID update completed successfully');
         } catch (error: any) {
           console.error('❌ Error updating user:', {
             error,
