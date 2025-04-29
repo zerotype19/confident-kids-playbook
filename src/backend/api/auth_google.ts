@@ -218,8 +218,8 @@ export async function authGoogle(context: { request: Request; env: Env }) {
 
             // Create the family
             await env.DB.prepare(`
-              INSERT INTO families (id, name, created_at, updated_at)
-              VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              INSERT INTO families (id, name, created_at)
+              VALUES (?, ?, CURRENT_TIMESTAMP)
             `).bind(family_id, `${name}'s Family`).run();
 
             // Add user as admin of the family
