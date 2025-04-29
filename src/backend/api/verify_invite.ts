@@ -6,31 +6,22 @@ interface InviteRequest {
   invite_code: string;
 }
 
-export const onRequestPost = async (context: { request: Request; env: Env }) => {
+export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
   try {
-    const { request, env } = context;
     const db = env.DB as D1Database;
-
-    // Handle CORS
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: corsHeaders(),
-      });
-    }
 
     // Parse request body
     const body = await request.json() as InviteRequest;
+    console.log('Request body:', body);
     const { invite_code } = body;
+    console.log('Invite code:', invite_code);
 
     if (!invite_code) {
       return new Response(
         JSON.stringify({ error: 'Missing invite code' }),
         {
           status: 400,
-          headers: {
-            ...corsHeaders(),
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json', ...corsHeaders() }
         }
       );
     }
@@ -40,16 +31,14 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
       .prepare('SELECT * FROM family_invites WHERE code = ?')
       .bind(invite_code)
       .first<{ expires_at: string }>();
+    console.log('Found invite:', invite);
 
     if (!invite) {
       return new Response(
         JSON.stringify({ error: 'Invalid invite code' }),
         {
           status: 404,
-          headers: {
-            ...corsHeaders(),
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json', ...corsHeaders() }
         }
       );
     }
@@ -62,10 +51,7 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
         JSON.stringify({ error: 'Invite code has expired' }),
         {
           status: 400,
-          headers: {
-            ...corsHeaders(),
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json', ...corsHeaders() }
         }
       );
     }
@@ -74,22 +60,21 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
       JSON.stringify({ message: 'Invite code is valid' }),
       {
         status: 200,
-        headers: {
-          ...corsHeaders(),
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() }
       }
     );
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error verifying invite:', err);
+    console.error('Error details:', {
+      name: err?.name,
+      message: err?.message,
+      stack: err?.stack
+    });
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       {
         status: 500,
-        headers: {
-          ...corsHeaders(),
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() }
       }
     );
   }
