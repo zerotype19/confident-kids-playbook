@@ -100,6 +100,17 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           currentUser: user
         });
         try {
+          // Start a transaction to update both tables
+          await env.DB.prepare('BEGIN TRANSACTION').run();
+          
+          console.log('🔄 Updating family_members table first');
+          await env.DB.prepare(`
+            UPDATE family_members 
+            SET user_id = ?
+            WHERE user_id = ?
+          `).bind(user_id, user.id).run();
+
+          console.log('🔄 Updating users table');
           await env.DB.prepare(`
             UPDATE users 
             SET id = ?, 
@@ -108,9 +119,14 @@ export async function authGoogle(context: { request: Request; env: Env }) {
                 updated_at = CURRENT_TIMESTAMP
             WHERE email = ?
           `).bind(user_id, name, email).run();
-          console.log('✅ User updated successfully');
+
+          await env.DB.prepare('COMMIT').run();
+          console.log('✅ Transaction completed successfully');
         } catch (error: any) {
           console.error('❌ Error updating user:', error);
+          // Rollback on error
+          await env.DB.prepare('ROLLBACK').run();
+          console.log('↩️ Transaction rolled back');
           throw error;
         }
       } else {
