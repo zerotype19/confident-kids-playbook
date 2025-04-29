@@ -42,8 +42,13 @@ export default function JoinFamilyPage() {
           throw new Error(data.error || 'Invalid invite code');
         }
 
-        // Store invite code for use after Google auth
-        localStorage.setItem('pendingInviteCode', code);
+        // Store all invite data for use after Google auth
+        localStorage.setItem('pendingInviteData', JSON.stringify({
+          invite_code: code,
+          family_id: data.family_id,
+          role: data.role
+        }));
+        
         setStatus('success');
         setMessage('Redirecting to sign in...');
 

@@ -153,6 +153,10 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           hasInviteCode: !!body.invite_code
         });
         try {
+          // Start transaction to create user and family member in one go
+          await env.DB.prepare('BEGIN TRANSACTION').run();
+
+          // Create the user first
           await env.DB.prepare(`
             INSERT INTO users (
               id, 
@@ -165,8 +169,35 @@ export async function authGoogle(context: { request: Request; env: Env }) {
             )
             VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
           `).bind(user_id, email, name, body.invite_code ? 1 : 0).run();
-          console.log('✅ New user created successfully');
+
+          // If invite code exists, add them to the family immediately
+          if (body.invite_code) {
+            // Check if invite code exists and is valid
+            const inviteResult = await env.DB.prepare(
+              'SELECT family_id, role FROM family_invites WHERE id = ? AND expires_at > datetime(\'now\')'
+            ).bind(body.invite_code).first<{ family_id: string; role: string }>();
+
+            if (inviteResult) {
+              const { family_id, role } = inviteResult;
+
+              // Add user as member of the family with the role from the invite
+              await env.DB.prepare(
+                'INSERT INTO family_members (id, user_id, family_id, role) VALUES (?, ?, ?, ?)'
+              ).bind(randomUUID(), user_id, family_id, role).run();
+
+              // Delete the used invite
+              await env.DB.prepare(
+                'DELETE FROM family_invites WHERE id = ?'
+              ).bind(body.invite_code).run();
+            }
+          }
+
+          // Commit the transaction
+          await env.DB.prepare('COMMIT').run();
+          console.log('✅ New user and family member created successfully');
         } catch (error: any) {
+          // Rollback on error
+          await env.DB.prepare('ROLLBACK').run();
           console.error('❌ Error creating user:', {
             error,
             errorMessage: error.message,
@@ -174,35 +205,6 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           });
           throw error;
         }
-      }
-    }
-
-    // If invite code is present, handle family join
-    if (body.invite_code) {
-      // Check if invite code exists and is valid
-      const inviteResult = await env.DB.prepare(
-        'SELECT family_id FROM family_invites WHERE code = ? AND expires_at > datetime(\'now\')'
-      ).bind(body.invite_code).first();
-
-      if (!inviteResult) {
-        return new Response(JSON.stringify({ error: 'Invalid or expired invite code' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const familyId = inviteResult.family_id;
-
-      // Check if user is already a member of this family
-      const existingMember = await env.DB.prepare(
-        'SELECT id FROM family_members WHERE user_id = ? AND family_id = ?'
-      ).bind(user_id, familyId).first();
-
-      if (!existingMember) {
-        // Add user as member of the family
-        await env.DB.prepare(
-          'INSERT INTO family_members (id, user_id, family_id, role) VALUES (?, ?, ?, ?)'
-        ).bind(randomUUID(), user_id, familyId, 'member').run();
       }
     }
 
