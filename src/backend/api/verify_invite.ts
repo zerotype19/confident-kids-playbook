@@ -6,7 +6,7 @@ interface InviteRequest {
   invite_code: string;
 }
 
-export async function onRequestPost(context: { request: Request; env: Env }) {
+export const onRequestPost = async (context: { request: Request; env: Env }) => {
   try {
     const { request, env } = context;
     const db = env.DB as D1Database;
@@ -93,4 +93,4 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       }
     );
   }
-} 
+}; 

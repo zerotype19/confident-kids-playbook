@@ -10,6 +10,7 @@ import pillars from './pillars';
 import { onRequestGet as rewardsHandler } from './rewards/[childId]';
 import { onRequest as childrenUpdate } from './children_update';
 import { onRequestPost as familyJoinHandler } from './family_join';
+import { onRequestPost as verifyInviteHandler } from './verify_invite';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -39,5 +40,6 @@ app.get('/api/rewards/:childId', rewardsHandler);
 
 // Family routes
 app.post('/api/family_join', familyJoinHandler);
+app.post('/api/verify_invite', verifyInviteHandler);
 
 export default app; 
