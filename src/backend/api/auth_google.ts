@@ -100,33 +100,37 @@ export async function authGoogle(context: { request: Request; env: Env }) {
           currentUser: user
         });
         try {
-          // Start a transaction to update both tables
-          await env.DB.prepare('BEGIN TRANSACTION').run();
-          
-          console.log('🔄 Updating family_members table first');
-          await env.DB.prepare(`
-            UPDATE family_members 
-            SET user_id = ?
-            WHERE user_id = ?
-          `).bind(user_id, user.id).run();
+          console.log('🔄 Starting batch operation');
+          const batch = [
+            // Update family_members table first
+            env.DB.prepare(`
+              UPDATE family_members 
+              SET user_id = ?
+              WHERE user_id = ?
+            `).bind(user_id, user.id),
 
-          console.log('🔄 Updating users table');
-          await env.DB.prepare(`
-            UPDATE users 
-            SET id = ?, 
-                name = ?,
-                auth_provider = 'google',
-                updated_at = CURRENT_TIMESTAMP
-            WHERE email = ?
-          `).bind(user_id, name, email).run();
+            // Then update users table
+            env.DB.prepare(`
+              UPDATE users 
+              SET id = ?, 
+                  name = ?,
+                  auth_provider = 'google',
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE email = ?
+            `).bind(user_id, name, email)
+          ];
 
-          await env.DB.prepare('COMMIT').run();
-          console.log('✅ Transaction completed successfully');
+          const results = await env.DB.batch(batch);
+          console.log('✅ Batch operation completed successfully:', {
+            familyMembersResult: results[0],
+            usersResult: results[1]
+          });
         } catch (error: any) {
-          console.error('❌ Error updating user:', error);
-          // Rollback on error
-          await env.DB.prepare('ROLLBACK').run();
-          console.log('↩️ Transaction rolled back');
+          console.error('❌ Error updating user:', {
+            error,
+            errorMessage: error.message,
+            cause: error.cause
+          });
           throw error;
         }
       } else {
