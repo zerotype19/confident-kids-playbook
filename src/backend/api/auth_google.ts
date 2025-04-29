@@ -89,14 +89,26 @@ export async function authGoogle(context: { request: Request; env: Env }) {
         // Update existing user with Google ID and info
         await env.DB.prepare(`
           UPDATE users 
-          SET id = ?, name = ?
+          SET id = ?, 
+              name = ?,
+              auth_provider = 'google',
+              updated_at = CURRENT_TIMESTAMP
           WHERE email = ?
         `).bind(user_id, name, email).run();
       } else {
         // Create new user
         await env.DB.prepare(`
-          INSERT INTO users (id, email, name, auth_provider)
-          VALUES (?, ?, ?, 'google')
+          INSERT INTO users (
+            id, 
+            email, 
+            name, 
+            auth_provider,
+            created_at,
+            updated_at,
+            has_completed_onboarding,
+            selected_child_id
+          )
+          VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL)
         `).bind(user_id, email, name).run();
       }
     }
