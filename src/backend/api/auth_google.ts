@@ -201,6 +201,31 @@ export async function authGoogle(context: { request: Request; env: Env }) {
 
             const deleteResult = await deleteInviteStmt.run();
             console.log('✅ Invite deleted:', { deleteResult });
+          } else {
+            // Create a new family for the user
+            const family_id = crypto.randomUUID();
+            console.log('➕ Creating new family:', {
+              familyId: family_id,
+              userId: user_id
+            });
+
+            // Create the family
+            const familyStmt = env.DB.prepare(`
+              INSERT INTO families (id, name, created_at)
+              VALUES (?, ?, CURRENT_TIMESTAMP)
+            `).bind(family_id, `${name}'s Family`);
+
+            const familyResult = await familyStmt.run();
+            console.log('✅ Family created:', { familyResult });
+
+            // Add user as owner of the family
+            const memberStmt = env.DB.prepare(`
+              INSERT INTO family_members (id, family_id, user_id, role, created_at, updated_at)
+              VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            `).bind(crypto.randomUUID(), family_id, user_id, 'owner');
+
+            const memberResult = await memberStmt.run();
+            console.log('✅ Family member created:', { memberResult });
           }
 
           console.log('✅ New user and family member created successfully');
