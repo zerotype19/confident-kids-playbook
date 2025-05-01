@@ -112,29 +112,21 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
           .replace(/'/g, '"') // Replace single quotes with double quotes
           .replace(/\[|\]/g, ''); // Remove brackets
         const successSignals = successSignalsStr.split(', ').map(signal => signal.trim());
-
-        // Convert Python-style list to JSON format for tags
-        const tagsStr = challenge.tags
-          .replace(/'/g, '"') // Replace single quotes with double quotes
-          .replace(/\[|\]/g, ''); // Remove brackets
-        const tags = tagsStr ? tagsStr.split(', ').map(tag => tag.trim()) : [];
         
         return {
           ...challenge,
           success_signals: successSignals,
-          tags: tags
+          // Remove tags from the response since it's not needed for display
         };
       } catch (error: any) {
         console.error('Error parsing challenge data:', {
           challengeId: challenge.id,
           error: error.message,
-          success_signals: challenge.success_signals,
-          tags: challenge.tags
+          success_signals: challenge.success_signals
         });
         return {
           ...challenge,
-          success_signals: [],
-          tags: []
+          success_signals: []
         };
       }
     }) || [];
