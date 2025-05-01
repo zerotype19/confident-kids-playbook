@@ -105,11 +105,27 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     `).bind(childId, child.age_range).all<Challenge>();
 
     // Parse JSON fields
-    const parsedChallenges = challenges.results?.map(challenge => ({
-      ...challenge,
-      success_signals: JSON.parse(challenge.success_signals),
-      tags: JSON.parse(challenge.tags)
-    })) || [];
+    const parsedChallenges = challenges.results?.map(challenge => {
+      try {
+        return {
+          ...challenge,
+          success_signals: challenge.success_signals ? JSON.parse(challenge.success_signals) : [],
+          tags: challenge.tags ? JSON.parse(challenge.tags) : []
+        };
+      } catch (error: any) {
+        console.error('Error parsing JSON for challenge:', {
+          challengeId: challenge.id,
+          error: error.message,
+          success_signals: challenge.success_signals,
+          tags: challenge.tags
+        });
+        return {
+          ...challenge,
+          success_signals: [],
+          tags: []
+        };
+      }
+    }) || [];
 
     console.log('Found challenges:', {
       count: parsedChallenges.length,
