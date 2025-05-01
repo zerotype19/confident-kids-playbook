@@ -10,14 +10,16 @@ interface Child {
 interface Challenge {
   id: string;
   title: string;
-  description: string;
-  goal: string;
-  steps: string;
-  example_dialogue: string;
-  tip: string;
   pillar_id: number;
   age_range: string;
+  challenge_type_id: number;
   difficulty_level: number;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
+  tags: string;
   is_completed: number;
 }
 
@@ -91,8 +93,9 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     });
 
     const challenges = await env.DB.prepare(`
-      SELECT c.*, 
-             CASE WHEN cl.completed_at IS NOT NULL THEN 1 ELSE 0 END as is_completed
+      SELECT 
+        c.*,
+        CASE WHEN cl.completed_at IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
         AND cl.child_id = ?
@@ -101,14 +104,21 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       ORDER BY c.pillar_id, c.difficulty_level
     `).bind(childId, child.age_range).all<Challenge>();
 
+    // Parse JSON fields
+    const parsedChallenges = challenges.results?.map(challenge => ({
+      ...challenge,
+      success_signals: JSON.parse(challenge.success_signals),
+      tags: JSON.parse(challenge.tags)
+    })) || [];
+
     console.log('Found challenges:', {
-      count: challenges.results?.length || 0,
-      firstChallenge: challenges.results?.[0],
+      count: parsedChallenges.length,
+      firstChallenge: parsedChallenges[0],
       childAgeRange: child.age_range,
       childId: childId
     });
 
-    return new Response(JSON.stringify(challenges.results), {
+    return new Response(JSON.stringify(parsedChallenges), {
       headers: corsHeaders()
     });
   } catch (error) {

@@ -449,88 +449,59 @@ export default function AllChallengesPage() {
                   {/* Expanded Content */}
                   {challenge.isExpanded && (
                     <div className="px-6 pb-6 space-y-6">
-                      {/* Description */}
-                      {challenge.description && (
-                        <div className="bg-white rounded-lg p-4 border border-gray-200">
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Description</h3>
-                          <p className="text-gray-600 leading-relaxed">{challenge.description}</p>
+                      {/* What You Practice */}
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">What You Practice</h3>
+                        <p className="text-gray-600 leading-relaxed">{challenge.what_you_practice}</p>
+                      </div>
+
+                      {/* Start Prompt */}
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Start Prompt</h3>
+                        <p className="text-gray-600 leading-relaxed">{challenge.start_prompt}</p>
+                      </div>
+
+                      {/* Guide Prompt */}
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Guide Prompt</h3>
+                        <p className="text-gray-600 leading-relaxed">{challenge.guide_prompt}</p>
+                      </div>
+
+                      {/* Success Signals */}
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Success Signals</h3>
+                        <div className="space-y-2">
+                          {challenge.success_signals.map((signal, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-kidoova-green flex items-center justify-center">
+                                <Icon name="check" className="w-4 h-4 text-white" />
+                              </div>
+                              <p className="text-gray-600 leading-relaxed">{signal}</p>
+                            </div>
+                          ))}
                         </div>
-                      )}
+                      </div>
 
-                      {/* Goal */}
-                      {challenge.goal && (
-                        <div className="bg-white rounded-lg p-4 border border-gray-200">
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Goal</h3>
-                          <p className="text-gray-600 leading-relaxed">{challenge.goal}</p>
+                      {/* Why It Matters */}
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Why It Matters</h3>
+                        <p className="text-gray-600 leading-relaxed">{challenge.why_it_matters}</p>
+                      </div>
+
+                      {/* Tags */}
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Tags</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {challenge.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                            >
+                              {tag}
+                            </span>
+                          ))}
                         </div>
-                      )}
-
-                      {/* Steps */}
-                      {challenge.steps && (
-                        <div className="bg-white rounded-lg p-4 border border-gray-200">
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Steps</h3>
-                          {(() => {
-                            try {
-                              // Parse steps if it's a string
-                              const stepsArray = typeof challenge.steps === 'string' 
-                                ? JSON.parse(challenge.steps)
-                                : challenge.steps;
-
-                              // Ensure we have an array
-                              const steps = Array.isArray(stepsArray) ? stepsArray : [stepsArray];
-
-                              return (
-                                <div className="space-y-3">
-                                  {steps.map((step, index) => (
-                                    <div key={index} className="flex items-start gap-3">
-                                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-kidoova-green flex items-center justify-center">
-                                        <span className="text-white font-medium">{index + 1}</span>
-                                      </div>
-                                      <p className="text-gray-600 leading-relaxed">{step}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            } catch (error) {
-                              // Fallback if JSON parsing fails
-                              return (
-                                <div className="bg-white rounded-md p-4 border border-gray-200">
-                                  <pre className="text-gray-600 whitespace-pre-wrap font-sans">
-                                    {typeof challenge.steps === 'string' 
-                                      ? challenge.steps.split('\n').map((line, i) => (
-                                          <div key={i} className="mb-1">{line}</div>
-                                        ))
-                                      : JSON.stringify(challenge.steps, null, 2)
-                                    }
-                                  </pre>
-                                </div>
-                              );
-                            }
-                          })()}
-                        </div>
-                      )}
-
-                      {/* Example Dialogue */}
-                      {challenge.example_dialogue && (
-                        <div className="bg-white rounded-lg p-4 border border-gray-200">
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Example Dialogue</h3>
-                          <div className="bg-gray-50 rounded-md p-4">
-                            <pre className="text-gray-600 whitespace-pre-wrap font-sans">
-                              {challenge.example_dialogue.split('\n').map((line, i) => (
-                                <div key={i} className="mb-1">{line}</div>
-                              ))}
-                            </pre>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Tip */}
-                      {challenge.tip && (
-                        <div className="bg-white rounded-lg p-4 border border-gray-200">
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">Tip</h3>
-                          <p className="text-gray-600 leading-relaxed">{challenge.tip}</p>
-                        </div>
-                      )}
+                      </div>
 
                       {/* Complete Button */}
                       {!challenge.is_completed && (

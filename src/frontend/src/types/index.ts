@@ -67,14 +67,16 @@ export type PillarId = keyof typeof PILLAR_NAMES;
 export interface Challenge {
   id: string;
   title: string;
-  description: string;
-  goal: string;
-  steps: string | string[];
-  example_dialogue: string;
-  tip: string;
   pillar_id: number;
   age_range: string;
+  challenge_type_id: number;
   difficulty_level: number;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string[];
+  why_it_matters: string;
+  tags: string[];
   is_completed: boolean;
 }
 
