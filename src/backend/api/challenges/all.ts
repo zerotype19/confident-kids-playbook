@@ -107,26 +107,34 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     // Parse JSON fields
     const parsedChallenges = challenges.results?.map(challenge => {
       try {
-        // Convert Python-style list to JSON format
+        // Convert Python-style list to JSON format for success_signals
         const successSignalsStr = challenge.success_signals
           .replace(/'/g, '"') // Replace single quotes with double quotes
           .replace(/\[|\]/g, ''); // Remove brackets
         const successSignals = successSignalsStr.split(', ').map(signal => signal.trim());
+
+        // Convert Python-style list to JSON format for tags
+        const tagsStr = challenge.tags
+          .replace(/'/g, '"') // Replace single quotes with double quotes
+          .replace(/\[|\]/g, ''); // Remove brackets
+        const tags = tagsStr ? tagsStr.split(', ').map(tag => tag.trim()) : [];
         
         return {
           ...challenge,
           success_signals: successSignals,
-          // Remove tags from the response since it's not needed for display
+          tags: tags
         };
       } catch (error: any) {
-        console.error('Error parsing success_signals for challenge:', {
+        console.error('Error parsing challenge data:', {
           challengeId: challenge.id,
           error: error.message,
-          success_signals: challenge.success_signals
+          success_signals: challenge.success_signals,
+          tags: challenge.tags
         });
         return {
           ...challenge,
-          success_signals: []
+          success_signals: [],
+          tags: []
         };
       }
     }) || [];
