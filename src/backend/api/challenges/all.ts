@@ -107,13 +107,19 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     // Parse JSON fields
     const parsedChallenges = challenges.results?.map(challenge => {
       try {
+        // Convert Python-style list to JSON format
+        const successSignalsStr = challenge.success_signals
+          .replace(/'/g, '"') // Replace single quotes with double quotes
+          .replace(/\[|\]/g, ''); // Remove brackets
+        const successSignals = successSignalsStr.split(', ').map(signal => signal.trim());
+        
         return {
           ...challenge,
-          success_signals: challenge.success_signals ? JSON.parse(challenge.success_signals) : [],
+          success_signals: successSignals,
           // Remove tags from the response since it's not needed for display
         };
       } catch (error: any) {
-        console.error('Error parsing JSON for challenge:', {
+        console.error('Error parsing success_signals for challenge:', {
           challengeId: challenge.id,
           error: error.message,
           success_signals: challenge.success_signals
