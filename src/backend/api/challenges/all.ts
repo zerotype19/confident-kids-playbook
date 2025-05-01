@@ -110,19 +110,17 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         return {
           ...challenge,
           success_signals: challenge.success_signals ? JSON.parse(challenge.success_signals) : [],
-          tags: challenge.tags ? JSON.parse(challenge.tags) : []
+          // Remove tags from the response since it's not needed for display
         };
       } catch (error: any) {
         console.error('Error parsing JSON for challenge:', {
           challengeId: challenge.id,
           error: error.message,
-          success_signals: challenge.success_signals,
-          tags: challenge.tags
+          success_signals: challenge.success_signals
         });
         return {
           ...challenge,
-          success_signals: [],
-          tags: []
+          success_signals: []
         };
       }
     }) || [];
