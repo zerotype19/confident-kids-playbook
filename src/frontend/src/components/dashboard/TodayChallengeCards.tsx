@@ -310,32 +310,16 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                       </div>
                       <div className="text-lg text-gray-800 text-center space-y-2">
                         {card.content && (() => {
-                          console.log('Success signals content:', card.content);
                           try {
-                            // Try to parse the content directly
-                            const parsedContent = JSON.parse(card.content);
-                            console.log('Parsed content:', parsedContent);
-                            
-                            // If it's a string, try parsing that string
-                            if (typeof parsedContent === 'string') {
-                              const doubleParsed = JSON.parse(parsedContent);
-                              console.log('Double parsed content:', doubleParsed);
-                              if (Array.isArray(doubleParsed)) {
-                                return doubleParsed.map((signal: string, index: number) => (
-                                  <p key={index}>{signal}</p>
-                                ));
-                              }
-                            }
-                            
-                            // If it's an array, display each item
-                            if (Array.isArray(parsedContent)) {
-                              return parsedContent.map((signal: string, index: number) => (
-                                <p key={index}>{signal}</p>
-                              ));
-                            }
-                            
-                            // If we get here, just display the content
-                            return <p>{card.content}</p>;
+                            // Remove the square brackets and split by comma
+                            const signals = card.content
+                              .replace(/^\[|\]$/g, '') // Remove square brackets
+                              .split(',') // Split by comma
+                              .map(signal => signal.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
+
+                            return signals.map((signal: string, index: number) => (
+                              <p key={index}>{signal}</p>
+                            ));
                           } catch (e) {
                             console.log('Parsing error:', e);
                             return <p>{card.content}</p>;
