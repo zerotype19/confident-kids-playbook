@@ -20,6 +20,14 @@ interface ExpandedPillarProps {
   childId: string;
 }
 
+const pillarHex: Record<number, string> = {
+  1: '#F7B801', // Independence & Problem-Solving
+  2: '#38A169', // Growth Mindset & Resilience
+  3: '#4299E1', // Social Confidence & Communication
+  4: '#805AD5', // Purpose & Strength Discovery
+  5: '#E53E3E'  // Managing Fear & Anxiety
+};
+
 export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps) {
   const navigate = useNavigate();
   const { selectedChild } = useChildContext();
@@ -65,7 +73,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
                 className="h-full rounded-full transition-all duration-300"
                 style={{ 
                   width: `${pillar.progress}%`,
-                  backgroundColor: pillar.color
+                  backgroundColor: pillarHex[parseInt(pillar.id)]
                 }}
               />
             </div>

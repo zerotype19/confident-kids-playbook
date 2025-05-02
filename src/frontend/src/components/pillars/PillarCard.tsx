@@ -7,6 +7,14 @@ interface PillarCardProps {
   onClick: () => void;
 }
 
+const pillarHex: Record<number, string> = {
+  1: '#F7B801', // Independence & Problem-Solving
+  2: '#38A169', // Growth Mindset & Resilience
+  3: '#4299E1', // Social Confidence & Communication
+  4: '#805AD5', // Purpose & Strength Discovery
+  5: '#E53E3E'  // Managing Fear & Anxiety
+};
+
 export default function PillarCard({ pillar, childId, onClick }: PillarCardProps) {
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +41,9 @@ export default function PillarCard({ pillar, childId, onClick }: PillarCardProps
         }
 
         const { progress } = await response.json();
-        setProgress(progress);
+        // Calculate progress based on 75 total challenges
+        const completedChallenges = Math.round((progress / 100) * 75);
+        setProgress((completedChallenges / 75) * 100);
       } catch (err) {
         console.error('Error fetching pillar progress:', err);
       } finally {
@@ -67,7 +77,7 @@ export default function PillarCard({ pillar, childId, onClick }: PillarCardProps
             className="h-full rounded-full transition-all duration-300"
             style={{ 
               width: `${progress}%`,
-              backgroundColor: pillar.color
+              backgroundColor: pillarHex[parseInt(pillar.id)]
             }}
           />
         </div>
