@@ -78,7 +78,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     }
 
     // Get total age-appropriate challenges for this pillar
-    const { total } = await env.DB.prepare(`
+    const totalResult = await env.DB.prepare(`
       SELECT COUNT(*) as total 
       FROM challenges 
       WHERE pillar_id = ?
@@ -87,7 +87,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     `).bind(pillarId, child.age_range).first<{ total: number }>();
 
     // Get completed age-appropriate challenges for this pillar and child
-    const { completed } = await env.DB.prepare(`
+    const completedResult = await env.DB.prepare(`
       SELECT COUNT(*) as completed 
       FROM challenges c
       JOIN challenge_logs cl ON c.id = cl.challenge_id
@@ -98,19 +98,23 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
             REPLACE(REPLACE(REPLACE(?, '–', '-'), '—', '-'), ' ', '')
     `).bind(pillarId, childId, child.age_range).first<{ completed: number }>();
 
-    const progress = total ? (completed / total) * 100 : 0;
+    // Use fixed total of 75 challenges per pillar
+    const fixedTotal = 75;
+    const completed = completedResult?.completed || 0;
+    const progress = fixedTotal ? (completed / fixedTotal) * 100 : 0;
 
     console.log('Pillar progress calculation:', {
       pillarId,
       childId,
       childAgeRange: child.age_range,
-      total,
+      total: totalResult?.total || 0,
       completed,
+      fixedTotal,
       progress
     });
 
     const response: PillarProgress = {
-      total,
+      total: fixedTotal,
       completed,
       progress
     };
