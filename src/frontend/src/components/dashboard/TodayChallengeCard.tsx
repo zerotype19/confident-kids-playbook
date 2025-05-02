@@ -29,6 +29,14 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { selectedChild } = useChildContext();
 
+  const pillarHex: Record<number, string> = {
+    1: '#F7B801', // Independence & Problem-Solving
+    2: '#38A169', // Growth Mindset & Resilience
+    3: '#4299E1', // Social Confidence & Communication
+    4: '#805AD5', // Purpose & Strength Discovery
+    5: '#E53E3E'  // Managing Fear & Anxiety
+  };
+
   if (!challenge) {
     return (
       <div className="bg-white rounded-2xl shadow-kidoova p-6">
@@ -53,11 +61,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
               <span 
                 className="text-xs font-medium px-2 py-1 rounded-full"
                 style={{
-                  backgroundColor: challenge.pillar_id === 1 ? '#F7B801' :
-                                 challenge.pillar_id === 2 ? '#38A169' :
-                                 challenge.pillar_id === 3 ? '#4299E1' :
-                                 challenge.pillar_id === 4 ? '#805AD5' :
-                                 '#E53E3E',
+                  backgroundColor: pillarHex[challenge.pillar_id],
                   color: 'white'
                 }}
               >
