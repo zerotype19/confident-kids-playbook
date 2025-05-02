@@ -1,10 +1,9 @@
 import { Env } from '../types';
 import { corsHeaders } from '../lib/cors';
 
-export async function onRequestGet(context: { request: Request; env: Env }) {
-  const { request, env } = context;
-  const url = new URL(request.url);
-  const childId = url.pathname.split('/').pop();
+export async function onRequestGet(context: { request: Request; env: Env; params?: { childId: string } }) {
+  const { request, env, params } = context;
+  const childId = params?.childId;
 
   console.log('Trait Scores API: Request received', {
     url: request.url,
