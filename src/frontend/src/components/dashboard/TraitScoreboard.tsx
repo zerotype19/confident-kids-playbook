@@ -74,16 +74,16 @@ export default function TraitScoreboard() {
   }
 
   return (
-    <div className="p-4 rounded-xl bg-white shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Confidence DNA</h2>
-      <div className="space-y-2">
+    <div className="w-full p-6 rounded-xl bg-white shadow-md">
+      <h2 className="text-2xl font-semibold mb-6">Confidence DNA</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {traits.map((trait) => (
-          <div key={trait.trait_id} className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <span className={`w-3 h-3 rounded-full ${pillarColors[trait.pillar_id]}`}></span>
-              <span>{trait.trait_name}</span>
+          <div key={trait.trait_id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <span className="flex items-center gap-3">
+              <span className={`w-4 h-4 rounded-full ${pillarColors[trait.pillar_id]}`}></span>
+              <span className="font-medium">{trait.trait_name}</span>
             </span>
-            <span className="font-bold">{Math.round(trait.score)} pts</span>
+            <span className="font-bold text-lg">{Math.round(trait.score)} pts</span>
           </div>
         ))}
       </div>
