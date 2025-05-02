@@ -272,8 +272,32 @@ export default function UniversalChallengeModal({
                 return null;
               })()}
             </div>
-          ) : (
-            <div className="text-center">{currentCard.content}</div>
+          ) : currentCard.type === 'success_signals' && (
+            <div className="text-center">
+              <div className="text-2xl mb-4">✨ Success Signals</div>
+              <div className="space-y-2">
+                {(() => {
+                  try {
+                    const signals = typeof currentCard.content === 'string' 
+                      ? JSON.parse(currentCard.content)
+                      : currentCard.content;
+                    
+                    if (Array.isArray(signals)) {
+                      return signals.map((signal, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <span className="text-green-500">✓</span>
+                          <span className="text-left">{signal}</span>
+                        </div>
+                      ));
+                    }
+                    return null;
+                  } catch (e) {
+                    console.error('Error parsing success signals:', e);
+                    return null;
+                  }
+                })()}
+              </div>
+            </div>
           )}
         </div>
 
