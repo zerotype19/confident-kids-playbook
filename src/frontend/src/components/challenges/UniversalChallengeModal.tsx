@@ -44,6 +44,13 @@ const CARD_ICONS = [
   '✅', // completion
 ];
 
+interface Card {
+  type: string;
+  icon: string;
+  title: string;
+  content?: string;
+}
+
 export default function UniversalChallengeModal({ 
   isOpen, 
   onClose, 
@@ -57,7 +64,7 @@ export default function UniversalChallengeModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { token } = useAuth();
 
-  const cards = [
+  const cards: Card[] = [
     {
       type: 'practice',
       icon: CARD_ICONS[0],
@@ -214,7 +221,10 @@ export default function UniversalChallengeModal({
         <div className="text-lg text-gray-800">
           {currentCard.type === 'success' && currentCard.content ? (
             <div className="space-y-3">
-              {JSON.parse(currentCard.content).map((signal: string, index: number) => (
+              {(typeof currentCard.content === 'string' ? 
+                currentCard.content.split('\n').filter(line => line.trim()) : 
+                JSON.parse(currentCard.content)
+              ).map((signal: string, index: number) => (
                 <div key={index} className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-kidoova-green flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
