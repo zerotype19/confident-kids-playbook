@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { PrivateRoute } from '../components/PrivateRoute';
 import AuthenticatedPageWrapper from '../components/AuthenticatedPageWrapper';
 
@@ -8,137 +7,174 @@ export const ParentGuidePage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white shadow rounded-lg p-6">
-          <h1 className="text-3xl font-bold mb-6 text-gray-900">Kidoova Parent Guide</h1>
-          <p className="text-xl text-gray-600 mb-12">Helping Your Child Build Confidence, One Day at a Time</p>
-          
+          <h1 className="text-3xl font-bold mb-2 text-[#00A67E] font-kidoova">Kidoova Parent Guide</h1>
+          <p className="text-xl text-gray-700 mb-8 font-semibold">Helping Your Child Build Confidence, One Day at a Time</p>
+
           <div className="prose prose-lg max-w-none text-gray-900">
-            <section className="mb-12">
+            <section className="mb-10">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">💡 What Is Kidoova?</h2>
-              <p className="mb-4">
-                Kidoova gives you short, research-backed challenges you can do with your child to build real-world confidence, resilience, and purpose — in just a few focused minutes a day.
-              </p>
-              <p>
-                It's not about doing it perfectly — it's about showing up, trying together, and building emotional strength through practice.
-              </p>
+              <p>Kidoova is a confidence-building app that gives you short, age-appropriate, research-backed challenges to do with your child each day.</p>
+              <p>It's not about doing it perfectly — it's about doing it consistently. In just a few focused minutes, you'll be helping your child build emotional strength, resilience, and real-world confidence — one small action at a time.</p>
             </section>
 
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">✅ How to Use the App</h2>
-              
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">🏠 1. Start on the Dashboard</h3>
-                <p className="mb-4">Each day, you'll see:</p>
-                <ul className="list-disc pl-6 mb-4">
-                  <li>Today's Challenge</li>
-                  <li>This Week's Theme (e.g. Brave Voice Week)</li>
-                  <li>A simple explanation of the goal and steps to try</li>
-                </ul>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">🧭 What to do:</h4>
-                  <ul className="list-disc pl-6">
-                    <li>Read the goal and steps</li>
-                    <li>Choose 1 or 2 that fit your day</li>
-                    <li>Use the example dialogue if needed</li>
-                    <li>Click Mark Challenge Complete when you're done</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">📈 2. Track Confidence Over Time</h3>
-                <p className="mb-4">After each challenge, your child reflects on how confident they felt using an emoji slider.</p>
-                <p className="mb-4">You'll see:</p>
-                <ul className="list-disc pl-6 mb-4">
-                  <li>A Confidence Trend Chart over time</li>
-                  <li>A Summary Message based on how things are going — like "You're trending upward — keep it up!" or "Confidence dipped — let's keep practicing!"</li>
-                </ul>
-                <p>This gives you insight into how your child is growing emotionally.</p>
-              </div>
-
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">🎯 3. Celebrate Progress & Rewards</h3>
-                <p className="mb-4">As you complete challenges, your child earns:</p>
-                <ul className="list-disc pl-6 mb-4">
-                  <li>Challenge Streaks (daily momentum)</li>
-                  <li>Trophies for milestone completions (5, 10, 20...)</li>
-                  <li>A Confidence Star, which fills up as they complete challenges in each pillar</li>
-                  <li>Pillar Progress Bars, showing growth in different skill areas</li>
-                </ul>
-                <p>Celebrating effort makes confidence stick.</p>
-              </div>
-
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">🏛 4. Explore the Pillars</h3>
-                <p className="mb-4">Kidoova's challenges are grouped into 5 research-backed skill areas:</p>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border border-gray-200">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2 border-b">Pillar</th>
-                        <th className="px-4 py-2 border-b">What It Builds</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="px-4 py-2 border-b">🌱 Independence & Problem-Solving</td>
-                        <td className="px-4 py-2 border-b">Critical thinking, initiative, self-trust</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 border-b">💪 Growth Mindset & Resilience</td>
-                        <td className="px-4 py-2 border-b">Persistence, learning from mistakes</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 border-b">🗣 Social Confidence & Communication</td>
-                        <td className="px-4 py-2 border-b">Expressing ideas, handling social situations</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 border-b">🧭 Purpose & Strength Discovery</td>
-                        <td className="px-4 py-2 border-b">Recognizing talents and interests</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 border-b">🛡 Managing Fear & Anxiety</td>
-                        <td className="px-4 py-2 border-b">Bravery, calmness, emotional regulation</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <p className="mt-4">You can view all challenges by pillar or filter by type and difficulty anytime.</p>
-              </div>
-
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">💬 5. Get Support Anytime</h3>
-                <p className="mb-4">Need a hand or a reminder?</p>
-                <ul className="list-disc pl-6 mb-4">
-                  <li>Tap Parent Guide from your Dashboard</li>
-                  <li>Use the Parenting Coach chat bubble for ideas or help</li>
-                </ul>
-                <p>Everything is designed to be simple, supportive, and doable — even on busy days</p>
-              </div>
-            </section>
-
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">🚀 How to Start Using Kidoova Today (Quick Walkthrough)</h2>
-              <ol className="list-decimal pl-6 mb-4">
-                <li>Log in and choose your child from the dropdown</li>
-                <li>Go to the Dashboard to see today's challenge</li>
-                <li>Read the goal + steps, and pick one to try today</li>
-                <li>Try the challenge together (even for 5 minutes)</li>
-                <li>Click Mark Challenge Complete</li>
-                <li>Fill in the quick confidence reflection (optional but helpful!)</li>
-              </ol>
-              <p className="text-lg font-semibold">🎉 That's it — your child earns a reward, and you both build confidence together.</p>
-            </section>
-
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">💡 Tips for Success</h2>
-              <ul className="list-disc pl-6 mb-4">
-                <li>Don't worry about doing it "right" — do it consistently</li>
-                <li>Praise effort, not just success</li>
-                <li>Let your child try things their way</li>
-                <li>It's okay to pause or come back later</li>
-                <li>Keep it light, fun, and conversational</li>
+            <section className="mb-10">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">✅ How to Use Kidoova</h2>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">🏠 1. Start Your Day on the Dashboard</h3>
+              <p>When you log in, you'll see:</p>
+              <ul className="list-disc pl-6 mb-2">
+                <li>Today's Challenge — personalized by age and this week's theme</li>
+                <li>This Week's Theme — like "Brave Voice Week" or "Try Something New"</li>
+                <li>Daily Motivation Card for Parents — a short reminder that you're doing great too</li>
               </ul>
-              <p className="text-lg font-semibold text-center mt-8">✨ Every time you show up, you're helping your child believe in themselves. That's real progress. ✨</p>
+              <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                <h4 className="font-semibold mb-1">🧭 What to do:</h4>
+                <ul className="list-disc pl-6">
+                  <li>Click Today's Challenge</li>
+                  <li>Walk through the steps together using the card-by-card format</li>
+                  <li>Try one or more steps that fit your day</li>
+                  <li>Use the "example dialogue" if you need a prompt</li>
+                  <li>Click Mark Challenge Complete when done</li>
+                </ul>
+              </div>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">📊 2. Reflect and Track Growth</h3>
+              <p>After each challenge, your child will see a quick reflection prompt:</p>
+              <ul className="list-disc pl-6 mb-2">
+                <li>Emoji Confidence Slider: "How confident did you feel?"</li>
+                <li>Optional: "What made you feel that way?"</li>
+              </ul>
+              <p>This helps them build emotional awareness — and helps you see how they're doing.</p>
+              <p className="mt-2">You'll be able to view:</p>
+              <ul className="list-disc pl-6 mb-2">
+                <li>📈 Confidence Trend Charts over time</li>
+                <li>💬 Progress Messages ("You're trending upward!" or "Confidence dipped — keep practicing!")</li>
+                <li>🧠 Challenge Journal (coming soon): their growing record of effort and emotional wins</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">🏆 3. Celebrate Progress & Rewards</h3>
+              <p>Your child earns recognition for showing up and growing:</p>
+              <ul className="list-disc pl-6 mb-2">
+                <li>🔥 Streaks for consecutive days completed</li>
+                <li>🏅 Trophies at key milestones (5, 10, 20 challenges...)</li>
+                <li>⭐ Confidence Star that fills as they complete challenges across all pillars</li>
+                <li>🧱 Pillar Progress Bars that show growth in each skill area</li>
+                <li>🎯 Challenge Tracker sorted by age, type, and theme</li>
+              </ul>
+              <p>Celebrating effort (not perfection) is key to making confidence stick.</p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">🧬 4. Understand Your Child's Confidence "DNA"</h3>
+              <p>Every challenge in Kidoova includes metadata to help personalize your child's experience:</p>
+              <div className="overflow-x-auto mb-4">
+                <table className="min-w-full bg-white border border-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2 border-b">Element</th>
+                      <th className="px-4 py-2 border-b">What It Does</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🏛 Pillar</td>
+                      <td className="px-4 py-2 border-b">Links the challenge to a skill domain (e.g., Growth Mindset)</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🧪 Challenge Type</td>
+                      <td className="px-4 py-2 border-b">Indicates the format (e.g., "Try It Together", "Role Play", "Reflection")</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🔢 Difficulty Level</td>
+                      <td className="px-4 py-2 border-b">Ranges from 1 (easy) to 3 (more independent)</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🏷 Tags</td>
+                      <td className="px-4 py-2 border-b">Help filter challenges by topic (e.g., bravery, creativity, friendship)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>You can explore challenges by pillar, type, difficulty, or tag — or follow the guided "Today's Challenge" path each day.</p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">🏛 5. Explore the 5 Pillars of Confidence</h3>
+              <div className="overflow-x-auto mb-4">
+                <table className="min-w-full bg-white border border-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2 border-b">Pillar</th>
+                      <th className="px-4 py-2 border-b">What It Builds</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🌱 Independence & Problem-Solving</td>
+                      <td className="px-4 py-2 border-b">Decision-making, initiative, critical thinking</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border-b">💪 Growth Mindset & Resilience</td>
+                      <td className="px-4 py-2 border-b">Effort, perseverance, reframing failure</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🗣 Social Confidence & Communication</td>
+                      <td className="px-4 py-2 border-b">Assertiveness, self-expression, friendships</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🧭 Purpose & Strength Discovery</td>
+                      <td className="px-4 py-2 border-b">Talent exploration, self-worth, intrinsic motivation</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 border-b">🛡 Managing Fear & Anxiety</td>
+                      <td className="px-4 py-2 border-b">Bravery, calming strategies, positive self-talk</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>You can explore pillar-specific content anytime from the Pillars section. Each includes an overview, progress bar, and relevant challenges.</p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">👨‍👩‍👧‍👦 6. Designed for Shared Parenting</h3>
+              <p>Kidoova supports multiple parents or caregivers:</p>
+              <ul className="list-disc pl-6 mb-2">
+                <li>All parents linked to a child's profile can view and complete challenges</li>
+                <li>Reflections and progress are synced across all devices</li>
+                <li>Ideal for co-parenting, grandparents, or rotating routines</li>
+              </ul>
+              <p>Just make sure each adult is logged in under the same family group.</p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">💬 7. Get Help Anytime</h3>
+              <p>Need a quick boost or clarification?</p>
+              <ul className="list-disc pl-6 mb-2">
+                <li>Tap Parent Guide from the menu (you're here now!)</li>
+                <li>Tap the 💬 Chatbot Coach in the corner — it offers tips, ideas, or emotional support</li>
+                <li>Or revisit your child's past reflections and progress anytime</li>
+              </ul>
+            </section>
+
+            <section className="mb-10">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">🚀 Quick Start Guide: First Challenge</h2>
+              <ol className="list-decimal pl-6 mb-2">
+                <li>Log in and select your child</li>
+                <li>Visit the Dashboard</li>
+                <li>Tap Today's Challenge</li>
+                <li>Read the cards, try one or more steps together</li>
+                <li>Mark it complete</li>
+                <li>Fill out the emoji reflection with your child</li>
+              </ol>
+              <p className="text-lg font-semibold">🎉 Celebrate! Your child just built confidence.</p>
+            </section>
+
+            <section className="mb-10">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">💡 Tips for Parents</h2>
+              <ul className="list-disc pl-6 mb-2">
+                <li>Show up consistently, even if it's just for 5 minutes</li>
+                <li>Don't worry about doing it all — one step is better than none</li>
+                <li>Praise effort, not just outcomes</li>
+                <li>Let your child take the lead when they're ready</li>
+                <li>Use the "example dialogue" when you need help knowing what to say</li>
+                <li>If you miss a day, just pick it up again tomorrow — no guilt, no pressure</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-semibold text-[#00A67E] mb-2">✨ Remember: Confidence Grows Through Practice</h2>
+              <p>Every challenge is a small investment in your child's belief in themselves.<br />Keep it light, stay curious, and enjoy the journey together.</p>
             </section>
           </div>
         </div>
