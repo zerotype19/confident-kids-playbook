@@ -319,14 +319,14 @@ Format your response with natural line breaks between paragraphs and ideas.`
     // If no challenge ID found, append a recommended challenge and tag
     if (!challengeIds.length && availableChallenges.length > 0) {
       const fallback = availableChallenges[0];
-      responseWithLinks += `<br><br><strong>Recommended Challenge:</strong> ${fallback.title}<br>${fallback.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${fallback.id as string}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
+      responseWithLinks += `<br><br>I found a challenge that might help ${selectedChild.name}:<br><strong>${fallback.title}</strong><br>${fallback.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${fallback.id as string}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
       challengeIds = [fallback.id as string];
     } else {
       // For each challenge ID in the response, add a Start Challenge button
       challengeIds.forEach(challengeId => {
         const challenge = availableChallenges.find(c => c.id === challengeId);
         if (challenge) {
-          responseWithLinks += `<br><br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${challengeId}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
+          responseWithLinks += `<br><br>I found a challenge that might help ${selectedChild.name}:<br><strong>${challenge.title}</strong><br>${challenge.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${challengeId}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
         }
       });
     }
