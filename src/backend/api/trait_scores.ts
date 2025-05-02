@@ -8,6 +8,13 @@ export async function GET(
   try {
     const { childId } = params;
 
+    if (!childId) {
+      return NextResponse.json(
+        { error: 'Child ID is required' },
+        { status: 400 }
+      );
+    }
+
     const traitScores = await db
       .selectFrom('child_trait_scores')
       .innerJoin('traits', 'traits.id', 'child_trait_scores.trait_id')
@@ -24,6 +31,7 @@ export async function GET(
 
     return NextResponse.json(traitScores, {
       headers: {
+        'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -33,7 +41,15 @@ export async function GET(
     console.error('Error fetching trait scores:', error);
     return NextResponse.json(
       { error: 'Failed to fetch trait scores' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        }
+      }
     );
   }
 } 

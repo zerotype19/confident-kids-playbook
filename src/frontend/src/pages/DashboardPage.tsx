@@ -259,45 +259,34 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 space-y-4">
+      <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-heading text-gray-900">
             {selectedChild ? `${selectedChild.name}'s Dashboard` : 'Dashboard'}
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {selectedChild ? (
-            <>
-              <WeeklyTheme />
-              <TodayChallengeCards 
-                childId={selectedChild.id} 
-                challenge={challenge}
-                onComplete={handleChallengeComplete}
-              />
-              {trendData.length > 0 && (
-                <ConfidenceTrendChart data={trendData} summary={trendSummary} />
-              )}
-              <div className="grid grid-cols-1 gap-8">
-                <div className="space-y-8">
-                  <RewardsOverview progress={progress} />
-                  <ProgressTracker progress={progress} childId={selectedChild.id} />
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
-              <CustomButton onClick={() => navigate('/manage-children')}>
-                Manage Children
-              </CustomButton>
-            </div>
-          )}
-        </div>
-
-        {selectedChild && (
-          <div className="mt-8">
+        {selectedChild ? (
+          <div className="space-y-8">
+            <WeeklyTheme />
+            <TodayChallengeCards 
+              childId={selectedChild.id} 
+              challenge={challenge}
+              onComplete={handleChallengeComplete}
+            />
+            {trendData.length > 0 && (
+              <ConfidenceTrendChart data={trendData} summary={trendSummary} />
+            )}
+            <RewardsOverview progress={progress} />
+            <ProgressTracker progress={progress} childId={selectedChild.id} />
             <TraitScoreboard />
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
+            <CustomButton onClick={() => navigate('/manage-children')}>
+              Manage Children
+            </CustomButton>
           </div>
         )}
       </div>
