@@ -1,5 +1,10 @@
 import { Env } from '../types';
 
+interface TraitMapping {
+  trait_id: number;
+  weight: number;
+}
+
 export async function calculateTraitScores(
   child_id: string,
   challenge_id: string,
@@ -17,15 +22,17 @@ export async function calculateTraitScores(
       LIMIT 1
     `).bind(child_id, challenge_id).first();
 
-    const emoji_slider = reflectionRecord?.feeling ?? 3; // default if missing
-    const reflection = reflectionRecord?.reflection ?? null;
+    const emoji_slider = (reflectionRecord?.feeling as number) ?? 3; // default if missing
+    const reflection = reflectionRecord?.reflection as string ?? null;
 
     // 2. Lookup trait mappings for this challenge
-    const traits = await env.DB.prepare(`
+    const traitsResult = await env.DB.prepare(`
       SELECT trait_id, weight 
       FROM challenge_traits 
       WHERE challenge_id = ?
     `).bind(challenge_id).all();
+
+    const traits = (traitsResult.results as unknown as TraitMapping[]);
 
     // 3. Calculate scores and update records
     const multiplier = 0.6 + 0.1 * emoji_slider;
