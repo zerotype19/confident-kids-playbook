@@ -6,7 +6,7 @@ interface FamilyChildStepProps {
   onBack: () => void;
 }
 
-export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps) {
+export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps): JSX.Element {
   const { familyData, setFamilyData, children, addChild, removeChild } = useOnboarding();
   const [familyName, setFamilyName] = useState(familyData.name);
   const [childName, setChildName] = useState('');
