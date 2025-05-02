@@ -236,11 +236,11 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                           Level {challenge.difficulty_level}
                         </span>
                       </div>
-                      <div className="flex flex-col items-center space-y-2 pt-6">
-                        <h2 className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</h2>
+                      <div className="flex flex-col items-center space-y-2 pt-2">
+                        <h2 className="text-3xl font-bold text-kidoova-green text-center">"{challenge.title}"</h2>
                         <p className="text-lg text-gray-800 text-center">{challenge.what_you_practice}</p>
                       </div>
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center mt-6">
                         <button
                           onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
                           disabled={currentCard === cards.length - 1}
@@ -261,7 +261,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <span className="text-3xl mr-2">{card.icon}</span>
-                        <h3 className="text-xl font-bold text-kidoova-green">What You'll Practice</h3>
+                        <h3 className="text-3xl font-bold text-kidoova-green">What You'll Practice</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
@@ -286,7 +286,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <span className="text-3xl mr-2">{card.icon}</span>
-                        <h3 className="text-xl font-bold text-kidoova-green">Getting Started</h3>
+                        <h3 className="text-3xl font-bold text-kidoova-green">Getting Started</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
@@ -311,7 +311,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <span className="text-3xl mr-2">{card.icon}</span>
-                        <h3 className="text-xl font-bold text-kidoova-green">Guide</h3>
+                        <h3 className="text-3xl font-bold text-kidoova-green">Guide</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
@@ -336,9 +336,13 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <span className="text-3xl mr-2">{card.icon}</span>
-                        <h3 className="text-xl font-bold text-kidoova-green">Success Signals</h3>
+                        <h3 className="text-3xl font-bold text-kidoova-green">Success Signals</h3>
                       </div>
-                      <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                      <div className="text-lg text-gray-800 text-center space-y-2">
+                        {card.content && JSON.parse(card.content).map((signal: string, index: number) => (
+                          <p key={index}>{signal}</p>
+                        ))}
+                      </div>
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
                         <button
                           onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
@@ -361,7 +365,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <span className="text-3xl mr-2">{card.icon}</span>
-                        <h3 className="text-xl font-bold text-kidoova-green">Why It Matters</h3>
+                        <h3 className="text-3xl font-bold text-kidoova-green">Why It Matters</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
