@@ -120,11 +120,6 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
       icon: CARD_ICONS[0],
     },
     {
-      type: 'practice',
-      icon: CARD_ICONS[1],
-      content: challenge.what_you_practice,
-    },
-    {
       type: 'start',
       icon: CARD_ICONS[2],
       content: challenge.start_prompt,
@@ -249,30 +244,6 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                               ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                               : 'bg-kidoova-accent text-white hover:bg-kidoova-green'
                           }`}
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Practice Card */}
-                  {card.type === 'practice' && (
-                    <>
-                      <div className="flex items-center justify-center mb-4">
-                        <span className="text-3xl mr-2">{card.icon}</span>
-                      </div>
-                      <div className="text-lg text-gray-800 text-center mb-8">{card.content}</div>
-                      <div className="flex-1 flex items-end justify-center pb-4 space-x-4">
-                        <button
-                          onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
-                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
-                        >
-                          Previous
-                        </button>
-                        <button
-                          onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
-                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
                         >
                           Next
                         </button>
