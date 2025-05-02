@@ -40,7 +40,7 @@ function getPillarName(pillarId: number): string {
 // Helper function to format challenges for the prompt
 function formatChallenges(challenges: any[]): string {
   return challenges.map(c =>
-    `• ${c.title}: ${c.description} Tip: ${c.tip}`
+    `• ${c.title}: ${c.what_you_practice} Guide: ${c.guide_prompt}`
   ).join('\n');
 }
 
@@ -143,15 +143,14 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       SELECT 
         id, 
         title, 
-        what_you_practice as description,  
-        tip, 
+        what_you_practice,
+        guide_prompt,
+        start_prompt,
+        success_signals,
+        why_it_matters,
         difficulty_level, 
         age_range, 
-        pillar_id,
-        start_prompt,
-        guide_prompt,
-        success_signals,
-        why_it_matters
+        pillar_id
       FROM challenges
       WHERE pillar_id = ? 
         AND age_range = ?
@@ -162,7 +161,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
 
     // Format challenges for the prompt
     const challengeList = availableChallenges.map(challenge => 
-      `• [Challenge ${challenge.id}]: ${challenge.title} - ${challenge.description} Tip: ${challenge.tip}`
+      `• [Challenge ${challenge.id}]: ${challenge.title} - ${challenge.what_you_practice}\nGuide: ${challenge.guide_prompt}`
     ).join('\n');
 
     // Create OpenAI client
