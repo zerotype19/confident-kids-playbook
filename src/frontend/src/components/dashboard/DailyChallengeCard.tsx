@@ -1,121 +1,109 @@
-import React, { useEffect, useState } from 'react';
-import { useFeatureFlags } from '../../hooks/useFeatureFlags';
+import React, { useState } from 'react';
+import UniversalChallengeModal from '../challenges/UniversalChallengeModal';
+import { useAuth } from '../../contexts/AuthContext';
+import { useChildContext } from '../../contexts/ChildContext';
 
 interface Challenge {
   id: string;
   title: string;
   description: string;
-  age_range: string;
-  is_completed: boolean;
+  goal: string;
+  steps: string[];
+  tip: string;
+  example_dialogue: string;
+  pillar_id: number;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
 }
 
-interface DailyChallengeCardProps {
-  childId: string;
-}
-
-export default function DailyChallengeCard({ childId }: DailyChallengeCardProps): JSX.Element {
+export default function DailyChallengeCard() {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { isFeatureEnabled } = useFeatureFlags();
-  const isPremium = isFeatureEnabled('premium.dashboard_insights');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { token } = useAuth();
+  const { selectedChild } = useChildContext();
 
-  useEffect(() => {
-    const fetchChallenge = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await fetch(`${apiUrl}/api/challenges/today?child_id=${childId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch challenge');
-        }
-
-        const data = await response.json();
-        setChallenge(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch challenge');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChallenge();
-  }, [childId]);
-
-  const handleComplete = async () => {
-    if (!challenge || !isPremium) return;
+  const fetchDailyChallenge = async () => {
+    if (!selectedChild?.id) return;
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${apiUrl}/api/challenge-log`, {
-        method: 'POST',
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenges/today?child_id=${selectedChild.id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          challenge_id: challenge.id,
-          child_id: childId
-        })
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to complete challenge');
+        throw new Error('Failed to fetch daily challenge');
       }
 
-      setChallenge(prev => prev ? { ...prev, is_completed: true } : null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to complete challenge');
+      const data = await response.json();
+      setChallenge(data);
+    } catch (error) {
+      console.error('Error fetching daily challenge:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (loading) {
-    return <div className="text-sm text-gray-600">Loading challenge...</div>;
-  }
+  React.useEffect(() => {
+    fetchDailyChallenge();
+  }, [selectedChild?.id]);
 
-  if (error) {
-    return <div className="text-sm text-red-600">{error}</div>;
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="animate-pulse">
+          <div className="h-6 w-3/4 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 w-1/2 bg-gray-200 rounded mb-4"></div>
+          <div className="h-10 w-32 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
   }
 
   if (!challenge) {
-    return <div className="text-sm text-gray-600">No challenge available for today</div>;
+    return (
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="text-center">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Challenge Available</h3>
+          <p className="text-gray-600">Check back later for today's challenge.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Daily Challenge</h2>
-      
-      <div className="space-y-3">
-        <div className="font-medium">{challenge.title}</div>
-        <div className="text-sm text-gray-600">{challenge.description}</div>
-        <div className="text-sm text-gray-500">Age range: {challenge.age_range}</div>
-      </div>
-
-      {isPremium && !challenge.is_completed && (
-        <div className="space-y-3">
+    <>
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Daily Challenge</h2>
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium text-kidoova-green">{challenge.title}</h3>
+            <p className="text-gray-600 mt-1">{challenge.description}</p>
+          </div>
           <button
-            onClick={handleComplete}
-            className="bg-blue-600 text-white rounded-full px-4 py-2 text-sm w-full"
+            onClick={() => setIsModalOpen(true)}
+            className="w-full bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors"
           >
-            Mark Complete
+            Start Challenge
           </button>
         </div>
-      )}
+      </div>
 
-      {challenge.is_completed && (
-        <div className="text-sm text-green-600">Challenge completed for today</div>
-      )}
-    </div>
+      <UniversalChallengeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        challenge={challenge}
+        childId={selectedChild?.id || ''}
+        onComplete={() => {
+          setIsModalOpen(false);
+          fetchDailyChallenge(); // Refresh the challenge status
+        }}
+      />
+    </>
   );
 } 
