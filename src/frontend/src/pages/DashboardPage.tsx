@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import WeeklyTheme from '../components/WeeklyTheme';
 import ConfidenceTrendChart from '../components/ConfidenceTrendChart';
 import { ConfidenceData } from '../utils/confidenceTrend';
+import TraitScoreboard from '../components/dashboard/TraitScoreboard';
 
 export default function DashboardPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -265,32 +266,35 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        {selectedChild ? (
-          <>
-            <WeeklyTheme />
-            <TodayChallengeCards 
-              childId={selectedChild.id} 
-              challenge={challenge}
-              onComplete={handleChallengeComplete}
-            />
-            {trendData.length > 0 && (
-              <ConfidenceTrendChart data={trendData} summary={trendSummary} />
-            )}
-            <div className="grid grid-cols-1 gap-8">
-              <div className="space-y-8">
-                <RewardsOverview progress={progress} />
-                <ProgressTracker progress={progress} childId={selectedChild.id} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <TraitScoreboard />
+          {selectedChild ? (
+            <>
+              <WeeklyTheme />
+              <TodayChallengeCards 
+                childId={selectedChild.id} 
+                challenge={challenge}
+                onComplete={handleChallengeComplete}
+              />
+              {trendData.length > 0 && (
+                <ConfidenceTrendChart data={trendData} summary={trendSummary} />
+              )}
+              <div className="grid grid-cols-1 gap-8">
+                <div className="space-y-8">
+                  <RewardsOverview progress={progress} />
+                  <ProgressTracker progress={progress} childId={selectedChild.id} />
+                </div>
               </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
+              <CustomButton onClick={() => navigate('/manage-children')}>
+                Manage Children
+              </CustomButton>
             </div>
-          </>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Please select a child to view their dashboard</p>
-            <CustomButton onClick={() => navigate('/manage-children')}>
-              Manage Children
-            </CustomButton>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
