@@ -106,8 +106,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         json_group_array(json_object(
           'trait_id', ts.trait_id,
           'score', ts.score,
-          'name', t.name,
-          'description', t.description
+          'name', t.name
         )) as trait_scores
       FROM children c
       LEFT JOIN child_trait_scores ts ON c.id = ts.child_id
@@ -184,7 +183,6 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
         c.age_range,
         c.pillar_id,
         ct.name as challenge_type_name,
-        ct.description as challenge_type_description,
         json_group_array(json_object(
           'trait_id', t.id,
           'weight', ct2.weight,
