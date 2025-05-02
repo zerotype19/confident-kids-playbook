@@ -224,24 +224,18 @@ export default function UniversalChallengeModal({
               <div className="text-2xl mb-4">✨ Success Signals</div>
               <div className="space-y-2">
                 {(() => {
-                  try {
-                    // Remove the outer brackets and quotes, then split by comma
-                    const content = currentCard.content as string;
-                    const signals = content
-                      .replace(/^\[|\]$/g, '') // Remove outer brackets
-                      .split(',') // Split by comma
-                      .map(signal => signal.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
-                    
-                    return signals.map((signal, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <span className="text-green-500">✓</span>
-                        <span className="text-left">{signal}</span>
-                      </div>
-                    ));
-                  } catch (e) {
-                    console.error('Error parsing success signals:', e);
-                    return null;
-                  }
+                  const content = currentCard.content as string;
+                  const signals = content
+                    .slice(1, -1) // Remove outer brackets
+                    .split(',') // Split by comma
+                    .map(s => s.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
+                  
+                  return signals.map((signal, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <span className="text-green-500">✓</span>
+                      <span className="text-left">{signal}</span>
+                    </div>
+                  ));
                 })()}
               </div>
             </div>
