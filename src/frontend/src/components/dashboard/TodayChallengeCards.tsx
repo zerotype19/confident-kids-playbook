@@ -154,10 +154,10 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     <div className="relative flex flex-col items-center">
       <div
         className="relative w-full flex items-end justify-center"
-        style={{ height: `${280 + 15 * (cards.length - currentCard - 1)}px` }}
+        style={{ height: `${360 + 15 * (cards.length - currentCard - 1)}px` }}
       >
         {isCompleted ? (
-          <div className="absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center bg-white justify-center h-[280px] w-full">
+          <div className="absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center bg-white justify-center h-[360px] w-full">
             <div className="flex flex-col items-center space-y-4">
               <div className="flex items-center space-x-2 text-kidoova-accent">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   transform: `scale(${scale})`,
                   opacity: 1,
                   width: '100%',
-                  height: '280px',
+                  height: '360px',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
                 }}
               >
@@ -222,11 +222,21 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                            challenge.pillar_id === 4 ? 'Purpose & Strength Discovery' :
                            'Managing Fear & Anxiety'}
                         </span>
-                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                        <span 
+                          className="text-xs font-medium px-2 py-1 rounded-full"
+                          style={{
+                            backgroundColor: challenge.difficulty_level === 1 ? '#C6F6D5' :
+                                           challenge.difficulty_level === 2 ? '#9AE6B4' :
+                                           '#68D391',
+                            color: challenge.difficulty_level === 1 ? '#22543D' :
+                                   challenge.difficulty_level === 2 ? '#1A4731' :
+                                   '#1B4B2F'
+                          }}
+                        >
                           Level {challenge.difficulty_level}
                         </span>
                       </div>
-                      <div className="flex flex-col items-center space-y-2">
+                      <div className="flex flex-col items-center space-y-2 pt-6">
                         <h2 className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</h2>
                         <p className="text-lg text-gray-800 text-center">{challenge.what_you_practice}</p>
                       </div>
