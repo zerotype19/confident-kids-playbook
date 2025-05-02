@@ -5,17 +5,15 @@ import { corsHeaders } from '../lib/cors';
 interface Challenge {
   id: string;
   title: string;
-  description: string;
+  what_you_practice: string;
   goal: string;
   steps: string[];
   example_dialogue: string;
-  tip: string;
+  guide_prompt: string;
   pillar_id: string;
   age_range: string;
   difficulty_level: string;
-  what_you_practice: string;
   start_prompt: string;
-  guide_prompt: string;
   success_signals: string;
   why_it_matters: string;
 }
@@ -50,17 +48,15 @@ export async function onRequestGet({ request, env, params }: { request: Request;
       SELECT 
         id,
         title,
-        description,
+        what_you_practice,
         goal,
         steps,
         example_dialogue,
-        tip,
+        guide_prompt,
         pillar_id,
         age_range,
         difficulty_level,
-        what_you_practice,
         start_prompt,
-        guide_prompt,
         success_signals,
         why_it_matters
       FROM challenges
