@@ -3,6 +3,7 @@ import { corsHeaders } from '../lib/cors';
 import { verifyJWT } from '../auth';
 import { v4 as uuidv4 } from 'uuid';
 import { evaluateAndGrantRewards } from '../lib/rewardEngine';
+import { calculateTraitScores } from './trait_scoring';
 
 interface ChallengeLogRequest {
   child_id: string;
@@ -113,11 +114,13 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
     // Insert new log
     const logId = uuidv4();
+    const completed_at = new Date().toISOString();
     console.log('Generated log ID:', logId);
     console.log('Inserting with values:', {
       logId,
       childId: body.child_id,
-      challengeId: body.challenge_id
+      challengeId: body.challenge_id,
+      completed_at
     });
     
     const insertResult = await env.DB.prepare(`
@@ -125,11 +128,12 @@ export async function onRequest(context: { request: Request; env: Env }) {
         id,
         child_id,
         challenge_id,
+        completed_at,
         reflection,
         mood_rating
-      ) VALUES (?, ?, ?, NULL, NULL)
+      ) VALUES (?, ?, ?, ?, NULL, NULL)
     `)
-      .bind(logId, body.child_id, body.challenge_id)
+      .bind(logId, body.child_id, body.challenge_id, completed_at)
       .run();
 
     if (!insertResult.success) {
@@ -142,10 +146,12 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
     console.log('Challenge log inserted successfully:', insertResult);
 
+    // Calculate trait scores
+    await calculateTraitScores(body.child_id, body.challenge_id, completed_at, env);
+
     // Evaluate and grant rewards
     console.log('Starting reward evaluation...');
     await evaluateAndGrantRewards(body.child_id, env);
-    console.log('Reward evaluation complete');
 
     // Calculate updated stats
     console.log('Calculating updated stats...');
