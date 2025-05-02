@@ -194,11 +194,16 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       LEFT JOIN traits t ON ct2.trait_id = t.id
       WHERE c.pillar_id = ? 
         AND c.age_range = ?
-        AND c.id NOT IN (${completedChallenges.map(c => `'${c.challenge_id}'`).join(',') || 'NULL'})
+        AND c.id NOT IN (
+          SELECT challenge_id 
+          FROM challenge_logs 
+          WHERE child_id = ? 
+          AND completed_at IS NOT NULL
+        )
       GROUP BY c.id
       ORDER BY c.difficulty_level ASC
       LIMIT 3
-    `).bind(pillarId, ageRange).all();
+    `).bind(pillarId, ageRange, selectedChildId).all();
 
     // Fallback: If no available challenges, fetch one (even if completed)
     if (!availableChallenges || availableChallenges.length === 0) {
@@ -222,7 +227,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
             'name', t.name
           )) as traits
         FROM challenges c
-        LEFT JOIN challenge_types ct ON c.challenge_type_id = ct.id
+        LEFT JOIN challenge_types ct ON c.challenge_type_id = ct.challenge_type_id
         LEFT JOIN challenge_traits ct2 ON c.id = ct2.challenge_id
         LEFT JOIN traits t ON ct2.trait_id = t.id
         WHERE c.pillar_id = ? AND c.age_range = ?
@@ -319,14 +324,14 @@ Format your response with natural line breaks between paragraphs and ideas.`
     // If no challenge ID found, append a recommended challenge and tag
     if (!challengeIds.length && availableChallenges.length > 0) {
       const fallback = availableChallenges[0];
-      responseWithLinks += `<br><br>I found a challenge that might help ${selectedChild.name}:<br><strong>${fallback.title}</strong><br>${fallback.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${fallback.id as string}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
+      responseWithLinks += `I found a challenge that might help ${selectedChild.name}:<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${fallback.id as string}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
       challengeIds = [fallback.id as string];
     } else {
       // For each challenge ID in the response, add a Start Challenge button
       challengeIds.forEach(challengeId => {
         const challenge = availableChallenges.find(c => c.id === challengeId);
         if (challenge) {
-          responseWithLinks += `<br><br>I found a challenge that might help ${selectedChild.name}:<br><strong>${challenge.title}</strong><br>${challenge.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${challengeId}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
+          responseWithLinks += `I found a challenge that might help ${selectedChild.name}:<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${challengeId}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
         }
       });
     }
