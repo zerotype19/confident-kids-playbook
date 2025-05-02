@@ -121,8 +121,8 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     const completedChallengeIds = completedChallenges.map(c => c.challenge_id);
 
     // Get request body
-    const { message } = await request.json();
-    if (!message) {
+    const body = await request.json() as ChatbotRequest;
+    if (!body.message) {
       console.log('❌ No message provided');
       return new Response(JSON.stringify({ error: 'Message is required' }), {
         status: 400,
@@ -134,13 +134,24 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     }
 
     // Detect pillar from message
-    const pillarId = detectPillarId(message);
+    const pillarId = detectPillarId(body.message);
     const pillarName = getPillarName(pillarId);
     const ageRange = selectedChild.age_range;
 
     // Get available challenges that match the pillar and age range
     const { results: availableChallenges } = await env.DB.prepare(`
-      SELECT id, title, description, tip, difficulty_level, age_range, pillar_id
+      SELECT 
+        id, 
+        title, 
+        what_you_practice as description,  
+        tip, 
+        difficulty_level, 
+        age_range, 
+        pillar_id,
+        start_prompt,
+        guide_prompt,
+        success_signals,
+        why_it_matters
       FROM challenges
       WHERE pillar_id = ? 
         AND age_range = ?
@@ -162,7 +173,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     // Log the request to OpenAI
     console.log('🤖 Sending request to OpenAI:', {
       model: 'gpt-3.5-turbo',
-      messageLength: message.length,
+      messageLength: body.message.length,
       availableChallenges: availableChallenges.length,
       pillar: pillarName,
       ageRange
@@ -190,7 +201,7 @@ Format your response with natural line breaks between paragraphs and ideas.`
         },
         {
           role: 'user',
-          content: message
+          content: body.message
         }
       ],
       temperature: 0.7,
