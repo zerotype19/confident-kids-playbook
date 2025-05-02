@@ -150,9 +150,9 @@ export default function HomePage(): JSX.Element {
       
       // Redirect based on onboarding status
       if (userData.has_completed_onboarding) {
-        window.location.href = '/dashboard'
+        navigate('/dashboard')
       } else {
-        window.location.href = '/onboarding'
+        navigate('/onboarding')
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -353,15 +353,15 @@ export default function HomePage(): JSX.Element {
   <h2 className="text-3xl font-bold mb-8">What Parents Are Saying</h2>
   <div className="max-w-4xl mx-auto space-y-12">
     <blockquote className="text-lg italic relative">
-      “My son asks for his challenge every morning. It's become part of our rhythm.”
+      "My son asks for his challenge every morning. It's become part of our rhythm."
       <span className="block mt-4 font-semibold text-gray-700">— Amanda R., Mom of 6-year-old</span>
     </blockquote>
     <blockquote className="text-lg italic relative">
-      “I love how simple it is, and how much better my daughter handles setbacks now.”
+      "I love how simple it is, and how much better my daughter handles setbacks now."
       <span className="block mt-4 font-semibold text-gray-700">— Jacob T., Dad of 8-year-old</span>
     </blockquote>
     <blockquote className="text-lg italic relative">
-      “We used to struggle with confidence. Now we celebrate progress every night.”
+      "We used to struggle with confidence. Now we celebrate progress every night."
       <span className="block mt-4 font-semibold text-gray-700">— Priya M., Parent of 5-year-old twins</span>
     </blockquote>
   </div>
