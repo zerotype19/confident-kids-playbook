@@ -125,47 +125,6 @@ export default function Chatbot() {
     }
   };
 
-  const markChallengeComplete = async (challengeId: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          challenge_id: challengeId,
-          child_id: selectedChild?.id
-        })
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to mark challenge as complete');
-      }
-
-      // Close the challenge modal
-      setSelectedChallenge(null);
-
-      // Add a success message to the chat
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Great job completing the challenge! 🎉 Would you like to try another one?'
-      }]);
-    } catch (error) {
-      console.error('Error marking challenge complete:', error);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Sorry, I had trouble marking that challenge as complete. Please try again later.'
-      }]);
-    }
-  };
-
   // Helper to extract challenge IDs from [challenge:ID] or [challenge ID] (case-insensitive, colon or space)
   function extractChallengeIds(text: string): string[] {
     const matches = [...text.matchAll(/\[challenge[: ]([^\]]+)\]/gi)];
@@ -302,9 +261,11 @@ export default function Chatbot() {
         }}
         childId={selectedChild?.id || ''}
         onComplete={() => {
-          if (selectedChallenge) {
-            markChallengeComplete(selectedChallenge.id);
-          }
+          setSelectedChallenge(null);
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: 'Great job completing the challenge! 🎉 Would you like to try another one?'
+          }]);
         }}
       />
     </>
