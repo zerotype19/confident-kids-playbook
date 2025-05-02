@@ -162,17 +162,17 @@ export default function Chatbot() {
     }
   };
 
-  // Helper to extract challenge IDs from [challenge:ID] (case-insensitive, with colon)
+  // Helper to extract challenge IDs from [challenge:ID] or [challenge ID] (case-insensitive, colon or space)
   function extractChallengeIds(text: string): string[] {
-    const matches = [...text.matchAll(/\[challenge:([^\]]+)\]/gi)];
+    const matches = [...text.matchAll(/\[challenge[: ]([^\]]+)\]/gi)];
     return matches.map(m => m[1]);
   }
 
   const renderMessage = (message: Message, index: number) => {
-    // Remove [challenge:ID] tags and any "Click here to check out the challenge details" lines
+    // Remove [challenge:ID] and [challenge ID] tags and any "Click here to check out the challenge details" lines
     let content = message.content
-      .replace(/\[challenge:([^\]]+)\]/gi, '')
-      .replace(/Click here to check out the challenge details:? ?\[challenge:[^\]]+\]/gi, '');
+      .replace(/\[challenge[: ][^\]]+\]/gi, '')
+      .replace(/Click here to check out the challenge details:? ?\[challenge[: ][^\]]+\]/gi, '');
 
     // Extract challenge IDs for this message
     const challengeIds = extractChallengeIds(message.content);
