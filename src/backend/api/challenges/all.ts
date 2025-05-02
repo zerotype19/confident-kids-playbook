@@ -1,6 +1,7 @@
 import { Env } from '../../types';
 import { verifyJWT } from '../../auth';
 import { corsHeaders } from '../../lib/cors';
+import { eq } from 'drizzle-orm';
 
 interface Child {
   id: string;
@@ -113,10 +114,13 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
           .replace(/\[|\]/g, ''); // Remove brackets
         const successSignals = successSignalsStr.split(', ').map(signal => signal.trim());
         
+        // Parse tags from string to array
+        const tags = challenge.tags ? JSON.parse(challenge.tags.replace(/'/g, '"')) : [];
+        
         return {
           ...challenge,
           success_signals: successSignals,
-          // Remove tags from the response since it's not needed for display
+          tags: tags
         };
       } catch (error: any) {
         console.error('Error parsing challenge data:', {
@@ -126,7 +130,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         });
         return {
           ...challenge,
-          success_signals: []
+          success_signals: [],
+          tags: []
         };
       }
     }) || [];
