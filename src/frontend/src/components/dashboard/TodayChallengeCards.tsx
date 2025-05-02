@@ -154,10 +154,10 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     <div className="relative flex flex-col items-center">
       <div
         className="relative w-full flex items-end justify-center"
-        style={{ height: `${360 + 15 * (cards.length - currentCard - 1)}px` }}
+        style={{ height: `${280 + 15 * (cards.length - currentCard - 1)}px` }}
       >
         {isCompleted ? (
-          <div className="absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center bg-white justify-center h-[360px] w-full">
+          <div className="absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center bg-white justify-center h-[280px] w-full">
             <div className="flex flex-col items-center space-y-4">
               <div className="flex items-center space-x-2 text-kidoova-accent">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,13 +189,13 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   transform: `scale(${scale})`,
                   opacity: 1,
                   width: '100%',
-                  height: '360px',
+                  height: '280px',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
                 }}
               >
                 <div className="flex-1 flex flex-col items-center justify-center px-6 w-full">
                   {/* Daily Challenge Title - Show on all cards */}
-                  <div className="w-full text-center mb-4">
+                  <div className="w-full text-center mb-2">
                     <h2 className="text-2xl font-heading text-gray-900">
                       {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
                     </h2>
@@ -204,7 +204,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* First Card: Intro */}
                   {card.type === 'intro' && selectedChild && (
                     <>
-                      <div className="flex items-center justify-center space-x-4 mb-4">
+                      <div className="flex items-center justify-center space-x-4 mb-2">
                         <span 
                           className="text-xs font-medium px-2 py-1 rounded-full"
                           style={{
@@ -223,13 +223,10 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                            'Managing Fear & Anxiety'}
                         </span>
                         <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                          {challenge.challenge_type.name}
-                        </span>
-                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-700">
                           Level {challenge.difficulty_level}
                         </span>
                       </div>
-                      <div className="flex flex-col items-center space-y-4">
+                      <div className="flex flex-col items-center space-y-2">
                         <h2 className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</h2>
                         <p className="text-lg text-gray-800 text-center">{challenge.what_you_practice}</p>
                       </div>
