@@ -317,7 +317,7 @@ export default function HomePage(): JSX.Element {
               loop
               className="w-full h-full object-cover"
             >
-              <source src="/demo.mp4" type="video/mp4" />
+              <source src="/kidoova.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
