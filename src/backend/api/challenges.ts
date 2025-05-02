@@ -13,6 +13,11 @@ interface Challenge {
   pillar_id: string;
   age_range: string;
   difficulty_level: string;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
 }
 
 export async function onRequestGet({ request, env, params }: { request: Request; env: Env; params: { id: string } }) {
@@ -52,7 +57,12 @@ export async function onRequestGet({ request, env, params }: { request: Request;
         tip,
         pillar_id,
         age_range,
-        difficulty_level
+        difficulty_level,
+        what_you_practice,
+        start_prompt,
+        guide_prompt,
+        success_signals,
+        why_it_matters
       FROM challenges
       WHERE id = ?
     `).bind(params.id).first<Challenge>();

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Modal from './Modal';
+import UniversalChallengeModal from './challenges/UniversalChallengeModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useChildContext } from '../contexts/ChildContext';
 
@@ -13,10 +14,16 @@ interface Challenge {
   id: string;
   title: string;
   description: string;
-  tip: string;
   goal: string;
-  steps?: string[];
-  example_dialogue?: string;
+  steps: string[];
+  tip: string;
+  example_dialogue: string;
+  pillar_id: number;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
 }
 
 export default function Chatbot() {
@@ -257,52 +264,31 @@ export default function Chatbot() {
         </div>
       </Modal>
 
-      <Modal
+      <UniversalChallengeModal
         isOpen={!!selectedChallenge}
         onClose={() => setSelectedChallenge(null)}
-        title={selectedChallenge?.title || ''}
-      >
-        {selectedChallenge && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold">Goal:</h3>
-              <p>{selectedChallenge.goal}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Steps:</h3>
-              <ol className="list-decimal list-inside space-y-2">
-                {selectedChallenge.steps?.map((step: string, index: number) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ol>
-            </div>
-            {selectedChallenge.example_dialogue && (
-              <div>
-                <h3 className="font-semibold">Example Dialogue:</h3>
-                <p className="italic">{selectedChallenge.example_dialogue}</p>
-              </div>
-            )}
-            <div>
-              <h3 className="font-semibold">Tip:</h3>
-              <p>{selectedChallenge.tip}</p>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => markChallengeComplete(selectedChallenge.id)}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Mark Complete
-              </button>
-              <button
-                onClick={() => setSelectedChallenge(null)}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+        challenge={selectedChallenge || {
+          id: '',
+          title: '',
+          description: '',
+          goal: '',
+          steps: [],
+          tip: '',
+          example_dialogue: '',
+          pillar_id: 0,
+          what_you_practice: '',
+          start_prompt: '',
+          guide_prompt: '',
+          success_signals: '',
+          why_it_matters: ''
+        }}
+        childId={selectedChild?.id || ''}
+        onComplete={() => {
+          if (selectedChallenge) {
+            markChallengeComplete(selectedChallenge.id);
+          }
+        }}
+      />
     </>
   );
 } 
