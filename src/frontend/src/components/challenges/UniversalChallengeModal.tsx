@@ -221,7 +221,6 @@ export default function UniversalChallengeModal({
         <div className="text-lg text-gray-800">
           {currentCard.type === 'success' ? (
             <div className="text-center">
-              <div className="text-2xl mb-4">✨ Success Signals</div>
               <div className="space-y-2">
                 {(() => {
                   const content = currentCard.content;
@@ -232,8 +231,11 @@ export default function UniversalChallengeModal({
                       // Try to parse as JSON if it's a string representation of an array
                       signals = JSON.parse(content);
                     } catch {
-                      // If not JSON, split by newlines
-                      signals = content.split('\n').filter(s => s.trim());
+                      // If not JSON, try to parse as a Python-style list string
+                      signals = content
+                        .replace(/^\[|\]$/g, '') // Remove square brackets
+                        .split(',') // Split by comma
+                        .map(signal => signal.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
                     }
                   } else if (Array.isArray(content)) {
                     signals = content;
@@ -252,7 +254,8 @@ export default function UniversalChallengeModal({
             </div>
           ) : (
             <div className="text-center">
-              {currentCard.content}
+              {typeof currentCard.content === 'string' ? currentCard.content : 
+               Array.isArray(currentCard.content) ? currentCard.content.join('\n') : ''}
             </div>
           )}
         </div>
