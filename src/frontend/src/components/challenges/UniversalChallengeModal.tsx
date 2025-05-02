@@ -211,8 +211,23 @@ export default function UniversalChallengeModal({
           <h2 className="text-2xl font-bold text-kidoova-green">{currentCard.title}</h2>
         </div>
 
-        <div className="text-lg text-gray-800 text-center">
-          {currentCard.content}
+        <div className="text-lg text-gray-800">
+          {currentCard.type === 'success' && currentCard.content ? (
+            <div className="space-y-3">
+              {JSON.parse(currentCard.content).map((signal: string, index: number) => (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-kidoova-green flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-600 leading-relaxed">{signal}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center">{currentCard.content}</div>
+          )}
         </div>
 
         <div className="flex justify-between items-center">
