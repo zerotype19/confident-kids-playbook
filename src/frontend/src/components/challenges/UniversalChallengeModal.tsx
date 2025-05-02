@@ -164,18 +164,25 @@ export default function UniversalChallengeModal({
             {emojiFaces.map((emoji, index) => {
               // Green gradient classes from light to dark
               const greenBg = [
-                'bg-green-100', // 😖
-                'bg-green-200', // 😐
-                'bg-green-300', // 🙂
-                'bg-green-400', // 😄
-                'bg-green-500'  // 🤩
+                'bg-green-50',  // 😖 - lightest
+                'bg-green-100', // 😐
+                'bg-green-200', // 🙂
+                'bg-green-300', // 😄
+                'bg-green-400'  // 🤩 - darkest
+              ];
+              const greenBorder = [
+                'border-green-100',  // 😖
+                'border-green-200',  // 😐
+                'border-green-300',  // 🙂
+                'border-green-400',  // 😄
+                'border-green-500'   // 🤩
               ];
               return (
                 <button
                   key={index}
                   onClick={() => setFeeling(index + 1)}
-                  className={`text-2xl transition-transform duration-200 rounded-full w-12 h-12 flex items-center justify-center border-2 focus:outline-none 
-                    ${feeling === index + 1 ? `${greenBg[index]} border-green-600 scale-110 text-white` : 'border-gray-300 bg-white hover:bg-green-50'}
+                  className={`text-2xl transition-all duration-200 rounded-full w-12 h-12 flex items-center justify-center border-2 focus:outline-none 
+                    ${feeling === index + 1 ? `${greenBg[index]} ${greenBorder[index]} scale-110 shadow-md` : 'border-gray-300 bg-white hover:bg-green-50'}
                   `}
                   aria-label={confidenceLabels[index]}
                 >
