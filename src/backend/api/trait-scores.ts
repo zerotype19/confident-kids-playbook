@@ -22,7 +22,7 @@ export async function GET(
       );
     }
 
-    const traitScores = await db.query(`
+    const result = await db.query(`
       SELECT 
         t.id as trait_id,
         t.name as trait_name,
@@ -35,8 +35,11 @@ export async function GET(
       ORDER BY cts.score DESC
     `, [childId]);
 
+    // Ensure we're returning the rows from the query result
+    const traitScores = result.rows || [];
+
     return new Response(
-      JSON.stringify(traitScores),
+      JSON.stringify({ data: traitScores }),
       {
         status: 200,
         headers: {

@@ -34,6 +34,7 @@ import { onRequestGet as getConfidenceTrend } from './api/confidence-trend'
 import { onRequestPost as familyInvite } from './api/family_invite'
 import { onRequestPost as familyJoin } from './api/family_join'
 import { onRequestPost as verifyInvite } from './api/verify_invite'
+import { onRequestGet as traitScores } from './api/trait-scores'
 
 const router = Router()
 
@@ -123,6 +124,19 @@ router.put('/api/children/:id', (request, context) => {
     });
   }
   return childrenUpdate({ request, env: context.env, id });
+})
+
+// Trait scores route
+router.get('/api/trait-scores/:childId', (request, context) => {
+  const url = new URL(request.url);
+  const childId = url.pathname.split('/').pop();
+  if (!childId) {
+    return new Response(JSON.stringify({ error: 'Missing child ID' }), {
+      status: 400,
+      headers: corsHeaders()
+    });
+  }
+  return traitScores({ request, env: context.env, params: { childId } });
 })
 
 // Dashboard routes
