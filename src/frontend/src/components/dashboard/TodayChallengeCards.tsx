@@ -339,9 +339,18 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <h3 className="text-3xl font-bold text-kidoova-green">Success Signals</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center space-y-2">
-                        {card.content && JSON.parse(card.content).map((signal: string, index: number) => (
-                          <p key={index}>{signal}</p>
-                        ))}
+                        {card.content && (() => {
+                          try {
+                            const signals = JSON.parse(card.content);
+                            return Array.isArray(signals) 
+                              ? signals.map((signal: string, index: number) => (
+                                  <p key={index}>{signal}</p>
+                                ))
+                              : <p>{card.content}</p>;
+                          } catch (e) {
+                            return <p>{card.content}</p>;
+                          }
+                        })()}
                       </div>
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
                         <button
