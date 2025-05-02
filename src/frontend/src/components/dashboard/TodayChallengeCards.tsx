@@ -191,7 +191,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                 <div className="flex-1 flex flex-col items-center justify-center px-6 w-full">
                   {/* Daily Challenge Title - Show on all cards */}
                   <div className="w-full text-center mt-4 mb-4">
-                    <h2 className={`text-2xl font-heading ${currentCard > 0 ? 'text-gray-400' : 'text-gray-900'}`}>
+                    <h2 className={`${currentCard > 0 ? 'text-sm text-gray-400' : 'text-2xl font-heading text-gray-900'}`}>
                       {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
                     </h2>
                   </div>
@@ -308,7 +308,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <span className="text-3xl mr-2">{card.icon}</span>
                         <h3 className="text-3xl font-bold text-kidoova-green">Success Signals</h3>
                       </div>
-                      <div className="text-lg text-gray-800 text-center space-y-2">
+                      <div className="text-base text-gray-800 text-center space-y-2">
                         {card.content && (() => {
                           try {
                             // Remove the square brackets and split by comma
@@ -318,7 +318,12 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                               .map(signal => signal.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
 
                             return signals.map((signal: string, index: number) => (
-                              <p key={index}>{signal}</p>
+                              <div key={index} className="flex items-center justify-center">
+                                <svg className="w-5 h-5 mr-2 text-kidoova-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <p>{signal}</p>
+                              </div>
                             ));
                           } catch (e) {
                             console.log('Parsing error:', e);
