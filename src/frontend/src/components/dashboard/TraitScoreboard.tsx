@@ -29,7 +29,7 @@ export default function TraitScoreboard() {
 
       try {
         console.log('Fetching trait scores for child:', selectedChildId);
-        const response = await fetch(`/api/trait-scores/${selectedChildId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-scores/${selectedChildId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/json'
