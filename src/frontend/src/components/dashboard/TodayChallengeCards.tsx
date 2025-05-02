@@ -340,35 +340,35 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                       </div>
                       <div className="text-lg text-gray-800 text-center space-y-2">
                         {card.content && (() => {
+                          console.log('Success signals content:', card.content);
                           try {
-                            // First try to parse as is
-                            const signals = JSON.parse(card.content);
-                            if (Array.isArray(signals)) {
-                              return signals.map((signal: string, index: number) => (
-                                <p key={index}>{signal}</p>
-                              ));
-                            }
-                            // If not an array, try parsing the string itself
-                            const parsedString = JSON.parse(signals);
-                            if (Array.isArray(parsedString)) {
-                              return parsedString.map((signal: string, index: number) => (
-                                <p key={index}>{signal}</p>
-                              ));
-                            }
-                            return <p>{card.content}</p>;
-                          } catch (e) {
-                            // If parsing fails, try parsing the content directly
-                            try {
-                              const parsedContent = JSON.parse(card.content);
-                              if (Array.isArray(parsedContent)) {
-                                return parsedContent.map((signal: string, index: number) => (
+                            // Try to parse the content directly
+                            const parsedContent = JSON.parse(card.content);
+                            console.log('Parsed content:', parsedContent);
+                            
+                            // If it's a string, try parsing that string
+                            if (typeof parsedContent === 'string') {
+                              const doubleParsed = JSON.parse(parsedContent);
+                              console.log('Double parsed content:', doubleParsed);
+                              if (Array.isArray(doubleParsed)) {
+                                return doubleParsed.map((signal: string, index: number) => (
                                   <p key={index}>{signal}</p>
                                 ));
                               }
-                              return <p>{card.content}</p>;
-                            } catch (e) {
-                              return <p>{card.content}</p>;
                             }
+                            
+                            // If it's an array, display each item
+                            if (Array.isArray(parsedContent)) {
+                              return parsedContent.map((signal: string, index: number) => (
+                                <p key={index}>{signal}</p>
+                              ));
+                            }
+                            
+                            // If we get here, just display the content
+                            return <p>{card.content}</p>;
+                          } catch (e) {
+                            console.log('Parsing error:', e);
+                            return <p>{card.content}</p>;
                           }
                         })()}
                       </div>
