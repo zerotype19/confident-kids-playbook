@@ -162,20 +162,32 @@ export default function Chatbot() {
     }
   };
 
-  const renderMessage = (message: Message) => {
+  const renderMessage = (message: Message, index: number) => {
     const content = message.content.replace(
       /\[Challenge ([a-f0-9-]+)\]/g,
       (match, challengeId) => {
-        return `<a href="#" onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('openChallenge', { detail: '${challengeId}' }));" class="text-blue-500 hover:underline">View Challenge</a>`;
+        // Remove the old link injection
+        return '';
       }
     );
 
     return (
-      <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`} key={index}>
         <div className={`max-w-[70%] rounded-lg p-3 ${
           message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100'
         }`}>
           <div dangerouslySetInnerHTML={{ __html: content }} />
+          {/* If assistant and challengeIds, show Start Challenge button */}
+          {message.role === 'assistant' && message.challengeIds && message.challengeIds.length > 0 && (
+            <div className="mt-4 flex justify-center">
+              <button
+                className="bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors"
+                onClick={() => handleChallengeClick(message.challengeIds![0])}
+              >
+                Start Challenge
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -223,11 +235,7 @@ export default function Chatbot() {
       >
         <div className="flex flex-col h-[60vh]">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div key={index}>
-                {renderMessage(message)}
-              </div>
-            ))}
+            {messages.map(renderMessage)}
             {isLoading && (
               <div className="flex justify-start mb-4">
                 <div className="bg-gray-100 rounded-lg p-3">
