@@ -318,12 +318,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                               .map(signal => signal.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
 
                             return signals.map((signal: string, index: number) => (
-                              <div key={index} className="flex items-center justify-center">
-                                <svg className="w-5 h-5 mr-2 text-kidoova-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                <p>{signal}</p>
-                              </div>
+                              <p key={index}>{signal}</p>
                             ));
                           } catch (e) {
                             console.log('Parsing error:', e);
@@ -376,7 +371,9 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* Completion Card */}
                   {card.type === 'completion' && (
                     <div className="flex flex-col items-center space-y-4">
-                      <div className="text-3xl font-bold text-kidoova-green">Ready to complete this challenge?</div>
+                      <div className="text-3xl font-bold text-kidoova-green text-center">
+                        Ready to complete<br />this challenge?
+                      </div>
                       <button
                         onClick={handleMarkComplete}
                         className="px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200"
