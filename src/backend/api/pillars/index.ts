@@ -91,9 +91,16 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       ORDER BY id ASC
     `).all();
 
-    // Get progress for each pillar
-    const pillarsWithProgress = await Promise.all(
+    // Get challenge types for each pillar
+    const pillarsWithTypes = await Promise.all(
       pillars.map(async (pillar) => {
+        // Get challenge types for this pillar
+        const { results: challengeTypes } = await env.DB.prepare(`
+          SELECT * FROM challenge_types
+          WHERE pillar_id = ?
+          ORDER BY challenge_type_id ASC
+        `).bind(pillar.id).all();
+
         // Get total challenges for this pillar
         const { total } = await env.DB.prepare(`
           SELECT COUNT(*) as total FROM challenges WHERE pillar_id = ?
@@ -112,12 +119,13 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 
         return {
           ...pillar,
-          progress
+          progress,
+          challenge_types: challengeTypes
         };
       })
     );
 
-    return new Response(JSON.stringify(pillarsWithProgress), {
+    return new Response(JSON.stringify(pillarsWithTypes), {
       headers: corsHeaders()
     });
 

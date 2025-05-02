@@ -172,4 +172,11 @@ export interface RewardsOverviewProps {
 
 export interface TrophyCaseProps {
   rewards: Reward[];
+}
+
+export interface ChallengeType {
+  pillar_id: number;
+  challenge_type_id: number;
+  name: string;
+  description: string;
 } 
