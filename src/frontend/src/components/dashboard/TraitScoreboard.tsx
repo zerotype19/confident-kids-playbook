@@ -9,13 +9,22 @@ interface Trait {
   score: number;
 }
 
-const pillarColors: Record<number, string> = {
-  1: 'bg-yellow-300',
-  2: 'bg-green-400',
-  3: 'bg-blue-400',
-  4: 'bg-purple-400',
-  5: 'bg-red-400'
+const pillarHex: Record<number, string> = {
+  1: '#F7B801', // Independence & Problem-Solving
+  2: '#38A169', // Growth Mindset & Resilience
+  3: '#4299E1', // Social Confidence & Communication
+  4: '#805AD5', // Purpose & Strength Discovery
+  5: '#E53E3E'  // Managing Fear & Anxiety
 };
+
+const levelNames = ['🏕 Explorer', '🔧 Builder', '🏆 Champion', '🌟 Master'];
+
+function getLevel(score: number): number {
+  if (score >= 100) return 3;
+  if (score >= 50) return 2;
+  if (score >= 25) return 1;
+  return 0;
+}
 
 export default function TraitScoreboard() {
   const { selectedChildId, token } = useAuth();
@@ -93,16 +102,31 @@ export default function TraitScoreboard() {
   return (
     <div className="w-full p-6 rounded-xl bg-white shadow-md">
       <h2 className="text-2xl font-semibold mb-6">Confidence DNA</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {traits?.map((trait) => (
-          <div key={trait.trait_id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <span className="flex items-center gap-3">
-              <span className={`w-4 h-4 rounded-full ${pillarColors[trait.pillar_id]}`}></span>
-              <span className="font-medium">{trait.trait_name}</span>
-            </span>
-            <span className="font-bold text-lg">{Math.round(trait.score)} pts</span>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {traits?.map((trait) => {
+          const level = getLevel(trait.score);
+          const levelName = levelNames[level];
+          const percent = Math.min(trait.score, 100);
+
+          return (
+            <div key={trait.trait_id} className="flex flex-col gap-2 p-4 rounded-xl bg-gray-50 shadow-sm">
+              <div className="flex justify-between items-center text-sm font-medium">
+                <span className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: pillarHex[trait.pillar_id] }} />
+                  {trait.trait_name}
+                </span>
+                <span className="text-green-800 font-semibold">{Math.round(trait.score)} pts</span>
+              </div>
+              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-3 rounded-full transition-all"
+                  style={{ width: `${percent}%`, backgroundColor: pillarHex[trait.pillar_id] }}
+                />
+              </div>
+              <div className="text-xs text-gray-600 mt-1">Level: <strong>{levelName}</strong></div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
