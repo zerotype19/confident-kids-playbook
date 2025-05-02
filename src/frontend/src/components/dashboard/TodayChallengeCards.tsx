@@ -261,7 +261,6 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <span className="text-3xl mr-2">{card.icon}</span>
-                        <h3 className="text-3xl font-bold text-kidoova-green">What You'll Practice</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center mb-8">{card.content}</div>
                       <div className="flex-1 flex items-end justify-center pb-4 space-x-4">
