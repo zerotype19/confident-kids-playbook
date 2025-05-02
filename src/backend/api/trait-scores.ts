@@ -1,13 +1,10 @@
 import { createDb } from '../lib/db';
 import { Env } from '../types';
 
-export async function GET(
-  request: Request,
-  { params, env }: { params: { childId: string }, env: Env }
-) {
+export async function onRequestGet({ request, env }: { request: Request, env: Env }) {
   try {
-    const { childId } = params;
-    const db = createDb(env);
+    const url = new URL(request.url);
+    const childId = url.pathname.split('/').pop();
 
     if (!childId) {
       return new Response(
@@ -24,6 +21,7 @@ export async function GET(
       );
     }
 
+    const db = createDb(env);
     const result = await db.query(`
       SELECT 
         t.id as trait_id,
