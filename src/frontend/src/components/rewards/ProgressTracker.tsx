@@ -7,6 +7,14 @@ interface ProgressTrackerProps {
   childId: string;
 }
 
+const pillarHex: Record<number, string> = {
+  1: '#F7B801', // Independence & Problem-Solving
+  2: '#38A169', // Growth Mindset & Resilience
+  3: '#4299E1', // Social Confidence & Communication
+  4: '#805AD5', // Purpose & Strength Discovery
+  5: '#E53E3E'  // Managing Fear & Anxiety
+};
+
 export default function ProgressTracker({ progress, childId }: ProgressTrackerProps) {
   if (!progress) return null;
 
@@ -83,8 +91,11 @@ export default function ProgressTracker({ progress, childId }: ProgressTrackerPr
               </div>
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-kidoova-accent transition-all duration-300"
-                  style={{ width: `${data.total > 0 ? (data.completed / data.total) * 100 : 0}%` }}
+                  className="h-full transition-all duration-300"
+                  style={{ 
+                    width: `${data.total > 0 ? (data.completed / data.total) * 100 : 0}%`,
+                    backgroundColor: pillarHex[parseInt(pillarId)]
+                  }}
                 />
               </div>
             </div>
