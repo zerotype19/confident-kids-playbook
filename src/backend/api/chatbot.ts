@@ -189,7 +189,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
           'name', t.name
         )) as traits
       FROM challenges c
-      LEFT JOIN challenge_types ct ON c.challenge_type_id = ct.id
+      LEFT JOIN challenge_types ct ON c.challenge_type_id = ct.challenge_type_id
       LEFT JOIN challenge_traits ct2 ON c.id = ct2.challenge_id
       LEFT JOIN traits t ON ct2.trait_id = t.id
       WHERE c.pillar_id = ? 
