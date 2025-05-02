@@ -4,14 +4,19 @@ import { corsHeaders, handleOptions } from '../../lib/cors';
 interface Challenge {
   id: string;
   title: string;
-  description: string;
-  goal: string;
-  steps: string[];
-  example_dialogue: string;
-  tip: string;
   pillar_id: string;
   age_range: string;
+  challenge_type_id: number;
   difficulty_level: number;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
+  challenge_type: {
+    name: string;
+    description: string;
+  };
 }
 
 interface Child {
@@ -21,14 +26,17 @@ interface Child {
 interface ChallengeResult {
   id: string;
   title: string;
-  description: string;
-  goal: string;
-  steps: string;
-  example_dialogue: string;
-  tip: string;
   pillar_id: string;
   age_range: string;
+  challenge_type_id: number;
   difficulty_level: number;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
+  challenge_type_name: string;
+  challenge_type_description: string;
 }
 
 export async function challenge({ request, env }: { request: Request; env: Env }) {
@@ -71,18 +79,23 @@ export async function challenge({ request, env }: { request: Request; env: Env }
       SELECT 
         c.id,
         c.title,
-        c.description,
-        c.goal,
-        c.steps,
-        c.example_dialogue,
-        c.tip,
         c.pillar_id,
         c.age_range,
+        c.challenge_type_id,
         c.difficulty_level,
+        c.what_you_practice,
+        c.start_prompt,
+        c.guide_prompt,
+        c.success_signals,
+        c.why_it_matters,
+        ct.name as challenge_type_name,
+        ct.description as challenge_type_description,
         CASE WHEN cl.id IS NOT NULL THEN 1 ELSE 0 END as is_completed
       FROM challenges c
       LEFT JOIN challenge_logs cl ON c.id = cl.challenge_id 
         AND cl.child_id = ?
+      LEFT JOIN challenge_types ct ON c.challenge_type_id = ct.challenge_type_id
+        AND c.pillar_id = ct.pillar_id
       WHERE REPLACE(c.age_range, '–', '-') = REPLACE(?, '–', '-')
       AND c.pillar_id = (SELECT pillar_id FROM current_theme)
       AND NOT EXISTS (
@@ -106,18 +119,23 @@ export async function challenge({ request, env }: { request: Request; env: Env }
 
     console.log('Found challenge:', result.id);
 
-    // Parse the steps JSON array
+    // Create the challenge object with the new structure
     const challenge: Challenge = {
       id: result.id,
       title: result.title,
-      description: result.description,
-      goal: result.goal,
-      steps: JSON.parse(result.steps),
-      example_dialogue: result.example_dialogue,
-      tip: result.tip,
       pillar_id: result.pillar_id,
       age_range: result.age_range,
-      difficulty_level: result.difficulty_level
+      challenge_type_id: result.challenge_type_id,
+      difficulty_level: result.difficulty_level,
+      what_you_practice: result.what_you_practice,
+      start_prompt: result.start_prompt,
+      guide_prompt: result.guide_prompt,
+      success_signals: result.success_signals,
+      why_it_matters: result.why_it_matters,
+      challenge_type: {
+        name: result.challenge_type_name,
+        description: result.challenge_type_description
+      }
     };
 
     return new Response(JSON.stringify({ challenge }), {

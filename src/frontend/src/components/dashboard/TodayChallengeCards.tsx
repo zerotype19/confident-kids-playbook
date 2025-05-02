@@ -13,6 +13,15 @@ interface Challenge {
   example_dialogue: string;
   pillar_id: number;
   is_completed: boolean;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
+  challenge_type: {
+    name: string;
+    description: string;
+  };
 }
 
 interface TodayChallengeCardsProps {
@@ -23,10 +32,11 @@ interface TodayChallengeCardsProps {
 
 const CARD_ICONS = [
   '💡', // intro
-  '👟', // step 1
-  '👟', // step 2
-  '👟', // step 3
-  '💬', // dialogue
+  '🎯', // what you practice
+  '🚀', // start prompt
+  '📚', // guide prompt
+  '✨', // success signals
+  '💡', // why it matters
   '✅', // completion
 ];
 
@@ -109,31 +119,33 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
       icon: CARD_ICONS[0],
     },
     {
-      type: 'step',
+      type: 'practice',
       icon: CARD_ICONS[1],
-      stepNum: 1,
-      content: challenge.steps[0],
+      content: challenge.what_you_practice,
     },
     {
-      type: 'step',
+      type: 'start',
       icon: CARD_ICONS[2],
-      stepNum: 2,
-      content: challenge.steps[1],
+      content: challenge.start_prompt,
     },
     {
-      type: 'step',
+      type: 'guide',
       icon: CARD_ICONS[3],
-      stepNum: 3,
-      content: challenge.steps[2],
+      content: challenge.guide_prompt,
     },
     {
-      type: 'dialogue',
+      type: 'success',
       icon: CARD_ICONS[4],
-      content: challenge.example_dialogue,
+      content: challenge.success_signals,
+    },
+    {
+      type: 'why',
+      icon: CARD_ICONS[5],
+      content: challenge.why_it_matters,
     },
     {
       type: 'completion',
-      icon: CARD_ICONS[5],
+      icon: CARD_ICONS[6],
     }
   ];
 
@@ -189,58 +201,84 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <span className="text-3xl mr-2">{card.icon}</span>
                         <span className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</span>
                       </div>
-                      <div className="text-lg text-gray-800 text-center">{challenge.description}</div>
+                      <div className="text-lg text-gray-800 text-center mb-4">Let's build confidence together!</div>
+                      <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft w-full">
+                        <h3 className="text-lg font-semibold text-kidoova-green mb-2">
+                          {challenge.challenge_type.name}
+                        </h3>
+                        <p className="text-text-base">
+                          {challenge.challenge_type.description}
+                        </p>
+                      </div>
                     </>
                   )}
-                  {/* Step Cards */}
-                  {card.type === 'step' && (
+
+                  {/* Practice Card */}
+                  {card.type === 'practice' && (
                     <>
                       <div className="flex items-center justify-center mb-4">
-                        <span className="text-2xl mr-2">{card.icon}</span>
-                        <span className="text-2xl font-bold text-kidoova-green text-center">Step {card.stepNum}</span>
+                        <span className="text-3xl mr-2">{card.icon}</span>
+                        <h3 className="text-xl font-bold text-kidoova-green">What You'll Practice</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
                     </>
                   )}
-                  {/* Dialogue Card */}
-                  {card.type === 'dialogue' && (
+
+                  {/* Start Prompt Card */}
+                  {card.type === 'start' && (
                     <>
                       <div className="flex items-center justify-center mb-4">
-                        <span className="text-2xl mr-2">{card.icon}</span>
-                        <span className="text-2xl font-bold text-kidoova-green text-center">Try Saying This</span>
+                        <span className="text-3xl mr-2">{card.icon}</span>
+                        <h3 className="text-xl font-bold text-kidoova-green">Getting Started</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
                     </>
                   )}
+
+                  {/* Guide Prompt Card */}
+                  {card.type === 'guide' && (
+                    <>
+                      <div className="flex items-center justify-center mb-4">
+                        <span className="text-3xl mr-2">{card.icon}</span>
+                        <h3 className="text-xl font-bold text-kidoova-green">Guide</h3>
+                      </div>
+                      <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                    </>
+                  )}
+
+                  {/* Success Signals Card */}
+                  {card.type === 'success' && (
+                    <>
+                      <div className="flex items-center justify-center mb-4">
+                        <span className="text-3xl mr-2">{card.icon}</span>
+                        <h3 className="text-xl font-bold text-kidoova-green">Success Signals</h3>
+                      </div>
+                      <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                    </>
+                  )}
+
+                  {/* Why It Matters Card */}
+                  {card.type === 'why' && (
+                    <>
+                      <div className="flex items-center justify-center mb-4">
+                        <span className="text-3xl mr-2">{card.icon}</span>
+                        <h3 className="text-xl font-bold text-kidoova-green">Why It Matters</h3>
+                      </div>
+                      <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                    </>
+                  )}
+
                   {/* Completion Card */}
                   {card.type === 'completion' && (
-                    <div className="space-y-6 w-full flex flex-col items-center">
-                      <div className="flex items-center justify-center">
-                        <span className="text-2xl mr-2">{card.icon}</span>
-                        <span className="text-2xl font-bold text-kidoova-green text-center">Great Job!</span>
-                      </div>
-                      <p className="text-lg text-gray-700 text-center">You've completed all the steps for today's challenge.</p>
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="text-xl font-bold text-kidoova-green">Ready to complete this challenge?</div>
                       <button
                         onClick={handleMarkComplete}
-                        disabled={isCompleting}
-                        className={`px-6 py-3 rounded-lg font-semibold text-white w-full max-w-xs
-                          ${isCompleting 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200'
-                          }`}
+                        className="px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200"
                       >
-                        {isCompleting ? 'Marking Complete...' : 'Mark Challenge Complete'}
+                        Mark Complete
                       </button>
                     </div>
-                  )}
-                  {/* Next Button */}
-                  {isTop && idx !== cards.length - 1 && card.type !== 'completion' && (
-                    <button
-                      className="mt-8 px-6 py-2 rounded-lg bg-kidoova-accent text-white font-semibold shadow hover:bg-kidoova-green transition-colors duration-200 w-full max-w-xs"
-                      onClick={() => setCurrentCard(currentCard + 1)}
-                    >
-                      Next
-                    </button>
                   )}
                 </div>
               </div>
@@ -248,12 +286,24 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
           })
         )}
       </div>
+
+      {/* Navigation Buttons */}
+      {!isCompleted && currentCard < cards.length - 1 && (
+        <button
+          onClick={() => setCurrentCard(prev => prev + 1)}
+          className="mt-4 px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200"
+        >
+          Next
+        </button>
+      )}
+
       {/* Error Message */}
       {error && (
         <div className="text-red-600 text-center mt-4">
           {error}
         </div>
       )}
+
       {/* Reflection Modal */}
       {showReflection && (
         <PostChallengeReflectionModal

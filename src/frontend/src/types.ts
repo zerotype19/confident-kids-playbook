@@ -12,17 +12,20 @@ export interface Child {
 export interface Challenge {
   id: string;
   title: string;
-  description: string;
-  goal: string;
-  steps: string | string[];
-  example_dialogue?: string;
-  tip?: string;
   pillar_id: number;
   age_range: string;
+  challenge_type_id: number;
   difficulty_level: number;
-  is_completed: number;
-  created_at: string;
-  updated_at: string;
+  what_you_practice: string;
+  start_prompt: string;
+  guide_prompt: string;
+  success_signals: string;
+  why_it_matters: string;
+  is_completed?: boolean;
+  challenge_type: {
+    name: string;
+    description: string;
+  };
 }
 
 export interface FeatureFlags {
