@@ -195,8 +195,8 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
               >
                 <div className="flex-1 flex flex-col items-center justify-center px-6 w-full">
                   {/* Daily Challenge Title - Show on all cards */}
-                  <div className="w-full text-center mt-4 mb-6">
-                    <h2 className="text-2xl font-heading text-gray-900">
+                  <div className="w-full text-center mt-4 mb-4">
+                    <h2 className={`text-2xl font-heading ${currentCard > 0 ? 'text-gray-400' : 'text-gray-900'}`}>
                       {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
                     </h2>
                   </div>
@@ -311,7 +311,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                     <>
                       <div className="flex items-center justify-center mb-4">
                         <span className="text-3xl mr-2">{card.icon}</span>
-                        <h3 className="text-3xl font-bold text-kidoova-green">Guide</h3>
+                        <h3 className="text-3xl font-bold text-kidoova-green">Guide Prompt</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
                       <div className="flex-1 flex items-end justify-center pb-4 space-x-4">
