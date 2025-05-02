@@ -118,6 +118,10 @@ export default function Chatbot() {
       setSelectedChallenge(challenge);
     } catch (error) {
       console.error('Error fetching challenge:', error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Sorry, I had trouble loading that challenge. Please try again.' 
+      }]);
     }
   };
 

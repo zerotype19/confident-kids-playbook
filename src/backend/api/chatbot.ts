@@ -39,9 +39,11 @@ function getPillarName(pillarId: number): string {
 
 // Helper function to format challenges for the prompt
 function formatChallenges(challenges: any[]): string {
-  return challenges.map(c =>
-    `• ${c.title}: ${c.what_you_practice} Guide: ${c.guide_prompt}`
-  ).join('\n');
+  return challenges.map(c => {
+    const traits = c.traits ? `\nTraits: ${JSON.parse(c.traits as string).map((t: any) => `${t.name} (${t.weight})`).join(', ')}` : '';
+    const type = c.challenge_type_name ? `\nType: ${c.challenge_type_name} - ${c.challenge_type_description}` : '';
+    return `• [challenge:${c.id}] ${c.title} - ${c.what_you_practice}${type}${traits}\nGuide: ${c.guide_prompt}`;
+  }).join('\n');
 }
 
 const corsHeaders = (origin: string) => ({
@@ -95,9 +97,23 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       });
     }
 
-    // Get child's details
+    // Get child's details and trait scores
     const { results: childData } = await env.DB.prepare(`
-      SELECT id, name, age_range FROM children WHERE id = ?
+      SELECT 
+        c.id, 
+        c.name, 
+        c.age_range,
+        json_group_array(json_object(
+          'trait_id', ts.trait_id,
+          'score', ts.score,
+          'name', t.name,
+          'description', t.description
+        )) as trait_scores
+      FROM children c
+      LEFT JOIN child_trait_scores ts ON c.id = ts.child_id
+      LEFT JOIN traits t ON ts.trait_id = t.id
+      WHERE c.id = ?
+      GROUP BY c.id
     `).bind(selectedChildId).all();
 
     const selectedChild = childData[0];
@@ -112,13 +128,29 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       });
     }
 
-    // Get completed challenges for the selected child
+    // Get completed challenges with reflections
     const { results: completedChallenges } = await env.DB.prepare(`
-      SELECT challenge_id FROM challenge_logs 
-      WHERE child_id = ?
+      SELECT 
+        cl.challenge_id,
+        cl.completed_at,
+        cl.reflection,
+        cl.mood_rating,
+        c.title,
+        c.pillar_id,
+        json_group_array(json_object(
+          'trait_id', ct.trait_id,
+          'weight', ct.weight,
+          'name', t.name
+        )) as traits
+      FROM challenge_logs cl
+      JOIN challenges c ON cl.challenge_id = c.id
+      LEFT JOIN challenge_traits ct ON c.id = ct.challenge_id
+      LEFT JOIN traits t ON ct.trait_id = t.id
+      WHERE cl.child_id = ?
+      GROUP BY cl.challenge_id
+      ORDER BY cl.completed_at DESC
+      LIMIT 5
     `).bind(selectedChildId).all();
-
-    const completedChallengeIds = completedChallenges.map(c => c.challenge_id);
 
     // Get request body
     const body = await request.json() as ChatbotRequest;
@@ -141,45 +173,94 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     // Get available challenges that match the pillar and age range
     let { results: availableChallenges } = await env.DB.prepare(`
       SELECT 
-        id, 
-        title, 
-        what_you_practice,
-        guide_prompt,
-        start_prompt,
-        success_signals,
-        why_it_matters,
-        difficulty_level, 
-        age_range, 
-        pillar_id
-      FROM challenges
-      WHERE pillar_id = ? 
-        AND age_range = ?
-        AND id NOT IN (${completedChallengeIds.map(() => '?').join(',') || 'NULL'})
-      ORDER BY difficulty_level ASC
+        c.id, 
+        c.title, 
+        c.what_you_practice,
+        c.guide_prompt,
+        c.start_prompt,
+        c.success_signals,
+        c.why_it_matters,
+        c.difficulty_level,
+        c.age_range,
+        c.pillar_id,
+        ct.name as challenge_type_name,
+        ct.description as challenge_type_description,
+        json_group_array(json_object(
+          'trait_id', t.id,
+          'weight', ct2.weight,
+          'name', t.name
+        )) as traits
+      FROM challenges c
+      LEFT JOIN challenge_types ct ON c.challenge_type_id = ct.id
+      LEFT JOIN challenge_traits ct2 ON c.id = ct2.challenge_id
+      LEFT JOIN traits t ON ct2.trait_id = t.id
+      WHERE c.pillar_id = ? 
+        AND c.age_range = ?
+        AND c.id NOT IN (${completedChallenges.map(c => `'${c.challenge_id}'`).join(',') || 'NULL'})
+      GROUP BY c.id
+      ORDER BY c.difficulty_level ASC
       LIMIT 3
-    `).bind(pillarId, ageRange, ...completedChallengeIds).all();
+    `).bind(pillarId, ageRange).all();
 
     // Fallback: If no available challenges, fetch one (even if completed)
     if (!availableChallenges || availableChallenges.length === 0) {
       const fallback = await env.DB.prepare(`
-        SELECT id, title, what_you_practice, guide_prompt, start_prompt, success_signals, why_it_matters, difficulty_level, age_range, pillar_id
-        FROM challenges
-        WHERE pillar_id = ? AND age_range = ?
-        ORDER BY difficulty_level ASC
+        SELECT 
+          c.id, 
+          c.title, 
+          c.what_you_practice,
+          c.guide_prompt,
+          c.start_prompt,
+          c.success_signals,
+          c.why_it_matters,
+          c.difficulty_level,
+          c.age_range,
+          c.pillar_id,
+          ct.name as challenge_type_name,
+          ct.description as challenge_type_description,
+          json_group_array(json_object(
+            'trait_id', t.id,
+            'weight', ct2.weight,
+            'name', t.name
+          )) as traits
+        FROM challenges c
+        LEFT JOIN challenge_types ct ON c.challenge_type_id = ct.id
+        LEFT JOIN challenge_traits ct2 ON c.id = ct2.challenge_id
+        LEFT JOIN traits t ON ct2.trait_id = t.id
+        WHERE c.pillar_id = ? AND c.age_range = ?
+        GROUP BY c.id
+        ORDER BY c.difficulty_level ASC
         LIMIT 1
       `).bind(pillarId, ageRange).all();
       availableChallenges = fallback.results;
     }
 
     // Format challenges for the prompt
-    const challengeList = availableChallenges.map(challenge => 
-      `• [challenge:${challenge.id}] ${challenge.title} - ${challenge.what_you_practice}\nGuide: ${challenge.guide_prompt}`
-    ).join('\n');
+    const challengeList = formatChallenges(availableChallenges);
 
     // Create OpenAI client
     const openai = new OpenAI({
       apiKey: env.OPENAI_API_KEY,
     });
+
+    // Prepare context about completed challenges
+    const completedContext = completedChallenges.length > 0 ? `
+Recent completed challenges:
+${completedChallenges.map(c => 
+  `• ${c.title} (${getPillarName(Number(c.pillar_id))})
+   Reflection: ${c.reflection || 'No reflection provided'}
+   Mood: ${c.mood_rating}/5
+   Traits: ${c.traits ? JSON.parse(c.traits as string).map((t: any) => `${t.name} (${t.weight})`).join(', ') : 'None'}
+`).join('\n')}
+` : '';
+
+    // Prepare context about child's traits
+    const traitContext = selectedChild.trait_scores ? `
+Child's current trait scores:
+${JSON.parse(selectedChild.trait_scores as string).map((t: any) => 
+  `• ${t.name}: ${t.score} - ${t.description}`
+).join('\n')}
+` : '';
 
     // Log the request to OpenAI
     console.log('🤖 Sending request to OpenAI:', {
@@ -199,6 +280,10 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
           content: `You are a kind parenting coach helping parents raise confident, resilient children.
 
 The selected child is ${selectedChild.name}, age ${selectedChild.age_range}, and you're helping their parent.
+
+${traitContext}
+
+${completedContext}
 
 Here are challenge ideas from the Raising Confident Kids playbook, aligned to the "${pillarName}" pillar and appropriate for a ${ageRange}-year-old:
 
@@ -225,7 +310,7 @@ Format your response with natural line breaks between paragraphs and ideas.`
       usage: completion.usage
     });
 
-    const response = completion.choices[0].message.content;
+    const response = completion.choices[0].message.content || '';
 
     // Extract challenge IDs from the response
     let challengeIds = [...response.matchAll(/\[challenge[: ]([^\]]+)\]/gi)].map(match => match[1]);
@@ -236,8 +321,16 @@ Format your response with natural line breaks between paragraphs and ideas.`
     // If no challenge ID found, append a recommended challenge and tag
     if (!challengeIds.length && availableChallenges.length > 0) {
       const fallback = availableChallenges[0];
-      responseWithLinks += `<br><br><strong>Recommended Challenge:</strong> ${fallback.title}<br>${fallback.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${fallback.id}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
-      challengeIds = [fallback.id];
+      responseWithLinks += `<br><br><strong>Recommended Challenge:</strong> ${fallback.title}<br>${fallback.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${fallback.id as string}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
+      challengeIds = [fallback.id as string];
+    } else {
+      // For each challenge ID in the response, add a Start Challenge button
+      challengeIds.forEach(challengeId => {
+        const challenge = availableChallenges.find(c => c.id === challengeId);
+        if (challenge) {
+          responseWithLinks += `<br><br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${challengeId}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
+        }
+      });
     }
 
     return new Response(JSON.stringify({ 
