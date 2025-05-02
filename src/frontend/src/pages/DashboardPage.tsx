@@ -277,9 +277,15 @@ export default function DashboardPage() {
             {trendData.length > 0 && (
               <ConfidenceTrendChart data={trendData} summary={trendSummary} />
             )}
-            <RewardsOverview progress={progress} />
-            <ProgressTracker progress={progress} childId={selectedChild.id} />
-            <TraitScoreboard />
+            <div className="w-full">
+              <RewardsOverview progress={progress} />
+            </div>
+            <div className="w-full">
+              <ProgressTracker progress={progress} childId={selectedChild.id} />
+            </div>
+            <div className="w-full">
+              <TraitScoreboard />
+            </div>
           </div>
         ) : (
           <div className="text-center py-8">
