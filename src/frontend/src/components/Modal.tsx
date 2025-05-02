@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 
 interface ModalProps {
   isOpen: boolean;
@@ -38,7 +39,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps):
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0 }}>
       <div 
         ref={modalRef}
@@ -67,4 +68,6 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps):
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 } 
