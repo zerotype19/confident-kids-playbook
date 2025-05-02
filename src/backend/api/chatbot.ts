@@ -139,7 +139,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     const ageRange = selectedChild.age_range;
 
     // Get available challenges that match the pillar and age range
-    const { results: availableChallenges } = await env.DB.prepare(`
+    let { results: availableChallenges } = await env.DB.prepare(`
       SELECT 
         id, 
         title, 
@@ -154,14 +154,26 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
       FROM challenges
       WHERE pillar_id = ? 
         AND age_range = ?
-        AND id NOT IN (${completedChallengeIds.map(() => '?').join(',')})
+        AND id NOT IN (${completedChallengeIds.map(() => '?').join(',') || 'NULL'})
       ORDER BY difficulty_level ASC
       LIMIT 3
     `).bind(pillarId, ageRange, ...completedChallengeIds).all();
 
+    // Fallback: If no available challenges, fetch one (even if completed)
+    if (!availableChallenges || availableChallenges.length === 0) {
+      const fallback = await env.DB.prepare(`
+        SELECT id, title, what_you_practice, guide_prompt, start_prompt, success_signals, why_it_matters, difficulty_level, age_range, pillar_id
+        FROM challenges
+        WHERE pillar_id = ? AND age_range = ?
+        ORDER BY difficulty_level ASC
+        LIMIT 1
+      `).bind(pillarId, ageRange).all();
+      availableChallenges = fallback.results;
+    }
+
     // Format challenges for the prompt
     const challengeList = availableChallenges.map(challenge => 
-      `• [Challenge ${challenge.id}]: ${challenge.title} - ${challenge.what_you_practice}\nGuide: ${challenge.guide_prompt}`
+      `• [challenge:${challenge.id}] ${challenge.title} - ${challenge.what_you_practice}\nGuide: ${challenge.guide_prompt}`
     ).join('\n');
 
     // Create OpenAI client
@@ -215,17 +227,22 @@ Format your response with natural line breaks between paragraphs and ideas.`
 
     const response = completion.choices[0].message.content;
 
-    // Extract challenge IDs from the response and create proper links
-    const responseWithLinks = response
-      .replace(
-        /Click here to check out the challenge details: \[challenge:([^\]]+)\]/g,
-        (match, id) => `<a href="#" class="text-blue-600 hover:text-blue-800 underline" onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('openChallenge', { detail: '${id}' }));">Click here to check out the challenge details</a>`
-      )
-      .replace(/\n/g, '<br>'); // Convert newlines to HTML line breaks
+    // Extract challenge IDs from the response
+    let challengeIds = [...response.matchAll(/\[challenge[: ]([^\]]+)\]/gi)].map(match => match[1]);
+    let responseWithLinks = response
+      .replace(/Click here to check out the challenge details:? ?\[challenge[: ][^\]]+\]/gi, '')
+      .replace(/\n/g, '<br>');
+
+    // If no challenge ID found, append a recommended challenge and tag
+    if (!challengeIds.length && availableChallenges.length > 0) {
+      const fallback = availableChallenges[0];
+      responseWithLinks += `<br><br><strong>Recommended Challenge:</strong> ${fallback.title}<br>${fallback.what_you_practice}<br><button onclick=\"window.dispatchEvent(new CustomEvent('openChallenge',{detail:'${fallback.id}'}));\" class=\"bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors mt-2\">Start Challenge</button>`;
+      challengeIds = [fallback.id];
+    }
 
     return new Response(JSON.stringify({ 
       response: responseWithLinks,
-      challengeIds: [...response.matchAll(/\[challenge:([^\]]+)\]/g)].map(match => match[1])
+      challengeIds
     }), {
       status: 200,
       headers: {
