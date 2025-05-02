@@ -136,7 +136,7 @@ router.get('/api/trait-scores/:childId', (request, context) => {
       headers: corsHeaders()
     });
   }
-  return traitScores({ request, env: context.env, params: { childId } });
+  return traitScores({ request, env: context.env });
 })
 
 // Dashboard routes
