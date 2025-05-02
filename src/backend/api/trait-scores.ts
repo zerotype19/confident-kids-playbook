@@ -1,22 +1,30 @@
 import { createDb } from '../lib/db';
 import { Env } from '../types';
+import { corsHeaders } from '../lib/cors';
 
 export async function onRequestGet({ request, env }: { request: Request, env: Env }) {
+  console.log('Trait Scores API: Request received', {
+    url: request.url,
+    method: request.method,
+    headers: Object.fromEntries(request.headers.entries())
+  });
+
   try {
     const url = new URL(request.url);
     const childId = url.pathname.split('/').pop();
 
+    console.log('Trait Scores API: Parsed URL parameters', {
+      childId,
+      pathname: url.pathname
+    });
+
     if (!childId) {
+      console.log('Trait Scores API: Missing child ID');
       return new Response(
         JSON.stringify({ error: 'Child ID is required' }),
         {
           status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          },
+          headers: { ...corsHeaders(), 'Content-Type': 'application/json' }
         }
       );
     }
@@ -35,30 +43,22 @@ export async function onRequestGet({ request, env }: { request: Request, env: En
       ORDER BY cts.score DESC
     `, [childId]);
 
+    console.log('Trait Scores API: Successfully fetched scores:', result.results);
+
     return new Response(
-      JSON.stringify({ data: result.results }),
+      JSON.stringify(result.results),
       {
         status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
-    console.error('Error fetching trait scores:', error);
+    console.error('Trait Scores API: Error fetching scores:', error);
     return new Response(
       JSON.stringify({ error: 'Failed to fetch trait scores' }),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' }
       }
     );
   }
