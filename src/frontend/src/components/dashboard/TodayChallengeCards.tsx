@@ -341,14 +341,34 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                       <div className="text-lg text-gray-800 text-center space-y-2">
                         {card.content && (() => {
                           try {
+                            // First try to parse as is
                             const signals = JSON.parse(card.content);
-                            return Array.isArray(signals) 
-                              ? signals.map((signal: string, index: number) => (
-                                  <p key={index}>{signal}</p>
-                                ))
-                              : <p>{card.content}</p>;
-                          } catch (e) {
+                            if (Array.isArray(signals)) {
+                              return signals.map((signal: string, index: number) => (
+                                <p key={index}>{signal}</p>
+                              ));
+                            }
+                            // If not an array, try parsing the string itself
+                            const parsedString = JSON.parse(signals);
+                            if (Array.isArray(parsedString)) {
+                              return parsedString.map((signal: string, index: number) => (
+                                <p key={index}>{signal}</p>
+                              ));
+                            }
                             return <p>{card.content}</p>;
+                          } catch (e) {
+                            // If parsing fails, try parsing the content directly
+                            try {
+                              const parsedContent = JSON.parse(card.content);
+                              if (Array.isArray(parsedContent)) {
+                                return parsedContent.map((signal: string, index: number) => (
+                                  <p key={index}>{signal}</p>
+                                ));
+                              }
+                              return <p>{card.content}</p>;
+                            } catch (e) {
+                              return <p>{card.content}</p>;
+                            }
                           }
                         })()}
                       </div>
