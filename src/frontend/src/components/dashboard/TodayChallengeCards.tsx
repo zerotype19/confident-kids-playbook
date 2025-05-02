@@ -154,7 +154,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     <div className="relative flex flex-col items-center">
       <div
         className="relative w-full flex items-end justify-center"
-        style={{ height: `${300 + 15 * (cards.length - currentCard - 1)}px` }}
+        style={{ height: `${360 + 15 * (cards.length - currentCard - 1)}px` }}
       >
         {isCompleted ? (
           <div className="absolute left-0 right-0 mx-auto rounded-2xl shadow-xl flex flex-col items-center bg-white justify-center h-[360px] w-full">
@@ -189,7 +189,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   transform: `scale(${scale})`,
                   opacity: 1,
                   width: '100%',
-                  height: '360px',
+                  height: '300px',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.10)'
                 }}
               >
