@@ -219,7 +219,7 @@ export default function UniversalChallengeModal({
         </div>
 
         <div className="text-lg text-gray-800">
-          {currentCard.type === 'success_signals' ? (
+          {currentCard.type === 'success' ? (
             <div className="text-center">
               <div className="text-2xl mb-4">✨ Success Signals</div>
               <div className="space-y-2">
