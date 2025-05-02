@@ -308,7 +308,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <span className="text-3xl mr-2">{card.icon}</span>
                         <h3 className="text-3xl font-bold text-kidoova-green">Success Signals</h3>
                       </div>
-                      <div className="text-base text-gray-800 text-center space-y-2">
+                      <div className="text-sm text-gray-800 text-center space-y-2">
                         {card.content && (() => {
                           try {
                             // Remove the square brackets and split by comma
@@ -376,7 +376,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* Completion Card */}
                   {card.type === 'completion' && (
                     <div className="flex flex-col items-center space-y-4">
-                      <div className="text-xl font-bold text-kidoova-green">Ready to complete this challenge?</div>
+                      <div className="text-3xl font-bold text-kidoova-green">Ready to complete this challenge?</div>
                       <button
                         onClick={handleMarkComplete}
                         className="px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200"
