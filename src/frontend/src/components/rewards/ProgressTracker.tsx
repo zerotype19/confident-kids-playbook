@@ -51,30 +51,6 @@ export default function ProgressTracker({ progress, childId }: ProgressTrackerPr
         </div>
       </div>
 
-      {/* Milestone Progress */}
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Milestone Progress</h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-kidoova-accent transition-all duration-300"
-                  style={{ width: `${progress.milestone_progress.percentage}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-sm text-gray-600 mt-1">
-                <span>Milestone Progress</span>
-                <span>{progress.milestone_progress.current} of {progress.milestone_progress.next}</span>
-              </div>
-            </div>
-            <div className="text-xl font-bold text-kidoova-accent">
-              {Math.round(progress.milestone_progress.percentage)}%
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Pillar Progress */}
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">Pillar Progress</h3>
