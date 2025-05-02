@@ -257,6 +257,20 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <h3 className="text-xl font-bold text-kidoova-green">What You'll Practice</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </>
                   )}
 
@@ -268,6 +282,20 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <h3 className="text-xl font-bold text-kidoova-green">Getting Started</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </>
                   )}
 
@@ -279,6 +307,20 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <h3 className="text-xl font-bold text-kidoova-green">Guide</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </>
                   )}
 
@@ -290,6 +332,20 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <h3 className="text-xl font-bold text-kidoova-green">Success Signals</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </>
                   )}
 
@@ -301,6 +357,20 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <h3 className="text-xl font-bold text-kidoova-green">Why It Matters</h3>
                       </div>
                       <div className="text-lg text-gray-800 text-center">{card.content}</div>
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
+                          className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </>
                   )}
 
