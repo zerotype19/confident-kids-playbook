@@ -157,16 +157,16 @@ export default function UniversalChallengeModal({
 
     if (currentCard.type === 'reflection') {
       return (
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-center text-kidoova-green">How confident did you feel?</h2>
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-center text-kidoova-green">How confident did you feel?</h2>
           
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-1">
             {emojiFaces.map((emoji, index) => (
               <button
                 key={index}
                 onClick={() => setFeeling(index + 1)}
-                className={`text-4xl transition-transform duration-200 ${
-                  feeling === index + 1 ? 'scale-125' : 'hover:scale-110'
+                className={`text-2xl transition-transform duration-200 ${
+                  feeling === index + 1 ? 'scale-110' : 'hover:scale-105'
                 }`}
               >
                 {emoji}
@@ -192,17 +192,17 @@ export default function UniversalChallengeModal({
             />
           </div>
 
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-end space-x-3">
             <button
               onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              className="px-3 py-1.5 text-gray-600 hover:text-gray-800"
             >
               Back
             </button>
             <button
               onClick={handleReflectionSubmit}
               disabled={isSubmitting}
-              className="px-4 py-2 bg-kidoova-green text-white rounded-lg hover:bg-kidoova-accent disabled:opacity-50"
+              className="px-3 py-1.5 bg-kidoova-green text-white rounded-lg hover:bg-kidoova-accent disabled:opacity-50"
             >
               {isSubmitting ? 'Submitting...' : 'Complete Challenge'}
             </button>
@@ -224,11 +224,22 @@ export default function UniversalChallengeModal({
               <div className="text-2xl mb-4">✨ Success Signals</div>
               <div className="space-y-2">
                 {(() => {
-                  const content = currentCard.content as string;
-                  const signals = content
-                    .slice(1, -1) // Remove outer brackets
-                    .split(',') // Split by comma
-                    .map(s => s.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
+                  const content = currentCard.content;
+                  let signals: string[];
+                  
+                  if (typeof content === 'string') {
+                    try {
+                      // Try to parse as JSON if it's a string representation of an array
+                      signals = JSON.parse(content);
+                    } catch {
+                      // If not JSON, split by newlines
+                      signals = content.split('\n').filter(s => s.trim());
+                    }
+                  } else if (Array.isArray(content)) {
+                    signals = content;
+                  } else {
+                    signals = [];
+                  }
                   
                   return signals.map((signal, index) => (
                     <div key={index} className="flex items-start gap-2">
