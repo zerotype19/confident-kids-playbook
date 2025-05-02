@@ -162,14 +162,20 @@ export default function Chatbot() {
     }
   };
 
+  // Helper to extract challenge IDs from [challenge:ID] (case-insensitive, with colon)
+  function extractChallengeIds(text: string): string[] {
+    const matches = [...text.matchAll(/\[challenge:([^\]]+)\]/gi)];
+    return matches.map(m => m[1]);
+  }
+
   const renderMessage = (message: Message, index: number) => {
-    const content = message.content.replace(
-      /\[Challenge ([a-f0-9-]+)\]/g,
-      (match, challengeId) => {
-        // Remove the old link injection
-        return '';
-      }
-    );
+    // Remove [challenge:ID] tags and any "Click here to check out the challenge details" lines
+    let content = message.content
+      .replace(/\[challenge:([^\]]+)\]/gi, '')
+      .replace(/Click here to check out the challenge details:? ?\[challenge:[^\]]+\]/gi, '');
+
+    // Extract challenge IDs for this message
+    const challengeIds = extractChallengeIds(message.content);
 
     return (
       <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`} key={index}>
@@ -178,11 +184,11 @@ export default function Chatbot() {
         }`}>
           <div dangerouslySetInnerHTML={{ __html: content }} />
           {/* If assistant and challengeIds, show Start Challenge button */}
-          {message.role === 'assistant' && message.challengeIds && message.challengeIds.length > 0 && (
+          {message.role === 'assistant' && challengeIds.length > 0 && (
             <div className="mt-4 flex justify-center">
               <button
                 className="bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors"
-                onClick={() => handleChallengeClick(message.challengeIds![0])}
+                onClick={() => handleChallengeClick(challengeIds[0])}
               >
                 Start Challenge
               </button>
