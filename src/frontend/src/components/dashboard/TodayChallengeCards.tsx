@@ -195,7 +195,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
               >
                 <div className="flex-1 flex flex-col items-center justify-center px-6 w-full">
                   {/* Daily Challenge Title - Show on all cards */}
-                  <div className="w-full text-center -mt-4">
+                  <div className="w-full text-center mt-4">
                     <h2 className="text-2xl font-heading text-gray-900">
                       {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
                     </h2>
@@ -263,8 +263,8 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                         <span className="text-3xl mr-2">{card.icon}</span>
                         <h3 className="text-3xl font-bold text-kidoova-green">What You'll Practice</h3>
                       </div>
-                      <div className="text-lg text-gray-800 text-center">{card.content}</div>
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4 mt-8 mb-8">
+                      <div className="text-lg text-gray-800 text-center mb-8">{card.content}</div>
+                      <div className="flex justify-center space-x-4 mt-4">
                         <button
                           onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
                           className="px-4 py-2 rounded-lg font-semibold bg-kidoova-accent text-white hover:bg-kidoova-green"
