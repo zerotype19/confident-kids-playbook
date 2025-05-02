@@ -161,17 +161,28 @@ export default function UniversalChallengeModal({
           <h2 className="text-xl font-bold text-center text-kidoova-green">How confident did you feel?</h2>
           
           <div className="flex justify-center space-x-1">
-            {emojiFaces.map((emoji, index) => (
-              <button
-                key={index}
-                onClick={() => setFeeling(index + 1)}
-                className={`text-2xl transition-transform duration-200 ${
-                  feeling === index + 1 ? 'scale-110' : 'hover:scale-105'
-                }`}
-              >
-                {emoji}
-              </button>
-            ))}
+            {emojiFaces.map((emoji, index) => {
+              // Green gradient classes from light to dark
+              const greenBg = [
+                'bg-green-100', // 😖
+                'bg-green-200', // 😐
+                'bg-green-300', // 🙂
+                'bg-green-400', // 😄
+                'bg-green-500'  // 🤩
+              ];
+              return (
+                <button
+                  key={index}
+                  onClick={() => setFeeling(index + 1)}
+                  className={`text-2xl transition-transform duration-200 rounded-full w-12 h-12 flex items-center justify-center border-2 focus:outline-none 
+                    ${feeling === index + 1 ? `${greenBg[index]} border-green-600 scale-110 text-white` : 'border-gray-300 bg-white hover:bg-green-50'}
+                  `}
+                  aria-label={confidenceLabels[index]}
+                >
+                  {emoji}
+                </button>
+              );
+            })}
           </div>
           
           <div className="text-center text-sm text-gray-600">
