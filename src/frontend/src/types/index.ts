@@ -71,13 +71,13 @@ export interface Challenge {
   age_range: string;
   challenge_type_id: number;
   difficulty_level: number;
-  what_you_practice: string;
-  start_prompt: string;
-  guide_prompt: string;
-  success_signals: string[];
-  why_it_matters: string;
-  tags: string[];
   is_completed: boolean;
+  what_you_practice?: string | null;
+  start_prompt?: string | null;
+  guide_prompt?: string | null;
+  success_signals?: string[] | null;
+  why_it_matters?: string | null;
+  tags?: string[] | null;
 }
 
 export interface Reward {
