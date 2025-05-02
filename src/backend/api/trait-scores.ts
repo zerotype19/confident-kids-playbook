@@ -1,11 +1,13 @@
-import { db } from '../lib/db';
+import { createDb } from '../lib/db';
+import { Env } from '../types';
 
 export async function GET(
   request: Request,
-  { params }: { params: { childId: string } }
+  { params, env }: { params: { childId: string }, env: Env }
 ) {
   try {
     const { childId } = params;
+    const db = createDb(env);
 
     if (!childId) {
       return new Response(
@@ -31,15 +33,12 @@ export async function GET(
         cts.score
       FROM child_trait_scores cts
       INNER JOIN traits t ON t.id = cts.trait_id
-      WHERE cts.child_id = $1
+      WHERE cts.child_id = ?
       ORDER BY cts.score DESC
     `, [childId]);
 
-    // Ensure we're returning the rows from the query result
-    const traitScores = result.rows || [];
-
     return new Response(
-      JSON.stringify({ data: traitScores }),
+      JSON.stringify({ data: result.results }),
       {
         status: 200,
         headers: {
