@@ -152,6 +152,11 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
 
   return (
     <div className="relative flex flex-col items-center">
+      <div className="w-full text-center mb-4">
+        <h2 className="text-2xl font-heading text-gray-900">
+          {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
+        </h2>
+      </div>
       <div
         className="relative w-full flex items-end justify-center"
         style={{ height: `${360 + 15 * (cards.length - currentCard - 1)}px` }}
@@ -225,6 +230,30 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                       <div className="flex flex-col items-center space-y-4">
                         <h2 className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</h2>
                         <p className="text-lg text-gray-800 text-center">{challenge.what_you_practice}</p>
+                      </div>
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.max(0, prev - 1))}
+                          disabled={currentCard === 0}
+                          className={`px-4 py-2 rounded-lg font-semibold ${
+                            currentCard === 0
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-kidoova-accent text-white hover:bg-kidoova-green'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setCurrentCard(prev => Math.min(cards.length - 1, prev + 1))}
+                          disabled={currentCard === cards.length - 1}
+                          className={`px-4 py-2 rounded-lg font-semibold ${
+                            currentCard === cards.length - 1
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-kidoova-accent text-white hover:bg-kidoova-green'
+                          }`}
+                        >
+                          Next
+                        </button>
                       </div>
                     </>
                   )}
