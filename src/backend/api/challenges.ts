@@ -6,16 +6,14 @@ interface Challenge {
   id: string;
   title: string;
   what_you_practice: string;
-  goal: string;
-  steps: string[];
-  example_dialogue: string;
+  start_prompt: string;
   guide_prompt: string;
   pillar_id: string;
   age_range: string;
-  difficulty_level: string;
-  start_prompt: string;
+  difficulty_level: number;
   success_signals: string;
   why_it_matters: string;
+  challenge_type_id: number;
 }
 
 export async function onRequestGet({ request, env, params }: { request: Request; env: Env; params: { id: string } }) {
@@ -49,16 +47,14 @@ export async function onRequestGet({ request, env, params }: { request: Request;
         id,
         title,
         what_you_practice,
-        goal,
-        steps,
-        example_dialogue,
+        start_prompt,
         guide_prompt,
         pillar_id,
         age_range,
         difficulty_level,
-        start_prompt,
         success_signals,
-        why_it_matters
+        why_it_matters,
+        challenge_type_id
       FROM challenges
       WHERE id = ?
     `).bind(params.id).first<Challenge>();
@@ -68,11 +64,6 @@ export async function onRequestGet({ request, env, params }: { request: Request;
         status: 404,
         headers: corsHeaders()
       });
-    }
-
-    // Parse steps if it's a string
-    if (typeof result.steps === 'string') {
-      result.steps = JSON.parse(result.steps);
     }
 
     return new Response(JSON.stringify(result), {
