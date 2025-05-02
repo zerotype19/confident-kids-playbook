@@ -1,5 +1,4 @@
 import { db } from '../lib/db';
-import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
@@ -23,19 +22,18 @@ export async function GET(
       );
     }
 
-    const traitScores = await db
-      .selectFrom('child_trait_scores')
-      .innerJoin('traits', 'traits.id', 'child_trait_scores.trait_id')
-      .select([
-        'traits.id as trait_id',
-        'traits.name as trait_name',
-        'traits.code as trait_code',
-        'traits.pillar_id',
-        'child_trait_scores.score'
-      ])
-      .where('child_trait_scores.child_id', '=', childId)
-      .orderBy('child_trait_scores.score', 'desc')
-      .execute();
+    const traitScores = await db.query(`
+      SELECT 
+        t.id as trait_id,
+        t.name as trait_name,
+        t.code as trait_code,
+        t.pillar_id,
+        cts.score
+      FROM child_trait_scores cts
+      INNER JOIN traits t ON t.id = cts.trait_id
+      WHERE cts.child_id = $1
+      ORDER BY cts.score DESC
+    `, [childId]);
 
     return new Response(
       JSON.stringify(traitScores),
