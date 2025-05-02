@@ -22,6 +22,7 @@ interface Challenge {
     name: string;
     description: string;
   };
+  difficulty_level: number;
 }
 
 interface TodayChallengeCardsProps {
@@ -196,19 +197,34 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   {/* First Card: Intro */}
                   {card.type === 'intro' && selectedChild && (
                     <>
-                      <div className="text-lg font-semibold text-gray-700 mb-2 text-center">{selectedChild.name}'s Daily Challenge</div>
-                      <div className="flex items-center justify-center mb-2">
-                        <span className="text-3xl mr-2">{card.icon}</span>
-                        <span className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</span>
-                      </div>
-                      <div className="text-lg text-gray-800 text-center mb-4">Let's build confidence together!</div>
-                      <div className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft w-full">
-                        <h3 className="text-lg font-semibold text-kidoova-green mb-2">
+                      <div className="flex items-center justify-center space-x-4 mb-4">
+                        <span 
+                          className="text-xs font-medium px-2 py-1 rounded-full"
+                          style={{
+                            backgroundColor: challenge.pillar_id === 1 ? '#F7B801' :
+                                           challenge.pillar_id === 2 ? '#38A169' :
+                                           challenge.pillar_id === 3 ? '#4299E1' :
+                                           challenge.pillar_id === 4 ? '#805AD5' :
+                                           '#E53E3E',
+                            color: 'white'
+                          }}
+                        >
+                          {challenge.pillar_id === 1 ? 'Independence & Problem-Solving' :
+                           challenge.pillar_id === 2 ? 'Growth Mindset & Resilience' :
+                           challenge.pillar_id === 3 ? 'Social Confidence & Communication' :
+                           challenge.pillar_id === 4 ? 'Purpose & Strength Discovery' :
+                           'Managing Fear & Anxiety'}
+                        </span>
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-700">
                           {challenge.challenge_type.name}
-                        </h3>
-                        <p className="text-text-base">
-                          {challenge.challenge_type.description}
-                        </p>
+                        </span>
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                          Level {challenge.difficulty_level}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center space-y-4">
+                        <h2 className="text-3xl font-bold text-kidoova-green text-center">{challenge.title}</h2>
+                        <p className="text-lg text-gray-800 text-center">{challenge.what_you_practice}</p>
                       </div>
                     </>
                   )}
@@ -286,16 +302,6 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
           })
         )}
       </div>
-
-      {/* Navigation Buttons */}
-      {!isCompleted && currentCard < cards.length - 1 && (
-        <button
-          onClick={() => setCurrentCard(prev => prev + 1)}
-          className="mt-4 px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200"
-        >
-          Next
-        </button>
-      )}
 
       {/* Error Message */}
       {error && (
