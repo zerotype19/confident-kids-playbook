@@ -28,19 +28,36 @@ export default function TraitScoreboard() {
       if (!selectedChildId || !token) return;
 
       try {
+        console.log('Fetching trait scores for child:', selectedChildId);
         const response = await fetch(`/api/trait-scores/${selectedChildId}`, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
           }
         });
 
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
         if (!response.ok) {
-          throw new Error('Failed to fetch trait scores');
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`Failed to fetch trait scores: ${response.status} ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Unexpected content type:', contentType);
+          console.error('Response text:', text);
+          throw new Error('Invalid response format: expected JSON');
         }
 
         const data = await response.json();
+        console.log('Received trait scores:', data);
         setTraits(data);
       } catch (err) {
+        console.error('Error in fetchTraits:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
