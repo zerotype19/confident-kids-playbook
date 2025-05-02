@@ -1,5 +1,6 @@
 import React from 'react';
 import { ProgressSummary } from '../../types';
+import { TrophyIcon } from '../../icons/TrophyIcon';
 
 interface RewardsOverviewProps {
   progress: ProgressSummary | null;
@@ -18,55 +19,30 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
   });
 
   return (
-    <div className="bg-white rounded-xl shadow-xl p-6 space-y-6">
-      <h2 className="text-xl font-heading">Overview</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Total Challenges Completed */}
-        <div className="bg-kidoova-yellow/10 rounded-lg p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Challenges Completed</h3>
-          <div className="flex items-center gap-4">
-            <div className="text-3xl">🎯</div>
-            <div>
-              <div className="text-2xl font-bold text-kidoova-accent">
-                {progress.milestones_completed}
-              </div>
-              <p className="text-sm text-gray-600">Total challenges completed</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Weekly Challenges */}
-        <div className="bg-kidoova-yellow/10 rounded-lg p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">This Week's Progress</h3>
-          <div className="flex items-center gap-4">
-            <div className="text-3xl">📅</div>
-            <div>
-              <div className="text-2xl font-bold text-kidoova-accent">
-                {typeof progress.weekly_challenges === 'number' ? progress.weekly_challenges : 0}
-              </div>
-              <p className="text-sm text-gray-600">Challenges completed this week</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Next Reward */}
-        {progress.next_reward && (
-          <div className="bg-kidoova-yellow/10 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Next Reward</h3>
-            <div className="flex items-center gap-4">
-              <div className="text-3xl">{progress.next_reward.icon}</div>
-              <div>
-                <div className="text-lg font-bold text-kidoova-accent">
-                  {progress.next_reward.title}
+    <div className="w-full bg-white rounded-lg shadow p-6">
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Milestone Trophies</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Object.entries(progress?.milestone_progress || {}).map(([milestone, completed]) => (
+          <div key={milestone} className="flex items-center space-x-4">
+            <div className="flex-shrink-0">
+              {completed ? (
+                <div className="w-12 h-12 rounded-full bg-kidoova-green flex items-center justify-center">
+                  <TrophyIcon className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-sm text-gray-600">
-                  {Math.round(progress.next_reward.progress)}% complete
-                </p>
-              </div>
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                  <TrophyIcon className="w-6 h-6 text-gray-400" />
+                </div>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">{milestone}</h3>
+              <p className="text-sm text-gray-500">
+                {completed ? 'Completed!' : 'In Progress'}
+              </p>
             </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
