@@ -133,7 +133,7 @@ router.get('/api/trait-scores/:childId', (request, context) => {
   if (!childId) {
     return new Response(JSON.stringify({ error: 'Missing child ID' }), {
       status: 400,
-      headers: corsHeaders()
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' }
     });
   }
   return traitScores({ request, env: context.env, params: { childId } });
