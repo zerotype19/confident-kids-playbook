@@ -225,19 +225,19 @@ export default function UniversalChallengeModal({
               <div className="space-y-2">
                 {(() => {
                   try {
-                    const signals = typeof currentCard.content === 'string' 
-                      ? JSON.parse(currentCard.content)
-                      : currentCard.content;
+                    // Remove the outer brackets and quotes, then split by comma
+                    const content = currentCard.content as string;
+                    const signals = content
+                      .replace(/^\[|\]$/g, '') // Remove outer brackets
+                      .split(',') // Split by comma
+                      .map(signal => signal.trim().replace(/^'|'$/g, '')); // Remove quotes and trim
                     
-                    if (Array.isArray(signals)) {
-                      return signals.map((signal, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <span className="text-green-500">✓</span>
-                          <span className="text-left">{signal}</span>
-                        </div>
-                      ));
-                    }
-                    return null;
+                    return signals.map((signal, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-green-500">✓</span>
+                        <span className="text-left">{signal}</span>
+                      </div>
+                    ));
                   } catch (e) {
                     console.error('Error parsing success signals:', e);
                     return null;
