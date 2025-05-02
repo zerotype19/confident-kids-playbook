@@ -84,7 +84,7 @@ export default function CompletionStep({ onComplete }: CompletionStepProps) {
   return (
     <div className="bg-white rounded-lg shadow-xl p-8">
       <div className="text-center">
-        <h3 className="text-xl font-heading text-[#00A67E]">Setup Complete!</h3>
+        <h3 className="text-4xl font-kidoova text-[#00A67E] mb-2">Setup Complete!</h3>
         <p className="mt-2 text-sm text-gray-500">
           Your family profile has been created successfully.
         </p>

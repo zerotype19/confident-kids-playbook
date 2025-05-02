@@ -34,7 +34,7 @@ export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
           <div>
-            <label htmlFor="familyName" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="familyName" className="block text-sm font-bold text-gray-700">
               Family Name
             </label>
             <div className="mt-1">
@@ -74,6 +74,9 @@ export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps
               {children.length === 0 && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div>
+                    <label className="block text-sm font-bold text-gray-700">
+                      Child's Name
+                    </label>
                     <input
                       type="text"
                       placeholder="Child's Name"
@@ -83,6 +86,9 @@ export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-bold text-gray-700">
+                      Birthdate
+                    </label>
                     <input
                       type="date"
                       value={childBirthdate}
@@ -91,6 +97,9 @@ export default function FamilyChildStep({ onNext, onBack }: FamilyChildStepProps
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-bold text-gray-700">
+                      Gender
+                    </label>
                     <select
                       value={childGender}
                       onChange={(e) => setChildGender(e.target.value)}

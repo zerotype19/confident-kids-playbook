@@ -21,7 +21,7 @@ export default function ParentDetailsStep({ onNext, onBack }: ParentDetailsStepP
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-bold text-gray-700">
               Your Name
             </label>
             <div className="mt-1">

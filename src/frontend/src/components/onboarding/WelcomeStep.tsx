@@ -13,10 +13,8 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
           alt="Kidoova Logo" 
           className="h-16 mx-auto mb-6"
         />
-        <h3 className="text-xl font-heading text-[#00A67E]">Welcome to Kidoova!</h3>
-        <p className="mt-2 text-sm text-gray-500">
-          Let's get your family set up
-        </p>
+        <h3 className="text-4xl font-kidoova text-[#00A67E] mb-2">Welcome to Kidoova!</h3>
+        <p className="mt-2 text-xl font-semibold text-gray-700">Let's get your family set up!</p>
       </div>
       <div className="mt-8">
         <button
