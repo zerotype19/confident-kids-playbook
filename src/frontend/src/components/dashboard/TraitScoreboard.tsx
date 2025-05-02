@@ -101,7 +101,10 @@ export default function TraitScoreboard() {
 
   return (
     <div className="w-full p-6 rounded-xl bg-white shadow-md">
-      <h2 className="text-2xl font-semibold mb-6">Confidence DNA</h2>
+      <h2 className="text-2xl font-semibold mb-2">Confidence DNA</h2>
+      <p className="text-sm text-gray-600 mb-6">
+        Confidence DNA is your child's growing profile of traits—like grit, bravery, and creativity—built from completing challenges that level up their confidence like XP in a game.
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {traits?.map((trait) => {
           const level = getLevel(trait.score);
