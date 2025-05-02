@@ -219,60 +219,7 @@ export default function UniversalChallengeModal({
         </div>
 
         <div className="text-lg text-gray-800">
-          {currentCard.type === 'success' && currentCard.content ? (
-            <div className="space-y-3">
-              {(() => {
-                try {
-                  // First try to parse as JSON if it's a string
-                  if (typeof currentCard.content === 'string') {
-                    try {
-                      const parsedContent = JSON.parse(currentCard.content);
-                      if (Array.isArray(parsedContent)) {
-                        return parsedContent.map((signal: string, index: number) => (
-                          <div key={index} className="flex items-start gap-3">
-                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-kidoova-green flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                            <p className="text-gray-600 leading-relaxed">{signal}</p>
-                          </div>
-                        ));
-                      }
-                    } catch (e) {
-                      // If JSON parsing fails, treat as string and split by newlines
-                      const lines = currentCard.content.split('\n').filter(line => line.trim());
-                      return lines.map((signal: string, index: number) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-kidoova-green flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                          <p className="text-gray-600 leading-relaxed">{signal}</p>
-                        </div>
-                      ));
-                    }
-                  } else if (Array.isArray(currentCard.content)) {
-                    // If content is already an array
-                    return currentCard.content.map((signal: string, index: number) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-kidoova-green flex items-center justify-center">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <p className="text-gray-600 leading-relaxed">{signal}</p>
-                      </div>
-                    ));
-                  }
-                } catch (e) {
-                  console.error('Error processing success signals:', e);
-                }
-                return null;
-              })()}
-            </div>
-          ) : currentCard.type === 'success_signals' && (
+          {currentCard.type === 'success_signals' ? (
             <div className="text-center">
               <div className="text-2xl mb-4">✨ Success Signals</div>
               <div className="space-y-2">
@@ -297,6 +244,10 @@ export default function UniversalChallengeModal({
                   }
                 })()}
               </div>
+            </div>
+          ) : (
+            <div className="text-center">
+              {currentCard.content}
             </div>
           )}
         </div>
