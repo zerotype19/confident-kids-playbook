@@ -192,7 +192,7 @@ export async function authGoogle(context: { request: Request; env: Env }) {
               has_completed_onboarding,
               temp_family_id
             )
-            VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?)
+            VALUES (?, ?, ?, 'google', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, ?)
           `).bind(user_id, email, name, family_id);
 
           const result = await stmt.run();
