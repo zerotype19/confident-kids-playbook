@@ -195,7 +195,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
               >
                 <div className="flex-1 flex flex-col items-center justify-center px-6 w-full">
                   {/* Daily Challenge Title - Show on all cards */}
-                  <div className="w-full text-center mt-4">
+                  <div className="w-full text-center mt-4 mb-6">
                     <h2 className="text-2xl font-heading text-gray-900">
                       {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
                     </h2>
