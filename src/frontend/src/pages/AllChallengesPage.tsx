@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import { Child, Challenge, PILLAR_NAMES } from '../types';
 import { useChildContext } from '../contexts/ChildContext';
-import Icon from '../components/common/Icon';
 import CustomButton from '../components/CustomButton';
-import PostChallengeReflectionModal from '../components/challenges/PostChallengeReflectionModal';
 
 interface ChallengeGroup {
   pillar_id: number;
@@ -19,15 +17,11 @@ interface ChallengeFilters {
   title: string | null;
 }
 
-interface DisplayedChallenge extends Challenge {
-  isExpanded?: boolean;
-}
-
 export default function AllChallengesPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
   const [allChallenges, setAllChallenges] = useState<Challenge[]>([]);
-  const [displayedChallenges, setDisplayedChallenges] = useState<DisplayedChallenge[]>([]);
+  const [displayedChallenges, setDisplayedChallenges] = useState<Challenge[]>([]);
   const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +30,6 @@ export default function AllChallengesPage() {
     difficulty: null,
     title: null
   });
-  const [showReflection, setShowReflection] = useState(false);
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
-  const [isCompleting, setIsCompleting] = useState(false);
   const navigate = useNavigate();
 
   // Get pillar from URL query parameter
@@ -195,109 +186,6 @@ export default function AllChallengesPage() {
     });
   };
 
-  const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
-    if (!selectedChild || !selectedChallengeId) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      // First, save the reflection
-      const reflectionResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/reflection`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          child_id: selectedChild.id,
-          challenge_id: selectedChallengeId,
-          feeling,
-          reflection
-        })
-      });
-
-      if (!reflectionResponse.ok) {
-        throw new Error('Failed to save reflection');
-      }
-
-      // Then mark the challenge as complete
-      const challengeResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-log`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          child_id: selectedChild.id,
-          challenge_id: selectedChallengeId
-        })
-      });
-
-      if (!challengeResponse.ok) {
-        throw new Error('Failed to mark challenge as complete');
-      }
-
-      // Refresh challenges after successful completion
-      const fetchChallenges = async () => {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/challenges/all?child_id=${selectedChild.id}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch challenges');
-        }
-
-        const data = await response.json();
-        setAllChallenges(data);
-
-        // Group challenges by pillar and difficulty
-        const groups = data.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
-          const existingGroup = acc.find(
-            group => group.pillar_id === challenge.pillar_id && group.difficulty_level === challenge.difficulty_level
-          );
-
-          if (existingGroup) {
-            if (!existingGroup.titles.includes(challenge.title)) {
-              existingGroup.titles.push(challenge.title);
-            }
-          } else {
-            acc.push({
-              pillar_id: challenge.pillar_id,
-              difficulty_level: challenge.difficulty_level,
-              titles: [challenge.title]
-            });
-          }
-
-          return acc;
-        }, []);
-
-        setChallengeGroups(groups);
-      };
-
-      await fetchChallenges();
-    } catch (err) {
-      console.error('Error completing challenge:', err);
-      throw err;
-    } finally {
-      setIsCompleting(false);
-      setShowReflection(false);
-      setSelectedChallengeId(null);
-    }
-  };
-
-  const handleChallengeComplete = (challengeId: string) => {
-    setSelectedChallengeId(challengeId);
-    setShowReflection(true);
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -413,114 +301,12 @@ export default function AllChallengesPage() {
             </div>
 
             {/* Challenges Grid */}
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedChallenges.map((challenge) => (
-                <div
+                <ChallengeCard
                   key={challenge.id}
-                  className="bg-white rounded-xl shadow-xl overflow-hidden"
-                >
-                  {/* Challenge Header */}
-                  <div 
-                    className="p-6 flex items-center justify-between cursor-pointer"
-                    onClick={() => {
-                      setDisplayedChallenges(prev => prev.map(c => 
-                        c.id === challenge.id ? { ...c, isExpanded: !c.isExpanded } : c
-                      ));
-                    }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        challenge.difficulty_level === 1 
-                          ? 'bg-green-100 text-green-800'
-                          : challenge.difficulty_level === 2
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {challenge.difficulty_level === 1 ? 'Easy' : challenge.difficulty_level === 2 ? 'Medium' : 'Hard'}
-                      </span>
-                      <h2 className="text-xl font-heading text-kidoova-green">{challenge.title}</h2>
-                    </div>
-                    <Icon 
-                      name={challenge.isExpanded ? "chevron-up" : "chevron-down"} 
-                      className="w-5 h-5 text-gray-400"
-                    />
-                  </div>
-
-                  {/* Expanded Content */}
-                  {challenge.isExpanded && (
-                    <div className="px-6 pb-6 space-y-6">
-                      {/* What You Practice */}
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">What You Practice</h3>
-                        <p className="text-gray-600 leading-relaxed">{challenge.what_you_practice}</p>
-                      </div>
-
-                      {/* Start Prompt */}
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Start Prompt</h3>
-                        <p className="text-gray-600 leading-relaxed">{challenge.start_prompt}</p>
-                      </div>
-
-                      {/* Guide Prompt */}
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Guide Prompt</h3>
-                        <p className="text-gray-600 leading-relaxed">{challenge.guide_prompt}</p>
-                      </div>
-
-                      {/* Success Signals */}
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Success Signals</h3>
-                        <div className="space-y-2">
-                          {challenge.success_signals.map((signal, index) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-kidoova-green flex items-center justify-center">
-                                <Icon name="check" className="w-4 h-4 text-white" />
-                              </div>
-                              <p className="text-gray-600 leading-relaxed">{signal}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Why It Matters */}
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Why It Matters</h3>
-                        <p className="text-gray-600 leading-relaxed">{challenge.why_it_matters}</p>
-                      </div>
-
-                      {/* Tags */}
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">Tags</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {challenge.tags.map((tag, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Complete Button */}
-                      {!challenge.is_completed && (
-                        <div className="pt-4 border-t border-gray-200">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleChallengeComplete(challenge.id);
-                            }}
-                            className="w-full px-4 py-3 rounded-lg text-sm font-medium text-white bg-kidoova-accent hover:bg-kidoova-accent-dark transition-colors duration-200 flex items-center justify-center gap-2"
-                          >
-                            <Icon name="check-circle" className="w-5 h-5" />
-                            Mark Complete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                  challenge={challenge}
+                />
               ))}
             </div>
           </>
@@ -533,19 +319,6 @@ export default function AllChallengesPage() {
           </div>
         )}
       </div>
-
-      {/* Add the reflection modal */}
-      {showReflection && (
-        <PostChallengeReflectionModal
-          onClose={() => {
-            setShowReflection(false);
-            setSelectedChallengeId(null);
-            setIsCompleting(false);
-          }}
-          onSubmit={handleReflectionSubmit}
-          isSubmitting={isCompleting}
-        />
-      )}
     </div>
   );
 } 
