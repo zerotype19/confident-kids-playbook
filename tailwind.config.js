@@ -2,7 +2,7 @@
 export default {
   content: [
     "./index.html",
-    "./src/frontend/src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -27,6 +27,19 @@ export default {
       borderRadius: {
         xl: '1rem',
         full: '9999px',
+      },
+      keyframes: {
+        glow: {
+          '0%, 100%': {
+            'box-shadow': '0 0 5px rgba(34, 197, 94, 0.2), 0 0 10px rgba(34, 197, 94, 0.2), 0 0 15px rgba(34, 197, 94, 0.2)',
+          },
+          '50%': {
+            'box-shadow': '0 0 10px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.4), 0 0 30px rgba(34, 197, 94, 0.4)',
+          },
+        },
+      },
+      animation: {
+        glow: 'glow 2s ease-in-out infinite',
       },
     },
   },
