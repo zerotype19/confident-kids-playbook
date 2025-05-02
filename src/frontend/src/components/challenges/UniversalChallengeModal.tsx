@@ -36,7 +36,6 @@ const confidenceLabels = [
 ];
 
 const CARD_ICONS = [
-  '💡', // intro
   '🎯', // what you practice
   '🚀', // start prompt
   '📚', // guide prompt
@@ -60,44 +59,38 @@ export default function UniversalChallengeModal({
 
   const cards = [
     {
-      type: 'intro',
-      icon: CARD_ICONS[0],
-      title: 'Challenge Overview',
-      content: challenge.description
-    },
-    {
       type: 'practice',
-      icon: CARD_ICONS[1],
+      icon: CARD_ICONS[0],
       title: 'What You\'ll Practice',
       content: challenge.what_you_practice
     },
     {
       type: 'start',
-      icon: CARD_ICONS[2],
+      icon: CARD_ICONS[1],
       title: 'Getting Started',
       content: challenge.start_prompt
     },
     {
       type: 'guide',
-      icon: CARD_ICONS[3],
+      icon: CARD_ICONS[2],
       title: 'Guide Prompt',
       content: challenge.guide_prompt
     },
     {
       type: 'success',
-      icon: CARD_ICONS[4],
+      icon: CARD_ICONS[3],
       title: 'Success Signals',
       content: challenge.success_signals
     },
     {
       type: 'why',
-      icon: CARD_ICONS[5],
+      icon: CARD_ICONS[4],
       title: 'Why It Matters',
       content: challenge.why_it_matters
     },
     {
       type: 'reflection',
-      icon: CARD_ICONS[6],
+      icon: CARD_ICONS[5],
       title: 'How Did It Go?'
     }
   ];
