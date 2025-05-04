@@ -45,6 +45,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const { selectedChildId, token } = useAuth();
   const { selectedChild } = useChildContext();
   const [traits, setTraits] = useState<Trait[]>([]);
+  const [historicalTraits, setHistoricalTraits] = useState<Trait[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,6 +71,26 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
     fetchTraits();
   }, [selectedChildId, token]);
 
+  useEffect(() => {
+    const fetchHistoricalTraits = async () => {
+      if (!selectedChildId || !token) return;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-scores/${selectedChildId}?historical=true`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        if (!response.ok) throw new Error('Failed to fetch historical trait scores');
+        const data = await response.json();
+        setHistoricalTraits(data.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      }
+    };
+    fetchHistoricalTraits();
+  }, [selectedChildId, token]);
+
   const totalXP = traits.reduce((sum, trait) => sum + trait.score, 0);
   const profileLevel = getProfileLevel(totalXP);
   const nextLevelXP = [200, 400, 700, 1000][profileLevel]; // cap Master
@@ -86,6 +107,13 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const totalChallenges = progress?.milestones_completed || 0;
   const longestStreak = progress?.longest_streak || 0;
   const weeklyChallenges = progress?.weekly_challenges || 0;
+
+  // Calculate most improved trait
+  const mostImprovedTrait = traits.reduce((maxTrait, trait) => {
+    const historicalTrait = historicalTraits.find(ht => ht.trait_id === trait.trait_id);
+    const improvement = historicalTrait ? trait.score - historicalTrait.score : 0;
+    return improvement > (maxTrait.improvement || 0) ? { trait, improvement } : maxTrait;
+  }, { trait: null as Trait | null, improvement: 0 });
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -155,7 +183,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
           <span className="font-semibold">Total Challenges:</span> {totalChallenges}
         </div>
         <div>
-          <span className="font-semibold">Most Improved Trait:</span> Grit
+          <span className="font-semibold">Most Improved Trait:</span> {mostImprovedTrait.trait ? mostImprovedTrait.trait.trait_name : 'N/A'}
         </div>
         <div>
           <span className="font-semibold">Awards:</span> <span className="text-yellow-500">🏆</span> {trophies}

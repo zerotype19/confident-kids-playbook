@@ -4,11 +4,14 @@ import { corsHeaders } from '../lib/cors';
 export async function onRequestGet(context: { request: Request; env: Env; params?: { childId: string } }) {
   const { request, env, params } = context;
   const childId = params?.childId;
+  const url = new URL(request.url);
+  const historical = url.searchParams.get('historical') === 'true';
 
   console.log('Trait Scores API: Request received', {
     url: request.url,
     method: request.method,
-    childId
+    childId,
+    historical
   });
 
   if (!childId) {
@@ -22,18 +25,37 @@ export async function onRequestGet(context: { request: Request; env: Env; params
   }
 
   try {
-    const result = await env.DB.prepare(`
-      SELECT 
-        t.id as trait_id,
-        t.name as trait_name,
-        t.code as trait_code,
-        t.pillar_id,
-        cts.score
-      FROM child_trait_scores cts
-      INNER JOIN traits t ON t.id = cts.trait_id
-      WHERE cts.child_id = ?
-      ORDER BY cts.score DESC
-    `).bind(childId).all();
+    let query;
+    if (historical) {
+      query = `
+        SELECT 
+          t.id as trait_id,
+          t.name as trait_name,
+          t.code as trait_code,
+          t.pillar_id,
+          cts.score
+        FROM child_trait_scores cts
+        INNER JOIN traits t ON t.id = cts.trait_id
+        WHERE cts.child_id = ?
+        AND cts.updated_at <= datetime('now', '-7 days')
+        ORDER BY cts.score DESC
+      `;
+    } else {
+      query = `
+        SELECT 
+          t.id as trait_id,
+          t.name as trait_name,
+          t.code as trait_code,
+          t.pillar_id,
+          cts.score
+        FROM child_trait_scores cts
+        INNER JOIN traits t ON t.id = cts.trait_id
+        WHERE cts.child_id = ?
+        ORDER BY cts.score DESC
+      `;
+    }
+
+    const result = await env.DB.prepare(query).bind(childId).all();
 
     console.log('Trait Scores API: Successfully fetched scores:', result.results);
 
