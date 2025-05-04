@@ -177,89 +177,10 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const longestStreak = progress?.longest_streak || 0;
   const weeklyChallenges = progress?.weekly_challenges || 0;
 
-  // --- Advanced Stats Logic ---
-  // 1. Top Trait
-  function getTopTrait(traits: Trait[]) {
-    if (traits.length === 0) return null;
-    return traits.reduce((max, t) => (t.score > max.score ? t : max));
-  }
-  const topTrait = getTopTrait(traits);
-  const topTraitLabel = topTrait ? `${topTrait.trait_name} (${Math.round(topTrait.score)} XP)` : 'N/A';
-
-  // 2. Fastest Growing Trait (Last 7 Days) - refined
-  function getFastestGrowingTrait(childId: string | undefined, traitScores: Trait[], history: TraitScoreHistory[]) {
-    if (!childId) return null;
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const deltas: Record<number, number> = {};
-    for (const row of history) {
-      if (row.child_id !== childId) continue;
-      if (new Date(row.completed_at) >= sevenDaysAgo) {
-        deltas[row.trait_id] = (deltas[row.trait_id] || 0) + row.score_delta;
-      }
-    }
-    const traitMap = Object.fromEntries(traitScores.map(t => [t.trait_id, t]));
-    const results = Object.entries(deltas)
-      .map(([traitId, recentDelta]) => {
-        const currentScore = traitMap[+traitId]?.score || 0;
-        const previousScore = currentScore - recentDelta;
-        const growth = previousScore > 0 ? recentDelta / previousScore : recentDelta > 0 ? 1 : 0;
-        return {
-          trait_id: +traitId,
-          growthPercent: Math.round(growth * 100),
-          trait_name: traitMap[+traitId]?.trait_name || `Trait ${traitId}`
-        };
-      })
-      .filter(r => r.growthPercent > 0)
-      .sort((a, b) => b.growthPercent - a.growthPercent);
-    return results[0] || null;
-  }
-  const childIdStr = selectedChildId || '';
-  const fastest = getFastestGrowingTrait(childIdStr, traits, historicalTraits);
-  const fastestLabel = fastest ? `${fastest.trait_name} (+${fastest.growthPercent}%)` : 'N/A';
-
-  // 3. Weekly XP Gained - refined
-  function getWeeklyXPGained(childId: string | undefined, history: TraitScoreHistory[]) {
-    if (!childId) return 0;
-    const now = new Date();
-    const dayOfWeek = now.getDay(); // Sunday = 0
-    const weekStart = new Date(now);
-    weekStart.setHours(0, 0, 0, 0);
-    weekStart.setDate(now.getDate() - dayOfWeek);
-    return history
-      .filter(row => row.child_id === childId && new Date(row.completed_at) >= weekStart)
-      .reduce((sum, row) => sum + row.score_delta, 0);
-  }
-  const weeklyXP = getWeeklyXPGained(childIdStr, historicalTraits);
-  const weeklyXPLabel = `+${weeklyXP} XP`;
-
-  // 4. Next Trait to Master - refined
-  const traitTierThresholds = [15, 35, 60, 100];
-  function getNextTraitToMaster(childId: string | undefined, traitScores: Trait[]) {
-    if (!childId) return null;
-    const childTraits = traitScores;
-    let best = null;
-    for (const trait of childTraits) {
-      for (let i = 0; i < traitTierThresholds.length; i++) {
-        const nextXP = traitTierThresholds[i];
-        if (trait.score < nextXP) {
-          const gap = nextXP - trait.score;
-          if (!best || gap < best.xpRemaining) {
-            best = {
-              trait_name: trait.trait_name,
-              xpRemaining: Math.round(gap),
-              from: traitTierEmojis[i - 1] || traitTierEmojis[0],
-              to: traitTierEmojis[i]
-            };
-          }
-          break;
-        }
-      }
-    }
-    return best;
-  }
-  const nextTrait = getNextTraitToMaster(childIdStr, traits);
-  const nextTraitLabel = nextTrait ? `${nextTrait.trait_name} (${nextTrait.from} → ${nextTrait.to} in ${nextTrait.xpRemaining} XP)` : 'N/A';
+  // --- Use backend-provided advanced stats ---
+  const fastestLabel = fastestGrowingTrait ? `${fastestGrowingTrait.trait_name} (+${fastestGrowingTrait.growthPercent}%)` : 'N/A';
+  const weeklyXPLabel = `+${weeklyXPGained} XP`;
+  const nextTraitLabel = nextTraitToMaster ? `${nextTraitToMaster.trait_name} (${nextTraitToMaster.from} → ${nextTraitToMaster.to} in ${nextTraitToMaster.xp_remaining} XP)` : 'N/A';
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -329,9 +250,6 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
       <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-wrap gap-6 items-center justify-between text-sm text-gray-700">
         <div>
           <span className="font-semibold">Most Improved Trait:</span> {mostImprovedTrait}
-        </div>
-        <div>
-          <span className="font-semibold">Top Trait:</span> {topTraitLabel}
         </div>
         <div>
           <span className="font-semibold">Fastest Growing Trait:</span> {fastestLabel}
