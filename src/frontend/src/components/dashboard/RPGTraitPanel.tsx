@@ -71,8 +71,9 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mostImprovedTrait, setMostImprovedTrait] = useState<string>('N/A');
-  const [challengeLogs, setChallengeLogs] = useState<ChallengeLog[]>([]);
-  const [traitScoreHistory, setTraitScoreHistory] = useState<TraitScoreHistory[]>([]);
+  const [weeklyXPGained, setWeeklyXPGained] = useState<number>(0);
+  const [fastestGrowingTrait, setFastestGrowingTrait] = useState<{ trait_name: string; growthPercent: number } | null>(null);
+  const [nextTraitToMaster, setNextTraitToMaster] = useState<{ trait_name: string; from: string; to: string; xp_remaining: number } | null>(null);
 
   useEffect(() => {
     const fetchTraits = async () => {
@@ -125,40 +126,36 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
     fetchHistoricalTraits();
   }, [selectedChildId, token]);
 
-  // Fetch challenge logs for advanced stats
+  // Use only trait-scores API for all advanced stats
   useEffect(() => {
-    const fetchLogs = async () => {
+    const fetchTraitScores = async () => {
       if (!selectedChildId || !token) return;
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-logs?child_id=${selectedChildId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-scores/${selectedChildId}`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
         });
-        if (!response.ok) throw new Error('Failed to fetch challenge logs');
+        if (!response.ok) throw new Error('Failed to fetch trait scores');
         const data = await response.json();
-        setChallengeLogs(data);
+        if (data.data) setTraits(data.data);
+        setWeeklyXPGained(data.weekly_xp_gained ?? 0);
+        setFastestGrowingTrait(data.fastest_growing_trait ?? null);
+        setNextTraitToMaster(data.next_trait_to_master ?? null);
+        // Most improved trait logic remains as before
+        if (data.data) {
+          const mostImproved = data.data.reduce((max: Trait, current: Trait) => {
+            const maxGain = typeof (max as any).recent_gain === 'number' ? (max as any).recent_gain : 0;
+            const currGain = typeof (current as any).recent_gain === 'number' ? (current as any).recent_gain : 0;
+            return currGain > maxGain ? current : max;
+          }, data.data[0]);
+          setMostImprovedTrait((mostImproved as any)?.trait_name || 'N/A');
+        }
       } catch (err) {
-        // Ignore for now
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
       }
     };
-    fetchLogs();
-  }, [selectedChildId, token]);
-
-  // Fetch trait_score_history for advanced XP stats
-  useEffect(() => {
-    const fetchTraitScoreHistory = async () => {
-      if (!selectedChildId || !token) return;
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-score-history?child_id=${selectedChildId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('Failed to fetch trait score history');
-        const data = await response.json();
-        setTraitScoreHistory(data);
-      } catch (err) {
-        // Ignore for now
-      }
-    };
-    fetchTraitScoreHistory();
+    fetchTraitScores();
   }, [selectedChildId, token]);
 
   const totalXP = traits.reduce((sum, trait) => sum + trait.score, 0);
@@ -218,7 +215,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
     return results[0] || null;
   }
   const childIdStr = selectedChildId || '';
-  const fastest = getFastestGrowingTrait(childIdStr, traits, traitScoreHistory);
+  const fastest = getFastestGrowingTrait(childIdStr, traits, historicalTraits);
   const fastestLabel = fastest ? `${fastest.trait_name} (+${fastest.growthPercent}%)` : 'N/A';
 
   // 3. Weekly XP Gained - refined
@@ -233,7 +230,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
       .filter(row => row.child_id === childId && new Date(row.completed_at) >= weekStart)
       .reduce((sum, row) => sum + row.score_delta, 0);
   }
-  const weeklyXP = getWeeklyXPGained(childIdStr, traitScoreHistory);
+  const weeklyXP = getWeeklyXPGained(childIdStr, historicalTraits);
   const weeklyXPLabel = `+${weeklyXP} XP`;
 
   // 4. Next Trait to Master - refined
