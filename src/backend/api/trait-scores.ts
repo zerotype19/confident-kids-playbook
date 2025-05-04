@@ -42,20 +42,41 @@ export async function onRequestGet(context: { request: Request; env: Env; params
       `;
     } else {
       query = `
+        WITH recent_trait_gains AS (
+          SELECT 
+            tsh.trait_id,
+            SUM(tsh.score_delta) as total_gain,
+            t.name as trait_name,
+            t.code as trait_code,
+            t.pillar_id
+          FROM trait_score_history tsh
+          INNER JOIN traits t ON t.id = tsh.trait_id
+          WHERE tsh.child_id = ?
+          AND tsh.completed_at >= datetime('now', '-7 days')
+          GROUP BY tsh.trait_id
+          ORDER BY total_gain DESC
+        ),
+        current_scores AS (
+          SELECT 
+            t.id as trait_id,
+            t.name as trait_name,
+            t.code as trait_code,
+            t.pillar_id,
+            cts.score
+          FROM child_trait_scores cts
+          INNER JOIN traits t ON t.id = cts.trait_id
+          WHERE cts.child_id = ?
+        )
         SELECT 
-          t.id as trait_id,
-          t.name as trait_name,
-          t.code as trait_code,
-          t.pillar_id,
-          cts.score
-        FROM child_trait_scores cts
-        INNER JOIN traits t ON t.id = cts.trait_id
-        WHERE cts.child_id = ?
-        ORDER BY cts.score DESC
+          cs.*,
+          COALESCE(rtg.total_gain, 0) as recent_gain
+        FROM current_scores cs
+        LEFT JOIN recent_trait_gains rtg ON cs.trait_id = rtg.trait_id
+        ORDER BY cs.score DESC
       `;
     }
 
-    const result = await env.DB.prepare(query).bind(childId).all();
+    const result = await env.DB.prepare(query).bind(childId, childId).all();
 
     console.log('Trait Scores API: Successfully fetched scores:', result.results);
 

@@ -48,6 +48,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const [historicalTraits, setHistoricalTraits] = useState<Trait[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mostImprovedTrait, setMostImprovedTrait] = useState<string>('N/A');
 
   useEffect(() => {
     const fetchTraits = async () => {
@@ -61,7 +62,14 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
         });
         if (!response.ok) throw new Error('Failed to fetch trait scores');
         const data = await response.json();
-        setTraits(data.data);
+        if (data.data) {
+          setTraits(data.data);
+          // Find the trait with the highest recent_gain
+          const mostImproved = data.data.reduce((max: Trait, current: Trait) => {
+            return (current.recent_gain || 0) > (max.recent_gain || 0) ? current : max;
+          }, data.data[0]);
+          setMostImprovedTrait(mostImproved?.trait_name || 'N/A');
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -107,13 +115,6 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const totalChallenges = progress?.milestones_completed || 0;
   const longestStreak = progress?.longest_streak || 0;
   const weeklyChallenges = progress?.weekly_challenges || 0;
-
-  // Calculate most improved trait
-  const mostImprovedTrait = traits.reduce((maxTrait, trait) => {
-    const historicalTrait = historicalTraits.find(ht => ht.trait_id === trait.trait_id);
-    const improvement = historicalTrait ? trait.score - historicalTrait.score : 0;
-    return improvement > (maxTrait.improvement || 0) ? { trait, improvement } : maxTrait;
-  }, { trait: null as Trait | null, improvement: 0 });
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -183,7 +184,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
           <span className="font-semibold">Total Challenges:</span> {totalChallenges}
         </div>
         <div>
-          <span className="font-semibold">Most Improved Trait:</span> {mostImprovedTrait.trait ? mostImprovedTrait.trait.trait_name : 'N/A'}
+          <span className="font-semibold">Most Improved Trait:</span> {mostImprovedTrait}
         </div>
         <div>
           <span className="font-semibold">Awards:</span> <span className="text-yellow-500">🏆</span> {trophies}
