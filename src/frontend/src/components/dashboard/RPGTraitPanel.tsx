@@ -140,7 +140,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
             />
           </div>
           <p className="text-xs text-gray-500 mt-1 flex flex-wrap gap-2 items-center">
-            XP: {totalXP} / {nextLevelXP}
+            XP: {Math.round(totalXP)} / {nextLevelXP}
             <span>|</span>
             <span>Streak: <span className="text-orange-500">🔥 {streak}</span></span>
             <span>|</span>
