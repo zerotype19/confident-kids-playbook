@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TodayChallengeCard from '../components/dashboard/TodayChallengeCard';
 import RewardsOverview from '../components/rewards/RewardsOverview';
 import ProgressTracker from '../components/rewards/ProgressTracker';
-import { Child, ProgressSummary } from '../types';
+import { Child, ProgressSummary, Reward } from '../types';
 import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
 import { useChildContext } from '../contexts/ChildContext';
@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import WeeklyTheme from '../components/WeeklyTheme';
 import ConfidenceTrendChart from '../components/ConfidenceTrendChart';
 import { ConfidenceData } from '../utils/confidenceTrend';
-import TraitScoreboard from '../components/dashboard/TraitScoreboard';
+import RPGTraitPanel from '../components/dashboard/RPGTraitPanel';
 
 export default function DashboardPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [children, setChildren] = useState<Child[]>([]);
   const [challenge, setChallenge] = useState<any>(null);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
+  const [rewards, setRewards] = useState<Reward[]>([]);
   const [trendData, setTrendData] = useState<ConfidenceData[]>([]);
   const [trendSummary, setTrendSummary] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -142,7 +143,7 @@ export default function DashboardPage() {
         
         // Ensure pillar_progress is an object
         const pillarProgress = rewardsData.progress.pillar_progress || {};
-        
+        setRewards(rewardsData.rewards || []);
         setProgress({
           milestones_completed: rewardsData.progress.total_challenges,
           current_streak: rewardsData.progress.current_streak,
@@ -230,7 +231,7 @@ export default function DashboardPage() {
           if (rewardsResponse.ok) {
             const rewardsData = await rewardsResponse.json();
             const pillarProgress = rewardsData.progress.pillar_progress || {};
-            
+            setRewards(rewardsData.rewards || []);
             setProgress({
               milestones_completed: rewardsData.progress.total_challenges,
               current_streak: rewardsData.progress.current_streak,
@@ -306,7 +307,7 @@ export default function DashboardPage() {
               <ProgressTracker progress={progress} childId={selectedChild.id} />
             </div>
             <div className="w-full">
-              <TraitScoreboard />
+              <RPGTraitPanel progress={progress} rewards={rewards} />
             </div>
           </div>
         ) : (

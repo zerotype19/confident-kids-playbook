@@ -142,7 +142,6 @@ export default function RewardsPage() {
 
         {selectedChild ? (
           <>
-            <RPGTraitPanel progress={progress} rewards={rewards} />
             <ConfidenceStar 
               progress={progress}
               childId={selectedChild.id}
@@ -152,6 +151,8 @@ export default function RewardsPage() {
             <RewardsOverview 
               progress={progress}
             />
+
+            <RPGTraitPanel progress={progress} rewards={rewards} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <TrophyCase 
