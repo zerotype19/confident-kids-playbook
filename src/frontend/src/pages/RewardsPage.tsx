@@ -154,16 +154,16 @@ export default function RewardsPage() {
 
             <RPGTraitPanel progress={progress} rewards={rewards} />
 
+            <div className="space-y-6 mb-6">
+              <ProgressTracker 
+                progress={progress}
+                childId={selectedChild.id}
+              />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <TrophyCase 
                 rewards={rewards}
               />
-              <div className="space-y-6">
-                <ProgressTracker 
-                  progress={progress}
-                  childId={selectedChild.id}
-                />
-              </div>
             </div>
           </>
         ) : (
