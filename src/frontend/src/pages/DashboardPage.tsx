@@ -199,6 +199,24 @@ export default function DashboardPage() {
         try {
           if (!token) return;
 
+          // Fetch today's challenge (this will now return completedToday: true)
+          const challengeResponse = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/dashboard/challenge?childId=${selectedChild.id}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            }
+          );
+          if (challengeResponse.ok) {
+            const challengeData = await challengeResponse.json();
+            if (challengeData.completedToday) {
+              setChallenge({ completedToday: true });
+            } else {
+              setChallenge(challengeData.challenge);
+            }
+          }
+
           // Fetch updated rewards and progress
           const rewardsResponse = await fetch(
             `${import.meta.env.VITE_API_URL}/api/rewards/${selectedChild.id}`,
