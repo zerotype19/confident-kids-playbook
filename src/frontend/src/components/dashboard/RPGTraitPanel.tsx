@@ -11,6 +11,15 @@ interface Trait {
   score: number;
 }
 
+interface ChallengeLog {
+  id: string;
+  child_id: string;
+  challenge_id: string;
+  trait_id: number;
+  xp_value: number;
+  completed_at: string;
+}
+
 const pillarHex: Record<number, string> = {
   1: '#F7B801', // Independence & Problem-Solving
   2: '#38A169', // Growth Mindset & Resilience
@@ -54,6 +63,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mostImprovedTrait, setMostImprovedTrait] = useState<string>('N/A');
+  const [challengeLogs, setChallengeLogs] = useState<ChallengeLog[]>([]);
 
   useEffect(() => {
     const fetchTraits = async () => {
@@ -71,9 +81,11 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
           setTraits(data.data);
           // Find the trait with the highest recent_gain
           const mostImproved = data.data.reduce((max: Trait, current: Trait) => {
-            return (current.recent_gain || 0) > (max.recent_gain || 0) ? current : max;
+            const maxGain = typeof (max as any).recent_gain === 'number' ? (max as any).recent_gain : 0;
+            const currGain = typeof (current as any).recent_gain === 'number' ? (current as any).recent_gain : 0;
+            return currGain > maxGain ? current : max;
           }, data.data[0]);
-          setMostImprovedTrait(mostImproved?.trait_name || 'N/A');
+          setMostImprovedTrait((mostImproved as any)?.trait_name || 'N/A');
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -104,6 +116,24 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
     fetchHistoricalTraits();
   }, [selectedChildId, token]);
 
+  // Fetch challenge logs for advanced stats
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (!selectedChildId || !token) return;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-logs?child_id=${selectedChildId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch challenge logs');
+        const data = await response.json();
+        setChallengeLogs(data);
+      } catch (err) {
+        // Ignore for now
+      }
+    };
+    fetchLogs();
+  }, [selectedChildId, token]);
+
   const totalXP = traits.reduce((sum, trait) => sum + trait.score, 0);
   const profileLevel = getProfileLevel(totalXP);
   const nextLevelXP = [200, 400, 700, 1000, 1200][profileLevel]; // safe cap
@@ -122,6 +152,93 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const totalChallenges = progress?.milestones_completed || 0;
   const longestStreak = progress?.longest_streak || 0;
   const weeklyChallenges = progress?.weekly_challenges || 0;
+
+  // --- Advanced Stats Logic ---
+  // 1. Top Trait
+  function getTopTrait(traits: Trait[]) {
+    if (traits.length === 0) return null;
+    return traits.reduce((max, t) => (t.score > max.score ? t : max));
+  }
+  const topTrait = getTopTrait(traits);
+  const topTraitLabel = topTrait ? `${topTrait.trait_name} (${Math.round(topTrait.score)} XP)` : 'N/A';
+
+  // 2. Fastest Growing Trait (Last 7 Days)
+  function getFastestGrowingTrait(challengeLogs: ChallengeLog[], traits: Trait[]) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    const recentXPMap: Record<number, number> = {};
+    challengeLogs.forEach(log => {
+      const completedAt = new Date(log.completed_at);
+      if (completedAt >= cutoff) {
+        recentXPMap[log.trait_id] = (recentXPMap[log.trait_id] || 0) + log.xp_value;
+      }
+    });
+    const growthRates = traits
+      .map(trait => {
+        const gain = recentXPMap[trait.trait_id] || 0;
+        const previousXP = trait.score - gain;
+        const growth = previousXP > 0 ? gain / previousXP : gain > 0 ? 1 : 0;
+        return { trait, growth };
+      })
+      .filter(t => t.growth > 0);
+    if (growthRates.length === 0) return null;
+    const fastest = growthRates.sort((a, b) => b.growth - a.growth)[0];
+    return {
+      name: fastest.trait.trait_name,
+      percent: Math.round(fastest.growth * 100),
+    };
+  }
+  const fastest = getFastestGrowingTrait(challengeLogs, traits);
+  const fastestLabel = fastest ? `${fastest.name} (+${fastest.percent}%)` : 'N/A';
+
+  // 3. Weekly XP Gained
+  function getWeeklyXPGained(challengeLogs: ChallengeLog[]) {
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay()); // Sunday start
+    return challengeLogs
+      .filter(log => new Date(log.completed_at) >= weekStart)
+      .reduce((sum, log) => sum + log.xp_value, 0);
+  }
+  const weeklyXP = getWeeklyXPGained(challengeLogs);
+  const weeklyXPLabel = `+${weeklyXP} XP`;
+
+  // 4. Next Trait to Master
+  const traitThresholds = [15, 35, 60, 100];
+  function getNextTraitToMaster(traits: Trait[]) {
+    let closestTrait = null;
+    let minXPNeeded = Infinity;
+    traits.forEach(trait => {
+      for (let i = 0; i < traitThresholds.length; i++) {
+        const nextTierXP = traitThresholds[i];
+        if (trait.score < nextTierXP) {
+          const xpNeeded = nextTierXP - trait.score;
+          if (xpNeeded < minXPNeeded) {
+            closestTrait = {
+              name: trait.trait_name,
+              currentTier: i === 0 ? '🔸' : i === 1 ? '🔹' : i === 2 ? '🟢' : '🟣',
+              nextTier: ['🔹', '🟢', '🟣', '🌟'][i],
+              xpRemaining: xpNeeded,
+            };
+            minXPNeeded = xpNeeded;
+          }
+          break;
+        }
+      }
+    });
+    return closestTrait;
+  }
+  const nextTrait = getNextTraitToMaster(traits);
+  const nextTraitLabel =
+    nextTrait &&
+    typeof nextTrait === 'object' &&
+    nextTrait !== null &&
+    'name' in nextTrait &&
+    'currentTier' in nextTrait &&
+    'nextTier' in nextTrait &&
+    'xpRemaining' in nextTrait
+      ? `${(nextTrait as any).name} (${(nextTrait as any).currentTier} → ${(nextTrait as any).nextTier} in ${(nextTrait as any).xpRemaining} XP)`
+      : 'N/A';
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -187,27 +304,23 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
         })}
       </div>
 
-      {/* Stats & Awards Summary (Optional/Stretch) */}
+      {/* Advanced Stats Summary */}
       <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-wrap gap-6 items-center justify-between text-sm text-gray-700">
-        <div>
-          <span className="font-semibold">Total Challenges:</span> {totalChallenges}
-        </div>
         <div>
           <span className="font-semibold">Most Improved Trait:</span> {mostImprovedTrait}
         </div>
         <div>
-          <span className="font-semibold">Awards:</span> <span className="text-yellow-500">🏆</span> {trophies}
+          <span className="font-semibold">Top Trait:</span> {topTraitLabel}
         </div>
         <div>
-          <span className="font-semibold">Streak:</span> <span className="text-orange-500">🔥</span> {streak} days
+          <span className="font-semibold">Fastest Growing Trait:</span> {fastestLabel}
         </div>
         <div>
-          <span className="font-semibold">Longest Streak:</span> <span className="text-orange-500">🔥</span> {longestStreak} days
+          <span className="font-semibold">Weekly XP Gained:</span> {weeklyXPLabel}
         </div>
         <div>
-          <span className="font-semibold">Weekly Challenges:</span> <span className="text-blue-500">📅</span> {weeklyChallenges}
+          <span className="font-semibold">Next Trait to Master:</span> {nextTraitLabel}
         </div>
-        {/* Add more stats or links as needed */}
       </div>
     </div>
   );
