@@ -290,8 +290,8 @@ export async function getChildProgress(childId: string, env: Env) {
     FROM challenge_logs
     WHERE child_id = ?
       AND completed_at IS NOT NULL
-      AND date(completed_at, 'localtime', 'America/New_York') >= date('now', 'localtime', 'America/New_York', 'weekday 0')
-      AND date(completed_at, 'localtime', 'America/New_York') <= date('now', 'localtime', 'America/New_York', 'weekday 6')
+      AND date(datetime(completed_at, 'utc'), 'localtime', 'America/New_York') >= date('now', 'localtime', 'America/New_York', 'weekday 0')
+      AND date(datetime(completed_at, 'utc'), 'localtime', 'America/New_York') <= date('now', 'localtime', 'America/New_York', 'weekday 6')
   `;
   console.log('DEBUG: Weekly challenges SQL:', weeklyChallengesSQL);
 
