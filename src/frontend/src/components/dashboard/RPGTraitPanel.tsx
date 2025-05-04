@@ -19,22 +19,27 @@ const pillarHex: Record<number, string> = {
   5: '#E53E3E'  // Managing Fear & Anxiety
 };
 
-const traitLevelNames = ['🏕 Explorer', '🔧 Builder', '🏆 Champion', '🌟 Master'];
-const profileLevelNames = ['🏕 Explorer', '🔧 Builder', '🏆 Champion', '🌟 Master'];
-
-export function getTraitLevel(xp: number): number {
-  if (xp >= 100) return 3;
-  if (xp >= 50) return 2;
-  if (xp >= 25) return 1;
-  return 0;
-}
-
 export function getProfileLevel(totalXP: number): number {
+  if (totalXP >= 1000) return 4;
   if (totalXP >= 700) return 3;
   if (totalXP >= 400) return 2;
   if (totalXP >= 200) return 1;
   return 0;
 }
+
+export const profileLevelLabels = ['Explorer', 'Pathfinder', 'Trailblazer', 'Guardian', 'Hero'];
+export const profileLevelEmojis = ['🧭', '🏕', '🔥', '🛡', '🌟'];
+
+export function getTraitTier(xp: number): number {
+  if (xp >= 100) return 4;
+  if (xp >= 60) return 3;
+  if (xp >= 35) return 2;
+  if (xp >= 15) return 1;
+  return 0;
+}
+
+export const traitTierLabels = ['Novice', 'Learner', 'Skilled', 'Expert', 'Mastery'];
+export const traitTierEmojis = ['🔸', '🔹', '🟢', '🟣', '🌟'];
 
 interface RPGTraitPanelProps {
   progress: ProgressSummary | null;
@@ -101,8 +106,10 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
 
   const totalXP = traits.reduce((sum, trait) => sum + trait.score, 0);
   const profileLevel = getProfileLevel(totalXP);
-  const nextLevelXP = [200, 400, 700, 1000][profileLevel]; // cap Master
+  const nextLevelXP = [200, 400, 700, 1000, 1200][profileLevel]; // safe cap
   const xpPercent = Math.min((totalXP / nextLevelXP) * 100, 100);
+  const profileLevelLabel = profileLevelLabels[profileLevel];
+  const profileEmoji = profileLevelEmojis[profileLevel];
   const avatarUrl = selectedChild?.avatar_url;
   const childName = selectedChild?.name || 'Your Child';
   const childAge = selectedChild?.birthdate
@@ -132,7 +139,9 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-semibold truncate">{childName}</h2>
           {childAge !== null && <p className="text-xs text-gray-500">Age: {childAge}</p>}
-          <p className="text-sm text-gray-600">Level {profileLevel + 1} – {profileLevelNames[profileLevel]}</p>
+          <p className="text-sm text-gray-600">
+            Level {profileLevel + 1} – {profileEmoji} {profileLevelLabel}
+          </p>
           <div className="mt-1 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-2 bg-green-500 rounded-full transition-all duration-700"
@@ -152,7 +161,9 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
       {/* Trait Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {traits.map((trait) => {
-          const traitLevel = getTraitLevel(trait.score);
+          const traitTier = getTraitTier(trait.score);
+          const traitLabel = traitTierLabels[traitTier];
+          const traitEmoji = traitTierEmojis[traitTier];
           const percent = Math.min(trait.score, 100);
           return (
             <div
@@ -172,7 +183,9 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
                   style={{ width: `${percent}%`, backgroundColor: pillarHex[trait.pillar_id] }}
                 />
               </div>
-              <div className="text-xs text-gray-600 mt-1">Level: <strong>{traitLevelNames[traitLevel]}</strong></div>
+              <p className="text-xs text-gray-600">
+                Tier: {traitEmoji} {traitLabel}
+              </p>
             </div>
           );
         })}

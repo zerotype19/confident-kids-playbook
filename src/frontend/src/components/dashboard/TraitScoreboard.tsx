@@ -17,14 +17,27 @@ const pillarHex: Record<number, string> = {
   5: '#E53E3E'  // Managing Fear & Anxiety
 };
 
-const levelNames = ['🏕 Explorer', '🔧 Builder', '🏆 Champion', '🌟 Master'];
-
-function getLevel(score: number): number {
-  if (score >= 100) return 3;
-  if (score >= 50) return 2;
-  if (score >= 25) return 1;
+// --- RPG Profile Level Logic ---
+function getProfileLevel(totalXP: number): number {
+  if (totalXP >= 1000) return 4;
+  if (totalXP >= 700) return 3;
+  if (totalXP >= 400) return 2;
+  if (totalXP >= 200) return 1;
   return 0;
 }
+const profileLevelLabels = ['Explorer', 'Pathfinder', 'Trailblazer', 'Guardian', 'Hero'];
+const profileLevelEmojis = ['🧭', '🏕', '🔥', '🛡', '🌟'];
+
+// --- RPG Trait Tier Logic ---
+function getTraitTier(xp: number): number {
+  if (xp >= 100) return 4;
+  if (xp >= 60) return 3;
+  if (xp >= 35) return 2;
+  if (xp >= 15) return 1;
+  return 0;
+}
+const traitTierLabels = ['Novice', 'Learner', 'Skilled', 'Expert', 'Mastery'];
+const traitTierEmojis = ['🔸', '🔹', '🟢', '🟣', '🌟'];
 
 export default function TraitScoreboard() {
   const { selectedChildId, token } = useAuth();
@@ -99,6 +112,13 @@ export default function TraitScoreboard() {
     );
   }
 
+  const totalXP = traits.reduce((sum, trait) => sum + trait.score, 0);
+  const profileLevel = getProfileLevel(totalXP);
+  const nextLevelXP = [200, 400, 700, 1000, 1200][profileLevel];
+  const xpPercent = Math.min((totalXP / nextLevelXP) * 100, 100);
+  const profileLevelLabel = profileLevelLabels[profileLevel];
+  const profileEmoji = profileLevelEmojis[profileLevel];
+
   return (
     <div className="w-full p-6 rounded-xl bg-white shadow-md">
       <h2 className="text-2xl font-semibold mb-2">Confidence DNA</h2>
@@ -107,10 +127,10 @@ export default function TraitScoreboard() {
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {traits?.map((trait) => {
-          const level = getLevel(trait.score);
-          const levelName = levelNames[level];
+          const traitTier = getTraitTier(trait.score);
+          const traitLabel = traitTierLabels[traitTier];
+          const traitEmoji = traitTierEmojis[traitTier];
           const percent = Math.min(trait.score, 100);
-
           return (
             <div key={trait.trait_id} className="flex flex-col gap-2 p-4 rounded-xl bg-gray-50 shadow-sm">
               <div className="flex justify-between items-center text-sm font-medium">
@@ -126,7 +146,9 @@ export default function TraitScoreboard() {
                   style={{ width: `${percent}%`, backgroundColor: pillarHex[trait.pillar_id] }}
                 />
               </div>
-              <div className="text-xs text-gray-600 mt-1">Level: <strong>{levelName}</strong></div>
+              <p className="text-xs text-gray-600 mt-1">
+                Tier: {traitEmoji} {traitLabel}
+              </p>
             </div>
           );
         })}
