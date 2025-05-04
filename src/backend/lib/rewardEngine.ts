@@ -267,23 +267,26 @@ export async function getChildProgress(childId: string, env: Env) {
     challenges: debugQuery?.results
   });
 
-  // Get challenges completed this week
+  // Get challenges completed this week (Sunday–Saturday, local time)
   const weeklyChallengesQuery = await env.DB.prepare(`
     SELECT 
       COUNT(*) as weekly_challenges,
       datetime('now', 'localtime', 'America/New_York') as current_time,
-      datetime('now', 'localtime', 'America/New_York', '-7 days') as week_start,
+      date('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days') as week_start,
+      date('now', 'localtime', 'America/New_York', 'weekday 6') as week_end,
       GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as completed_dates,
       GROUP_CONCAT(id) as challenge_ids,
       GROUP_CONCAT(challenge_id) as challenge_types
     FROM challenge_logs
     WHERE child_id = ?
-    AND completed_at IS NOT NULL
-    AND datetime(completed_at) >= datetime('now', '-7 days')
+      AND completed_at IS NOT NULL
+      AND date(completed_at, 'localtime', 'America/New_York') >= date('now', 'localtime', 'America/New_York', 'weekday 0', '-7 days')
+      AND date(completed_at, 'localtime', 'America/New_York') <= date('now', 'localtime', 'America/New_York', 'weekday 6')
   `).bind(childId).first<{ 
     weekly_challenges: number;
     current_time: string;
     week_start: string;
+    week_end: string;
     completed_dates: string;
     challenge_ids: string;
     challenge_types: string;
@@ -293,6 +296,7 @@ export async function getChildProgress(childId: string, env: Env) {
     childId,
     currentTime: weeklyChallengesQuery?.current_time,
     weekStart: weeklyChallengesQuery?.week_start,
+    weekEnd: weeklyChallengesQuery?.week_end,
     completedDates: weeklyChallengesQuery?.completed_dates,
     challengeIds: weeklyChallengesQuery?.challenge_ids,
     challengeTypes: weeklyChallengesQuery?.challenge_types,
