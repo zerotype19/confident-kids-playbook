@@ -26,6 +26,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
 
   try {
     let query;
+    let params;
     if (historical) {
       query = `
         SELECT 
@@ -40,6 +41,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
         AND cts.updated_at <= datetime('now', '-7 days')
         ORDER BY cts.score DESC
       `;
+      params = [childId];
     } else {
       query = `
         WITH recent_trait_gains AS (
@@ -74,9 +76,10 @@ export async function onRequestGet(context: { request: Request; env: Env; params
         LEFT JOIN recent_trait_gains rtg ON cs.trait_id = rtg.trait_id
         ORDER BY cs.score DESC
       `;
+      params = [childId, childId];
     }
 
-    const result = await env.DB.prepare(query).bind(childId, childId).all();
+    const result = await env.DB.prepare(query).bind(...params).all();
 
     console.log('Trait Scores API: Successfully fetched scores:', result.results);
 
