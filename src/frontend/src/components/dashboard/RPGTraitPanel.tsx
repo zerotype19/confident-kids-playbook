@@ -131,10 +131,10 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
       {/* Profile Header */}
       <div className="flex items-center gap-4 mb-6">
         <img
-          src={avatarUrl || '/avatar-placeholder.png'}
+          src={avatarUrl || '/logo.png'}
           alt="Child Avatar"
           className="w-20 h-20 rounded-full border-2 border-gray-300 object-cover bg-gray-100"
-          onError={e => (e.currentTarget.src = '/avatar-placeholder.png')}
+          onError={e => (e.currentTarget.src = '/logo.png')}
         />
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-semibold truncate">{childName}</h2>
