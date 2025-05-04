@@ -50,13 +50,15 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
 
   if (challenge && (challenge as any).completedToday) {
     return (
-      <div className="bg-white rounded-2xl shadow-kidoova p-6 flex flex-col items-center justify-center min-h-[300px]">
-        <div className="flex flex-col items-center space-y-4">
-          <span className="text-4xl text-kidoova-green">✅</span>
-          <span className="text-3xl font-heading font-bold text-kidoova-green">Daily Challenge Completed!</span>
+      <div className="bg-white rounded-2xl shadow-kidoova p-4 flex flex-col items-center justify-center min-h-[180px]">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl text-kidoova-green">✅</span>
+            <span className="text-2xl font-heading font-bold text-kidoova-green">Daily Challenge Completed!</span>
+          </div>
           <button
             onClick={() => window.location.href = '/all-challenges'}
-            className="px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-green hover:bg-kidoova-accent transition-colors duration-200 mt-4"
+            className="px-5 py-2 rounded-lg font-semibold text-white bg-kidoova-green hover:bg-kidoova-accent transition-colors duration-200"
           >
             See More Challenges
           </button>
