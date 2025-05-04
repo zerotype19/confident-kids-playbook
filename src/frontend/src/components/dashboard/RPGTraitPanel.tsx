@@ -247,15 +247,15 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
       </div>
 
       {/* Advanced Stats Summary */}
-      <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-wrap gap-6 items-center justify-between text-sm text-gray-700">
+      <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-wrap gap-6 items-center justify-between text-xs text-gray-700">
         <div>
           <span className="font-semibold">Most Improved Trait:</span> {mostImprovedTrait}
         </div>
         <div>
-          <span className="font-semibold">Fastest Growing Trait:</span> {fastestLabel}
+          <span className="font-semibold">Weekly XP Gained:</span> {weeklyXPLabel}
         </div>
         <div>
-          <span className="font-semibold">Weekly XP Gained:</span> {weeklyXPLabel}
+          <span className="font-semibold">Fastest Growing Trait:</span> {fastestLabel}
         </div>
         <div>
           <span className="font-semibold">Next Trait to Master:</span> {nextTraitLabel}
