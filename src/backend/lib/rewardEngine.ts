@@ -281,38 +281,31 @@ export async function getChildProgress(childId: string, env: Env) {
   const weeklyChallengesSQL = `
     SELECT 
       COUNT(*) as weekly_challenges,
-      datetime('now', 'localtime', 'America/New_York') as current_time,
-      date('now', 'localtime', 'America/New_York', 'weekday 0') as week_start,
-      date('now', 'localtime', 'America/New_York', 'weekday 6') as week_end,
-      GROUP_CONCAT(datetime(completed_at, 'localtime', 'America/New_York')) as completed_dates,
+      datetime('now') as current_time,
+      GROUP_CONCAT(completed_at) as completed_dates,
       GROUP_CONCAT(id) as challenge_ids,
       GROUP_CONCAT(challenge_id) as challenge_types
     FROM challenge_logs
     WHERE child_id = ?
       AND completed_at IS NOT NULL
-      AND date(datetime(completed_at, 'utc'), 'localtime', 'America/New_York') >= date('now', 'localtime', 'America/New_York', 'weekday 0')
-      AND date(datetime(completed_at, 'utc'), 'localtime', 'America/New_York') <= date('now', 'localtime', 'America/New_York', 'weekday 6')
+      AND datetime(completed_at) >= datetime('now', '-7 days')
   `;
   console.log('DEBUG: Weekly challenges SQL:', weeklyChallengesSQL);
 
   const weeklyChallengesQuery = await env.DB.prepare(weeklyChallengesSQL).bind(childId).first<{ 
     weekly_challenges: number;
     current_time: string;
-    week_start: string;
-    week_end: string;
     completed_dates: string;
     challenge_ids: string;
     challenge_types: string;
   }>();
 
   if ((weeklyChallengesQuery?.weekly_challenges || 0) === 0 && allCompletions.results.length > 0) {
-    console.warn('WARNING: Weekly challenges is 0 but there are completions for this child. Check timezone and date logic.');
+    console.warn('WARNING: Weekly challenges is 0 but there are completions for this child. Check date logic.');
   }
 
   console.log('Weekly challenges calculation (DEBUG):', {
     childId,
-    weekStart: weeklyChallengesQuery?.week_start,
-    weekEnd: weeklyChallengesQuery?.week_end,
     completedDates: weeklyChallengesQuery?.completed_dates,
     count: weeklyChallengesQuery?.weekly_challenges
   });
