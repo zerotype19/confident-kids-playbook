@@ -267,8 +267,18 @@ export async function getChildProgress(childId: string, env: Env) {
     challenges: debugQuery?.results
   });
 
+  // Print all completed_at values for this child
+  const allCompletions = await env.DB.prepare(`
+    SELECT completed_at FROM challenge_logs WHERE child_id = ? ORDER BY completed_at DESC
+  `).bind(childId).all<{ completed_at: string }>();
+  console.log('DEBUG: All completed_at values for child', childId, allCompletions.results);
+
   // Get challenges completed this week (Sunday–Saturday, local time, including today)
-  const weeklyChallengesQuery = await env.DB.prepare(`
+  const weekStart = await env.DB.prepare(`SELECT date('now', 'localtime', 'America/New_York', 'weekday 0') as week_start`).first<{ week_start: string }>();
+  const weekEnd = await env.DB.prepare(`SELECT date('now', 'localtime', 'America/New_York', 'weekday 6') as week_end`).first<{ week_end: string }>();
+  console.log('DEBUG: Calculated week window:', { weekStart: weekStart?.week_start, weekEnd: weekEnd?.week_end });
+
+  const weeklyChallengesSQL = `
     SELECT 
       COUNT(*) as weekly_challenges,
       datetime('now', 'localtime', 'America/New_York') as current_time,
@@ -282,7 +292,10 @@ export async function getChildProgress(childId: string, env: Env) {
       AND completed_at IS NOT NULL
       AND date(completed_at, 'localtime', 'America/New_York') >= date('now', 'localtime', 'America/New_York', 'weekday 0')
       AND date(completed_at, 'localtime', 'America/New_York') <= date('now', 'localtime', 'America/New_York', 'weekday 6')
-  `).bind(childId).first<{ 
+  `;
+  console.log('DEBUG: Weekly challenges SQL:', weeklyChallengesSQL);
+
+  const weeklyChallengesQuery = await env.DB.prepare(weeklyChallengesSQL).bind(childId).first<{ 
     weekly_challenges: number;
     current_time: string;
     week_start: string;
@@ -291,6 +304,10 @@ export async function getChildProgress(childId: string, env: Env) {
     challenge_ids: string;
     challenge_types: string;
   }>();
+
+  if ((weeklyChallengesQuery?.weekly_challenges || 0) === 0 && allCompletions.results.length > 0) {
+    console.warn('WARNING: Weekly challenges is 0 but there are completions for this child. Check timezone and date logic.');
+  }
 
   console.log('Weekly challenges calculation (DEBUG):', {
     childId,
