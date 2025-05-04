@@ -189,83 +189,80 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const topTrait = getTopTrait(traits);
   const topTraitLabel = topTrait ? `${topTrait.trait_name} (${Math.round(topTrait.score)} XP)` : 'N/A';
 
-  // 2. Fastest Growing Trait (Last 7 Days)
-  function getFastestGrowingTraitFromHistory(traitScoreHistory: TraitScoreHistory[], traits: Trait[]) {
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 7);
-    const recentXPMap: Record<number, number> = {};
-    traitScoreHistory.forEach(entry => {
-      const completedAt = new Date(entry.completed_at);
-      if (completedAt >= cutoff) {
-        recentXPMap[entry.trait_id] = (recentXPMap[entry.trait_id] || 0) + entry.score_delta;
+  // 2. Fastest Growing Trait (Last 7 Days) - refined
+  function getFastestGrowingTrait(childId: string | undefined, traitScores: Trait[], history: TraitScoreHistory[]) {
+    if (!childId) return null;
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const deltas: Record<number, number> = {};
+    for (const row of history) {
+      if (row.child_id !== childId) continue;
+      if (new Date(row.completed_at) >= sevenDaysAgo) {
+        deltas[row.trait_id] = (deltas[row.trait_id] || 0) + row.score_delta;
       }
-    });
-    const growthRates = traits
-      .map(trait => {
-        const gain = recentXPMap[trait.trait_id] || 0;
-        const previousXP = trait.score - gain;
-        const growth = previousXP > 0 ? gain / previousXP : gain > 0 ? 1 : 0;
-        return { trait, growth };
+    }
+    const traitMap = Object.fromEntries(traitScores.map(t => [t.trait_id, t]));
+    const results = Object.entries(deltas)
+      .map(([traitId, recentDelta]) => {
+        const currentScore = traitMap[+traitId]?.score || 0;
+        const previousScore = currentScore - recentDelta;
+        const growth = previousScore > 0 ? recentDelta / previousScore : recentDelta > 0 ? 1 : 0;
+        return {
+          trait_id: +traitId,
+          growthPercent: Math.round(growth * 100),
+          trait_name: traitMap[+traitId]?.trait_name || `Trait ${traitId}`
+        };
       })
-      .filter(t => t.growth > 0);
-    if (growthRates.length === 0) return null;
-    const fastest = growthRates.sort((a, b) => b.growth - a.growth)[0];
-    return {
-      name: fastest.trait.trait_name,
-      percent: Math.round(fastest.growth * 100),
-    };
+      .filter(r => r.growthPercent > 0)
+      .sort((a, b) => b.growthPercent - a.growthPercent);
+    return results[0] || null;
   }
-  const fastest = getFastestGrowingTraitFromHistory(traitScoreHistory, traits);
-  const fastestLabel = fastest ? `${fastest.name} (+${fastest.percent}%)` : 'N/A';
+  const childIdStr = selectedChildId || '';
+  const fastest = getFastestGrowingTrait(childIdStr, traits, traitScoreHistory);
+  const fastestLabel = fastest ? `${fastest.trait_name} (+${fastest.growthPercent}%)` : 'N/A';
 
-  // 3. Weekly XP Gained
-  function getWeeklyXPGainedFromHistory(traitScoreHistory: TraitScoreHistory[]) {
+  // 3. Weekly XP Gained - refined
+  function getWeeklyXPGained(childId: string | undefined, history: TraitScoreHistory[]) {
+    if (!childId) return 0;
     const now = new Date();
+    const dayOfWeek = now.getDay(); // Sunday = 0
     const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay()); // Sunday start
-    return traitScoreHistory
-      .filter(entry => new Date(entry.completed_at) >= weekStart)
-      .reduce((sum, entry) => sum + entry.score_delta, 0);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(now.getDate() - dayOfWeek);
+    return history
+      .filter(row => row.child_id === childId && new Date(row.completed_at) >= weekStart)
+      .reduce((sum, row) => sum + row.score_delta, 0);
   }
-  const weeklyXP = getWeeklyXPGainedFromHistory(traitScoreHistory);
+  const weeklyXP = getWeeklyXPGained(childIdStr, traitScoreHistory);
   const weeklyXPLabel = `+${weeklyXP} XP`;
 
-  // 4. Next Trait to Master
-  const traitThresholds = [15, 35, 60, 100];
-  function getNextTraitToMaster(traits: Trait[]) {
-    let closestTrait = null;
-    let minXPNeeded = Infinity;
-    traits.forEach(trait => {
-      for (let i = 0; i < traitThresholds.length; i++) {
-        const nextTierXP = traitThresholds[i];
-        if (trait.score < nextTierXP) {
-          const xpNeeded = nextTierXP - trait.score;
-          if (xpNeeded < minXPNeeded) {
-            closestTrait = {
-              name: trait.trait_name,
-              currentTier: i === 0 ? '🔸' : i === 1 ? '🔹' : i === 2 ? '🟢' : '🟣',
-              nextTier: ['🔹', '🟢', '🟣', '🌟'][i],
-              xpRemaining: xpNeeded,
+  // 4. Next Trait to Master - refined
+  const traitTierThresholds = [15, 35, 60, 100];
+  function getNextTraitToMaster(childId: string | undefined, traitScores: Trait[]) {
+    if (!childId) return null;
+    const childTraits = traitScores;
+    let best = null;
+    for (const trait of childTraits) {
+      for (let i = 0; i < traitTierThresholds.length; i++) {
+        const nextXP = traitTierThresholds[i];
+        if (trait.score < nextXP) {
+          const gap = nextXP - trait.score;
+          if (!best || gap < best.xpRemaining) {
+            best = {
+              trait_name: trait.trait_name,
+              xpRemaining: Math.round(gap),
+              from: traitTierEmojis[i - 1] || traitTierEmojis[0],
+              to: traitTierEmojis[i]
             };
-            minXPNeeded = xpNeeded;
           }
           break;
         }
       }
-    });
-    return closestTrait;
+    }
+    return best;
   }
-  const nextTrait = getNextTraitToMaster(traits);
-  const nextTraitLabel =
-    nextTrait &&
-    typeof nextTrait === 'object' &&
-    nextTrait !== null &&
-    'name' in nextTrait &&
-    'currentTier' in nextTrait &&
-    'nextTier' in nextTrait &&
-    'xpRemaining' in nextTrait
-      ? `${(nextTrait as any).name} (${(nextTrait as any).currentTier} → ${(nextTrait as any).nextTier} in ${(nextTrait as any).xpRemaining} XP)`
-      : 'N/A';
+  const nextTrait = getNextTraitToMaster(childIdStr, traits);
+  const nextTraitLabel = nextTrait ? `${nextTrait.trait_name} (${nextTrait.from} → ${nextTrait.to} in ${nextTrait.xpRemaining} XP)` : 'N/A';
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
