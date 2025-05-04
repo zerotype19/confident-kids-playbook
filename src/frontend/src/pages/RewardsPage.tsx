@@ -160,7 +160,7 @@ export default function RewardsPage() {
                 childId={selectedChild.id}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="w-full">
               <TrophyCase 
                 rewards={rewards}
               />
