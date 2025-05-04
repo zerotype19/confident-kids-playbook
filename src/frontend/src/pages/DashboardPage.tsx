@@ -115,7 +115,11 @@ export default function DashboardPage() {
 
         const challengeData = await challengeResponse.json();
         console.log('Challenge data:', challengeData);
-        setChallenge(challengeData.challenge);
+        if (challengeData.completedToday) {
+          setChallenge({ completedToday: true });
+        } else {
+          setChallenge(challengeData.challenge);
+        }
 
         // Fetch rewards and progress
         const rewardsResponse = await fetch(
