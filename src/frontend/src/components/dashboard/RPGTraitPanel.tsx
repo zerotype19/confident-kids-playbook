@@ -18,12 +18,20 @@ const pillarHex: Record<number, string> = {
   5: '#E53E3E'  // Managing Fear & Anxiety
 };
 
-const levelNames = ['🏕 Explorer', '🔧 Builder', '🏆 Champion', '🌟 Master'];
+const traitLevelNames = ['🏕 Explorer', '🔧 Builder', '🏆 Champion', '🌟 Master'];
+const profileLevelNames = ['🏕 Explorer', '🔧 Builder', '🏆 Champion', '🌟 Master'];
 
-function getLevel(score: number): number {
-  if (score >= 100) return 3;
-  if (score >= 50) return 2;
-  if (score >= 25) return 1;
+export function getTraitLevel(xp: number): number {
+  if (xp >= 100) return 3;
+  if (xp >= 50) return 2;
+  if (xp >= 25) return 1;
+  return 0;
+}
+
+export function getProfileLevel(totalXP: number): number {
+  if (totalXP >= 700) return 3;
+  if (totalXP >= 400) return 2;
+  if (totalXP >= 200) return 1;
   return 0;
 }
 
@@ -61,8 +69,8 @@ export default function RPGTraitPanel() {
   }, [selectedChildId, token]);
 
   const totalXP = traits.reduce((sum, trait) => sum + trait.score, 0);
-  const level = getLevel(totalXP);
-  const nextLevelXP = [25, 50, 100, 1000][level];
+  const profileLevel = getProfileLevel(totalXP);
+  const nextLevelXP = [200, 400, 700, 1000][profileLevel]; // cap Master
   const xpPercent = Math.min((totalXP / nextLevelXP) * 100, 100);
   const avatarUrl = selectedChild?.avatar_url;
   const childName = selectedChild?.name || 'Your Child';
@@ -85,8 +93,8 @@ export default function RPGTraitPanel() {
         />
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-semibold truncate">{childName}</h2>
-          {childAge && <p className="text-xs text-gray-500">Age: {childAge}</p>}
-          <p className="text-sm text-gray-600">Level {level + 1} – {levelNames[level]}</p>
+          {childAge !== null && <p className="text-xs text-gray-500">Age: {childAge}</p>}
+          <p className="text-sm text-gray-600">Level {profileLevel + 1} – {profileLevelNames[profileLevel]}</p>
           <div className="mt-1 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-2 bg-green-500 rounded-full transition-all duration-700"
@@ -106,7 +114,7 @@ export default function RPGTraitPanel() {
       {/* Trait Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {traits.map((trait) => {
-          const traitLevel = getLevel(trait.score);
+          const traitLevel = getTraitLevel(trait.score);
           const percent = Math.min(trait.score, 100);
           return (
             <div
@@ -126,7 +134,7 @@ export default function RPGTraitPanel() {
                   style={{ width: `${percent}%`, backgroundColor: pillarHex[trait.pillar_id] }}
                 />
               </div>
-              <div className="text-xs text-gray-600 mt-1">Level: <strong>{levelNames[traitLevel]}</strong></div>
+              <div className="text-xs text-gray-600 mt-1">Level: <strong>{traitLevelNames[traitLevel]}</strong></div>
             </div>
           );
         })}
