@@ -20,6 +20,14 @@ interface ChallengeLog {
   completed_at: string;
 }
 
+interface TraitScoreHistory {
+  id: string;
+  child_id: string;
+  trait_id: number;
+  score_delta: number;
+  completed_at: string;
+}
+
 const pillarHex: Record<number, string> = {
   1: '#F7B801', // Independence & Problem-Solving
   2: '#38A169', // Growth Mindset & Resilience
@@ -64,6 +72,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const [error, setError] = useState<string | null>(null);
   const [mostImprovedTrait, setMostImprovedTrait] = useState<string>('N/A');
   const [challengeLogs, setChallengeLogs] = useState<ChallengeLog[]>([]);
+  const [traitScoreHistory, setTraitScoreHistory] = useState<TraitScoreHistory[]>([]);
 
   useEffect(() => {
     const fetchTraits = async () => {
@@ -134,6 +143,24 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
     fetchLogs();
   }, [selectedChildId, token]);
 
+  // Fetch trait_score_history for advanced XP stats
+  useEffect(() => {
+    const fetchTraitScoreHistory = async () => {
+      if (!selectedChildId || !token) return;
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-score-history?child_id=${selectedChildId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch trait score history');
+        const data = await response.json();
+        setTraitScoreHistory(data);
+      } catch (err) {
+        // Ignore for now
+      }
+    };
+    fetchTraitScoreHistory();
+  }, [selectedChildId, token]);
+
   const totalXP = traits.reduce((sum, trait) => sum + trait.score, 0);
   const profileLevel = getProfileLevel(totalXP);
   const nextLevelXP = [200, 400, 700, 1000, 1200][profileLevel]; // safe cap
@@ -163,14 +190,14 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const topTraitLabel = topTrait ? `${topTrait.trait_name} (${Math.round(topTrait.score)} XP)` : 'N/A';
 
   // 2. Fastest Growing Trait (Last 7 Days)
-  function getFastestGrowingTrait(challengeLogs: ChallengeLog[], traits: Trait[]) {
+  function getFastestGrowingTraitFromHistory(traitScoreHistory: TraitScoreHistory[], traits: Trait[]) {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 7);
     const recentXPMap: Record<number, number> = {};
-    challengeLogs.forEach(log => {
-      const completedAt = new Date(log.completed_at);
+    traitScoreHistory.forEach(entry => {
+      const completedAt = new Date(entry.completed_at);
       if (completedAt >= cutoff) {
-        recentXPMap[log.trait_id] = (recentXPMap[log.trait_id] || 0) + log.xp_value;
+        recentXPMap[entry.trait_id] = (recentXPMap[entry.trait_id] || 0) + entry.score_delta;
       }
     });
     const growthRates = traits
@@ -188,19 +215,19 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
       percent: Math.round(fastest.growth * 100),
     };
   }
-  const fastest = getFastestGrowingTrait(challengeLogs, traits);
+  const fastest = getFastestGrowingTraitFromHistory(traitScoreHistory, traits);
   const fastestLabel = fastest ? `${fastest.name} (+${fastest.percent}%)` : 'N/A';
 
   // 3. Weekly XP Gained
-  function getWeeklyXPGained(challengeLogs: ChallengeLog[]) {
+  function getWeeklyXPGainedFromHistory(traitScoreHistory: TraitScoreHistory[]) {
     const now = new Date();
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - now.getDay()); // Sunday start
-    return challengeLogs
-      .filter(log => new Date(log.completed_at) >= weekStart)
-      .reduce((sum, log) => sum + log.xp_value, 0);
+    return traitScoreHistory
+      .filter(entry => new Date(entry.completed_at) >= weekStart)
+      .reduce((sum, entry) => sum + entry.score_delta, 0);
   }
-  const weeklyXP = getWeeklyXPGained(challengeLogs);
+  const weeklyXP = getWeeklyXPGainedFromHistory(traitScoreHistory);
   const weeklyXPLabel = `+${weeklyXP} XP`;
 
   // 4. Next Trait to Master
