@@ -166,13 +166,13 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-2xl font-bold">Daily Challenge Completed!</span>
+                <span className="text-3xl font-heading font-bold">Daily Challenge Completed!</span>
               </div>
               <button
                 onClick={() => navigate('/all-challenges')}
                 className="px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200 mt-4"
               >
-                View all Challenges
+                See More Challenges
               </button>
             </div>
           </div>
