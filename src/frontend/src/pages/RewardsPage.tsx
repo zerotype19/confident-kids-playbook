@@ -142,7 +142,7 @@ export default function RewardsPage() {
 
         {selectedChild ? (
           <>
-            <RPGTraitPanel />
+            <RPGTraitPanel progress={progress} rewards={rewards} />
             <ConfidenceStar 
               progress={progress}
               childId={selectedChild.id}

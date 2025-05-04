@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useChildContext } from '../../contexts/ChildContext';
+import { ProgressSummary, Reward } from '../../types';
 
 interface Trait {
   trait_id: number;
@@ -35,16 +36,17 @@ export function getProfileLevel(totalXP: number): number {
   return 0;
 }
 
-export default function RPGTraitPanel() {
+interface RPGTraitPanelProps {
+  progress: ProgressSummary | null;
+  rewards: Reward[];
+}
+
+export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps) {
   const { selectedChildId, token } = useAuth();
   const { selectedChild } = useChildContext();
   const [traits, setTraits] = useState<Trait[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Mock data for streak and trophies
-  const streak = 7; // Replace with real data if available
-  const trophies = 3; // Replace with real data if available
 
   useEffect(() => {
     const fetchTraits = async () => {
@@ -77,6 +79,13 @@ export default function RPGTraitPanel() {
   const childAge = selectedChild?.birthdate
     ? Math.floor((Date.now() - new Date(selectedChild.birthdate).getTime()) / (1000 * 60 * 60 * 24 * 365.25))
     : null;
+
+  // Use real stats from props
+  const streak = progress?.current_streak || 0;
+  const trophies = rewards?.length || 0;
+  const totalChallenges = progress?.milestones_completed || 0;
+  const longestStreak = progress?.longest_streak || 0;
+  const weeklyChallenges = progress?.weekly_challenges || 0;
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -143,16 +152,22 @@ export default function RPGTraitPanel() {
       {/* Stats & Awards Summary (Optional/Stretch) */}
       <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-wrap gap-6 items-center justify-between text-sm text-gray-700">
         <div>
-          <span className="font-semibold">Total Challenges:</span> 24
+          <span className="font-semibold">Total Challenges:</span> {totalChallenges}
         </div>
         <div>
           <span className="font-semibold">Most Improved Trait:</span> Grit
         </div>
         <div>
-          <span className="font-semibold">Awards:</span> <span className="text-yellow-500">🏆</span> 3
+          <span className="font-semibold">Awards:</span> <span className="text-yellow-500">🏆</span> {trophies}
         </div>
         <div>
-          <span className="font-semibold">Streak:</span> <span className="text-orange-500">🔥</span> 7 days
+          <span className="font-semibold">Streak:</span> <span className="text-orange-500">🔥</span> {streak} days
+        </div>
+        <div>
+          <span className="font-semibold">Longest Streak:</span> <span className="text-orange-500">🔥</span> {longestStreak} days
+        </div>
+        <div>
+          <span className="font-semibold">Weekly Challenges:</span> <span className="text-blue-500">📅</span> {weeklyChallenges}
         </div>
         {/* Add more stats or links as needed */}
       </div>
