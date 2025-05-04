@@ -292,14 +292,11 @@ export async function getChildProgress(childId: string, env: Env) {
     challenge_types: string;
   }>();
 
-  console.log('Weekly challenges calculation:', {
+  console.log('Weekly challenges calculation (DEBUG):', {
     childId,
-    currentTime: weeklyChallengesQuery?.current_time,
     weekStart: weeklyChallengesQuery?.week_start,
     weekEnd: weeklyChallengesQuery?.week_end,
     completedDates: weeklyChallengesQuery?.completed_dates,
-    challengeIds: weeklyChallengesQuery?.challenge_ids,
-    challengeTypes: weeklyChallengesQuery?.challenge_types,
     count: weeklyChallengesQuery?.weekly_challenges
   });
 
