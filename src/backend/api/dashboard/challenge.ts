@@ -69,6 +69,22 @@ export async function challenge({ request, env }: { request: Request; env: Env }
 
     console.log('Found child with age range:', child.age_range);
 
+    // 1. Check if the child has already completed a challenge today
+    const completedToday = await env.DB.prepare(`
+      SELECT 1 FROM challenge_logs
+      WHERE child_id = ?
+      AND date(completed_at) = date('now')
+      LIMIT 1
+    `).bind(childId).first();
+
+    if (completedToday) {
+      // Child has already completed a challenge today
+      return new Response(JSON.stringify({ completedToday: true }), {
+        status: 200,
+        headers: corsHeaders()
+      });
+    }
+
     // Get a random age-appropriate challenge that hasn't been completed today
     const result = await env.DB.prepare(`
       WITH current_theme AS (
