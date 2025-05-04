@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PostChallengeReflectionModal from '../challenges/PostChallengeReflectionModal';
 import { useChildContext } from '../../contexts/ChildContext';
@@ -50,6 +50,10 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
   const { selectedChild } = useChildContext();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setIsCompleted(challenge?.is_completed || false);
+  }, [challenge]);
+
   const pillarHex: Record<number, string> = {
     1: '#F7B801', // Independence & Problem-Solving
     2: '#38A169', // Growth Mindset & Resilience
@@ -60,6 +64,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
 
   const handleReflectionSubmit = async ({ feeling, reflection }: { feeling: number; reflection: string }) => {
     try {
+      setIsCompleting(true);
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No authentication token found');
