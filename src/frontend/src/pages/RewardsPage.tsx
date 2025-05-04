@@ -8,6 +8,7 @@ import ProgressTracker from '../components/rewards/ProgressTracker';
 import ConfidenceStar from '../components/rewards/ConfidenceStar';
 import CustomButton from '../components/CustomButton';
 import { useNavigate } from 'react-router-dom';
+import RPGTraitPanel from '../components/dashboard/RPGTraitPanel';
 
 export default function RewardsPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
@@ -141,6 +142,7 @@ export default function RewardsPage() {
 
         {selectedChild ? (
           <>
+            <RPGTraitPanel />
             <ConfidenceStar 
               progress={progress}
               childId={selectedChild.id}
