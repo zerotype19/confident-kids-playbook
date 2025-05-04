@@ -79,12 +79,79 @@ export async function onRequestGet(context: { request: Request; env: Env; params
       params = [childId, childId];
     }
 
-    const result = await env.DB.prepare(query).bind(...params).all();
+    const traitResults = await env.DB.prepare(query).bind(...params).all();
+    const traits = traitResults.results;
 
-    console.log('Trait Scores API: Successfully fetched scores:', result.results);
+    // --- Advanced RPG Stats ---
+    // 1. Weekly XP Gained (Sunday–now)
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const weekStart = new Date(now);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(now.getDate() - dayOfWeek);
+    const weekStartISO = weekStart.toISOString();
+    const weeklyXPQuery = await env.DB.prepare(`
+      SELECT SUM(score_delta) as weekly_xp
+      FROM trait_score_history
+      WHERE child_id = ?
+        AND completed_at >= ?
+    `).bind(childId, weekStartISO).first<{ weekly_xp: number }>();
+    const weekly_xp_gained = weeklyXPQuery?.weekly_xp || 0;
+
+    // 2. Fastest Growing Trait (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const sevenDaysAgoISO = sevenDaysAgo.toISOString();
+    const historyRows = await env.DB.prepare(`
+      SELECT trait_id, SUM(score_delta) as recent_delta
+      FROM trait_score_history
+      WHERE child_id = ? AND completed_at >= ?
+      GROUP BY trait_id
+    `).bind(childId, sevenDaysAgoISO).all<{ trait_id: number; recent_delta: number }>();
+    const traitMap = Object.fromEntries(traits.map((t: any) => [t.trait_id, t]));
+    const growthRates = historyRows.results.map(row => {
+      const currentScore = traitMap[row.trait_id]?.score || 0;
+      const previousScore = currentScore - row.recent_delta;
+      const growth = previousScore > 0 ? row.recent_delta / previousScore : row.recent_delta > 0 ? 1 : 0;
+      return {
+        trait_id: row.trait_id,
+        growthPercent: Math.round(growth * 100),
+        trait_name: traitMap[row.trait_id]?.trait_name || `Trait ${row.trait_id}`
+      };
+    }).filter(r => r.growthPercent > 0).sort((a, b) => b.growthPercent - a.growthPercent);
+    const fastest_growing_trait = growthRates[0] || null;
+
+    // 3. Next Trait to Master
+    const traitTierThresholds = [15, 35, 60, 100];
+    const traitTierEmojis = ['🔸', '🔹', '🟢', '🟣', '🌟'];
+    let best = null;
+    for (const trait of traits) {
+      const score = typeof trait.score === 'number' ? trait.score : Number(trait.score);
+      for (let i = 0; i < traitTierThresholds.length; i++) {
+        const nextXP = traitTierThresholds[i];
+        if (score < nextXP) {
+          const gap = nextXP - score;
+          if (!best || gap < best.xp_remaining) {
+            best = {
+              trait_name: trait.trait_name,
+              xp_remaining: Math.round(gap),
+              from: traitTierEmojis[i - 1] || traitTierEmojis[0],
+              to: traitTierEmojis[i]
+            };
+          }
+          break;
+        }
+      }
+    }
+    const next_trait_to_master = best;
 
     return new Response(
-      JSON.stringify({ data: result.results }),
+      JSON.stringify({
+        data: traits,
+        weekly_xp_gained,
+        fastest_growing_trait,
+        next_trait_to_master
+      }),
       {
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' }
       }
