@@ -112,10 +112,17 @@ export async function onRequestGet(context: { request: Request; env: Env; params
     const growthRates = historyRows.results.map(row => {
       const currentScore = traitMap[row.trait_id]?.score || 0;
       const previousScore = currentScore - row.recent_delta;
-      const growth = previousScore > 0 ? row.recent_delta / previousScore : row.recent_delta > 0 ? 1 : 0;
+      let growth = 0;
+      if (previousScore > 0) {
+        growth = row.recent_delta / previousScore;
+      } else if (row.recent_delta > 0) {
+        growth = 1;
+      }
+      // Cap growth to 999% for sanity
+      const growthPercent = Math.min(Math.round(growth * 100), 999);
       return {
         trait_id: row.trait_id,
-        growthPercent: Math.round(growth * 100),
+        growthPercent,
         trait_name: traitMap[row.trait_id]?.trait_name || `Trait ${row.trait_id}`
       };
     }).filter(r => r.growthPercent > 0).sort((a, b) => b.growthPercent - a.growthPercent);
@@ -131,12 +138,16 @@ export async function onRequestGet(context: { request: Request; env: Env; params
         const nextXP = traitTierThresholds[i];
         if (score < nextXP) {
           const gap = nextXP - score;
+          // Only show a tier up (from != to)
+          const fromTier = i === 0 ? traitTierEmojis[0] : traitTierEmojis[i - 1];
+          const toTier = traitTierEmojis[i];
+          if (fromTier === toTier) continue;
           if (!best || gap < best.xp_remaining) {
             best = {
               trait_name: trait.trait_name,
               xp_remaining: Math.round(gap),
-              from: traitTierEmojis[i - 1] || traitTierEmojis[0],
-              to: traitTierEmojis[i]
+              from: fromTier,
+              to: toTier
             };
           }
           break;
