@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Link } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import Modal from "../components/Modal"
-import PageWrapper from "../components/PageWrapper"
+import YouTubePlayer from "../components/YouTubePlayer"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -11,37 +9,10 @@ interface GoogleCredentialResponse {
   g_csrf_token: string
 }
 
-interface AuthResponse {
-  status: 'ok' | 'error'
-  jwt?: string
-  user?: {
-    id: string
-    email: string
-    name: string
-    picture: string
-  }
-  message?: string
-  details?: {
-    type: string
-    hasGoogleClientId: boolean
-    hasCredential: boolean
-  }
-}
-
-interface GoogleLoginError extends Error {
-  code?: string
-  message: string
-}
-
 interface GoogleIdentityServices {
   initialize: (config: {
     client_id: string;
     callback: (response: GoogleCredentialResponse) => Promise<void>;
-    auto_select?: boolean;
-    cancel_on_tap_outside?: boolean;
-    context?: string;
-    ux_mode?: "popup" | "redirect";
-    prompt_parent_id?: string;
   }) => void;
   renderButton: (
     element: HTMLElement | null,
@@ -49,19 +20,13 @@ interface GoogleIdentityServices {
       theme: "outline" | "filled";
       size: "large" | "medium" | "small";
       shape: "rectangular" | "pill" | "circle";
-      width?: string;
-      text?: string;
-      type?: "standard" | "icon";
-      logo_alignment?: "left" | "center";
     }
   ) => void;
   disableAutoSelect: () => Promise<void>;
   revoke: () => Promise<void>;
   prompt: () => void;
-  cancel: () => void;
 }
 
-// Declare Google Identity Services types
 declare global {
   interface Window {
     google: {
@@ -76,7 +41,6 @@ export default function HomePage(): JSX.Element {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const navigate = useNavigate()
   const { isAuthenticated, login } = useAuth()
-  const [activeModal, setActiveModal] = useState<string | null>(null)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -84,7 +48,6 @@ export default function HomePage(): JSX.Element {
     }
   }, [isAuthenticated, navigate])
 
-  // Safety check for environment variable
   if (!googleClientId) {
     console.error("❌ VITE_GOOGLE_CLIENT_ID is missing in environment variables")
     return (
@@ -94,20 +57,15 @@ export default function HomePage(): JSX.Element {
     )
   }
 
-  console.log("✅ Using Google Client ID:", googleClientId)
-
   const handleGoogleLogin = async (response: GoogleCredentialResponse) => {
     try {
       console.log("🔑 Received Google credential")
-      // Store credential temporarily for cleanup
       localStorage.setItem('google_credential', response.credential)
       
-      // Get invite code from URL if present
       const params = new URLSearchParams(window.location.search);
       const inviteCode = params.get('invite_code');
       console.log('Invite code from URL:', inviteCode);
       
-      // Exchange Google credential for JWT
       const apiUrl = import.meta.env.VITE_API_URL
       const authResponse = await fetch(`${apiUrl}/api/auth/google`, {
         method: 'POST',
@@ -130,10 +88,8 @@ export default function HomePage(): JSX.Element {
       const { jwt } = await authResponse.json()
       console.log("✅ Received JWT, logging in")
       await login(jwt)
-      // Clear the temporary credential after successful login
       localStorage.removeItem('google_credential')
       
-      // Fetch user data to check onboarding status
       const userResponse = await fetch(`${apiUrl}/api/user/profile`, {
         headers: {
           'Authorization': `Bearer ${jwt}`,
@@ -148,7 +104,6 @@ export default function HomePage(): JSX.Element {
       
       const userData = await userResponse.json()
       
-      // Redirect based on onboarding status
       if (userData.has_completed_onboarding) {
         navigate('/dashboard')
       } else {
@@ -156,7 +111,6 @@ export default function HomePage(): JSX.Element {
       }
     } catch (error) {
       console.error('Login error:', error)
-      // Clear the temporary credential on error
       localStorage.removeItem('google_credential')
     }
   }
@@ -164,14 +118,12 @@ export default function HomePage(): JSX.Element {
   useEffect(() => {
     const loadGoogleScript = async () => {
       try {
-        // Check if script is already loaded
         if (window.google) {
           console.log('Google script already loaded');
           initializeGoogleSignIn();
           return;
         }
 
-        // Load the Google Identity Services script
         const script = document.createElement('script');
         script.src = 'https://accounts.google.com/gsi/client';
         script.async = true;
@@ -182,7 +134,6 @@ export default function HomePage(): JSX.Element {
         };
         script.onerror = (error) => {
           console.error('Failed to load Google script:', error);
-          // Retry loading the script after a delay
           setTimeout(() => {
             console.log('Retrying Google script load...');
             loadGoogleScript();
@@ -201,14 +152,12 @@ export default function HomePage(): JSX.Element {
           return;
         }
 
-        // Initialize Google Identity Services
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           callback: handleGoogleLogin,
           auto_select: false
         });
 
-        // Render the sign-in button
         const button = document.getElementById('google-login-button-hero');
         if (button) {
           window.google.accounts.id.renderButton(button, {
@@ -218,7 +167,6 @@ export default function HomePage(): JSX.Element {
             width: '300'
           });
           
-          // Add a click handler to the button container
           button.addEventListener('click', (e) => {
             console.log('Google button clicked');
             e.preventDefault();
@@ -234,7 +182,6 @@ export default function HomePage(): JSX.Element {
     loadGoogleScript();
 
     return () => {
-      // Cleanup function
       const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
       if (script) {
         script.remove();
@@ -249,160 +196,127 @@ export default function HomePage(): JSX.Element {
     };
   }, [googleClientId]);
 
-  const openModal = (modalName: string) => {
-    setActiveModal(modalName)
-  }
-
-  const closeModal = () => {
-    setActiveModal(null)
-  }
-
-  const handleGetStarted = () => {
-    // Create a temporary button element
-    const tempButton = document.createElement('div');
-    tempButton.id = 'temp-google-button';
-    tempButton.style.display = 'none';
-    document.body.appendChild(tempButton);
-    
-    // Render the Google button on this temporary element
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.renderButton(
-        tempButton,
-        { theme: "filled", size: "large", shape: "pill" }
-      );
-      
-      // Trigger a click on the button
-      const googleButton = document.querySelector('#temp-google-button > div');
-      if (googleButton) {
-        (googleButton as HTMLElement).click();
-      }
-      
-      // Clean up after a short delay
-      setTimeout(() => {
-        document.body.removeChild(tempButton);
-      }, 1000);
-    } else {
-      console.error('Google Identity Services not loaded');
-    }
-  };
-
   return (
-    <PageWrapper>
-      {/* Main content */}
-     <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8">
+    <main className="font-sans text-[#2E2E2E]">
+      {/* Sticky Header */}
+      <header className="bg-white sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
+          <img src="/logo.svg" alt="Kidoova" className="h-8" />
+          <nav className="hidden md:flex gap-6 text-sm font-medium text-[#8152A0]">
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Features</a>
+            <a href="#pillars">Pillars</a>
+            <a href="#rewards">Rewards</a>
+            <a href="#testimonials">Testimonials</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <div id="google-login-button-hero"></div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="text-center py-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Raising Confident Kids Starts Here</h1>
-        <p className="text-lg md:text-xl mb-6 max-w-2xl mx-auto">
-          A research-backed app that helps your child build independence, resilience, and purpose—one rewarding day at a time.
-        </p>
-         <center>
-              <div 
-                id="google-login-button-hero" 
-                className="w-full max-w-md transform scale-125 md:scale-150"
-              ></div></center>
+      <section className="bg-[#FFF6FB] py-20 px-6 text-center">
+        <h1 className="text-5xl font-bold mb-4">Raise Confident, Resilient Kids</h1>
+        <p className="text-xl max-w-2xl mx-auto mb-6 text-[#555]">Daily challenges backed by research, built for busy parents. Just one simple step each day.</p>
+        <div id="google-login-button-hero" className="mx-auto"></div>
       </section>
 
-      {/* App Preview Section */}
-      <section className="py-16 bg-gray-100 text-center">
-        <h2 className="text-3xl font-bold mb-4">See Kidoova In Action</h2>
-        <p className="text-lg mb-6">Scroll through a real walkthrough of how your child tracks progress, earns rewards, and builds confidence.</p>
-        <div className="flex justify-center">
-          <div className="w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
-            {/* Placeholder for demo video */}
-            <video
-              controls
-              autoPlay
-              muted
-              loop
-              className="w-full h-full object-cover"
-            >
-              <source src="/kidoova.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+      {/* Video Section */}
+      <section className="bg-white py-16 px-6 text-center">
+        <h2 className="text-3xl font-bold mb-6">How Kidoova Helps</h2>
+        <div className="max-w-3xl mx-auto">
+          <YouTubePlayer videoId="tiOA9z6kVZs" />
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20 bg-white px-6 text-center">
+        <h2 className="text-4xl font-bold mb-12">How Kidoova Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Step 1: Choose a Focus</h3><p className="text-[#555]">Pick a confidence pillar like resilience or independence.</p></div>
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Step 2: Complete Challenges</h3><p className="text-[#555]">Do simple daily tasks together with your child.</p></div>
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Step 3: Watch Growth Happen</h3><p className="text-[#555]">Earn XP, track progress, and unlock rewards.</p></div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="bg-[#FFF6FB] py-20 px-6 text-center">
+        <h2 className="text-4xl font-bold mb-12">What Makes Kidoova Different?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Trait System</h3><p className="text-[#555]">Build traits like grit, empathy, and focus through daily practice.</p></div>
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">XP & Progress</h3><p className="text-[#555]">Earn experience points and see visual progress over time.</p></div>
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Confidence Star</h3><p className="text-[#555]">A unique tracker that fills up as your child completes challenges.</p></div>
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Rewards Engine</h3><p className="text-[#555]">Motivating milestones and streaks that celebrate growth.</p></div>
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Parenting Coach (AI)</h3><p className="text-[#555]">Ask questions, get prompts, and connect better using AI.</p></div>
+          <div><h3 className="text-xl font-semibold text-[#8152A0] mb-2">Built-In Reflection</h3><p className="text-[#555]">Simple microjournaling helps kids reflect and grow emotionally.</p></div>
+        </div>
+      </section>
+
+      {/* Pillars */}
+      <section id="pillars" className="py-20 px-6 text-center bg-white">
+        <h2 className="text-4xl font-bold mb-10">The 5 Pillars of Confidence</h2>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-[#8152A0] font-semibold text-lg">
+          <div>Independence</div><div>Growth Mindset</div><div>Social Confidence</div><div>Purpose</div><div>Managing Fear</div>
+        </div>
+      </section>
+
+      {/* Rewards */}
+      <section id="rewards" className="bg-[#FFF6FB] py-20 px-6 text-center">
+        <h2 className="text-4xl font-bold mb-10">Progress Kids Can See (and Feel)</h2>
+        <p className="text-lg max-w-2xl mx-auto text-[#555] mb-6">Unlock rewards, build streaks, and fill the star together.</p>
+        <img src="/screens/star-and-rewards.png" alt="Confidence Tracker" className="max-w-2xl mx-auto rounded-lg shadow-lg" />
+      </section>
+
+      {/* Testimonials */}
+      <section id="testimonials" className="bg-white py-20 px-6 text-center">
+        <h2 className="text-4xl font-bold mb-12">What Parents Are Saying</h2>
+        <div className="flex flex-col md:flex-row gap-6 justify-center">
+          <div className="bg-[#FFF6FB] p-6 rounded-lg shadow max-w-md mx-auto">
+            <p className="text-[#555] mb-2">"My daughter is more confident and excited to try new things thanks to Kidoova."</p>
+            <p className="text-sm text-[#8152A0] font-semibold">— Rachel, mom of 6-year-old</p>
+          </div>
+          <div className="bg-[#FFF6FB] p-6 rounded-lg shadow max-w-md mx-auto">
+            <p className="text-[#555] mb-2">"This is what modern parenting tools should look like. Thoughtful, easy, and actually helpful."</p>
+            <p className="text-sm text-[#8152A0] font-semibold">— Marco, dad of two</p>
           </div>
         </div>
       </section>
 
-      {/* Rewards & Tracking */}
-      <section className="py-16 px-4">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-8">Track Growth. Celebrate Wins. Earn Rewards.</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition-shadow">
-              <div className="text-green-500 mb-4 text-4xl">🎯</div>
-              <h3 className="text-xl font-semibold mb-2">Daily Progress</h3>
-              <p>See how your child improves every day across five key areas of confidence.</p>
-            </div>
-            <div className="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition-shadow">
-              <div className="text-yellow-500 mb-4 text-4xl">🏆</div>
-              <h3 className="text-xl font-semibold mb-2">Confidence Rewards</h3>
-              <p>Earn points and unlock milestone badges as your child completes challenges and hits streaks.</p>
-            </div>
-            <div className="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition-shadow">
-              <div className="text-blue-500 mb-4 text-4xl">📊</div>
-              <h3 className="text-xl font-semibold mb-2">Visual Trackers</h3>
-              <p>Motivate your child with visual charts that highlight progress, consistency, and streaks.</p>
-            </div>
-          </div>
+      {/* FAQ */}
+      <section id="faq" className="bg-[#FFF6FB] py-20 px-6">
+        <h2 className="text-4xl font-bold text-center mb-10">Questions? We've Got Answers.</h2>
+        <div className="max-w-3xl mx-auto space-y-6">
+          <details className="bg-white p-4 rounded-md shadow">
+            <summary className="cursor-pointer font-semibold text-[#8152A0]">What ages is Kidoova for?</summary>
+            <p className="text-sm text-gray-600 mt-2">Ages 3–13, with personalized experiences by age group.</p>
+          </details>
+          <details className="bg-white p-4 rounded-md shadow">
+            <summary className="cursor-pointer font-semibold text-[#8152A0]">How long does it take each day?</summary>
+            <p className="text-sm text-gray-600 mt-2">Most challenges take 5–10 minutes. Easy to fit into your day.</p>
+          </details>
+          <details className="bg-white p-4 rounded-md shadow">
+            <summary className="cursor-pointer font-semibold text-[#8152A0]">Can both parents use it?</summary>
+            <p className="text-sm text-gray-600 mt-2">Yes, you can share access and track together.</p>
+          </details>
         </div>
       </section>
 
-{/* Testimonials */}
-<section className="py-16 bg-white text-center">
-  <h2 className="text-3xl font-bold mb-8">What Parents Are Saying</h2>
-  <div className="max-w-4xl mx-auto space-y-12">
-    <blockquote className="text-lg italic relative">
-      "My son asks for his challenge every morning. It's become part of our rhythm."
-      <span className="block mt-4 font-semibold text-gray-700">— Amanda R., Mom of 6-year-old</span>
-    </blockquote>
-    <blockquote className="text-lg italic relative">
-      "I love how simple it is, and how much better my daughter handles setbacks now."
-      <span className="block mt-4 font-semibold text-gray-700">— Jacob T., Dad of 8-year-old</span>
-    </blockquote>
-    <blockquote className="text-lg italic relative">
-      "We used to struggle with confidence. Now we celebrate progress every night."
-      <span className="block mt-4 font-semibold text-gray-700">— Priya M., Parent of 5-year-old twins</span>
-    </blockquote>
-  </div>
-</section>
-
-
-{/* Research Section */}
-<section className="py-16 bg-gray-50 text-center">
-  <h2 className="text-3xl font-bold mb-6">Backed by Research. Built for Real Life.</h2>
-  <p className="text-lg mb-10 max-w-3xl mx-auto">
-    Kidoova is grounded in decades of child development research, combining key principles from the world's top developmental psychologists into a daily, approachable format for parents.
-  </p>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto text-left">
-    <div>
-      <h3 className="font-semibold text-lg mb-2">Growth Mindset</h3>
-      <p>Based on the work of Dr. Carol Dweck, we teach kids that effort builds ability, helping them embrace challenges and learn from mistakes.</p>
-    </div>
-    <div>
-      <h3 className="font-semibold text-lg mb-2">Self-Efficacy & Confidence</h3>
-      <p>Following Albert Bandura's research, our challenges are designed to build belief in one's own abilities through mastery and encouragement.</p>
-    </div>
-    <div>
-      <h3 className="font-semibold text-lg mb-2">Social & Emotional Learning</h3>
-      <p>Influenced by Harvard's SEL framework and the Child Mind Institute, Kidoova supports emotional growth and communication skills in daily life.</p>
-    </div>
-  </div>
-  <p className="text-sm mt-8 text-gray-500">Sources: Dweck (2006), Bandura (1997), Denham (1998), Duckworth (2005), SEL in Schools (HGSE)</p>
-</section>
-
-
-      {/* CTA */}
-      <section className="py-16 text-center">
-        <h2 className="text-3xl font-bold mb-4">Your Journey Starts Today</h2>
-        <p className="text-lg mb-6">Join thousands of parents helping kids build confidence through practice, tracking, and rewards.</p>
-        <center>
-              <div 
-                id="google-login-button-hero2" 
-                className="w-full max-w-md transform scale-125 md:scale-150"
-              ></div></center>
+      {/* Final CTA + Story */}
+      <section className="bg-[#8152A0] text-white py-20 px-6 text-center">
+        <h2 className="text-4xl font-bold mb-4">We're Just Parents, Too.</h2>
+        <p className="max-w-xl mx-auto mb-6 text-lg">Kidoova was inspired by our journey raising Jack and Emmy. We built what we needed—and now we hope it helps your family too.</p>
+        <div id="google-login-button-cta" className="mx-auto"></div>
       </section>
-    </div>
-    </PageWrapper>
-  )
+
+      {/* Footer */}
+      <footer className="bg-white py-12 px-6 text-center text-sm text-gray-500">
+        <p>Kidoova © 2025. All rights reserved.</p>
+        <div className="mt-4 space-x-4">
+          <a href="/privacy" className="underline">Privacy Policy</a>
+          <a href="/terms" className="underline">Terms</a>
+          <a href="/support" className="underline">Contact</a>
+        </div>
+      </footer>
+    </main>
+  );
 } 
