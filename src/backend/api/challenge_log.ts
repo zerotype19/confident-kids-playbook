@@ -104,7 +104,8 @@ export async function onRequest(context: { request: Request; env: Env }) {
 
     if (existingLog) {
       console.log('Found existing completion:', existingLog);
-      return new Response(JSON.stringify({ error: 'Challenge already completed' }), {
+      // Return a clear error message for the frontend
+      return new Response(JSON.stringify({ error: 'Challenge already completed for this child.' }), {
         status: 400,
         headers: corsHeaders()
       });
