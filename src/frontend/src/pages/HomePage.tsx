@@ -283,7 +283,7 @@ export default function HomePage(): JSX.Element {
       <section id="rewards" className="bg-kidoova-background py-20 px-6 text-center">
         <h2 className="text-4xl font-bold mb-10">Progress Kids Can See (and Feel)</h2>
         <p className="text-lg max-w-2xl mx-auto text-kidoova-green mb-6">Unlock rewards, build streaks, and fill the star together.</p>
-        <img src="/screens/star-and-rewards.png" alt="Confidence Tracker" className="max-w-2xl mx-auto rounded-lg shadow-kidoova" />
+        <img src="/kidoova_rewards_collage.png" alt="Confidence Tracker" className="max-w-2xl mx-auto rounded-lg shadow-kidoova" />
       </section>
 
       {/* Testimonials */}
