@@ -300,11 +300,6 @@ export default function HomePage(): JSX.Element {
           src="/kidoova_rewards_collage.png" 
           alt="Confidence Tracker" 
           className="max-w-2xl mx-auto rounded-lg shadow-kidoova"
-          onError={(e) => {
-            console.error('Error loading image:', e);
-            const target = e.target as HTMLImageElement;
-            target.src = '/screens/star-and-rewards.png'; // Fallback to previous image
-          }}
         />
       </section>
 
