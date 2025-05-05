@@ -1,7 +1,10 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import YouTubePlayer from "../components/YouTubePlayer"
+import PrivacyPolicyModal from "../components/PrivacyPolicyModal"
+import TermsModal from "../components/TermsModal"
+import ContactModal from "../components/ContactModal"
 
 interface GoogleCredentialResponse {
   credential: string
@@ -41,6 +44,9 @@ export default function HomePage(): JSX.Element {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const navigate = useNavigate()
   const { isAuthenticated, login } = useAuth()
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false)
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -331,11 +337,25 @@ export default function HomePage(): JSX.Element {
       <footer className="bg-white py-12 px-6 text-center text-sm text-kidoova-green">
         <p>Kidoova © 2025. All rights reserved.</p>
         <div className="mt-4 space-x-4">
-          <a href="/privacy" className="underline">Privacy Policy</a>
-          <a href="/terms" className="underline">Terms</a>
-          <a href="/support" className="underline">Contact</a>
+          <button onClick={() => setIsPrivacyModalOpen(true)} className="underline">Privacy Policy</button>
+          <button onClick={() => setIsTermsModalOpen(true)} className="underline">Terms</button>
+          <button onClick={() => setIsContactModalOpen(true)} className="underline">Contact</button>
         </div>
       </footer>
+
+      {/* Modals */}
+      <PrivacyPolicyModal 
+        isOpen={isPrivacyModalOpen} 
+        onClose={() => setIsPrivacyModalOpen(false)} 
+      />
+      <TermsModal 
+        isOpen={isTermsModalOpen} 
+        onClose={() => setIsTermsModalOpen(false)} 
+      />
+      <ContactModal 
+        isOpen={isContactModalOpen} 
+        onClose={() => setIsContactModalOpen(false)} 
+      />
     </main>
   );
 } 
