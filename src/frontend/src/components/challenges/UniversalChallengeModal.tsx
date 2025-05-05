@@ -16,6 +16,7 @@ interface Challenge {
   guide_prompt: string;
   success_signals: string;
   why_it_matters: string;
+  traits?: { trait_id: number; trait_name: string; weight: number }[];
 }
 
 interface UniversalChallengeModalProps {
@@ -62,6 +63,9 @@ export default function UniversalChallengeModal({
   const [feeling, setFeeling] = useState(3); // Default to middle value
   const [reflection, setReflection] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showXPSummary, setShowXPSummary] = useState(false);
+  const [xpGains, setXPGains] = useState<{ trait_name: string; gain: number; new_total: number }[]>([]);
+  const [totalXPGain, setTotalXPGain] = useState(0);
   const { token } = useAuth();
 
   const cards: Card[] = [
@@ -141,10 +145,37 @@ export default function UniversalChallengeModal({
         throw new Error('Failed to mark challenge as complete');
       }
 
-      if (onComplete) {
-        onComplete();
+      // Calculate XP gains
+      const multiplier = 0.6 + 0.1 * feeling;
+      const base = 10;
+      const gains = challenge.traits?.map(trait => ({
+        trait_name: trait.trait_name,
+        gain: Math.round(base * multiplier * trait.weight),
+        new_total: 0 // Will be updated after fetching current scores
+      })) || [];
+
+      // Fetch current trait scores to calculate new totals
+      const scoresResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-scores/${childId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (scoresResponse.ok) {
+        const scoresData = await scoresResponse.json();
+        const currentScores = scoresData.data;
+        
+        // Update new totals
+        gains.forEach(gain => {
+          const currentTrait = currentScores.find((t: any) => t.trait_name === gain.trait_name);
+          gain.new_total = (currentTrait?.score || 0) + gain.gain;
+        });
       }
-      onClose();
+
+      setXPGains(gains);
+      setTotalXPGain(gains.reduce((sum, gain) => sum + gain.gain, 0));
+      setShowXPSummary(true);
     } catch (error) {
       console.error('Error completing challenge:', error);
     } finally {
@@ -152,7 +183,44 @@ export default function UniversalChallengeModal({
     }
   };
 
+  const renderXPSummary = () => (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-center text-kidoova-green">XP Gained! 🎉</h2>
+      <div className="space-y-2">
+        {xpGains.map((gain, index) => (
+          <div key={index} className="flex justify-between items-center text-sm">
+            <span>{gain.trait_name}</span>
+            <span className="text-green-600">
+              +{gain.gain} XP ({gain.new_total} total)
+            </span>
+          </div>
+        ))}
+        <div className="border-t pt-2 mt-2 flex justify-between items-center font-semibold">
+          <span>Total XP Gained</span>
+          <span className="text-green-600">+{totalXPGain} XP</span>
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button
+          onClick={() => {
+            if (onComplete) {
+              onComplete();
+            }
+            onClose();
+          }}
+          className="px-4 py-2 bg-kidoova-green text-white rounded-lg hover:bg-kidoova-accent"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+
   const renderStep = () => {
+    if (showXPSummary) {
+      return renderXPSummary();
+    }
+
     const currentCard = cards[currentStep];
 
     if (currentCard.type === 'reflection') {
