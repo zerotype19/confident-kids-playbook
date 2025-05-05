@@ -164,16 +164,16 @@ export default function HomePage(): JSX.Element {
           auto_select: false
         });
 
-        const button = document.getElementById('google-login-button-hero');
-        if (button) {
-          window.google.accounts.id.renderButton(button, {
+        // Render a narrower button in the header
+        const headerButton = document.getElementById('google-login-button-hero');
+        if (headerButton) {
+          window.google.accounts.id.renderButton(headerButton, {
             theme: 'outline',
             size: 'large',
             shape: 'rectangular',
-            width: '300'
+            width: 160 // narrower width for header
           });
-          
-          button.addEventListener('click', (e) => {
+          headerButton.addEventListener('click', (e) => {
             console.log('Google button clicked');
             e.preventDefault();
           });
@@ -216,7 +216,7 @@ export default function HomePage(): JSX.Element {
             <a href="#testimonials">Testimonials</a>
             <a href="#faq">FAQ</a>
           </nav>
-          <div id="google-login-button-hero"></div>
+          <div id="google-login-button-hero" className="w-40"></div>
         </div>
       </header>
 
@@ -357,9 +357,9 @@ export default function HomePage(): JSX.Element {
       <footer className="bg-white py-12 px-6 text-center text-sm text-kidoova-green">
         <p>Kidoova © 2025. All rights reserved.</p>
         <div className="mt-4 space-x-4">
-          <button onClick={() => setIsPrivacyModalOpen(true)} className="text-kidoova-green bg-transparent p-0 rounded-none shadow-none border-none hover:underline focus:underline">Privacy Policy</button>
-          <button onClick={() => setIsTermsModalOpen(true)} className="text-kidoova-green bg-transparent p-0 rounded-none shadow-none border-none hover:underline focus:underline">Terms</button>
-          <button onClick={() => setIsContactModalOpen(true)} className="text-kidoova-green bg-transparent p-0 rounded-none shadow-none border-none hover:underline focus:underline">Contact</button>
+          <a onClick={() => setIsPrivacyModalOpen(true)} className="cursor-pointer text-kidoova-green hover:underline">Privacy Policy</a>
+          <a onClick={() => setIsTermsModalOpen(true)} className="cursor-pointer text-kidoova-green hover:underline">Terms</a>
+          <a onClick={() => setIsContactModalOpen(true)} className="cursor-pointer text-kidoova-green hover:underline">Contact</a>
         </div>
       </footer>
 
