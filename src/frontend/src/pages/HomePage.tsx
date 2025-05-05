@@ -231,7 +231,14 @@ export default function HomePage(): JSX.Element {
       <section className="bg-white py-16 px-6 text-center">
         <h2 className="text-3xl font-bold mb-6">How Kidoova Helps</h2>
         <div className="max-w-3xl mx-auto">
-          <YouTubePlayer videoId="224OrYZ9-YA" />
+          <video 
+            src="/kidoova.mp4" 
+            controls 
+            className="w-full rounded-lg shadow-kidoova"
+            poster="/video-poster.jpg"
+          >
+            Your browser does not support the video tag.
+          </video>
         </div>
       </section>
 
@@ -289,7 +296,16 @@ export default function HomePage(): JSX.Element {
       <section id="rewards" className="bg-kidoova-background py-20 px-6 text-center">
         <h2 className="text-4xl font-bold mb-10">Progress Kids Can See (and Feel)</h2>
         <p className="text-lg max-w-2xl mx-auto text-kidoova-green mb-6">Unlock rewards, build streaks, and fill the star together.</p>
-        <img src="/kidoova_rewards_collage.png" alt="Confidence Tracker" className="max-w-2xl mx-auto rounded-lg shadow-kidoova" />
+        <img 
+          src="/kidoova_rewards_collage.png" 
+          alt="Confidence Tracker" 
+          className="max-w-2xl mx-auto rounded-lg shadow-kidoova"
+          onError={(e) => {
+            console.error('Error loading image:', e);
+            const target = e.target as HTMLImageElement;
+            target.src = '/screens/star-and-rewards.png'; // Fallback to previous image
+          }}
+        />
       </section>
 
       {/* Testimonials */}
