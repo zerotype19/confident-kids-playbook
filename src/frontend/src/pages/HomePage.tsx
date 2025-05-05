@@ -255,8 +255,27 @@ export default function HomePage(): JSX.Element {
       {/* Pillars */}
       <section id="pillars" className="py-20 px-6 text-center bg-white">
         <h2 className="text-4xl font-bold mb-10">The 5 Pillars of Confidence</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-kidoova-accent font-semibold text-lg">
-          <div>Independence</div><div>Growth Mindset</div><div>Social Confidence</div><div>Purpose</div><div>Managing Fear</div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 max-w-6xl mx-auto">
+          <div className="flex flex-col items-center">
+            <h3 className="text-xl font-semibold text-kidoova-accent mb-2">Independence</h3>
+            <p className="text-sm text-kidoova-green">Building self-reliance and problem-solving skills through age-appropriate challenges</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <h3 className="text-xl font-semibold text-kidoova-accent mb-2">Growth Mindset</h3>
+            <p className="text-sm text-kidoova-green">Developing resilience and the ability to learn from challenges and mistakes</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <h3 className="text-xl font-semibold text-kidoova-accent mb-2">Social Confidence</h3>
+            <p className="text-sm text-kidoova-green">Strengthening communication skills and building positive relationships</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <h3 className="text-xl font-semibold text-kidoova-accent mb-2">Purpose</h3>
+            <p className="text-sm text-kidoova-green">Discovering personal strengths and finding meaning in daily activities</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <h3 className="text-xl font-semibold text-kidoova-accent mb-2">Managing Fear</h3>
+            <p className="text-sm text-kidoova-green">Learning to understand and overcome anxiety through gentle exposure</p>
+          </div>
         </div>
       </section>
 
