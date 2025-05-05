@@ -357,9 +357,9 @@ export default function HomePage(): JSX.Element {
       <footer className="bg-white py-12 px-6 text-center text-sm text-kidoova-green">
         <p>Kidoova © 2025. All rights reserved.</p>
         <div className="mt-4 space-x-4">
-          <button onClick={() => setIsPrivacyModalOpen(true)} className="text-kidoova-green">Privacy Policy</button>
-          <button onClick={() => setIsTermsModalOpen(true)} className="text-kidoova-green">Terms</button>
-          <button onClick={() => setIsContactModalOpen(true)} className="text-kidoova-green">Contact</button>
+          <button onClick={() => setIsPrivacyModalOpen(true)} className="text-kidoova-green bg-transparent p-0 rounded-none shadow-none border-none hover:underline focus:underline">Privacy Policy</button>
+          <button onClick={() => setIsTermsModalOpen(true)} className="text-kidoova-green bg-transparent p-0 rounded-none shadow-none border-none hover:underline focus:underline">Terms</button>
+          <button onClick={() => setIsContactModalOpen(true)} className="text-kidoova-green bg-transparent p-0 rounded-none shadow-none border-none hover:underline focus:underline">Contact</button>
         </div>
       </footer>
 
