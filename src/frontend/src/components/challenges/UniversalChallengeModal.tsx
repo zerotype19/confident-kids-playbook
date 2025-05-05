@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../Modal';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -66,7 +66,29 @@ export default function UniversalChallengeModal({
   const [showXPSummary, setShowXPSummary] = useState(false);
   const [xpGains, setXPGains] = useState<{ trait_name: string; gain: number; new_total: number }[]>([]);
   const [totalXPGain, setTotalXPGain] = useState(0);
+  const [traits, setTraits] = useState<{ trait_id: number; trait_name: string; weight: number }[]>(challenge.traits || []);
   const { token } = useAuth();
+
+  // Fetch traits if not present
+  useEffect(() => {
+    if (!challenge.traits && challenge.id && token) {
+      fetch(`${import.meta.env.VITE_API_URL}/api/challenge-traits/${challenge.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          setTraits(data);
+        })
+        .catch(err => {
+          console.error('Failed to fetch challenge traits', err);
+        });
+    } else if (challenge.traits) {
+      setTraits(challenge.traits);
+    }
+  }, [challenge.id, challenge.traits, token]);
 
   const cards: Card[] = [
     {
@@ -148,11 +170,11 @@ export default function UniversalChallengeModal({
       // Calculate XP gains
       const multiplier = 0.6 + 0.1 * feeling;
       const base = 10;
-      const gains = challenge.traits?.map(trait => ({
+      const gains = traits.map(trait => ({
         trait_name: trait.trait_name,
         gain: Math.round(base * multiplier * trait.weight),
         new_total: 0 // Will be updated after fetching current scores
-      })) || [];
+      }));
 
       // Fetch current trait scores to calculate new totals
       const scoresResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-scores/${childId}`, {
