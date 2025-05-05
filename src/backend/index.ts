@@ -35,6 +35,7 @@ import { onRequestPost as familyInvite } from './api/family_invite'
 import { onRequestPost as familyJoin } from './api/family_join'
 import { onRequestPost as verifyInvite } from './api/verify_invite'
 import { onRequestGet as traitScores } from './api/trait-scores'
+import { onRequestGet as challengeXpSummary } from './api/challenge-xp-summary'
 
 const router = Router()
 
@@ -195,6 +196,15 @@ router.post('/api/reflection', (request, context) => {
 router.post('/api/family/invite', (request, context) => familyInvite({ request, env: context.env }))
 router.post('/api/family_join', (request, context) => familyJoin({ request, env: context.env }))
 router.post('/api/verify_invite', (request, context) => verifyInvite({ request, env: context.env }))
+
+// Challenge XP Summary route
+router.get('/api/challenge-xp-summary/:childId/:challengeId', (request, context) => {
+  const url = new URL(request.url);
+  const parts = url.pathname.split('/');
+  const childId = parts[parts.length - 2];
+  const challengeId = parts[parts.length - 1];
+  return challengeXpSummary({ request, env: context.env, params: { childId, challengeId } });
+});
 
 // Add catch-all route for debugging
 router.all('*', (request) => {
