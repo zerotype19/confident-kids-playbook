@@ -338,6 +338,11 @@ export default function HomePage(): JSX.Element {
             <summary className="cursor-pointer font-semibold text-kidoova-accent">Can both parents use it?</summary>
             <p className="text-sm text-kidoova-green mt-2">Yes, you can share access and track together.</p>
           </details>
+          <details className="bg-white p-4 rounded-lg shadow-kidoova">
+            <summary className="cursor-pointer font-semibold text-kidoova-accent">What research is Kidoova based on?</summary>
+            <p className="text-sm text-kidoova-green mt-2">Kidoova is grounded in real developmental science and parenting psychology. Our five pillars draw from growth mindset research (Carol Dweck), social-emotional learning (CASEL), self-determination theory, and strengths-based development frameworks. We've also synthesized practices from child development experts and parenting literature to ensure the app supports real-world, confidence-building outcomes. All references used in building the playbook are listed in our research appendix.</p>
+            <a href="/kidoova_kids_confidence_playbook.pdf" className="text-sm text-kidoova-accent mt-2 block">Kidoova Kid's Confidence Playbook →</a>
+          </details>
         </div>
       </section>
 
@@ -352,9 +357,9 @@ export default function HomePage(): JSX.Element {
       <footer className="bg-white py-12 px-6 text-center text-sm text-kidoova-green">
         <p>Kidoova © 2025. All rights reserved.</p>
         <div className="mt-4 space-x-4">
-          <button onClick={() => setIsPrivacyModalOpen(true)} className="underline">Privacy Policy</button>
-          <button onClick={() => setIsTermsModalOpen(true)} className="underline">Terms</button>
-          <button onClick={() => setIsContactModalOpen(true)} className="underline">Contact</button>
+          <button onClick={() => setIsPrivacyModalOpen(true)} className="text-kidoova-green">Privacy Policy</button>
+          <button onClick={() => setIsTermsModalOpen(true)} className="text-kidoova-green">Terms</button>
+          <button onClick={() => setIsContactModalOpen(true)} className="text-kidoova-green">Contact</button>
         </div>
       </footer>
 
