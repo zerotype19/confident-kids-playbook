@@ -179,7 +179,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
 
   // --- Use backend-provided advanced stats ---
   const fastestLabel = fastestGrowingTrait ? `${fastestGrowingTrait.trait_name} (+${fastestGrowingTrait.growthPercent}%)` : 'N/A';
-  const weeklyXPLabel = `+${weeklyXPGained} XP`;
+  const weeklyXPLabel = `+${Math.round(weeklyXPGained)} XP`;
   const nextTraitLabel = nextTraitToMaster ? `${nextTraitToMaster.trait_name} (${nextTraitToMaster.from} → ${nextTraitToMaster.to} in ${nextTraitToMaster.xp_remaining} XP)` : 'N/A';
 
   if (loading) return <div className="p-4">Loading...</div>;
