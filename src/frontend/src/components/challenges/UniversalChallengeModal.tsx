@@ -167,36 +167,26 @@ export default function UniversalChallengeModal({
         throw new Error('Failed to mark challenge as complete');
       }
 
-      // Calculate XP gains
-      const multiplier = 0.6 + 0.1 * feeling;
-      const base = 10;
-      const gains = traits.map(trait => ({
-        trait_name: trait.trait_name,
-        gain: Math.round(base * multiplier * trait.weight),
-        new_total: 0 // Will be updated after fetching current scores
-      }));
-
-      // Fetch current trait scores to calculate new totals
-      const scoresResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/trait-scores/${childId}`, {
+      // Fetch XP summary from backend
+      const xpSummaryResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/challenge-xp-summary/${childId}/${challenge.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
       });
-
-      if (scoresResponse.ok) {
-        const scoresData = await scoresResponse.json();
-        const currentScores = scoresData.data;
-        
-        // Update new totals
-        gains.forEach(gain => {
-          const currentTrait = currentScores.find((t: any) => t.trait_name === gain.trait_name);
-          gain.new_total = (currentTrait?.score || 0) + gain.gain;
-        });
+      let gains = [];
+      let totalXP = 0;
+      if (xpSummaryResponse.ok) {
+        const xpSummary = await xpSummaryResponse.json();
+        gains = xpSummary.traits.map((trait: any) => ({
+          trait_name: trait.trait_name,
+          gain: Math.round(trait.xp_gained),
+          new_total: Math.round(trait.new_total)
+        }));
+        totalXP = Math.round(xpSummary.total_xp);
       }
-
       setXPGains(gains);
-      setTotalXPGain(gains.reduce((sum, gain) => sum + gain.gain, 0));
+      setTotalXPGain(totalXP);
       setShowXPSummary(true);
     } catch (error) {
       console.error('Error completing challenge:', error);
