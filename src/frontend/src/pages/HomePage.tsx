@@ -216,7 +216,7 @@ export default function HomePage(): JSX.Element {
             <a href="#testimonials">Testimonials</a>
             <a href="#faq">FAQ</a>
           </nav>
-          <div id="google-login-button-hero" className="w-40"></div>
+          <div id="google-login-button-hero" className="w-40 pr-2"></div>
         </div>
       </header>
 
