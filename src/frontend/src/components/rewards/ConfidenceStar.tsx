@@ -71,7 +71,7 @@ const createCenterStarPath = (cx: number, cy: number, spikes: number, outerRadiu
 export default function ConfidenceStar({ progress, childId, childName }: ConfidenceStarProps) {
   if (!progress) return null;
 
-  const MAX_CHALLENGES = 35;
+  const MAX_CHALLENGES = 15;
   const cx = 100;
   const cy = 100;
   const outerRadius = 80;
@@ -82,7 +82,7 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
       <h2 className="text-2xl font-heading text-kidoova-green mb-4 text-center">{childName}'s Confidence Star</h2>
-      <p className="text-sm text-gray-600 mb-6 text-center">Complete 35 Challenges in each pillar to complete your star!</p>
+      <p className="text-sm text-gray-600 mb-6 text-center">Complete 15 Challenges in each pillar to complete your star!</p>
       <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
         <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
           {[0, 1, 2, 3, 4].map(index => {
