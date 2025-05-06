@@ -341,7 +341,7 @@ export default function HomePage(): JSX.Element {
           <details className="bg-white p-4 rounded-lg shadow-kidoova">
             <summary className="cursor-pointer font-semibold text-kidoova-accent">What research is Kidoova based on?</summary>
             <p className="text-sm text-kidoova-green mt-2">Kidoova is grounded in real developmental science and parenting psychology. Our five pillars draw from growth mindset research (Carol Dweck), social-emotional learning (CASEL), self-determination theory, and strengths-based development frameworks. We've also synthesized practices from child development experts and parenting literature to ensure the app supports real-world, confidence-building outcomes. All references used in building the playbook are listed in our research appendix.</p>
-            <a href="/kidoova_kids_confidence_playbook.pdf" className="text-sm text-kidoova-accent mt-2 block">Kidoova Kid's Confidence Playbook →</a>
+            <a href="/Kidoova_Kids_Confidence_Playbook.pdf" className="text-sm text-kidoova-accent mt-2 block">Kidoova Kid's Confidence Playbook →</a>
           </details>
         </div>
       </section>
