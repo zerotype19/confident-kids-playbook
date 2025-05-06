@@ -222,7 +222,7 @@ export default function HomePage(): JSX.Element {
 
       {/* Hero Section */}
       <section className="bg-kidoova-background py-20 px-6 text-center">
-        <h1 className="text-5xl font-bold mb-4">Raise Confident, Resilient Kids</h1>
+        <h1 className="text-5xl font-bold mb-4">5 Minute Exercises to Raise Confident, Resilient Kids</h1>
         <p className="text-xl max-w-2xl mx-auto mb-6 text-kidoova-green">Daily challenges backed by research, built for busy parents. Just one simple step each day.</p>
         <div id="google-login-button-hero" className="mx-auto"></div>
       </section>
