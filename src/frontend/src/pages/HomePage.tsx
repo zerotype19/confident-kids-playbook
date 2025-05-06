@@ -207,7 +207,7 @@ export default function HomePage(): JSX.Element {
       {/* Sticky Header */}
       <header className="bg-white sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
-          <img src="/logo.png" alt="Kidoova" className="h-16" />
+          <img src="/logo.png" alt="Kidoova" className="h-20" />
           <nav className="hidden md:flex gap-6 text-sm font-medium text-kidoova-green">
             <a href="#how-it-works">How It Works</a>
             <a href="#features">Features</a>
