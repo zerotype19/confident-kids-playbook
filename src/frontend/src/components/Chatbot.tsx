@@ -38,8 +38,11 @@ export default function Chatbot() {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    // Add initial welcome message
-    setMessages([{ role: 'assistant', content: 'Hi! How can I help today?' }]);
+    // Add initial welcome message with day of the week
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const today = new Date();
+    const dayName = days[today.getDay()];
+    setMessages([{ role: 'assistant', content: `Happy ${dayName}! How can I help today?` }]);
   }, []);
 
   useEffect(() => {
