@@ -79,8 +79,17 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
   const centerStarOuter = 40;
   const centerStarInner = 20;
 
-  // Use star_fill_progress for each pillar
-  const starFill = progress.star_fill_progress || {};
+  // Use star_fill_progress for each pillar, fallback to XP if missing or all zeros
+  let starFill = progress.star_fill_progress || {};
+  // If star_fill is missing or all zeros, fallback to XP calculation
+  const allZeroOrMissing = [1,2,3,4,5].every(pid => !starFill[pid] || starFill[pid] === 0);
+  if (allZeroOrMissing && progress.pillar_progress) {
+    starFill = {};
+    for (let pid = 1; pid <= 5; pid++) {
+      const xp = progress.pillar_progress[pid]?.xp || 0;
+      starFill[pid] = (xp % 150) / 150;
+    }
+  }
   const completedStars = progress.completed_stars_count || 0;
   const completedStarDates = progress.completed_stars || [];
 
