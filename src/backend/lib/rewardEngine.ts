@@ -405,6 +405,40 @@ export async function getChildProgress(childId: string, env: Env) {
     return acc;
   }, {});
 
+  // --- Completed Stars Logic ---
+  // 1. Calculate number of completed stars (min floor(xp/150) across all pillars)
+  const xpValues = [1,2,3,4,5].map(pid => xpPerPillarMap[pid] || 0);
+  const completedStars = Math.min(...xpValues.map(xp => Math.floor(xp / 150)));
+
+  // 2. Query completed_stars table for this child
+  const starsQuery = await env.DB.prepare(`
+    SELECT star_number, date_completed FROM completed_stars WHERE child_id = ? ORDER BY star_number ASC
+  `).bind(childId).all<{ star_number: number; date_completed: string }>();
+  const starsInDb = starsQuery.results || [];
+  const starsInDbCount = starsInDb.length;
+
+  // 3. If DB count < calculated, insert new records for each new star
+  if (completedStars > starsInDbCount) {
+    for (let i = starsInDbCount + 1; i <= completedStars; i++) {
+      await env.DB.prepare(`
+        INSERT INTO completed_stars (id, child_id, star_number, date_completed)
+        VALUES (?, ?, ?, datetime('now'))
+      `).bind(uuidv4(), childId, i).run();
+    }
+    // Re-query to get updated list
+    const updatedStarsQuery = await env.DB.prepare(`
+      SELECT star_number, date_completed FROM completed_stars WHERE child_id = ? ORDER BY star_number ASC
+    `).bind(childId).all<{ star_number: number; date_completed: string }>();
+    starsInDb.length = 0;
+    Array.prototype.push.apply(starsInDb, updatedStarsQuery.results || []);
+  }
+
+  // 4. For the star fill, use (xp % 150) / 150 for each pillar
+  const starFillProgress = [1,2,3,4,5].reduce((acc, pid) => {
+    acc[pid] = ((xpPerPillarMap[pid] || 0) % 150) / 150;
+    return acc;
+  }, {} as Record<number, number>);
+
   return {
     total_challenges: total,
     current_streak: current_streak || 0,
@@ -412,6 +446,9 @@ export async function getChildProgress(childId: string, env: Env) {
     weekly_challenges: weeklyChallengesQuery?.weekly_challenges || 0,
     pillar_progress: transformedPillarProgress,
     milestone_progress: milestoneProgress,
-    next_rewards: nextRewards
+    next_rewards: nextRewards,
+    completed_stars: starsInDb,
+    completed_stars_count: starsInDb.length,
+    star_fill_progress: starFillProgress
   };
 } 
