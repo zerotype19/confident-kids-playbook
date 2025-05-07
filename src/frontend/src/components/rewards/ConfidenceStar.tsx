@@ -79,19 +79,36 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
   const centerStarOuter = 40;
   const centerStarInner = 20;
 
+  // Use star_fill_progress for each pillar
+  const starFill = progress.star_fill_progress || {};
+  const completedStars = progress.completed_stars_count || 0;
+  const completedStarDates = progress.completed_stars || [];
+
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
-      <h2 className="text-2xl font-heading text-kidoova-green mb-4 text-center">{childName}'s Confidence Star</h2>
-      <p className="text-sm text-gray-600 mb-6 text-center">Earn 150 XP in each pillar to complete your star!</p>
+      <h2 className="text-2xl font-heading text-kidoova-green mb-2 text-center">{childName}'s Confidence Star</h2>
+      <p className="text-sm text-gray-600 mb-2 text-center">Earn 150 XP in each pillar to complete a star. Stars are cumulative!</p>
+      <div className="flex flex-col items-center mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-2xl">⭐️</span>
+          <span className="font-bold text-lg">{completedStars} Completed Star{completedStars === 1 ? '' : 's'}</span>
+        </div>
+        {completedStarDates.length > 0 && (
+          <div className="text-xs text-gray-500 text-center">
+            {completedStarDates.map(star => (
+              <div key={star.star_number}>
+                Star {star.star_number}: {new Date(star.date_completed).toLocaleDateString()}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
         <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
           {[0, 1, 2, 3, 4].map(index => {
             const pillarId = index + 1;
-            const xp = progress.pillar_progress[pillarId]?.xp || 0;
-            const fillRatio = Math.min(xp / MAX_XP, 1);
-
+            const fillRatio = starFill[pillarId] ?? 0;
             if (fillRatio === 0) return null;
-
             return (
               <path
                 key={`point-${pillarId}`}
@@ -118,9 +135,7 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
             const angle = (Math.PI * 2 * index) / 5 - Math.PI / 2;
             const labelX = cx + Math.cos(angle) * 85;
             const labelY = cy + Math.sin(angle) * 85;
-            const xp = progress.pillar_progress[pillarId]?.xp || 0;
-            const fillRatio = Math.min(xp / MAX_XP, 1);
-
+            const fillRatio = starFill[pillarId] ?? 0;
             return (
               <g
                 key={`tooltip-${pillarId}`}
@@ -132,7 +147,7 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
                   {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split('&')[0]}
                 </text>
                 <text x={0} y={8} textAnchor="middle" fill="white" fontSize="7px" fontWeight="bold">
-                  {Math.round(fillRatio * 100)}% ({xp} XP)
+                  {Math.round(fillRatio * 100)}%
                 </text>
               </g>
             );

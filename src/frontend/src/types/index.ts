@@ -121,4 +121,7 @@ export interface ProgressSummary {
     pillar_id?: number;
     progress: number;
   };
+  completed_stars?: { star_number: number; date_completed: string }[];
+  completed_stars_count?: number;
+  star_fill_progress?: Record<number, number>;
 } 
