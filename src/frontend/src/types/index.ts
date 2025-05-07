@@ -104,6 +104,7 @@ export interface ProgressSummary {
     total: number;
     completed: number;
     percentage: number;
+    xp: number;
   }>;
   milestone_progress: {
     current: number;

@@ -71,7 +71,7 @@ const createCenterStarPath = (cx: number, cy: number, spikes: number, outerRadiu
 export default function ConfidenceStar({ progress, childId, childName }: ConfidenceStarProps) {
   if (!progress) return null;
 
-  const MAX_CHALLENGES = 15;
+  const MAX_XP = 150; // 150 XP required per pillar
   const cx = 100;
   const cy = 100;
   const outerRadius = 80;
@@ -82,13 +82,13 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
       <h2 className="text-2xl font-heading text-kidoova-green mb-4 text-center">{childName}'s Confidence Star</h2>
-      <p className="text-sm text-gray-600 mb-6 text-center">Complete 15 Challenges in each pillar to complete your star!</p>
+      <p className="text-sm text-gray-600 mb-6 text-center">Earn 150 XP in each pillar to complete your star!</p>
       <div className="relative w-full max-w-[400px] mx-auto aspect-square overflow-visible">
         <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
           {[0, 1, 2, 3, 4].map(index => {
             const pillarId = index + 1;
-            const completed = progress.pillar_progress[pillarId]?.completed || 0;
-            const fillRatio = Math.min(completed / MAX_CHALLENGES, 1);
+            const xp = progress.pillar_progress[pillarId]?.xp || 0;
+            const fillRatio = Math.min(xp / MAX_XP, 1);
 
             if (fillRatio === 0) return null;
 
@@ -118,8 +118,8 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
             const angle = (Math.PI * 2 * index) / 5 - Math.PI / 2;
             const labelX = cx + Math.cos(angle) * 85;
             const labelY = cy + Math.sin(angle) * 85;
-            const completed = progress.pillar_progress[pillarId]?.completed || 0;
-            const fillRatio = Math.min(completed / MAX_CHALLENGES, 1);
+            const xp = progress.pillar_progress[pillarId]?.xp || 0;
+            const fillRatio = Math.min(xp / MAX_XP, 1);
 
             return (
               <g
@@ -132,7 +132,7 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
                   {PILLAR_NAMES[pillarId as keyof typeof PILLAR_NAMES].split('&')[0]}
                 </text>
                 <text x={0} y={8} textAnchor="middle" fill="white" fontSize="7px" fontWeight="bold">
-                  {Math.round(fillRatio * 100)}% ({completed})
+                  {Math.round(fillRatio * 100)}% ({xp} XP)
                 </text>
               </g>
             );
