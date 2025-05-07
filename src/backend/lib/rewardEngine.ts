@@ -327,6 +327,19 @@ export async function getChildProgress(childId: string, env: Env) {
     GROUP BY c.pillar_id
   `).bind(normalizedAgeRange, childId).all<{ pillar_id: number; completed: number; total: number }>();
 
+  // Get XP per pillar
+  const xpPerPillarQuery = await env.DB.prepare(`
+    SELECT t.pillar_id, SUM(cts.score) as xp
+    FROM child_trait_scores cts
+    JOIN traits t ON cts.trait_id = t.id
+    WHERE cts.child_id = ?
+    GROUP BY t.pillar_id
+  `).bind(childId).all<{ pillar_id: number; xp: number }>();
+  const xpPerPillarMap = (xpPerPillarQuery.results || []).reduce((acc: any, row: any) => {
+    acc[row.pillar_id] = row.xp || 0;
+    return acc;
+  }, {});
+
   // Calculate next rewards
   const nextRewards = {
     milestone: null as any,
@@ -381,12 +394,13 @@ export async function getChildProgress(childId: string, env: Env) {
     }
   }
 
-  // Transform pillar progress into the expected format
+  // Transform pillar progress into the expected format, now including XP
   const transformedPillarProgress = (pillarProgress.results || []).reduce((acc: any, pillar: any) => {
     acc[pillar.pillar_id] = {
       completed: pillar.completed,
       total: pillar.total,
-      percentage: pillar.total > 0 ? (pillar.completed / pillar.total) * 100 : 0
+      percentage: pillar.total > 0 ? (pillar.completed / pillar.total) * 100 : 0,
+      xp: xpPerPillarMap[pillar.pillar_id] || 0
     };
     return acc;
   }, {});
