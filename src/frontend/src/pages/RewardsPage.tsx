@@ -89,18 +89,7 @@ export default function RewardsPage() {
 
         const data = await response.json();
         setRewards(data.rewards || []);
-        
-        // Ensure pillar_progress is an object
-        const pillarProgress = data.progress.pillar_progress || {};
-        
-        setProgress({
-          milestones_completed: data.progress.total_challenges,
-          current_streak: data.progress.current_streak,
-          longest_streak: data.progress.longest_streak,
-          weekly_challenges: data.progress.weekly_challenges,
-          pillar_progress: pillarProgress,
-          milestone_progress: data.progress.milestone_progress
-        });
+        setProgress(data.progress);
       } catch (err) {
         console.error('Error fetching rewards:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
