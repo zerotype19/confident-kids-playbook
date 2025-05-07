@@ -303,7 +303,7 @@ export default function HomePage(): JSX.Element {
         <img 
           src="/kidoova_rewards_collage.png" 
           alt="Confidence Tracker" 
-          className="max-w-2xl mx-auto rounded-lg shadow-kidoova"
+          className="w-full max-w-[90%] sm:max-w-xl md:max-w-2xl mx-auto rounded-lg shadow-kidoova"
         />
       </section>
 
