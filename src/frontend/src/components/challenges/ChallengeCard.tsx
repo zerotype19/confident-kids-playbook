@@ -34,7 +34,7 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
             onClick={() => setIsModalOpen(true)}
             className="w-full bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors"
           >
-            Start Challenge
+            Start Workout
           </button>
         </div>
       </div>
