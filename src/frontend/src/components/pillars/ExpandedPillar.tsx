@@ -83,7 +83,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
 
       {isExpanded && (
         <div className="p-6">
-          <h3 className="text-lg font-heading text-gray-900 mb-4">Challenge Types</h3>
+          <h3 className="text-lg font-heading text-gray-900 mb-4">Workout Types</h3>
           <div className="space-y-4">
             {pillar.challenge_types.map((type) => (
               <div key={`${type.pillar_id}-${type.challenge_type_id}`} className="bg-kidoova-background rounded-xl p-4 shadow-yellowSoft">
@@ -97,7 +97,7 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
             onClick={handleViewAll}
             className="mt-6 w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
           >
-            View All Challenges
+            View All Workouts
           </button>
         </div>
       )}
