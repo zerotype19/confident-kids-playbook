@@ -71,37 +71,37 @@ export default function UniversalChallengeModal({
   const cards: Card[] = [
     {
       type: 'practice',
-      icon: CARD_ICONS[0],
-      title: 'What You\'ll Practice',
+      icon: '🏋️',
+      title: 'What You\u2019re Training',
       content: challenge.what_you_practice
     },
     {
       type: 'start',
-      icon: CARD_ICONS[1],
-      title: 'Getting Started',
+      icon: '🔥',
+      title: 'Warm-Up',
       content: challenge.start_prompt
     },
     {
       type: 'guide',
-      icon: CARD_ICONS[2],
-      title: 'Guide Prompt',
+      icon: '🎤',
+      title: 'Coaching Cue',
       content: challenge.guide_prompt
     },
     {
       type: 'success',
-      icon: CARD_ICONS[3],
-      title: 'Success Signals',
+      icon: '✅',
+      title: 'Signs of Progress',
       content: challenge.success_signals
     },
     {
       type: 'why',
-      icon: CARD_ICONS[4],
-      title: 'Why It Matters',
+      icon: '🏁',
+      title: 'Training Impact',
       content: challenge.why_it_matters
     },
     {
       type: 'reflection',
-      icon: CARD_ICONS[5],
+      icon: '✅',
       title: 'How Did It Go?'
     }
   ];
@@ -176,19 +176,19 @@ export default function UniversalChallengeModal({
 
   const renderXPSummary = () => (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-center text-kidoova-green">XP Gained! 🎉</h2>
+      <h2 className="text-xl font-bold text-center text-kidoova-green">Training Points Earned! 🎉</h2>
       <div className="space-y-2">
         {xpGains.map((gain, index) => (
           <div key={index} className="flex justify-between items-center text-sm">
             <span>{gain.trait_name}</span>
             <span className="text-green-600">
-              +{gain.gain} XP ({gain.new_total} total)
+              +{gain.gain} Training Points ({gain.new_total} total)
             </span>
           </div>
         ))}
         <div className="border-t pt-2 mt-2 flex justify-between items-center font-semibold">
-          <span>Total XP Gained</span>
-          <span className="text-green-600">+{totalXPGain} XP</span>
+          <span>Total Training Points</span>
+          <span className="text-green-600">+{totalXPGain} Training Points</span>
         </div>
       </div>
       <div className="flex justify-end">
@@ -217,7 +217,7 @@ export default function UniversalChallengeModal({
     if (currentCard.type === 'reflection') {
       return (
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-center text-kidoova-green">How confident did you feel?</h2>
+          <h2 className="text-xl font-bold text-center text-kidoova-green">How did this workout feel?</h2>
           
           <div className="flex justify-center space-x-1">
             {emojiFaces.map((emoji, index) => {
@@ -265,7 +265,7 @@ export default function UniversalChallengeModal({
               onChange={(e) => setReflection(e.target.value)}
               className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-kidoova-green focus:border-transparent"
               rows={4}
-              placeholder="How did the challenge go? What did you learn?"
+              placeholder="What felt strong? What would you try next time?"
             />
           </div>
 
@@ -281,7 +281,7 @@ export default function UniversalChallengeModal({
               disabled={isSubmitting}
               className="px-3 py-1.5 bg-kidoova-green text-white rounded-lg hover:bg-kidoova-accent disabled:opacity-50"
             >
-              {isSubmitting ? 'Submitting...' : 'Complete Challenge'}
+              {isSubmitting ? 'Submitting...' : 'Complete Workout'}
             </button>
           </div>
         </div>
