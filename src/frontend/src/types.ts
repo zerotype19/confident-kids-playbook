@@ -104,6 +104,14 @@ export interface JournalEntry {
 export type PillarId = 1 | 2 | 3 | 4 | 5;
 
 export const PILLAR_NAMES: Record<PillarId, string> = {
+  1: 'Core Strength',
+  2: 'Endurance',
+  3: 'Social Mobility',
+  4: 'Inner Strength',
+  5: 'Calm & Control'
+};
+
+export const PILLAR_ORIGINAL_NAMES: Record<PillarId, string> = {
   1: 'Independence & Problem-Solving',
   2: 'Growth Mindset & Resilience',
   3: 'Social Confidence & Communication',
