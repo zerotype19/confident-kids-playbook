@@ -69,8 +69,8 @@ export default function DailyChallengeCard() {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="text-center">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Challenge Available</h3>
-          <p className="text-gray-600">Check back later for today's challenge.</p>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Workout Available</h3>
+          <p className="text-gray-600">Check back later for today's workout.</p>
         </div>
       </div>
     );
@@ -79,7 +79,7 @@ export default function DailyChallengeCard() {
   return (
     <>
       <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Daily Challenge</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Daily Workout</h2>
         <div className="space-y-4">
           <div>
             <h3 className="text-lg font-medium text-kidoova-green">{challenge.title}</h3>
@@ -89,7 +89,7 @@ export default function DailyChallengeCard() {
             onClick={() => setIsModalOpen(true)}
             className="w-full bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors"
           >
-            Start Challenge
+            Start Workout
           </button>
         </div>
       </div>

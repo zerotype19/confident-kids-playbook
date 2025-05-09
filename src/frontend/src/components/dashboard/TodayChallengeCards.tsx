@@ -150,8 +150,8 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
     return (
       <div className="bg-white rounded-2xl shadow-kidoova p-6">
         <div className="text-center py-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Challenge Available</h3>
-          <p className="text-gray-600">Check back later for today's challenge.</p>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Workout Available</h3>
+          <p className="text-gray-600">Check back later for today's workout.</p>
         </div>
       </div>
     );
@@ -165,13 +165,13 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            <span className="text-3xl font-heading font-bold">Daily Challenge Completed!</span>
+            <span className="text-3xl font-heading font-bold">Daily Workout Completed!</span>
           </div>
           <button
             onClick={() => navigate('/all-challenges')}
             className="px-6 py-3 rounded-lg font-semibold text-white bg-kidoova-accent hover:bg-kidoova-green transition-colors duration-200 mt-4"
           >
-            See More Challenges
+            See More Workouts
           </button>
         </div>
       </div>
@@ -238,7 +238,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                 {/* Daily Challenge Title - Show on all cards */}
                 <div className="w-full text-center mt-4 mb-4">
                   <h2 className={`${currentCard > 0 ? 'text-sm text-gray-400' : 'text-2xl font-heading text-gray-900'}`}>
-                    {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
+                    {selectedChild ? `${selectedChild.name}'s Daily Workout` : 'Daily Workout'}
                   </h2>
                 </div>
 
@@ -317,7 +317,7 @@ export default function TodayChallengeCards({ challenge, childId, onComplete }: 
                   <>
                     <div className="flex flex-col items-center space-y-4">
                       <div className="text-4xl">{card.icon}</div>
-                      <p className="text-lg text-gray-800 text-center">Ready to complete today's challenge?</p>
+                      <p className="text-lg text-gray-800 text-center">Ready to complete today's workout?</p>
                     </div>
                     <div className="flex-1 flex items-end justify-center pb-4">
                       <button

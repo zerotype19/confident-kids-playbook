@@ -69,14 +69,14 @@ export default function TodaysChallenge({ childId }: TodaysChallengeProps) {
   if (!challenge) {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-4">
-        <div className="text-gray-600 text-sm">No challenge available for today.</div>
+        <div className="text-gray-600 text-sm">No workout available for today.</div>
       </div>
     );
   }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-4 space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Today's Challenge</h2>
+      <h2 className="text-lg font-semibold text-gray-900">Today's Workout</h2>
       <div>
         <h3 className="text-base font-bold text-blue-600">{challenge.title}</h3>
         <p className="text-sm text-gray-700 mt-1">{challenge.description}</p>

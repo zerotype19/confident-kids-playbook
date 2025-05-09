@@ -55,7 +55,7 @@ const TodaysChallengeCard: React.FC<TodaysChallengeCardProps> = ({
         <span className="text-xs text-white bg-kidoova-green px-3 py-1 rounded-full">Pillar: {pillar}</span>
       </div>
 
-      <CustomButton onClick={onMarkComplete}>Mark Challenge Complete</CustomButton>
+      <CustomButton onClick={onMarkComplete}>Mark Workout Complete</CustomButton>
     </div>
   );
 };

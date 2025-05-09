@@ -41,8 +41,8 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
     return (
       <div className="bg-white rounded-2xl shadow-kidoova p-6">
         <div className="text-center py-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Challenge Available</h3>
-          <p className="text-gray-600">Check back later for today's challenge.</p>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Workout Available</h3>
+          <p className="text-gray-600">Check back later for today's workout.</p>
         </div>
       </div>
     );
@@ -54,13 +54,13 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         <div className="flex flex-col items-center space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-2xl text-kidoova-green">✅</span>
-            <span className="text-2xl font-heading font-bold text-kidoova-green">Daily Challenge Completed!</span>
+            <span className="text-2xl font-heading font-bold text-kidoova-green">Daily Workout Completed!</span>
           </div>
           <button
             onClick={() => window.location.href = '/all-challenges'}
             className="px-5 py-2 rounded-lg font-semibold text-white bg-kidoova-green hover:bg-kidoova-accent transition-colors duration-200"
           >
-            See More Challenges
+            See More Workouts
           </button>
         </div>
       </div>
@@ -73,7 +73,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
         <div className="space-y-4">
           <div className="text-center">
             <h2 className="text-2xl font-heading text-gray-900 mb-2">
-              {selectedChild ? `${selectedChild.name}'s Daily Challenge` : 'Daily Challenge'}
+              {selectedChild ? `${selectedChild.name}'s Daily Workout` : 'Daily Workout'}
             </h2>
             <h3 className="text-3xl font-bold text-kidoova-green mb-4">{challenge.title}</h3>
             <div className="flex justify-center gap-2 mb-4">
@@ -105,7 +105,7 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
             onClick={() => setIsModalOpen(true)}
             className="w-full bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors"
           >
-            Start Challenge
+            Start Workout
           </button>
         </div>
       </div>
