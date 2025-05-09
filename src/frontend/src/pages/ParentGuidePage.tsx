@@ -12,14 +12,14 @@ export const ParentGuidePage: React.FC = () => {
 
           <div className="prose prose-lg max-w-none text-gray-900">
             <section className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">💡 What Is Kidoova?</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 mt-8">💡 What Is Kidoova?</h2>
               <p>Kidoova is your child’s confidence gym — and you’re their coach. Each day, you’ll get a short, age-appropriate, research-backed workout (formerly “challenge”) to complete together.</p>
               <p>It’s not about being perfect. It’s about showing up. In just a few focused minutes a day, you’ll help your child train key emotional skills like resilience, independence, and communication — one small rep at a time.</p>
             </section>
 
             <section className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">✅ How to Use Kidoova</h2>
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">🏠 1. Start Your Day in the Training Hub</h3>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 mt-8">✅ How to Use Kidoova</h2>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">🏠 1. Start Your Day in the Training Hub</h3>
               <p>When you log in, you’ll see:</p>
               <ul className="list-disc pl-6 mb-4">
                 <li>Today’s Workout — personalized by age and training zone</li>
@@ -27,7 +27,7 @@ export const ParentGuidePage: React.FC = () => {
                 <li>Daily Motivation for Parents — a reminder that you’re doing great too</li>
               </ul>
               <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <h4 className="font-semibold mb-2">What to do:</h4>
+                <h4 className="font-semibold mb-2 mt-4">What to do:</h4>
                 <ul className="list-disc pl-6">
                   <li>Tap Today’s Workout</li>
                   <li>Walk through the steps together — each card is part of the routine</li>
@@ -37,7 +37,7 @@ export const ParentGuidePage: React.FC = () => {
                 </ul>
               </div>
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">📊 2. Reflect and Track Growth</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">📊 2. Reflect and Track Growth</h3>
               <p>After each workout, your child will see a cool-down reflection prompt:</p>
               <ul className="list-disc pl-6 mb-4">
                 <li>Confidence Slider: “How did this workout feel?”</li>
@@ -51,7 +51,7 @@ export const ParentGuidePage: React.FC = () => {
                 <li>🧠 Workout Journal (coming soon): a timeline of their emotional reps</li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">🏆 3. Celebrate Training Wins</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">🏆 3. Celebrate Training Wins</h3>
               <p>Your child earns recognition for consistency and growth:</p>
               <ul className="list-disc pl-6 mb-6">
                 <li>🔥 Streaks for showing up daily</li>
@@ -62,7 +62,7 @@ export const ParentGuidePage: React.FC = () => {
               </ul>
               <p>Celebrate effort, not perfection — that’s how confidence sticks.</p>
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">🧬 4. Understand Your Child’s Confidence “Training Profile”</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">🧬 4. Understand Your Child’s Confidence “Training Profile”</h3>
               <p>Every workout in Kidoova includes data that helps personalize your child’s plan:</p>
               <div className="overflow-x-auto mb-6">
                 <table className="min-w-full bg-white border border-gray-200 mb-4">
@@ -94,7 +94,7 @@ export const ParentGuidePage: React.FC = () => {
               </div>
               <p>You can explore workouts by zone, format, or intensity — or follow the Today’s Workout to stay on track.</p>
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">🏋️ 5. Explore the 5 Training Zones</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">🏋️ 5. Explore the 5 Training Zones</h3>
               <div className="overflow-x-auto mb-6">
                 <table className="min-w-full bg-white border border-gray-200 mb-4">
                   <thead>
@@ -129,7 +129,7 @@ export const ParentGuidePage: React.FC = () => {
               </div>
               <p>Each zone includes an overview, a progress bar, and a catalog of workouts you can revisit anytime.</p>
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">👨‍👩‍👧‍👦 6. Built for Shared Parenting</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">👨‍👩‍👧‍👦 6. Built for Shared Parenting</h3>
               <p>Kidoova works across caregivers:</p>
               <ul className="list-disc pl-6 mb-6">
                 <li>All parents linked to a child’s profile can view and log workouts</li>
@@ -138,7 +138,7 @@ export const ParentGuidePage: React.FC = () => {
               </ul>
               <p>Just make sure everyone’s using the same family account</p>
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">💬 7. Get Help Anytime</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 mt-6">💬 7. Get Help Anytime</h3>
               <p>Need a quick spotter or second opinion?</p>
               <ul className="list-disc pl-6 mb-6">
                 <li>Tap Parent Guide (you’re here!)</li>
@@ -148,7 +148,7 @@ export const ParentGuidePage: React.FC = () => {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">🚀 Quick Start: First Workout</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 mt-8">🚀 Quick Start: First Workout</h2>
               <ol className="list-decimal pl-6 mb-6">
                 <li>Log in and select your child</li>
                 <li>Tap Today’s Workout</li>
@@ -160,7 +160,7 @@ export const ParentGuidePage: React.FC = () => {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">💡 Tips for Parent-Coaches</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 mt-8">💡 Tips for Parent-Coaches</h2>
               <ul className="list-disc pl-6 mb-6">
                 <li>Show up consistently — even 5 minutes helps</li>
                 <li>Don’t stress about “finishing” every workout</li>
@@ -172,7 +172,7 @@ export const ParentGuidePage: React.FC = () => {
             </section>
 
             <section className="mb-4">
-              <h2 className="text-2xl font-semibold text-[#00A67E] mb-4">✨ Remember: Confidence Grows Through Practice</h2>
+              <h2 className="text-2xl font-semibold text-[#00A67E] mb-4 mt-8">✨ Remember: Confidence Grows Through Practice</h2>
               <p>Every Kidoova workout is a tiny rep that helps your child believe in themselves more.<br />Stay present, stay playful — and train confidence together.</p>
             </section>
           </div>
