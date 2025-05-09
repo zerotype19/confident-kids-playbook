@@ -219,21 +219,19 @@ export default function AllWorkoutsPage() {
             {/* Filter Options */}
             <div className="bg-white rounded-xl shadow-xl p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Pillar Filter */}
+                {/* Training Zone Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Pillar
+                  <label htmlFor="pillar" className="block text-sm font-medium text-gray-700">
+                    Training Zone
                   </label>
                   <select
+                    id="pillar"
+                    name="pillar"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring focus:ring-kidoova-accent/50"
                     value={filters.pillarId || ''}
-                    onChange={(e) => setFilters(prev => ({
-                      ...prev,
-                      pillarId: e.target.value ? Number(e.target.value) : null,
-                      title: null // Reset title when pillar changes
-                    }))}
-                    className="w-full rounded-lg border-gray-300 shadow-sm focus:border-kidoova-accent focus:ring-kidoova-accent"
+                    onChange={e => setFilters(prev => ({ ...prev, pillarId: e.target.value ? Number(e.target.value) : null, title: null }))}
                   >
-                    <option value="">All Pillars</option>
+                    <option value="">All Training Zones</option>
                     {pillarIds.map((id) => (
                       <option key={id} value={id}>
                         {PILLAR_NAMES[id as keyof typeof PILLAR_NAMES]}

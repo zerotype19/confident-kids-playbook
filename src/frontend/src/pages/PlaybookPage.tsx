@@ -99,7 +99,7 @@ export default function PlaybookPage() {
                     activeSection === 'pillars' ? 'bg-neutral-200 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-100'
                   }`}
                 >
-                  The 5 Pillars of Confidence
+                  The 5 Training Zones of Confidence
                 </button>
               </li>
               <li>
@@ -170,7 +170,7 @@ export default function PlaybookPage() {
                     <h3 className="font-medium mb-2">How to Use This Guide:</h3>
                     <ul className="list-disc pl-6 space-y-2">
                       <li>Start with the Communication section to build a strong foundation</li>
-                      <li>Explore the 5 Pillars to understand key confidence-building principles</li>
+                      <li>Explore the 5 Training Zones to understand key confidence-building principles</li>
                       <li>Use the Age Adaptation section to tailor strategies to your child's development</li>
                       <li>Implement Daily Habits to reinforce confidence consistently</li>
                       <li>Refer to Troubleshooting when you encounter challenges</li>
@@ -199,16 +199,16 @@ export default function PlaybookPage() {
               </div>
             </section>
 
-            {/* The 5 Pillars Section */}
+            {/* The 5 Training Zones Section */}
             <section id="pillars" className="mb-12">
               <div className="bg-neutral-50 p-6 rounded-lg">
-                <h2 className="text-xl font-semibold text-neutral-800 mb-4">The 5 Pillars of Confidence in Kids</h2>
+                <h2 className="text-xl font-semibold text-neutral-800 mb-4">The 5 Training Zones of Confidence in Kids</h2>
                 <div className="space-y-6">
-                  <p className="text-neutral-700">These five pillars form the foundation of confidence in children. Each pillar builds upon the others, creating a strong framework for healthy development.</p>
+                  <p className="text-neutral-700">These five training zones form the foundation of confidence in children. Each zone builds upon the others, creating a strong framework for healthy development.</p>
                   
-                  {/* Pillar 1 */}
+                  {/* Training Zone 1 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 1: Independence & Problem-Solving</h3>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Training Zone 1: Independence & Problem-Solving</h3>
                     <p className="text-neutral-700">Teaching children to think for themselves and solve problems independently builds self-trust and confidence.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>
@@ -221,9 +221,9 @@ export default function PlaybookPage() {
                     </div>
                   </div>
 
-                  {/* Pillar 2 */}
+                  {/* Training Zone 2 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 2: Growth Mindset & Resilience</h3>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Training Zone 2: Growth Mindset & Resilience</h3>
                     <p className="text-neutral-700">Helping children develop a growth mindset enables them to see challenges as opportunities for growth.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>
@@ -236,9 +236,9 @@ export default function PlaybookPage() {
                     </div>
                   </div>
 
-                  {/* Pillar 3 */}
+                  {/* Training Zone 3 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 3: Social Confidence & Communication</h3>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Training Zone 3: Social Confidence & Communication</h3>
                     <p className="text-neutral-700">Building social skills and communication abilities helps children navigate relationships and express themselves confidently.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>
@@ -251,9 +251,9 @@ export default function PlaybookPage() {
                     </div>
                   </div>
 
-                  {/* Pillar 4 */}
+                  {/* Training Zone 4 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 4: Purpose & Strength Discovery</h3>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Training Zone 4: Purpose & Strength Discovery</h3>
                     <p className="text-neutral-700">Helping children discover their unique strengths and find purpose in their activities builds lasting confidence.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>
@@ -266,9 +266,9 @@ export default function PlaybookPage() {
                     </div>
                   </div>
 
-                  {/* Pillar 5 */}
+                  {/* Training Zone 5 */}
                   <div className="border-t border-neutral-200 pt-6">
-                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Pillar 5: Managing Fear & Anxiety</h3>
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">Training Zone 5: Managing Fear & Anxiety</h3>
                     <p className="text-neutral-700">Teaching children to handle fear and anxiety builds resilience and confidence in facing challenges.</p>
                     <div className="mt-4">
                       <h4 className="font-medium text-neutral-700 mb-2">Key Strategies:</h4>

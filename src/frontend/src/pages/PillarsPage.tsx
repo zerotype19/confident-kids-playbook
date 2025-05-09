@@ -123,7 +123,7 @@ export default function PillarsPage() {
       <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-heading text-gray-900">
-            {selectedChild ? `${selectedChild.name}'s Pillars` : 'Pillars'}
+            {selectedChild ? `${selectedChild.name}'s Training Zones` : 'Training Zones'}
           </h1>
         </div>
 
@@ -139,7 +139,7 @@ export default function PillarsPage() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Please select a child to view their pillars</p>
+            <p className="text-gray-600 mb-4">Please select a child to view their training zones</p>
             <CustomButton onClick={() => navigate('/manage-children')}>
               Manage Children
             </CustomButton>

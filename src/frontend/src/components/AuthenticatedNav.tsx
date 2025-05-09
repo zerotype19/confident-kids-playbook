@@ -11,7 +11,7 @@ const AuthenticatedNav: React.FC<AuthenticatedNavProps> = ({ isMenuOpen, onClose
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '🏠' },
-    { path: '/pillars', label: 'Pillars', icon: '🏛️' },
+    { path: '/pillars', label: 'Training Zones', icon: '🏛️' },
     { path: '/all-challenges', label: 'Workouts', icon: '🎯' },
     { path: '/rewards', label: 'Rewards', icon: '🏆' },
   ];

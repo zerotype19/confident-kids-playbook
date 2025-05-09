@@ -8,19 +8,19 @@ interface ConfidenceStarProps {
 }
 
 const PILLAR_COLORS = {
-  1: '#F7B801', // Independence
-  2: '#38A169', // Growth Mindset
-  3: '#4299E1', // Social
-  4: '#805AD5', // Purpose
-  5: '#E53E3E'  // Fear
+  1: '#F7B801', // Training Zone 1
+  2: '#38A169', // Training Zone 2
+  3: '#4299E1', // Training Zone 3
+  4: '#805AD5', // Training Zone 4
+  5: '#E53E3E'  // Training Zone 5
 };
 
 const PILLAR_NAMES = {
-  1: 'Core Strength', // Independence & Problem-Solving
-  2: 'Endurance', // Growth Mindset & Resilience
-  3: 'Social Mobility', // Social Confidence & Communication
-  4: 'Inner Strength', // Purpose & Strength Discovery
-  5: 'Calm & Control' // Managing Fear & Anxiety
+  1: 'Core Strength', // Training Zone 1
+  2: 'Endurance', // Training Zone 2
+  3: 'Social Mobility', // Training Zone 3
+  4: 'Inner Strength', // Training Zone 4
+  5: 'Calm & Control' // Training Zone 5
 };
 
 const createPartialStarPointPath = (

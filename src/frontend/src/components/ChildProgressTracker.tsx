@@ -100,7 +100,7 @@ export default function ChildProgressTracker({ childId }: ChildProgressTrackerPr
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <span className="text-blue-500 mr-2">🌟</span>
-            <strong>Current Focus:</strong>
+            <strong>Current Training Zone:</strong>
           </div>
           <span className="text-lg font-semibold">{data.currentFocusPillar}</span>
         </div>

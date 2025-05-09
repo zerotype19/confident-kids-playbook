@@ -62,7 +62,7 @@ export const ProgressDashboard: React.FC = () => {
             {selectedChild?.name}'s Progress
           </h1>
           <p className="mt-2 text-gray-600">
-            Track your child's growth across all pillars of confidence
+            Track your child's growth across all training zones of confidence
           </p>
         </div>
 
