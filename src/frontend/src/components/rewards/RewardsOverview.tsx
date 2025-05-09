@@ -22,21 +22,21 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
       <h2 className="text-xl font-heading">Overview</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Total Challenges Completed */}
+        {/* Total Workouts Completed */}
         <div className="bg-kidoova-yellow/10 rounded-lg p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Challenges Completed</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Workouts Completed</h3>
           <div className="flex items-center gap-4">
             <div className="text-3xl">🎯</div>
             <div>
               <div className="text-2xl font-bold text-kidoova-accent">
                 {progress.milestones_completed}
               </div>
-              <p className="text-sm text-gray-600">Total challenges completed</p>
+              <p className="text-sm text-gray-600">Total workouts completed</p>
             </div>
           </div>
         </div>
 
-        {/* Weekly Challenges */}
+        {/* Weekly Workouts */}
         <div className="bg-kidoova-yellow/10 rounded-lg p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">This Week's Progress</h3>
           <div className="flex items-center gap-4">
@@ -45,7 +45,7 @@ export default function RewardsOverview({ progress }: RewardsOverviewProps) {
               <div className="text-2xl font-bold text-kidoova-accent">
                 {typeof progress.weekly_challenges === 'number' ? progress.weekly_challenges : 0}
               </div>
-              <p className="text-sm text-gray-600">Challenges completed this week</p>
+              <p className="text-sm text-gray-600">Workouts completed this week</p>
             </div>
           </div>
         </div>
