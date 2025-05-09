@@ -279,38 +279,52 @@ export default function HomePage(): JSX.Element {
 
       {/* The 5 Confidence Training Zones */}
       <section className="py-20 px-6 text-center bg-white">
-        <h2 className="text-4xl font-bold mb-10">🧱 The 5 Confidence Training Zones</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 mb-4 mx-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 border-b">Zone</th>
-                <th className="px-4 py-2 border-b">What It Builds</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="px-4 py-2 border-b">🧱 Core Strength</td>
-                <td className="px-4 py-2 border-b">Independence, decision-making, and problem-solving</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 border-b">🏃 Endurance</td>
-                <td className="px-4 py-2 border-b">Resilience, growth mindset, and emotional stamina</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 border-b">🤝 Social Mobility</td>
-                <td className="px-4 py-2 border-b">Communication, connection, and social confidence</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 border-b">💡 Inner Strength</td>
-                <td className="px-4 py-2 border-b">Personal strengths, curiosity, and intrinsic motivation</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 border-b">🧘 Calm & Control</td>
-                <td className="px-4 py-2 border-b">Fear management, emotional regulation, and bravery</td>
-              </tr>
-            </tbody>
-          </table>
+        <h2 className="text-4xl font-bold mb-10 flex items-center justify-center gap-3">
+          <span role="img" aria-label="bricks">🧱</span> The 5 Confidence Training Zones
+        </h2>
+        <div className="flex justify-center">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-4xl">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="text-2xl font-bold text-kidoova-green pb-6 text-left border-none">Zone</th>
+                  <th className="text-2xl font-bold text-kidoova-green pb-6 text-left border-none">What It Builds</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="align-top">
+                  <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
+                    <span role="img" aria-label="bricks">🧱</span> Core Strength
+                  </td>
+                  <td className="py-4 text-lg text-gray-800 border-none">Independence, decision-making, and problem-solving</td>
+                </tr>
+                <tr className="align-top">
+                  <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
+                    <span role="img" aria-label="runner">🏃</span> Endurance
+                  </td>
+                  <td className="py-4 text-lg text-gray-800 border-none">Resilience, growth mindset, and emotional stamina</td>
+                </tr>
+                <tr className="align-top">
+                  <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
+                    <span role="img" aria-label="handshake">🤝</span> Social Mobility
+                  </td>
+                  <td className="py-4 text-lg text-gray-800 border-none">Communication, connection, and social confidence</td>
+                </tr>
+                <tr className="align-top">
+                  <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
+                    <span role="img" aria-label="lightbulb">💡</span> Inner Strength
+                  </td>
+                  <td className="py-4 text-lg text-gray-800 border-none">Personal strengths, curiosity, and intrinsic motivation</td>
+                </tr>
+                <tr className="align-top">
+                  <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
+                    <span role="img" aria-label="meditating">🧘</span> Calm & Control
+                  </td>
+                  <td className="py-4 text-lg text-gray-800 border-none">Fear management, emotional regulation, and bravery</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
