@@ -206,7 +206,18 @@ export default function HomePage(): JSX.Element {
       <header className="bg-white sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
           <img src="/logo.png" alt="Kidoova" className="h-20" />
-          <div id="google-login-button-hero" className="w-40 pr-2"></div>
+          <nav className="hidden md:flex gap-6 text-base font-semibold text-kidoova-green">
+            <a href="#how-it-works" className="hover:text-kidoova-accent transition">How It Works</a>
+            <a href="#features" className="hover:text-kidoova-accent transition">Features</a>
+            <a href="#zones" className="hover:text-kidoova-accent transition">Pillars</a>
+            <a href="#rewards" className="hover:text-kidoova-accent transition">Rewards</a>
+            <a href="#testimonials" className="hover:text-kidoova-accent transition">Testimonials</a>
+            <a href="#faq" className="hover:text-kidoova-accent transition">FAQ</a>
+          </nav>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-kidoova-green font-medium mb-1">Just sign in to get started!</span>
+            <div id="google-login-button-hero" className="w-56 h-14 flex items-center justify-center"></div>
+          </div>
         </div>
       </header>
 
@@ -214,7 +225,10 @@ export default function HomePage(): JSX.Element {
       <section className="bg-kidoova-background py-20 px-6 text-center">
         <h1 className="text-5xl font-bold mb-4">💪 5-Minute Confidence Workouts for Kids</h1>
         <p className="text-xl max-w-2xl mx-auto mb-6 text-kidoova-green">Daily training sessions backed by research — designed for busy parents. Just one small rep a day.</p>
-        <div id="google-login-button-hero" className="mx-auto"></div>
+        <div className="flex flex-col items-center justify-center mt-8">
+          <span className="text-base text-kidoova-green font-medium mb-2">Just sign in to get started!</span>
+          <div id="google-login-button-hero" className="w-64 h-16 flex items-center justify-center"></div>
+        </div>
       </section>
 
       {/* Video Section */}
@@ -278,7 +292,7 @@ export default function HomePage(): JSX.Element {
       </section>
 
       {/* The 5 Confidence Training Zones */}
-      <section className="py-20 px-6 text-center bg-white">
+      <section id="zones" className="py-20 px-6 text-center bg-white">
         <h2 className="text-4xl font-bold mb-10 flex items-center justify-center gap-3">
           <span role="img" aria-label="bricks">🧱</span> The 5 Confidence Training Zones
         </h2>
@@ -296,31 +310,31 @@ export default function HomePage(): JSX.Element {
                   <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
                     <span role="img" aria-label="bricks">🧱</span> Core Strength
                   </td>
-                  <td className="py-4 text-lg text-gray-800 border-none">Independence, decision-making, and problem-solving</td>
+                  <td className="py-4 text-lg text-gray-800 border-none text-left">Independence, decision-making, and problem-solving</td>
                 </tr>
                 <tr className="align-top">
                   <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
                     <span role="img" aria-label="runner">🏃</span> Endurance
                   </td>
-                  <td className="py-4 text-lg text-gray-800 border-none">Resilience, growth mindset, and emotional stamina</td>
+                  <td className="py-4 text-lg text-gray-800 border-none text-left">Resilience, growth mindset, and emotional stamina</td>
                 </tr>
                 <tr className="align-top">
                   <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
                     <span role="img" aria-label="handshake">🤝</span> Social Mobility
                   </td>
-                  <td className="py-4 text-lg text-gray-800 border-none">Communication, connection, and social confidence</td>
+                  <td className="py-4 text-lg text-gray-800 border-none text-left">Communication, connection, and social confidence</td>
                 </tr>
                 <tr className="align-top">
                   <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
                     <span role="img" aria-label="lightbulb">💡</span> Inner Strength
                   </td>
-                  <td className="py-4 text-lg text-gray-800 border-none">Personal strengths, curiosity, and intrinsic motivation</td>
+                  <td className="py-4 text-lg text-gray-800 border-none text-left">Personal strengths, curiosity, and intrinsic motivation</td>
                 </tr>
                 <tr className="align-top">
                   <td className="py-4 text-xl font-semibold text-kidoova-green flex items-center gap-2 border-none">
                     <span role="img" aria-label="meditating">🧘</span> Calm & Control
                   </td>
-                  <td className="py-4 text-lg text-gray-800 border-none">Fear management, emotional regulation, and bravery</td>
+                  <td className="py-4 text-lg text-gray-800 border-none text-left">Fear management, emotional regulation, and bravery</td>
                 </tr>
               </tbody>
             </table>
