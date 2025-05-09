@@ -179,8 +179,8 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
 
   // --- Use backend-provided advanced stats ---
   const fastestLabel = fastestGrowingTrait ? `${fastestGrowingTrait.trait_name} (+${fastestGrowingTrait.growthPercent}%)` : 'N/A';
-  const weeklyXPLabel = `+${Math.round(weeklyXPGained)} XP`;
-  const nextTraitLabel = nextTraitToMaster ? `${nextTraitToMaster.trait_name} (${nextTraitToMaster.from} → ${nextTraitToMaster.to} in ${nextTraitToMaster.xp_remaining} XP)` : 'N/A';
+  const weeklyXPLabel = `+${Math.round(weeklyXPGained)} Training Points`;
+  const nextTraitLabel = nextTraitToMaster ? `${nextTraitToMaster.trait_name} (${nextTraitToMaster.from} → ${nextTraitToMaster.to} in ${nextTraitToMaster.xp_remaining} Training Points)` : 'N/A';
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -208,7 +208,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
             />
           </div>
           <p className="text-xs text-gray-500 mt-1 flex flex-wrap gap-2 items-center">
-            XP: {Math.round(totalXP)} / {nextLevelXP}
+            Training Points: {Math.round(totalXP)} / {nextLevelXP}
           </p>
         </div>
       </div>
@@ -230,7 +230,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: pillarHex[trait.pillar_id] }} />
                   {trait.trait_name}
                 </span>
-                <span className="text-green-800 font-semibold">{Math.round(trait.score)} XP</span>
+                <span className="text-green-800 font-semibold">{Math.round(trait.score)} Training Points</span>
               </div>
               <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
                 <div
@@ -252,7 +252,7 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
           <span className="font-semibold">Most Improved Trait:</span> {mostImprovedTrait}
         </div>
         <div>
-          <span className="font-semibold">Weekly XP Gained:</span> {weeklyXPLabel}
+          <span className="font-semibold">Weekly Training Points Gained:</span> {weeklyXPLabel}
         </div>
         <div>
           <span className="font-semibold">Fastest Growing Trait:</span> {fastestLabel}

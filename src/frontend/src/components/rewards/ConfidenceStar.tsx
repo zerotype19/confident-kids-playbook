@@ -71,7 +71,7 @@ const createCenterStarPath = (cx: number, cy: number, spikes: number, outerRadiu
 export default function ConfidenceStar({ progress, childId, childName }: ConfidenceStarProps) {
   if (!progress) return null;
 
-  const MAX_XP = 150; // 150 XP required per pillar
+  const MAX_XP = 150; // 150 Training Points required per pillar
   const cx = 100;
   const cy = 100;
   const outerRadius = 80;
@@ -96,7 +96,7 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
       <h2 className="text-2xl font-heading text-kidoova-green mb-2 text-center">{childName}'s Confidence Star</h2>
-      <p className="text-sm text-gray-600 mb-2 text-center">Earn 150 XP in each pillar to complete a star. Stars are cumulative!</p>
+      <p className="text-sm text-gray-600 mb-2 text-center">Earn 150 Training Points in each pillar to complete a star. Stars are cumulative!</p>
       <div className="flex flex-col items-center mb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-2xl">⭐️</span>
