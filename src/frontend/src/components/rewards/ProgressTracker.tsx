@@ -53,7 +53,7 @@ export default function ProgressTracker({ progress, childId }: ProgressTrackerPr
 
       {/* Pillar Progress */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Pillar Progress</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Training Zone Progress</h3>
         <div className="space-y-4">
           {Object.entries(progress.pillar_progress).map(([pillarId, data]) => (
             <div key={pillarId}>
