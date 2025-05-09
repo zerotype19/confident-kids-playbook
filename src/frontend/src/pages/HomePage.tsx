@@ -207,12 +207,12 @@ export default function HomePage(): JSX.Element {
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
           <img src="/logo.png" alt="Kidoova" className="h-20" />
           <nav className="hidden md:flex gap-6 text-base font-semibold text-kidoova-green">
-            <a href="#how-it-works" className="hover:text-kidoova-accent transition">How It Works</a>
-            <a href="#features" className="hover:text-kidoova-accent transition">Features</a>
-            <a href="#zones" className="hover:text-kidoova-accent transition">Pillars</a>
-            <a href="#rewards" className="hover:text-kidoova-accent transition">Rewards</a>
-            <a href="#testimonials" className="hover:text-kidoova-accent transition">Testimonials</a>
-            <a href="#faq" className="hover:text-kidoova-accent transition">FAQ</a>
+            <a href="#how-it-works" className="hover:text-kidoova-accent transition scroll-smooth">How It Works</a>
+            <a href="#features" className="hover:text-kidoova-accent transition scroll-smooth">Features</a>
+            <a href="#zones" className="hover:text-kidoova-accent transition scroll-smooth">Pillars</a>
+            <a href="#rewards" className="hover:text-kidoova-accent transition scroll-smooth">Rewards</a>
+            <a href="#testimonials" className="hover:text-kidoova-accent transition scroll-smooth">Testimonials</a>
+            <a href="#faq" className="hover:text-kidoova-accent transition scroll-smooth">FAQ</a>
           </nav>
           <div className="flex flex-col items-center">
             <span className="text-xs text-kidoova-green font-medium mb-1">Just sign in to get started!</span>
@@ -224,9 +224,8 @@ export default function HomePage(): JSX.Element {
       {/* Hero Section */}
       <section className="bg-kidoova-background py-20 px-6 text-center">
         <h1 className="text-5xl font-bold mb-4">💪 5-Minute Confidence Workouts for Kids</h1>
-        <p className="text-xl max-w-2xl mx-auto mb-6 text-kidoova-green">Daily training sessions backed by research — designed for busy parents. Just one small rep a day.</p>
-        <div className="flex flex-col items-center justify-center mt-8">
-          <span className="text-base text-kidoova-green font-medium mb-2">Just sign in to get started!</span>
+        <p className="text-xl max-w-2xl mx-auto mb-2 text-kidoova-green">Daily training sessions backed by research — designed for busy parents. Just one small rep a day.</p>
+        <div className="flex flex-col items-center justify-center mt-4">
           <div id="google-login-button-hero" className="w-64 h-16 flex items-center justify-center"></div>
         </div>
       </section>
@@ -251,7 +250,7 @@ export default function HomePage(): JSX.Element {
       </section>
 
       {/* How Kidoova Works */}
-      <section className="py-20 bg-white px-6 text-center">
+      <section id="how-it-works" className="py-20 bg-white px-6 text-center">
         <h2 className="text-4xl font-bold mb-12">🏋️ How Kidoova Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <div><h3 className="text-xl font-semibold text-kidoova-accent mb-2">Step 1: Pick a Training Zone</h3><p className="text-kidoova-green">Choose a skill area like Core Strength (independence) or Endurance (resilience).</p></div>
@@ -261,7 +260,7 @@ export default function HomePage(): JSX.Element {
       </section>
 
       {/* What Makes Kidoova Different */}
-      <section className="bg-kidoova-background py-20 px-6 text-center">
+      <section id="features" className="bg-kidoova-background py-20 px-6 text-center">
         <h2 className="text-4xl font-bold mb-12">🧠 What Makes Kidoova Different?</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <div>
@@ -343,7 +342,7 @@ export default function HomePage(): JSX.Element {
       </section>
 
       {/* Progress Kids Can See (and Feel) */}
-      <section className="bg-kidoova-background py-20 px-6 text-center">
+      <section id="rewards" className="bg-kidoova-background py-20 px-6 text-center">
         <h2 className="text-4xl font-bold mb-10">🏆 Progress Kids Can See (and Feel)</h2>
         <p className="text-lg max-w-2xl mx-auto text-kidoova-green mb-6">Build streaks. Fill the Confidence Star. Earn medals. See real growth.</p>
         <img 
@@ -354,7 +353,7 @@ export default function HomePage(): JSX.Element {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-white py-20 px-6 text-center">
+      <section id="testimonials" className="bg-white py-20 px-6 text-center">
         <h2 className="text-4xl font-bold mb-12">👨‍👩‍👧‍👦 What Parents Are Saying</h2>
         <div className="flex flex-col md:flex-row gap-6 justify-center">
           <div className="bg-kidoova-background p-6 rounded-lg shadow-kidoova max-w-md mx-auto">
@@ -369,7 +368,7 @@ export default function HomePage(): JSX.Element {
       </section>
 
       {/* FAQ */}
-      <section className="bg-kidoova-background py-20 px-6">
+      <section id="faq" className="bg-kidoova-background py-20 px-6">
         <h2 className="text-4xl font-bold text-center mb-10">❓ Questions? We've Got Answers.</h2>
         <div className="max-w-3xl mx-auto space-y-6">
           <details className="bg-white p-4 rounded-lg shadow-kidoova">
