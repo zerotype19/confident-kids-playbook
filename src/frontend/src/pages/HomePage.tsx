@@ -217,9 +217,23 @@ export default function HomePage(): JSX.Element {
         <div id="google-login-button-hero" className="mx-auto"></div>
       </section>
 
-      {/* How Kidoova Helps */}
+      {/* Video Section */}
       <section className="bg-white py-16 px-6 text-center">
         <h2 className="text-3xl font-bold mb-6">🔧 How Kidoova Helps</h2>
+        <div className="max-w-3xl mx-auto">
+          <video 
+            src="/kidoova.mp4" 
+            controls 
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full rounded-lg shadow-kidoova"
+            poster="/video-poster.jpg"
+          >
+            Your browser does not support the video tag.
+          </video>
+        </div>
       </section>
 
       {/* How Kidoova Works */}
@@ -304,6 +318,11 @@ export default function HomePage(): JSX.Element {
       <section className="bg-kidoova-background py-20 px-6 text-center">
         <h2 className="text-4xl font-bold mb-10">🏆 Progress Kids Can See (and Feel)</h2>
         <p className="text-lg max-w-2xl mx-auto text-kidoova-green mb-6">Build streaks. Fill the Confidence Star. Earn medals. See real growth.</p>
+        <img 
+          src="/kidoova_rewards_collage.png" 
+          alt="Confidence Tracker" 
+          className="w-full max-w-[90%] sm:max-w-xl md:max-w-2xl mx-auto rounded-lg shadow-kidoova"
+        />
       </section>
 
       {/* Testimonials */}
@@ -327,15 +346,20 @@ export default function HomePage(): JSX.Element {
         <div className="max-w-3xl mx-auto space-y-6">
           <details className="bg-white p-4 rounded-lg shadow-kidoova">
             <summary className="cursor-pointer font-semibold text-kidoova-accent">What ages is Kidoova for?</summary>
+            <p className="text-sm text-kidoova-green mt-2">Ages 3–13, with personalized experiences by age group.</p>
           </details>
           <details className="bg-white p-4 rounded-lg shadow-kidoova">
             <summary className="cursor-pointer font-semibold text-kidoova-accent">How long does it take each day?</summary>
+            <p className="text-sm text-kidoova-green mt-2">Most workouts take 5–10 minutes. Easy to fit into your day.</p>
           </details>
           <details className="bg-white p-4 rounded-lg shadow-kidoova">
             <summary className="cursor-pointer font-semibold text-kidoova-accent">Can both parents use it?</summary>
+            <p className="text-sm text-kidoova-green mt-2">Yes, you can share access and track together. Reflections and progress sync across devices for all caregivers.</p>
           </details>
           <details className="bg-white p-4 rounded-lg shadow-kidoova">
             <summary className="cursor-pointer font-semibold text-kidoova-accent">What research is Kidoova based on?</summary>
+            <p className="text-sm text-kidoova-green mt-2">Kidoova is grounded in real developmental science and parenting psychology. Our five training zones draw from growth mindset research (Carol Dweck), social-emotional learning (CASEL), self-determination theory, and strengths-based development frameworks. We've also synthesized practices from child development experts and parenting literature to ensure the app supports real-world, confidence-building outcomes. All references used in building the playbook are listed in our research appendix.</p>
+            <a href="/Kidoova_Kids_Confidence_Playbook.pdf" className="text-sm text-kidoova-accent mt-2 block">Kidoova Kid's Confidence Playbook →</a>
           </details>
         </div>
       </section>
