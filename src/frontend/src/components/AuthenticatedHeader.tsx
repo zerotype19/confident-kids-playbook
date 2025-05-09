@@ -12,8 +12,8 @@ const AuthenticatedHeader: React.FC<AuthenticatedHeaderProps> = ({ isMenuOpen, o
   const { user } = useAuth();
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-white shadow-sm z-50">
-      <div className="h-full flex items-center justify-between px-4">
+    <header className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
+      <div className="h-full flex items-center justify-between px-4 py-1">
         <div className="flex items-center">
           <button
             onClick={onToggleMenu}
@@ -43,7 +43,7 @@ const AuthenticatedHeader: React.FC<AuthenticatedHeaderProps> = ({ isMenuOpen, o
             </svg>
           </button>
           <Link to="/dashboard" className="flex items-center">
-            <img src="/logo.png" alt="Kidoova" className="h-8" />
+            <img src="/logo.png" alt="Kidoova" className="h-12" />
           </Link>
         </div>
         <ChildSelector />
