@@ -27,41 +27,41 @@ interface TraitScoreHistory {
   score_delta: number;
   completed_at: string;
 }
-
 const pillarHex: Record<number, string> = {
-  1: '#F7B801', // Independence & Problem-Solving
-  2: '#38A169', // Growth Mindset & Resilience
-  3: '#4299E1', // Social Confidence & Communication
-  4: '#805AD5', // Purpose & Strength Discovery
-  5: '#E53E3E'  // Managing Fear & Anxiety
+  1: '#F7B801', // Core Strength (Independence & Problem-Solving)
+  2: '#38A169', // Endurance (Growth Mindset & Resilience)
+  3: '#4299E1', // Social Mobility (Social Confidence & Communication)
+  4: '#805AD5', // Inner Strength (Purpose & Strength Discovery)
+  5: '#E53E3E'  // Calm & Control (Managing Fear & Anxiety)
 };
 
 export function getProfileLevel(totalXP: number): number {
-  if (totalXP >= 1000) return 4;
-  if (totalXP >= 700) return 3;
-  if (totalXP >= 400) return 2;
-  if (totalXP >= 200) return 1;
-  return 0;
+  if (totalXP >= 1000) return 4; // Diamond
+  if (totalXP >= 700) return 3;  // Platinum
+  if (totalXP >= 400) return 2;  // Gold
+  if (totalXP >= 200) return 1;  // Silver
+  return 0;                      // Bronze
 }
 
-export const profileLevelLabels = ['Explorer', 'Pathfinder', 'Trailblazer', 'Guardian', 'Hero'];
-export const profileLevelEmojis = ['🧭', '🏕', '🔥', '🛡', '🌟'];
+export const profileLevelLabels = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+export const profileLevelEmojis = ['🥉', '🥈', '🥇', '💎', '🏆'];
 
 export function getTraitTier(xp: number): number {
-  if (xp >= 100) return 4;
-  if (xp >= 60) return 3;
-  if (xp >= 35) return 2;
-  if (xp >= 15) return 1;
-  return 0;
+  if (xp >= 100) return 4; // Diamond
+  if (xp >= 60) return 3;  // Platinum
+  if (xp >= 35) return 2;  // Gold
+  if (xp >= 15) return 1;  // Silver
+  return 0;                // Bronze
 }
 
-export const traitTierLabels = ['Novice', 'Learner', 'Skilled', 'Expert', 'Mastery'];
-export const traitTierEmojis = ['🔸', '🔹', '🟢', '🟣', '🌟'];
+export const traitTierLabels = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+export const traitTierEmojis = ['🥉', '🥈', '🥇', '💎', '🏆'];
 
 interface RPGTraitPanelProps {
   progress: ProgressSummary | null;
   rewards: Reward[];
 }
+
 
 export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps) {
   const { selectedChildId, token } = useAuth();
