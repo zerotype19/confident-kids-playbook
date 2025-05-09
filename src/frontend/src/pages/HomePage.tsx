@@ -205,7 +205,9 @@ export default function HomePage(): JSX.Element {
       {/* Sticky Header */}
       <header className="bg-white sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
-          <img src="/logo.png" alt="Kidoova" className="h-20" />
+          <a href="/">
+            <img src="/logo.png" alt="Kidoova" className="h-20" />
+          </a>
           <nav className="hidden md:flex gap-6 text-base font-semibold text-kidoova-green">
             <a href="#how-it-works" className="hover:text-kidoova-accent transition scroll-smooth">How It Works</a>
             <a href="#features" className="hover:text-kidoova-accent transition scroll-smooth">Features</a>
@@ -222,10 +224,10 @@ export default function HomePage(): JSX.Element {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-kidoova-background py-20 px-6 text-center">
-        <h1 className="text-5xl font-bold mb-4">💪 5-Minute Confidence Workouts for Kids</h1>
+      <section className="bg-kidoova-background pt-16 pb-8 px-6 text-center">
+        <h1 className="text-5xl font-bold mb-2">💪 5-Minute Confidence Workouts for Kids</h1>
         <p className="text-xl max-w-2xl mx-auto mb-2 text-kidoova-green">Daily training sessions backed by research — designed for busy parents. Just one small rep a day.</p>
-        <div className="flex flex-col items-center justify-center mt-4">
+        <div className="flex flex-col items-center justify-center mt-2">
           <div id="google-login-button-hero" className="w-64 h-16 flex items-center justify-center"></div>
         </div>
       </section>
