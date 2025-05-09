@@ -182,8 +182,18 @@ export default function RPGTraitPanel({ progress, rewards }: RPGTraitPanelProps)
   const weeklyXPLabel = `+${Math.round(weeklyXPGained)} Training Points`;
   let nextTraitLabel = 'N/A';
   if (nextTraitToMaster) {
-    const fromTier = traitTierLabels.indexOf(nextTraitToMaster.from);
-    const toTier = traitTierLabels.indexOf(nextTraitToMaster.to);
+    // Map old emoji to index if needed
+    const emojiToIndex: Record<string, number> = {
+      '🔸': 0, '🥉': 0, // Bronze
+      '🔹': 1, '🥈': 1, // Silver
+      '🟢': 2, '🥇': 2, // Gold
+      '🟣': 3, '💎': 3, // Platinum
+      '🌟': 4, '🏆': 4  // Diamond
+    };
+    let fromTier = traitTierLabels.indexOf(nextTraitToMaster.from);
+    let toTier = traitTierLabels.indexOf(nextTraitToMaster.to);
+    if (fromTier === -1 && emojiToIndex[nextTraitToMaster.from] !== undefined) fromTier = emojiToIndex[nextTraitToMaster.from];
+    if (toTier === -1 && emojiToIndex[nextTraitToMaster.to] !== undefined) toTier = emojiToIndex[nextTraitToMaster.to];
     const fromEmoji = traitTierEmojis[fromTier] || nextTraitToMaster.from;
     const toEmoji = traitTierEmojis[toTier] || nextTraitToMaster.to;
     nextTraitLabel = `${nextTraitToMaster.trait_name} (${fromEmoji} → ${toEmoji} in ${nextTraitToMaster.xp_remaining} Training Points)`;
