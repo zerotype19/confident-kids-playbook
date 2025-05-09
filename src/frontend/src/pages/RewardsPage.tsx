@@ -89,7 +89,14 @@ export default function RewardsPage() {
 
         const data = await response.json();
         setRewards(data.rewards || []);
-        setProgress(data.progress);
+        // Patch: map total_challenges to milestones_completed for frontend compatibility
+        const patchedProgress = data.progress
+          ? {
+              ...data.progress,
+              milestones_completed: data.progress.total_challenges,
+            }
+          : null;
+        setProgress(patchedProgress);
       } catch (err) {
         console.error('Error fetching rewards:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
