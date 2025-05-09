@@ -16,11 +16,11 @@ const PILLAR_COLORS = {
 };
 
 const PILLAR_NAMES = {
-  1: 'Independence & Problem-Solving',
-  2: 'Growth Mindset & Resilience',
-  3: 'Social Confidence & Communication',
-  4: 'Purpose & Strength Discovery',
-  5: 'Managing Fear & Anxiety'
+  1: 'Core Strength', // Independence & Problem-Solving
+  2: 'Endurance', // Growth Mindset & Resilience
+  3: 'Social Mobility', // Social Confidence & Communication
+  4: 'Inner Strength', // Purpose & Strength Discovery
+  5: 'Calm & Control' // Managing Fear & Anxiety
 };
 
 const createPartialStarPointPath = (
