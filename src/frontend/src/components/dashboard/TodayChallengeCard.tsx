@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import UniversalChallengeModal from '../challenges/UniversalChallengeModal';
 import { useChildContext } from '../../contexts/ChildContext';
+import { PILLAR_NAMES } from '../../types';
 
 interface Challenge {
   id: string;
@@ -25,17 +26,17 @@ interface TodayChallengeCardProps {
   onComplete?: () => void;
 }
 
+const PILLAR_COLORS: Record<number, string> = {
+  1: '#F7B801', // Core Strength
+  2: '#38A169', // Endurance
+  3: '#4299E1', // Social Mobility
+  4: '#805AD5', // Inner Strength
+  5: '#E53E3E'  // Calm & Control
+};
+
 export default function TodayChallengeCard({ challenge, childId, onComplete }: TodayChallengeCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { selectedChild } = useChildContext();
-
-  const pillarHex: Record<number, string> = {
-    1: '#F7B801', // Independence & Problem-Solving
-    2: '#38A169', // Growth Mindset & Resilience
-    3: '#4299E1', // Social Confidence & Communication
-    4: '#805AD5', // Purpose & Strength Discovery
-    5: '#E53E3E'  // Managing Fear & Anxiety
-  };
 
   if (!challenge) {
     return (
@@ -80,15 +81,11 @@ export default function TodayChallengeCard({ challenge, childId, onComplete }: T
               <span 
                 className="text-xs font-medium px-2 py-1 rounded-full"
                 style={{
-                  backgroundColor: pillarHex[challenge.pillar_id],
+                  backgroundColor: PILLAR_COLORS[challenge.pillar_id],
                   color: 'white'
                 }}
               >
-                {challenge.pillar_id === 1 ? 'Independence & Problem-Solving' :
-                 challenge.pillar_id === 2 ? 'Growth Mindset & Resilience' :
-                 challenge.pillar_id === 3 ? 'Social Confidence & Communication' :
-                 challenge.pillar_id === 4 ? 'Purpose & Strength Discovery' :
-                 'Managing Fear & Anxiety'}
+                {PILLAR_NAMES[challenge.pillar_id]}
               </span>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 challenge.difficulty_level === 1 
