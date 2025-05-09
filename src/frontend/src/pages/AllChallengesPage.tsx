@@ -5,27 +5,27 @@ import { Child, Challenge, PILLAR_NAMES } from '../types';
 import { useChildContext } from '../contexts/ChildContext';
 import CustomButton from '../components/CustomButton';
 
-interface ChallengeGroup {
+interface WorkoutGroup {
   pillar_id: number;
   difficulty_level: number;
   titles: string[];
 }
 
-interface ChallengeFilters {
+interface WorkoutFilters {
   pillarId: number | null;
   difficulty: number | null;
   title: string | null;
 }
 
-export default function AllChallengesPage() {
+export default function AllWorkoutsPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
-  const [allChallenges, setAllChallenges] = useState<Challenge[]>([]);
-  const [displayedChallenges, setDisplayedChallenges] = useState<Challenge[]>([]);
-  const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
+  const [allWorkouts, setAllWorkouts] = useState<Challenge[]>([]);
+  const [displayedWorkouts, setDisplayedWorkouts] = useState<Challenge[]>([]);
+  const [workoutGroups, setWorkoutGroups] = useState<WorkoutGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ChallengeFilters>({
+  const [filters, setFilters] = useState<WorkoutFilters>({
     pillarId: null,
     difficulty: null,
     title: null
@@ -85,9 +85,9 @@ export default function AllChallengesPage() {
     fetchChildren();
   }, [setSelectedChild, selectedChild]);
 
-  // Fetch challenges and group them by pillar and difficulty
+  // Fetch workouts and group them by pillar and difficulty
   useEffect(() => {
-    const fetchChallenges = async () => {
+    const fetchWorkouts = async () => {
       if (!selectedChild) return;
 
       setIsLoading(true);
@@ -109,69 +109,69 @@ export default function AllChallengesPage() {
         );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch challenges');
+          throw new Error('Failed to fetch workouts');
         }
 
         const data = await response.json();
-        setAllChallenges(data);
+        setAllWorkouts(data);
 
-        // Group challenges by pillar and difficulty
-        const groups = data.reduce((acc: ChallengeGroup[], challenge: Challenge) => {
+        // Group workouts by pillar and difficulty
+        const groups = data.reduce((acc: WorkoutGroup[], workout: Challenge) => {
           const existingGroup = acc.find(
-            group => group.pillar_id === challenge.pillar_id && group.difficulty_level === challenge.difficulty_level
+            group => group.pillar_id === workout.pillar_id && group.difficulty_level === workout.difficulty_level
           );
 
           if (existingGroup) {
-            if (!existingGroup.titles.includes(challenge.title)) {
-              existingGroup.titles.push(challenge.title);
+            if (!existingGroup.titles.includes(workout.title)) {
+              existingGroup.titles.push(workout.title);
             }
           } else {
             acc.push({
-              pillar_id: challenge.pillar_id,
-              difficulty_level: challenge.difficulty_level,
-              titles: [challenge.title]
+              pillar_id: workout.pillar_id,
+              difficulty_level: workout.difficulty_level,
+              titles: [workout.title]
             });
           }
 
           return acc;
         }, []);
 
-        setChallengeGroups(groups);
+        setWorkoutGroups(groups);
       } catch (err) {
-        console.error('Error fetching challenges:', err);
-        setError('Failed to load challenges');
+        console.error('Error fetching workouts:', err);
+        setError('Failed to load workouts');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchChallenges();
+    fetchWorkouts();
   }, [selectedChild]);
 
-  // Filter challenges based on selected filters and select random ones
+  // Filter workouts based on selected filters and select random ones
   useEffect(() => {
-    if (allChallenges.length === 0) return;
+    if (allWorkouts.length === 0) return;
 
-    const filtered = allChallenges.filter(challenge => {
-      if (filters.pillarId && challenge.pillar_id !== filters.pillarId) return false;
-      if (filters.difficulty && challenge.difficulty_level !== filters.difficulty) return false;
-      if (filters.title && challenge.title !== filters.title) return false;
+    const filtered = allWorkouts.filter(workout => {
+      if (filters.pillarId && workout.pillar_id !== filters.pillarId) return false;
+      if (filters.difficulty && workout.difficulty_level !== filters.difficulty) return false;
+      if (filters.title && workout.title !== filters.title) return false;
       return true;
     });
 
     // Shuffle array and take first 9
     const shuffled = [...filtered].sort(() => 0.5 - Math.random());
-    setDisplayedChallenges(shuffled.slice(0, 9));
-  }, [allChallenges, filters]);
+    setDisplayedWorkouts(shuffled.slice(0, 9));
+  }, [allWorkouts, filters]);
 
-  // Get unique difficulties from challenge groups
-  const difficulties = Array.from(new Set(challengeGroups.map(group => group.difficulty_level))).sort();
+  // Get unique difficulties from workout groups
+  const difficulties = Array.from(new Set(workoutGroups.map(group => group.difficulty_level))).sort();
 
-  // Get unique pillar IDs from challenge groups
-  const pillarIds = Array.from(new Set(challengeGroups.map(group => group.pillar_id)));
+  // Get unique pillar IDs from workout groups
+  const pillarIds = Array.from(new Set(workoutGroups.map(group => group.pillar_id)));
 
   // Get titles for selected pillar and difficulty
-  const availableTitles = challengeGroups
+  const availableTitles = workoutGroups
     .find(group => 
       group.pillar_id === filters.pillarId && 
       group.difficulty_level === filters.difficulty
@@ -198,7 +198,7 @@ export default function AllChallengesPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-500 text-center">
-          <p className="text-lg font-medium">Error loading challenges</p>
+          <p className="text-lg font-medium">Error loading workouts</p>
           <p className="text-sm mt-2">{error}</p>
         </div>
       </div>
@@ -210,7 +210,7 @@ export default function AllChallengesPage() {
       <div className="container mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-heading text-gray-900">
-            {selectedChild ? `${selectedChild.name}'s Challenges` : 'All Challenges'}
+            {selectedChild ? `${selectedChild.name}'s Workouts` : 'All Workouts'}
           </h1>
         </div>
 
@@ -265,10 +265,10 @@ export default function AllChallengesPage() {
                   </select>
                 </div>
 
-                {/* Challenge Type Filter */}
+                {/* Workout Type Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Challenge Type
+                    Workout Type
                   </label>
                   <select
                     value={filters.title || ''}
@@ -300,19 +300,19 @@ export default function AllChallengesPage() {
               </div>
             </div>
 
-            {/* Challenges Grid */}
+            {/* Workouts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedChallenges.map((challenge) => (
+              {displayedWorkouts.map((workout) => (
                 <ChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
+                  key={workout.id}
+                  challenge={workout}
                 />
               ))}
             </div>
           </>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Please select a child to view their challenges</p>
+            <p className="text-gray-600 mb-4">Please select a child to view their workouts</p>
             <CustomButton onClick={() => navigate('/manage-children')}>
               Manage Children
             </CustomButton>
