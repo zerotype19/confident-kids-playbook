@@ -247,33 +247,21 @@ export default function Chatbot() {
         </div>
       </Modal>
 
-      <UniversalChallengeModal
-        isOpen={!!selectedChallenge}
-        onClose={() => setSelectedChallenge(null)}
-        challenge={selectedChallenge || {
-          id: '',
-          title: '',
-          description: '',
-          goal: '',
-          steps: [],
-          tip: '',
-          example_dialogue: '',
-          pillar_id: 0,
-          what_you_practice: '',
-          start_prompt: '',
-          guide_prompt: '',
-          success_signals: '',
-          why_it_matters: ''
-        }}
-        childId={selectedChild?.id || ''}
-        onComplete={() => {
-          setSelectedChallenge(null);
-          setMessages(prev => [...prev, {
-            role: 'assistant',
-            content: 'Great job completing the workout! 🎉 Would you like to try another one?'
-          }]);
-        }}
-      />
+      {selectedChallenge && selectedChild && (
+        <UniversalChallengeModal
+          isOpen={!!selectedChallenge}
+          onClose={() => setSelectedChallenge(null)}
+          challenge={selectedChallenge}
+          childId={selectedChild.id}
+          onComplete={() => {
+            setSelectedChallenge(null);
+            setMessages(prev => [...prev, {
+              role: 'assistant',
+              content: 'Great job completing the workout! 🎉 Would you like to try another one?'
+            }]);
+          }}
+        />
+      )}
     </>
   );
 } 
