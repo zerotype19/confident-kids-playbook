@@ -114,7 +114,7 @@ export default function Chatbot() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch challenge details');
+        throw new Error('Failed to fetch workout details');
       }
 
       const challenge = await response.json();
@@ -123,7 +123,7 @@ export default function Chatbot() {
       console.error('Error fetching challenge:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Sorry, I had trouble loading that challenge. Please try again.' 
+        content: 'Sorry, I had trouble loading that workout. Please try again.' 
       }]);
     }
   };
@@ -138,7 +138,10 @@ export default function Chatbot() {
     // Remove [challenge:ID] and [challenge ID] tags and any "Click here to check out the challenge details" lines
     let content = message.content
       .replace(/\[challenge[: ][^\]]+\]/gi, '')
-      .replace(/Click here to check out the challenge details:? ?\[challenge[: ][^\]]+\]/gi, '');
+      .replace(/Click here to check out the challenge details:? ?\[challenge[: ][^\]]+\]/gi, '')
+      .replace(/challenge(s)?/gi, (match) => match[0] === 'C' ? 'Workout' : 'workout')
+      .replace(/Challenge(s)?/g, 'Workout$1')
+      .replace(/challenge(s)?/g, 'workout$1');
 
     // Extract challenge IDs for this message
     const challengeIds = extractChallengeIds(message.content);
@@ -156,7 +159,7 @@ export default function Chatbot() {
                 className="bg-kidoova-green text-white px-4 py-2 rounded-lg hover:bg-kidoova-accent transition-colors"
                 onClick={() => handleChallengeClick(challengeIds[0])}
               >
-                Start Challenge
+                Start Workout
               </button>
             </div>
           )}
@@ -267,7 +270,7 @@ export default function Chatbot() {
           setSelectedChallenge(null);
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: 'Great job completing the challenge! 🎉 Would you like to try another one?'
+            content: 'Great job completing the workout! 🎉 Would you like to try another one?'
           }]);
         }}
       />
