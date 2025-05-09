@@ -96,7 +96,7 @@ export default function ConfidenceStar({ progress, childId, childName }: Confide
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
       <h2 className="text-2xl font-heading text-kidoova-green mb-2 text-center">{childName}'s Confidence Star</h2>
-      <p className="text-sm text-gray-600 mb-2 text-center">Earn 150 Training Points in each pillar to complete a star. Stars are cumulative!</p>
+      <p className="text-sm text-gray-600 mb-2 text-center">Earn 150 Training Points in each training zone to complete a star.</p>
       <div className="flex flex-col items-center mb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-2xl">⭐️</span>

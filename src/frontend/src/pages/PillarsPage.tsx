@@ -9,7 +9,7 @@ import ExpandedPillar from '../components/pillars/ExpandedPillar';
 export default function PillarsPage() {
   const { selectedChild, setSelectedChild } = useChildContext();
   const [children, setChildren] = useState<Child[]>([]);
-  const [pillars, setPillars] = useState<Pillar[]>([]);
+  const [pillars, setPillars] = useState<Array<Pillar & { original_name?: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();

@@ -16,6 +16,7 @@ interface ExpandedPillarProps {
       name: string;
       description: string;
     }>;
+    original_name?: string;
   };
   childId: string;
 }
@@ -54,7 +55,12 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
         <span className="text-4xl">{pillar.icon}</span>
         <div className="flex-1 text-left">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-heading text-gray-900">{pillar.name}</h2>
+            <h2 className="text-xl font-heading text-gray-900">
+              {pillar.name}
+              {pillar.original_name && (
+                <span className="ml-2 text-base font-normal text-gray-500">({pillar.original_name})</span>
+              )}
+            </h2>
             <span className="text-gray-500 text-xl font-medium">
               {isExpanded ? '−' : '+'}
             </span>

@@ -168,6 +168,7 @@ export interface Pillar {
   description: string;
   icon: string;
   color: string;
+  original_name?: string;
 }
 
 export interface User {
