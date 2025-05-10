@@ -57,9 +57,6 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-heading text-gray-900">
               {pillar.name}
-              {pillar.original_name && (
-                <span className="ml-2 text-base font-normal text-gray-500">({pillar.original_name})</span>
-              )}
             </h2>
             <span className="text-gray-500 text-xl font-medium">
               {isExpanded ? '−' : '+'}
@@ -83,6 +80,9 @@ export default function ExpandedPillar({ pillar, childId }: ExpandedPillarProps)
                 }}
               />
             </div>
+            {pillar.original_name && (
+              <div className="text-xs text-gray-500 mt-1">{pillar.original_name}</div>
+            )}
           </div>
         </div>
       </button>

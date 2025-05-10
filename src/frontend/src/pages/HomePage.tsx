@@ -206,7 +206,7 @@ export default function HomePage(): JSX.Element {
       <header className="bg-white sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
           <a href="/">
-            <img src="/logo.png" alt="Kidoova" className="h-20" />
+          <img src="/logo.png" alt="Kidoova" className="h-20" />
           </a>
           <nav className="hidden md:flex gap-6 text-base font-semibold text-kidoova-green">
             <a href="#how-it-works" className="hover:text-kidoova-accent transition scroll-smooth">How It Works</a>
@@ -272,7 +272,7 @@ export default function HomePage(): JSX.Element {
           <div>
             <h3 className="text-xl font-semibold text-kidoova-accent mb-2">📈 XP + Visual Progress</h3>
             <p className="text-kidoova-green">Earn Training Points and watch your child grow in each skill zone.</p>
-          </div>
+        </div>
           <div>
             <h3 className="text-xl font-semibold text-kidoova-accent mb-2">⭐ Confidence Star</h3>
             <p className="text-kidoova-green">A visual tracker that fills up as your child trains across all five zones.</p>

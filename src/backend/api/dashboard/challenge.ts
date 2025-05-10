@@ -73,7 +73,7 @@ export async function challenge({ request, env }: { request: Request; env: Env }
     const completedToday = await env.DB.prepare(`
       SELECT 1 FROM challenge_logs
       WHERE child_id = ?
-      AND date(completed_at) = date('now')
+      AND date(datetime(completed_at, '-4 hours', '-30 minutes')) = date(datetime('now', '-4 hours', '-30 minutes'))
       LIMIT 1
     `).bind(childId).first();
 
@@ -119,7 +119,7 @@ export async function challenge({ request, env }: { request: Request; env: Env }
         FROM challenge_logs cl 
         WHERE cl.child_id = ? 
         AND cl.challenge_id = c.id 
-        AND date(cl.completed_at) = date('now')
+        AND date(datetime(cl.completed_at, '-4 hours', '-30 minutes')) = date(datetime('now', '-4 hours', '-30 minutes'))
       )
       ORDER BY RANDOM()
       LIMIT 1
